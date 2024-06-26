@@ -1,6 +1,6 @@
 'use client'
 
-import firebaseConfig from '../../firebase-config'
+import firebaseConfig from '../../app/firebase-config'
 import { initializeApp } from 'firebase/app'
 import {
     QueryDocumentSnapshot,
@@ -65,7 +65,7 @@ const GetAuth = () => {
             {loggedUser ? (
                 <p>{auth.currentUser?.email}</p>
             ) : (
-                <p onClick={() => router.push('/login')}>Login</p>
+                <p onClick={() => router.push('/login')}>Log In</p>
             )}
             <DropdownMenu>
                 <DropdownMenuTrigger className="ml-2">

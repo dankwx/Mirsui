@@ -9,8 +9,8 @@ import {
     getDoc,
 } from 'firebase/firestore'
 import { increment } from 'firebase/firestore'
-import Header from '../components/Header/Header'
-import Sidebar from '../components/Sidebar/Sidebar'
+import Header from '../../components/Header/Header'
+import Sidebar from '../../components/Sidebar/Sidebar'
 import { getAuth } from 'firebase/auth'
 import firebaseConfig from '../firebase-config'
 import { initializeApp } from 'firebase/app'

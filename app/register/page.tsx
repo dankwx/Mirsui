@@ -3,7 +3,17 @@
 import React, { useEffect, useState } from 'react'
 import { initializeApp } from 'firebase/app'
 import firebaseConfig from '../firebase-config'
-import { getFirestore, collection, addDoc } from 'firebase/firestore'
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    doc,
+    setDoc,
+    serverTimestamp,
+    query,
+    where,
+    getDocs,
+} from 'firebase/firestore'
 import {
     getAuth,
     createUserWithEmailAndPassword,
@@ -24,8 +34,25 @@ export default function Register() {
     const [emailError, setEmailError] = useState(false)
     const [passwordError, setPasswordError] = useState(false)
 
+    // Função para verificar se o username já existe
+    const checkUsernameExists = async (username: string) => {
+        const usersRef = collection(db, 'users')
+        const q = query(usersRef, where('username', '==', username))
+        const querySnapshot = await getDocs(q)
+        return !querySnapshot.empty
+    }
+
     const register = async () => {
         try {
+            // Verificar se o username já existe
+            const usernameExists = await checkUsernameExists(username)
+            if (usernameExists) {
+                throw new Error(
+                    'Username já está em uso. Por favor, escolha outro.'
+                )
+            }
+
+            // Registrar o usuário
             const userCredential = await createUserWithEmailAndPassword(
                 auth,
                 email,
@@ -34,15 +61,31 @@ export default function Register() {
             const user = userCredential.user
 
             if (user) {
+                // Enviar verificação por e-mail
                 await sendEmailVerification(user)
+
+                // Atualizar o nome de exibição no perfil
                 await updateProfile(user, { displayName: username })
+
+                // Armazenar dados adicionais do usuário no Firestore
+                await setDoc(doc(db, 'users', user.uid), {
+                    username: username,
+                    email: user.email,
+                    createdAt: serverTimestamp(),
+                })
+
+                // Definir item no localStorage para autenticação
                 localStorage.setItem('authenticated', 'messages')
+
+                // Recarregar a página
                 window.location.reload()
             } else {
-                throw new Error('User object not available after registration')
+                throw new Error(
+                    'Objeto de usuário não disponível após o registro'
+                )
             }
         } catch (error) {
-            console.error('Error registering:', error)
+            console.error('Erro ao registrar:', error)
             setUserError(true)
             setHide(true)
         }

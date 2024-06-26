@@ -104,7 +104,7 @@ const GetAuth = () => {
     return (
         <div className="flex">
             {loggedUser ? (
-                <p>{auth.currentUser?.email}</p>
+                <p>{auth.currentUser?.displayName}</p>
             ) : (
                 <Dialog>
                     <DialogTrigger>Log In</DialogTrigger>
@@ -180,7 +180,7 @@ const GetAuth = () => {
                 </Dialog>
             )}
             <DropdownMenu>
-                <DropdownMenuTrigger className="ml-2">
+                <DropdownMenuTrigger className="ml-2 outline-none">
                     {loggedUser ? (
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -192,7 +192,7 @@ const GetAuth = () => {
                             stroke-width="2"
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            className="lucide lucide-chevron-down"
+                            className="lucide lucide-chevron-down outline-none focus:outline-none"
                         >
                             <path d="m6 9 6 6 6-6" />
                         </svg>
@@ -204,7 +204,7 @@ const GetAuth = () => {
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                        <Link href="/registerusername">Profile</Link>
+                        <Link href="/claimedvideos">Profile</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>Billing</DropdownMenuItem>
                     <DropdownMenuItem>Team</DropdownMenuItem>

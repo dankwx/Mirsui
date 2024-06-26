@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import GetAuth from '../GetAuth/GetAuth'
 
 export default function () {
     return (
@@ -10,7 +11,9 @@ export default function () {
                         <div className="flex">
                             <Link href="/faq">FAQ</Link>
                         </div>
-                        <p>Sign Out</p>
+                        <div className="flex items-center justify-center">
+                            <GetAuth />
+                        </div>
                     </div>
                 </div>
             </div>

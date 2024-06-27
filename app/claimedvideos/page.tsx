@@ -91,7 +91,8 @@ export default function ClaimedVideos() {
                     <Sidebar />
                     <div className="flex flex-col p-4">
                         <p className="mb-4 text-lg font-semibold">
-                            Videos eternizados por: {auth.currentUser?.email}
+                            Videos eternizados por:{' '}
+                            {auth.currentUser?.displayName}
                         </p>
                         <div className="flex flex-col space-y-2"></div>
                     </div>

@@ -20,11 +20,14 @@ import {
     sendEmailVerification,
     updateProfile,
 } from 'firebase/auth'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 export default function Register() {
     const app = initializeApp(firebaseConfig)
     const db = getFirestore(app)
     const auth = getAuth(app)
+    const supabase = createClientComponentClient()
+
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -73,6 +76,17 @@ export default function Register() {
                     email: user.email,
                     createdAt: serverTimestamp(),
                 })
+
+                // Inserir usuário no Supabase
+                const { data, error } = await supabase
+                    .from('users')
+                    .insert([{ uid: user.uid, email: user.email, username }])
+
+                if (error) {
+                    throw new Error(
+                        'Erro ao inserir usuário no Supabase: ' + error.message
+                    )
+                }
 
                 // Definir item no localStorage para autenticação
                 localStorage.setItem('authenticated', 'messages')

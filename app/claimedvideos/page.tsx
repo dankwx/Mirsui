@@ -22,17 +22,13 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card'
+import Link from 'next/link'
 
 interface UserVideo {
     video_url: string
     position: number
     title: string
-    thumbnailUrl: string
-}
-
-interface VideoData {
-    id: string
-    title: string
+    channelTitle: string
     thumbnailUrl: string
 }
 
@@ -49,7 +45,6 @@ export default function ClaimedVideos() {
     const [user_id, setUser_id] = useState<string | null>(null) // Estado para armazenar user_id
     const [userVideos, setUserVideos] = useState<UserVideo[]>([])
     const [videoUrl, setVideoUrl] = useState<string>('')
-    const [videoData, setVideoData] = useState<VideoData | null>(null)
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
@@ -119,6 +114,7 @@ export default function ClaimedVideos() {
                         if (data.items && data.items.length > 0) {
                             const snippet = data.items[0].snippet
                             const title = snippet.title
+                            const channelTitle = snippet.channelTitle
                             const thumbnailUrl =
                                 snippet.thumbnails.maxres?.url ||
                                 snippet.thumbnails.high.url ||
@@ -128,6 +124,7 @@ export default function ClaimedVideos() {
                                 video_url: videoUrl,
                                 position: video.position,
                                 title: title,
+                                channelTitle: channelTitle,
                                 thumbnailUrl: thumbnailUrl,
                             })
                         }
@@ -147,55 +144,10 @@ export default function ClaimedVideos() {
         }
     }, [authStateChangedComplete])
 
-    // pegar dados dos videos
-    useEffect(() => {
-        if (!videoUrl) return
-
-        // Regex para extrair o ID do vídeo do YouTube
-        const videoIdRegex =
-            /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-
-        const match = videoUrl.match(videoIdRegex)
-        if (match && match[1]) {
-            const videoId = match[1]
-            const apiKey = 'AIzaSyBFQKXiPBiluxE3jtWnTvZH3A9K76A8afc' // Substitua pela sua chave de API do Google
-
-            // Fazer requisição para a API do YouTube para obter detalhes do vídeo
-            const apiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet`
-            fetch(apiUrl)
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error(
-                            'Erro na requisição para a API do YouTube'
-                        )
-                    }
-                    return response.json()
-                })
-                .then((data) => {
-                    if (data.items && data.items.length > 0) {
-                        const snippet = data.items[0].snippet
-                        setVideoData({
-                            id: videoId,
-                            title: snippet.title,
-                            thumbnailUrl: snippet.thumbnails.medium,
-                        })
-                    } else {
-                        throw new Error(
-                            'Nenhum item encontrado na resposta da API do YouTube'
-                        )
-                    }
-                })
-                .catch((error) => {
-                    console.error('Erro ao buscar dados do vídeo:', error)
-                    setError('Erro ao buscar dados do vídeo')
-                })
-        }
-    }, [videoUrl])
-
     return (
         <main className="flex min-h-screen flex-col">
             <Header />
-            <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
+            <div className="flex min-h-full w-full flex-1 flex-col justify-between font-sans text-sm">
                 <div className="flex h-full flex-1">
                     <Sidebar />
                     <div className="flex flex-col p-4">
@@ -203,7 +155,7 @@ export default function ClaimedVideos() {
                             Vídeos reivindicados pelo usuário:{' '}
                             {auth.currentUser?.displayName}
                         </p>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-3 gap-4">
                             {/* {userVideos.map((video, index) => (
                                 <div key={index} className="border p-4">
                                     <p className="mb-2 text-lg font-semibold">
@@ -221,17 +173,30 @@ export default function ClaimedVideos() {
                                 </div>
                             ))} */}
                             {userVideos.map((video, index) => (
-                                <Card className="max-w-md">
+                                <Card className="max-w-sm">
                                     <CardHeader>
-                                        <img
-                                            src={video.thumbnailUrl}
-                                            alt="Thumbnail do vídeo"
-                                            className="mb-2"
-                                            style={{ maxWidth: '100%' }}
-                                        />
-                                        <CardTitle>{video.title}</CardTitle>
-                                        <CardDescription>
-                                            Card Description
+                                        <Link
+                                            href={video.video_url}
+                                            target="_blank"
+                                        >
+                                            <img
+                                                src={video.thumbnailUrl}
+                                                alt="Thumbnail do vídeo"
+                                                className="mb-2"
+                                                style={{ maxWidth: '100%' }}
+                                            />
+                                        </Link>
+
+                                        <CardTitle className="text-md">
+                                            <Link
+                                                href={video.video_url}
+                                                target="_blank"
+                                            >
+                                                {video.title}
+                                            </Link>
+                                        </CardTitle>
+                                        <CardDescription className="text-sm">
+                                            {video.channelTitle}
                                         </CardDescription>
                                     </CardHeader>
                                     <CardFooter>

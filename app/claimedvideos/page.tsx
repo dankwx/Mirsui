@@ -14,24 +14,34 @@ import Sidebar from '../../components/Sidebar/Sidebar'
 import { getAuth } from 'firebase/auth'
 import firebaseConfig from '../firebase-config'
 import { initializeApp } from 'firebase/app'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+
+interface UserVideo {
+    video_url: string
+    position: number
+}
 
 export default function ClaimedVideos() {
     const app = initializeApp(firebaseConfig)
     const db = getFirestore()
     const auth = getAuth(app)
+    const supabase = createClientComponentClient()
 
-    const [collectionName, setCollectionName] = useState('')
-    const [userEmail, setUserEmail] = useState<unknown | null>(null)
+    const [userUsername, setUserUsername] = useState('')
     const [authStateChangedComplete, setAuthStateChangedComplete] =
         useState(false)
+    const [loggedUser, setLoggedUser] = useState<unknown | null>(null)
+    const [user_id, setUser_id] = useState<string | null>(null) // Estado para armazenar user_id
+    const [userVideos, setUserVideos] = useState<UserVideo[]>([])
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
-                setUserEmail(user.email)
+                setUserUsername(user.uid)
+                setLoggedUser(user.uid)
                 console.log('logado')
             } else {
-                setUserEmail('')
+                setUserUsername('')
                 console.log('não logado')
             }
             setAuthStateChangedComplete(true) // Marca como completo após a execução
@@ -41,47 +51,45 @@ export default function ClaimedVideos() {
     }, [auth])
 
     const handleAddCollection = async () => {
+        console.log('iniciando')
         if (authStateChangedComplete) {
-            if (collectionName.trim() === '') {
-                alert('Por favor, insira um nome para a coleção.')
-                return
-            }
-
-            const collectionRef = collection(db, collectionName)
-
             try {
-                const subcollectionRef = doc(
-                    collectionRef,
-                    `${auth.currentUser?.email}`
-                )
+                setLoggedUser('mFyuIhECSeaFOVxU8P78nPWdfk42')
 
-                const subcollectionSnapshot = await getDoc(subcollectionRef)
+                const { data: users, error: usersError } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('uid', loggedUser)
+                    .single()
 
-                if (subcollectionSnapshot.exists()) {
-                    // Subcoleção já existe, então incrementa o campo 'position'
-                    await setDoc(
-                        subcollectionRef,
-                        { position: increment(1) },
-                        { merge: true }
-                    )
-                    alert(
-                        `Subcoleção 'hello world' já existente. Incrementando o campo 'position'.`
-                    )
-                } else {
-                    // Subcoleção não existe, então cria com position inicial 1
-                    await setDoc(subcollectionRef, { position: 1 })
-                    alert(`Subcoleção 'hello world' adicionada com sucesso!`)
+                if (usersError) {
+                    throw usersError
                 }
 
-                setCollectionName('')
+                //setando o id do usuario
+                const user_id = users ? users.id : null
+                setUser_id(user_id)
+
+                const { data: userVideosData, error } = await supabase
+                    .from('videos')
+                    .select('video_url, position')
+                    .eq('user_id', user_id) // user_id deve ser obtido anteriormente
+
+                if (error) {
+                    throw error
+                }
+                setUserVideos(userVideosData || [])
             } catch (error) {
-                console.error('Erro ao adicionar/atualizar coleção:', error)
-                alert(
-                    'Ocorreu um erro ao adicionar/atualizar a coleção. Verifique o console para mais detalhes.'
-                )
+                console.error('Erro ao reinvidicar vídeo:', error)
             }
         }
     }
+
+    useEffect(() => {
+        if (authStateChangedComplete) {
+            handleAddCollection() // Executa handleAddCollection apenas quando authStateChangedComplete for true
+        }
+    }, [authStateChangedComplete])
 
     return (
         <main className="flex min-h-screen flex-col">
@@ -91,9 +99,21 @@ export default function ClaimedVideos() {
                     <Sidebar />
                     <div className="flex flex-col p-4">
                         <p className="mb-4 text-lg font-semibold">
-                            Videos eternizados por:{' '}
+                            videos reinvidicados pelo usuario:{' '}
                             {auth.currentUser?.displayName}
                         </p>
+                        <div className="grid grid-cols-2 gap-4">
+                            {userVideos.map((video, index) => (
+                                <div key={index} className="border p-4">
+                                    <p className="mb-2 text-lg font-semibold">
+                                        {video.video_url}
+                                    </p>
+                                    <p className="text-sm">
+                                        Position: {video.position}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
                         <div className="flex flex-col space-y-2"></div>
                     </div>
                 </div>

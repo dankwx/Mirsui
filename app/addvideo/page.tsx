@@ -58,7 +58,6 @@ export default function AddVideo() {
             }
 
             const user_id = users ? users.id : null
-
             // Consulta para contar quantas vezes a video_url já foi inserida
             const { count: videoCount, error: countError } = await supabase
                 .from('videos')

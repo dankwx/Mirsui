@@ -16,6 +16,7 @@ import {
     CardTitle,
 } from '@/components/ui/card'
 import Link from 'next/link'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface UserVideo {
     video_url: string
@@ -38,6 +39,7 @@ export default function NewClaimedVideos() {
     const [loggedUser, setLoggedUser] = useState<unknown | null>(null)
     const [user_id, setUser_id] = useState<string | null>(null)
     const [userVideos, setUserVideos] = useState<UserVideo[]>([])
+    const [loadingVideos, setLoadingVideos] = useState(true) // Estado para controlar o carregamento dos vídeos
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -96,6 +98,7 @@ export default function NewClaimedVideos() {
                 )
 
                 setUserVideos(videosWithDetails)
+                setLoadingVideos(false) // Quando os vídeos são carregados, definimos o estado para false
             } catch (error) {
                 console.error('Erro ao reinvidicar vídeo:', error)
             }
@@ -119,51 +122,82 @@ export default function NewClaimedVideos() {
                             Vídeos reivindicados por:{' '}
                             {auth.currentUser?.displayName}
                         </p>
-                        <div className="grid grid-cols-3 gap-4">
-                            {userVideos.map((video, index) => (
-                                <Card key={index} className="max-w-sm">
-                                    <CardHeader>
-                                        <Link
-                                            href={video.video_url}
-                                            target="_blank"
-                                        >
-                                            <img
-                                                src={video.thumbnailUrl}
-                                                alt="Thumbnail do vídeo"
-                                                className="mb-2"
-                                                style={{
-                                                    maxWidth: 'auto',
-                                                    height: 'auto',
-                                                }}
-                                            />
-                                        </Link>
-                                        <CardTitle className="text-md">
+                        <div className="grid grid-cols-4 gap-4">
+                            {loadingVideos ? (
+                                <>
+                                    <div className="flex flex-col space-y-3">
+                                        <Skeleton className="h-[125px] w-[280px] rounded-xl" />
+                                        <div className="space-y-2">
+                                            <Skeleton className="h-4 w-[250px]" />
+                                            <Skeleton className="h-4 w-[200px]" />
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col space-y-3">
+                                        <Skeleton className="h-[125px] w-[280px] rounded-xl" />
+                                        <div className="space-y-2">
+                                            <Skeleton className="h-4 w-[250px]" />
+                                            <Skeleton className="h-4 w-[200px]" />
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col space-y-3">
+                                        <Skeleton className="h-[125px] w-[280px] rounded-xl" />
+                                        <div className="space-y-2">
+                                            <Skeleton className="h-4 w-[250px]" />
+                                            <Skeleton className="h-4 w-[200px]" />
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col space-y-3">
+                                        <Skeleton className="h-[125px] w-[280px] rounded-xl" />
+                                        <div className="space-y-2">
+                                            <Skeleton className="h-4 w-[250px]" />
+                                            <Skeleton className="h-4 w-[200px]" />
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                userVideos.map((video, index) => (
+                                    <Card key={index} className="max-w-72">
+                                        <CardHeader>
                                             <Link
                                                 href={video.video_url}
                                                 target="_blank"
                                             >
-                                                {video.title}
+                                                <img
+                                                    src={video.thumbnailUrl}
+                                                    alt="Thumbnail do vídeo"
+                                                    className="mb-2"
+                                                    style={{
+                                                        maxWidth: 'auto',
+                                                        height: 'auto',
+                                                    }}
+                                                    loading="lazy"
+                                                />
                                             </Link>
-                                        </CardTitle>
-                                        <CardDescription className="text-sm">
-                                            {video.channelTitle}
-                                        </CardDescription>
-                                    </CardHeader>
-                                    {/* <CardContent>
-                                        <p>Cadastrado em:</p>
-                                    </CardContent> */}
-                                    <CardFooter>
-                                        <p>Subs: {video.channelSubs}</p>
-                                        <p>
-                                            Views:{' '}
-                                            <strong className="text-green-500">
-                                                {video.viewCount}
-                                            </strong>
-                                        </p>
-                                        <p>Position: {video.position}</p>
-                                    </CardFooter>
-                                </Card>
-                            ))}
+                                            <CardTitle className="text-md">
+                                                <Link
+                                                    href={video.video_url}
+                                                    target="_blank"
+                                                >
+                                                    {video.title}
+                                                </Link>
+                                            </CardTitle>
+                                            <CardDescription className="text-sm">
+                                                {video.channelTitle}
+                                            </CardDescription>
+                                        </CardHeader>
+                                        <CardFooter>
+                                            <p>Subs: {video.channelSubs}</p>
+                                            <p>
+                                                Views:{' '}
+                                                <strong className="text-green-500">
+                                                    {video.viewCount}
+                                                </strong>
+                                            </p>
+                                            <p>Position: {video.position}</p>
+                                        </CardFooter>
+                                    </Card>
+                                ))
+                            )}
                         </div>
                         <div className="flex flex-col space-y-2"></div>
                     </div>

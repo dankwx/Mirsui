@@ -1,13 +1,6 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import {
-    getFirestore,
-    collection,
-    doc,
-    setDoc,
-    getDoc,
-} from 'firebase/firestore'
 import Header from '../../components/Header/Header'
 import Sidebar from '../../components/Sidebar/Sidebar'
 import { getAuth } from 'firebase/auth'
@@ -29,12 +22,13 @@ interface UserVideo {
     position: number
     title: string
     channelTitle: string
+    channelSubs: number
     thumbnailUrl: string
+    viewCount: number // Adicionado para armazenar o número de visualizações
 }
 
-export default function ClaimedVideos() {
+export default function NewClaimedVideos() {
     const app = initializeApp(firebaseConfig)
-    const db = getFirestore()
     const auth = getAuth(app)
     const supabase = createClientComponentClient()
 
@@ -42,10 +36,8 @@ export default function ClaimedVideos() {
     const [authStateChangedComplete, setAuthStateChangedComplete] =
         useState(false)
     const [loggedUser, setLoggedUser] = useState<unknown | null>(null)
-    const [user_id, setUser_id] = useState<string | null>(null) // Estado para armazenar user_id
+    const [user_id, setUser_id] = useState<string | null>(null)
     const [userVideos, setUserVideos] = useState<UserVideo[]>([])
-    const [videoUrl, setVideoUrl] = useState<string>('')
-    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -57,7 +49,7 @@ export default function ClaimedVideos() {
                 setUserUsername('')
                 console.log('não logado')
             }
-            setAuthStateChangedComplete(true) // Marca como completo após a execução
+            setAuthStateChangedComplete(true)
         })
 
         return () => unsubscribe()
@@ -67,8 +59,6 @@ export default function ClaimedVideos() {
         console.log('iniciando')
         if (authStateChangedComplete) {
             try {
-                setLoggedUser('mFyuIhECSeaFOVxU8P78nPWdfk42')
-
                 const { data: users, error: usersError } = await supabase
                     .from('users')
                     .select('id')
@@ -79,57 +69,31 @@ export default function ClaimedVideos() {
                     throw usersError
                 }
 
-                // Setando o id do usuário
                 const user_id = users ? users.id : null
                 setUser_id(user_id)
 
                 const { data: userVideosData, error } = await supabase
-                    .from('videos')
-                    .select('video_url, position')
-                    .eq('user_id', user_id) // user_id deve ser obtido anteriormente
+                    .from('videosnew')
+                    .select(
+                        'video_url, position, video_title, channel_name, subscribers_count, video_thumbnail, views_count'
+                    )
+                    .eq('user_id', user_id)
 
                 if (error) {
                     throw error
                 }
 
-                // Mapeando os dados dos vídeos para buscar título e thumbnail
-                const videosWithDetails: UserVideo[] = []
-                for (const video of userVideosData || []) {
-                    const videoUrl = video.video_url
-
-                    // Extrair o ID do vídeo do YouTube usando regex ou outra lógica
-                    const videoIdRegex =
-                        /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-                    const match = videoUrl.match(videoIdRegex)
-
-                    if (match && match[1]) {
-                        const videoId = match[1]
-                        const apiKey = `${process.env.NEXT_PUBLIC_YOUTUBE_API_KEY!}`
-
-                        // Fazer requisição para a API do YouTube para obter detalhes do vídeo
-                        const apiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet`
-                        const response = await fetch(apiUrl)
-                        const data = await response.json()
-
-                        if (data.items && data.items.length > 0) {
-                            const snippet = data.items[0].snippet
-                            const title = snippet.title
-                            const channelTitle = snippet.channelTitle
-                            const thumbnailUrl =
-                                snippet.thumbnails.maxres?.url ||
-                                snippet.thumbnails.high.url ||
-                                snippet.thumbnails.medium.url
-
-                            videosWithDetails.push({
-                                video_url: videoUrl,
-                                position: video.position,
-                                title: title,
-                                channelTitle: channelTitle,
-                                thumbnailUrl: thumbnailUrl,
-                            })
-                        }
-                    }
-                }
+                const videosWithDetails: UserVideo[] = userVideosData.map(
+                    (video) => ({
+                        video_url: video.video_url,
+                        position: video.position,
+                        title: video.video_title,
+                        channelTitle: video.channel_name,
+                        channelSubs: video.subscribers_count,
+                        thumbnailUrl: video.video_thumbnail,
+                        viewCount: video.views_count,
+                    })
+                )
 
                 setUserVideos(videosWithDetails)
             } catch (error) {
@@ -140,7 +104,7 @@ export default function ClaimedVideos() {
 
     useEffect(() => {
         if (authStateChangedComplete) {
-            handleAddCollection() // Executa handleAddCollection apenas quando authStateChangedComplete for true
+            handleAddCollection()
         }
     }, [authStateChangedComplete])
 
@@ -152,12 +116,12 @@ export default function ClaimedVideos() {
                     <Sidebar />
                     <div className="flex flex-col p-4">
                         <p className="mb-4 text-lg font-semibold">
-                            Vídeos reivindicados pelo usuário:{' '}
+                            Vídeos reivindicados por:{' '}
                             {auth.currentUser?.displayName}
                         </p>
                         <div className="grid grid-cols-3 gap-4">
                             {userVideos.map((video, index) => (
-                                <Card className="max-w-sm">
+                                <Card key={index} className="max-w-sm">
                                     <CardHeader>
                                         <Link
                                             href={video.video_url}
@@ -167,10 +131,12 @@ export default function ClaimedVideos() {
                                                 src={video.thumbnailUrl}
                                                 alt="Thumbnail do vídeo"
                                                 className="mb-2"
-                                                style={{ maxWidth: '100%' }}
+                                                style={{
+                                                    maxWidth: 'auto',
+                                                    height: 'auto',
+                                                }}
                                             />
                                         </Link>
-
                                         <CardTitle className="text-md">
                                             <Link
                                                 href={video.video_url}
@@ -183,7 +149,17 @@ export default function ClaimedVideos() {
                                             {video.channelTitle}
                                         </CardDescription>
                                     </CardHeader>
+                                    {/* <CardContent>
+                                        <p>Cadastrado em:</p>
+                                    </CardContent> */}
                                     <CardFooter>
+                                        <p>Subs: {video.channelSubs}</p>
+                                        <p>
+                                            Views:{' '}
+                                            <strong className="text-green-500">
+                                                {video.viewCount}
+                                            </strong>
+                                        </p>
                                         <p>Position: {video.position}</p>
                                     </CardFooter>
                                 </Card>

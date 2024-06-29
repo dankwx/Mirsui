@@ -90,6 +90,19 @@ const NewAddVideo = () => {
             const snippet = data.items[0].snippet
             const statistics = data.items[0].statistics
 
+            // Consulta para contar quantas vezes a video_url já foi inserida
+            const { count: videoCount, error: countError } = await supabase
+                .from('videosnew')
+                .select('*', { count: 'exact' })
+                .eq('video_url', videoUrl)
+
+            if (countError) {
+                throw countError
+            }
+
+            // A próxima posição será a contagem atual + 1
+            const nextPosition = videoCount !== null ? videoCount + 1 : 1
+
             // Construir objeto UserVideo
             const newVideo: UserVideo = {
                 video_url: videoUrl,
@@ -105,7 +118,7 @@ const NewAddVideo = () => {
                     snippet.thumbnails.medium.url ||
                     snippet.thumbnails.default.url,
                 channel_name: snippet.channelTitle,
-                position: 1, // A posição inicial será sempre 1 para um novo vídeo
+                position: nextPosition, // A posição inicial será sempre 1 para um novo vídeo
                 claimedat: new Date(),
             }
 
@@ -122,8 +135,10 @@ const NewAddVideo = () => {
                         channel_name: newVideo.channel_name,
                         user_id: user_id,
                         position: newVideo.position,
-                        claimedat: newVideo.claimedat.toISOString().slice(0, 19).replace('T', ' '), // Formato YYYY-MM-DD HH:mm:ss
-
+                        claimedat: newVideo.claimedat
+                            .toISOString()
+                            .slice(0, 19)
+                            .replace('T', ' '), // Formato YYYY-MM-DD HH:mm:ss
                     },
                 ])
 

@@ -25,7 +25,8 @@ interface UserVideo {
     channelTitle: string
     channelSubs: number
     thumbnailUrl: string
-    viewCount: number // Adicionado para armazenar o número de visualizações
+    viewCount: number
+    claimedAt: Date | null
 }
 
 export default function NewClaimedVideos() {
@@ -77,9 +78,10 @@ export default function NewClaimedVideos() {
                 const { data: userVideosData, error } = await supabase
                     .from('videosnew')
                     .select(
-                        'video_url, position, video_title, channel_name, subscribers_count, video_thumbnail, views_count'
+                        'video_url, position, video_title, channel_name, subscribers_count, video_thumbnail, views_count, claimedat'
                     )
                     .eq('user_id', user_id)
+                    .order('claimedat', { ascending: false })
 
                 if (error) {
                     throw error
@@ -94,6 +96,9 @@ export default function NewClaimedVideos() {
                         channelSubs: video.subscribers_count,
                         thumbnailUrl: video.video_thumbnail,
                         viewCount: video.views_count,
+                        claimedAt: video.claimedat
+                            ? new Date(video.claimedat)
+                            : null,
                     })
                 )
 
@@ -125,6 +130,13 @@ export default function NewClaimedVideos() {
                         <div className="grid grid-cols-4 gap-4">
                             {loadingVideos ? (
                                 <>
+                                    <div className="flex flex-col space-y-3">
+                                        <Skeleton className="h-[125px] w-[280px] rounded-xl" />
+                                        <div className="space-y-2">
+                                            <Skeleton className="h-4 w-[250px]" />
+                                            <Skeleton className="h-4 w-[200px]" />
+                                        </div>
+                                    </div>
                                     <div className="flex flex-col space-y-3">
                                         <Skeleton className="h-[125px] w-[280px] rounded-xl" />
                                         <div className="space-y-2">
@@ -194,6 +206,14 @@ export default function NewClaimedVideos() {
                                                 </strong>
                                             </p>
                                             <p>Position: {video.position}</p>
+                                            <p>
+                                                Claimed:{' '}
+                                                {video.claimedAt
+                                                    ? new Date(
+                                                          video.claimedAt
+                                                      ).toLocaleDateString()
+                                                    : 'Not claimed'}
+                                            </p>
                                         </CardFooter>
                                     </Card>
                                 ))

@@ -204,7 +204,11 @@ const GetAuth = () => {
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                        <Link href="/claimedvideos">Profile</Link>
+                        <Link
+                            href={`/newclaimedvideos/${auth.currentUser?.displayName}`}
+                        >
+                            Profile
+                        </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>Billing</DropdownMenuItem>
                     <DropdownMenuItem>Team</DropdownMenuItem>

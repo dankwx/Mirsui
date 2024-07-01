@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import Header from '../../components/Header/Header'
-import Sidebar from '../../components/Sidebar/Sidebar'
+import Header from '../../../components/Header/Header'
+import Sidebar from '../../../components/Sidebar/Sidebar'
 import { getAuth } from 'firebase/auth'
-import firebaseConfig from '../firebase-config'
+import firebaseConfig from '../../firebase-config'
 import { initializeApp } from 'firebase/app'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import {
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/card'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
+import supabase from '@/supabase'
 
 interface UserVideo {
     video_url: string
@@ -29,7 +30,13 @@ interface UserVideo {
     claimedAt: Date | null
 }
 
-export default function NewClaimedVideos() {
+export default function NewClaimedVideos({
+    params,
+    searchParams,
+}: {
+    params: { slug: string }
+    searchParams?: { [key: string]: string | string[] | undefined }
+}) {
     const app = initializeApp(firebaseConfig)
     const auth = getAuth(app)
     const supabase = createClientComponentClient()
@@ -45,12 +52,12 @@ export default function NewClaimedVideos() {
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
-                setUserUsername(user.uid)
-                setLoggedUser(user.uid)
+                setUserUsername(params.slug)
+                setLoggedUser(params.slug)
                 console.log('logado')
             } else {
-                setUserUsername('')
-                console.log('não logado')
+                setUserUsername(params.slug)
+                console.log(params.slug)
             }
             setAuthStateChangedComplete(true)
         })
@@ -65,7 +72,7 @@ export default function NewClaimedVideos() {
                 const { data: users, error: usersError } = await supabase
                     .from('users')
                     .select('id')
-                    .eq('uid', loggedUser)
+                    .eq('username', loggedUser)
                     .single()
 
                 if (usersError) {
@@ -124,8 +131,7 @@ export default function NewClaimedVideos() {
                     <Sidebar />
                     <div className="flex flex-col p-4">
                         <p className="mb-4 text-lg font-semibold">
-                            Vídeos reivindicados por:{' '}
-                            {auth.currentUser?.displayName}
+                            Vídeos reivindicados por: {params.slug}
                         </p>
                         <div className="grid grid-cols-4 gap-4">
                             {loadingVideos ? (

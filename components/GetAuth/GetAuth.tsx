@@ -205,7 +205,7 @@ const GetAuth = () => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
                         <Link
-                            href={`/newclaimedvideos/${auth.currentUser?.displayName}`}
+                            href={`/user/${auth.currentUser?.displayName}/claimed`}
                         >
                             Profile
                         </Link>

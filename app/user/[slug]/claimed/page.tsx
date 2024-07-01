@@ -117,6 +117,24 @@ export default function NewClaimedVideos({
         }
     }
 
+    const handleDeleteVideo = async (videoUrl: string) => {
+        try {
+            const { error } = await supabase
+                .from('videosnew')
+                .delete()
+                .eq('video_url', videoUrl)
+
+            if (error) {
+                throw error
+            }
+
+            // Atualizar a lista de vídeos após a exclusão
+            await handleAddCollection()
+        } catch (error) {
+            console.error('Erro ao deletar vídeo:', error)
+        }
+    }
+
     useEffect(() => {
         if (authStateChangedComplete) {
             handleAddCollection()
@@ -174,11 +192,25 @@ export default function NewClaimedVideos({
                                 </>
                             ) : (
                                 userVideos.map((video, index) => (
-                                    <Card key={index} className="max-w-72">
+                                    <Card
+                                        key={index}
+                                        className="group relative max-w-72"
+                                    >
                                         <CardHeader>
+                                            <div
+                                                className="absolute right-0 top-0 z-10 bg-red-700 p-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                                                onClick={() => {
+                                                    handleDeleteVideo(
+                                                        video.video_url
+                                                    )
+                                                }}
+                                            >
+                                                delete
+                                            </div>
                                             <Link
                                                 href={video.video_url}
                                                 target="_blank"
+                                                className="relative block"
                                             >
                                                 <img
                                                     src={video.thumbnailUrl}

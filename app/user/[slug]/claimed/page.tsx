@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import Header from '../../../components/Header/Header'
-import Sidebar from '../../../components/Sidebar/Sidebar'
+import Header from '../../../../components/Header/Header'
+import Sidebar from '../../../../components/Sidebar/Sidebar'
 import { getAuth } from 'firebase/auth'
-import firebaseConfig from '../../firebase-config'
+import firebaseConfig from '../../../firebase-config'
 import { initializeApp } from 'firebase/app'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import {

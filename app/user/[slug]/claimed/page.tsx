@@ -94,7 +94,7 @@ export default function NewClaimedVideos({
                 setUser_id(user_id)
 
                 const { data: userVideosData, error } = await supabase
-                    .from('videosnew')
+                    .from('videos')
                     .select(
                         'video_url, position, video_title, channel_name, subscribers_count, video_thumbnail, views_count, claimedat'
                     )
@@ -131,7 +131,7 @@ export default function NewClaimedVideos({
     const handleDeleteVideo = async (videoUrl: string) => {
         try {
             const { error } = await supabase
-                .from('videosnew')
+                .from('videos')
                 .delete()
                 .eq('video_url', videoUrl)
 

@@ -17,7 +17,18 @@ import {
 } from '@/components/ui/card'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
-import supabase from '@/supabase'
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 
 interface UserVideo {
     video_url: string
@@ -199,40 +210,75 @@ export default function NewClaimedVideos({
                                         <CardHeader>
                                             <div
                                                 className="absolute right-5 top-5 z-10 bg-white p-2 opacity-0 transition-all duration-300 hover:cursor-pointer hover:bg-red-400 hover:text-white group-hover:opacity-100"
-                                                onClick={() => {
-                                                    handleDeleteVideo(
-                                                        video.video_url
-                                                    )
-                                                }}
+                                                // onClick={() => {
+                                                //     handleDeleteVideo(
+                                                //         video.video_url
+                                                //     )
+                                                // }}
                                             >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width="18"
-                                                    height="18"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    stroke-width="2"
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    className="lucide lucide-trash-2"
-                                                >
-                                                    <path d="M3 6h18" />
-                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                                    <line
-                                                        x1="10"
-                                                        x2="10"
-                                                        y1="11"
-                                                        y2="17"
-                                                    />
-                                                    <line
-                                                        x1="14"
-                                                        x2="14"
-                                                        y1="11"
-                                                        y2="17"
-                                                    />
-                                                </svg>
+                                                <Dialog>
+                                                    <DialogTrigger>
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            width="18"
+                                                            height="18"
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            stroke-width="2"
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            className="lucide lucide-trash-2"
+                                                        >
+                                                            <path d="M3 6h18" />
+                                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                            <line
+                                                                x1="10"
+                                                                x2="10"
+                                                                y1="11"
+                                                                y2="17"
+                                                            />
+                                                            <line
+                                                                x1="14"
+                                                                x2="14"
+                                                                y1="11"
+                                                                y2="17"
+                                                            />
+                                                        </svg>
+                                                    </DialogTrigger>
+                                                    <DialogContent>
+                                                        <DialogHeader>
+                                                            <DialogTitle>
+                                                                Are you sure?
+                                                            </DialogTitle>
+                                                            <DialogDescription>
+                                                                This action
+                                                                cannot be
+                                                                undone.
+                                                            </DialogDescription>
+                                                        </DialogHeader>
+                                                        <DialogFooter>
+                                                            <DialogClose
+                                                                asChild
+                                                            >
+                                                                <Button
+                                                                    type="button"
+                                                                    variant={
+                                                                        'destructive'
+                                                                    }
+                                                                    onClick={() =>
+                                                                        handleDeleteVideo(
+                                                                            video.video_url
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Confirm
+                                                                </Button>
+                                                            </DialogClose>
+                                                        </DialogFooter>
+                                                    </DialogContent>
+                                                </Dialog>
                                             </div>
                                             <Link
                                                 href={video.video_url}

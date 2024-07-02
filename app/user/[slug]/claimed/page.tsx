@@ -210,16 +210,16 @@ export default function NewClaimedVideos({
                                         <CardHeader>
                                             {params.slug ==
                                             auth.currentUser?.displayName ? (
-                                                <div
-                                                    className="absolute right-5 top-5 z-10 bg-white p-2 opacity-0 transition-all duration-300 hover:cursor-pointer hover:bg-red-400 hover:text-white group-hover:opacity-100"
-                                                    // onClick={() => {
-                                                    //     handleDeleteVideo(
-                                                    //         video.video_url
-                                                    //     )
-                                                    // }}
-                                                >
-                                                    <Dialog>
-                                                        <DialogTrigger>
+                                                <Dialog>
+                                                    <DialogTrigger>
+                                                        <div
+                                                            className="absolute right-5 top-5 z-10 bg-white p-2 opacity-0 transition-all duration-300 hover:cursor-pointer hover:bg-red-400 hover:text-white group-hover:opacity-100"
+                                                            // onClick={() => {
+                                                            //     handleDeleteVideo(
+                                                            //         video.video_url
+                                                            //     )
+                                                            // }}
+                                                        >
                                                             <svg
                                                                 xmlns="http://www.w3.org/2000/svg"
                                                                 width="18"
@@ -248,41 +248,40 @@ export default function NewClaimedVideos({
                                                                     y2="17"
                                                                 />
                                                             </svg>
-                                                        </DialogTrigger>
-                                                        <DialogContent>
-                                                            <DialogHeader>
-                                                                <DialogTitle>
-                                                                    Are you
-                                                                    sure?
-                                                                </DialogTitle>
-                                                                <DialogDescription>
-                                                                    This action
-                                                                    cannot be
-                                                                    undone.
-                                                                </DialogDescription>
-                                                            </DialogHeader>
-                                                            <DialogFooter>
-                                                                <DialogClose
-                                                                    asChild
+                                                        </div>
+                                                    </DialogTrigger>
+                                                    <DialogContent>
+                                                        <DialogHeader>
+                                                            <DialogTitle>
+                                                                Are you sure?
+                                                            </DialogTitle>
+                                                            <DialogDescription>
+                                                                This action
+                                                                cannot be
+                                                                undone.
+                                                            </DialogDescription>
+                                                        </DialogHeader>
+                                                        <DialogFooter>
+                                                            <DialogClose
+                                                                asChild
+                                                            >
+                                                                <Button
+                                                                    type="button"
+                                                                    variant={
+                                                                        'destructive'
+                                                                    }
+                                                                    onClick={() =>
+                                                                        handleDeleteVideo(
+                                                                            video.video_url
+                                                                        )
+                                                                    }
                                                                 >
-                                                                    <Button
-                                                                        type="button"
-                                                                        variant={
-                                                                            'destructive'
-                                                                        }
-                                                                        onClick={() =>
-                                                                            handleDeleteVideo(
-                                                                                video.video_url
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        Confirm
-                                                                    </Button>
-                                                                </DialogClose>
-                                                            </DialogFooter>
-                                                        </DialogContent>
-                                                    </Dialog>
-                                                </div>
+                                                                    Confirm
+                                                                </Button>
+                                                            </DialogClose>
+                                                        </DialogFooter>
+                                                    </DialogContent>
+                                                </Dialog>
                                             ) : null}
 
                                             <Link

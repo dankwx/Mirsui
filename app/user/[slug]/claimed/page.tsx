@@ -208,78 +208,83 @@ export default function NewClaimedVideos({
                                         className="group relative max-w-72"
                                     >
                                         <CardHeader>
-                                            <div
-                                                className="absolute right-5 top-5 z-10 bg-white p-2 opacity-0 transition-all duration-300 hover:cursor-pointer hover:bg-red-400 hover:text-white group-hover:opacity-100"
-                                                // onClick={() => {
-                                                //     handleDeleteVideo(
-                                                //         video.video_url
-                                                //     )
-                                                // }}
-                                            >
-                                                <Dialog>
-                                                    <DialogTrigger>
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            width="18"
-                                                            height="18"
-                                                            viewBox="0 0 24 24"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            stroke-width="2"
-                                                            stroke-linecap="round"
-                                                            stroke-linejoin="round"
-                                                            className="lucide lucide-trash-2"
-                                                        >
-                                                            <path d="M3 6h18" />
-                                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                                            <line
-                                                                x1="10"
-                                                                x2="10"
-                                                                y1="11"
-                                                                y2="17"
-                                                            />
-                                                            <line
-                                                                x1="14"
-                                                                x2="14"
-                                                                y1="11"
-                                                                y2="17"
-                                                            />
-                                                        </svg>
-                                                    </DialogTrigger>
-                                                    <DialogContent>
-                                                        <DialogHeader>
-                                                            <DialogTitle>
-                                                                Are you sure?
-                                                            </DialogTitle>
-                                                            <DialogDescription>
-                                                                This action
-                                                                cannot be
-                                                                undone.
-                                                            </DialogDescription>
-                                                        </DialogHeader>
-                                                        <DialogFooter>
-                                                            <DialogClose
-                                                                asChild
+                                            {params.slug ==
+                                            auth.currentUser?.displayName ? (
+                                                <div
+                                                    className="absolute right-5 top-5 z-10 bg-white p-2 opacity-0 transition-all duration-300 hover:cursor-pointer hover:bg-red-400 hover:text-white group-hover:opacity-100"
+                                                    // onClick={() => {
+                                                    //     handleDeleteVideo(
+                                                    //         video.video_url
+                                                    //     )
+                                                    // }}
+                                                >
+                                                    <Dialog>
+                                                        <DialogTrigger>
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                width="18"
+                                                                height="18"
+                                                                viewBox="0 0 24 24"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                stroke-width="2"
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                className="lucide lucide-trash-2"
                                                             >
-                                                                <Button
-                                                                    type="button"
-                                                                    variant={
-                                                                        'destructive'
-                                                                    }
-                                                                    onClick={() =>
-                                                                        handleDeleteVideo(
-                                                                            video.video_url
-                                                                        )
-                                                                    }
+                                                                <path d="M3 6h18" />
+                                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                                <line
+                                                                    x1="10"
+                                                                    x2="10"
+                                                                    y1="11"
+                                                                    y2="17"
+                                                                />
+                                                                <line
+                                                                    x1="14"
+                                                                    x2="14"
+                                                                    y1="11"
+                                                                    y2="17"
+                                                                />
+                                                            </svg>
+                                                        </DialogTrigger>
+                                                        <DialogContent>
+                                                            <DialogHeader>
+                                                                <DialogTitle>
+                                                                    Are you
+                                                                    sure?
+                                                                </DialogTitle>
+                                                                <DialogDescription>
+                                                                    This action
+                                                                    cannot be
+                                                                    undone.
+                                                                </DialogDescription>
+                                                            </DialogHeader>
+                                                            <DialogFooter>
+                                                                <DialogClose
+                                                                    asChild
                                                                 >
-                                                                    Confirm
-                                                                </Button>
-                                                            </DialogClose>
-                                                        </DialogFooter>
-                                                    </DialogContent>
-                                                </Dialog>
-                                            </div>
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant={
+                                                                            'destructive'
+                                                                        }
+                                                                        onClick={() =>
+                                                                            handleDeleteVideo(
+                                                                                video.video_url
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        Confirm
+                                                                    </Button>
+                                                                </DialogClose>
+                                                            </DialogFooter>
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                </div>
+                                            ) : null}
+
                                             <Link
                                                 href={video.video_url}
                                                 target="_blank"

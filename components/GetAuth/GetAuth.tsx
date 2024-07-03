@@ -63,7 +63,7 @@ export default async function GetAuth() {
             ) : (
                 <div>
                     <Dialog>
-                    <DialogTrigger>{data.user.email}</DialogTrigger>
+                    <DialogTrigger>{data.user.user_metadata.username}</DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                             <DialogTitle>Log In</DialogTitle>

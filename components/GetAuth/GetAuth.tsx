@@ -51,36 +51,34 @@ export default async function GetAuth() {
     const supabase = createClient()
 
     const { data, error } = await supabase.auth.getUser()
-    if (error || !data?.user) {
-        redirect('/login')
-    }
+
+    const username = data.user?.user_metadata?.username || 'User'
 
     return (
         <div className="flex">
-            
-            {data.user.email == null ? (
+            {!data.user ? (
                 <p>Login</p>
             ) : (
                 <div>
                     <Dialog>
-                    <DialogTrigger>{data.user.user_metadata.username}</DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Log In</DialogTitle>
-                            <DialogDescription>
-                                By continuing, you agree to our User Agreement
-                                and acknowledge that you understand the Privacy
-                                Policy.
-                            </DialogDescription>
-                            <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label
-                                        htmlFor="name"
-                                        className="text-right"
-                                    >
-                                        Email
-                                    </Label>
-                                    {/* <Input
+                        <DialogTrigger>{username}</DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Log In</DialogTitle>
+                                <DialogDescription>
+                                    By continuing, you agree to our User
+                                    Agreement and acknowledge that you
+                                    understand the Privacy Policy.
+                                </DialogDescription>
+                                <div className="grid gap-4 py-4">
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label
+                                            htmlFor="name"
+                                            className="text-right"
+                                        >
+                                            Email
+                                        </Label>
+                                        {/* <Input
                                         id="name"
                                         className="col-span-3"
                                         value={name}
@@ -90,42 +88,41 @@ export default async function GetAuth() {
                                             setLoginEmail(event.target.value)
                                         }}
                                     /> */}
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label
-                                    htmlFor="username"
-                                    className="text-right"
-                                >
-                                    Password
-                                </Label>
-                                <Input
-                                    id="password"
-                                    className="col-span-3"
-                                    type="password"
-                                    placeholder="*******"
-                                    // value={paswrd}
-                                    // onChange={(event) => {
-                                    //     setPaswrd(event.target.value)
-                                    //     setLoginPassword(event.target.value)
-                                    // }}
-                                />
-                            </div>
-                            <DialogDescription className="pt-4 text-blue-600">
-                                Forgot Password?
-                            </DialogDescription>
-                            <DialogDescription className="pt-4 text-blue-600">
-                                Doesn't Have an account? Register
-                            </DialogDescription>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label
+                                        htmlFor="username"
+                                        className="text-right"
+                                    >
+                                        Password
+                                    </Label>
+                                    <Input
+                                        id="password"
+                                        className="col-span-3"
+                                        type="password"
+                                        placeholder="*******"
+                                        // value={paswrd}
+                                        // onChange={(event) => {
+                                        //     setPaswrd(event.target.value)
+                                        //     setLoginPassword(event.target.value)
+                                        // }}
+                                    />
+                                </div>
+                                <DialogDescription className="pt-4 text-blue-600">
+                                    Forgot Password?
+                                </DialogDescription>
+                                <DialogDescription className="pt-4 text-blue-600">
+                                    Doesn't Have an account? Register
+                                </DialogDescription>
 
-                            <DialogFooter>
-                                <Button type="submit">Log In</Button>
-                            </DialogFooter>
-                        </DialogHeader>
-                    </DialogContent>
-                </Dialog>
+                                <DialogFooter>
+                                    <Button type="submit">Log In</Button>
+                                </DialogFooter>
+                            </DialogHeader>
+                        </DialogContent>
+                    </Dialog>
                 </div>
-                
             )}
             <DropdownMenu>
                 <DropdownMenuTrigger className="ml-2 outline-none">
@@ -163,8 +160,7 @@ export default async function GetAuth() {
                     <DropdownMenuItem>Subscription</DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="cursor-pointer">
-                    <Deslog />
-                        
+                        <Deslog />
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>

@@ -29,7 +29,7 @@ interface Channel {
 
 const API_KEY = `${process.env.NEXT_PUBLIC_YOUTUBE_API_KEY!}`
 
-export default function Sidobar() {
+export default function ClaimChannel() {
     const supabase = createClient()
     const [loggedUser, setLoggedUser] = useState<string | null>(null)
     const [authStateChangedComplete, setAuthStateChangedComplete] =
@@ -46,13 +46,6 @@ export default function Sidobar() {
     useEffect(() => {
         fetchChannelInfo()
     }, [])
-    //executa funcoes
-    // useEffect(() => {
-    //     if (isAuthChecked && loggedUser) {
-    //         fetchChannelInformation()
-    //     }
-    // }, [isAuthChecked, loggedUser])
-
 
     //fetch o usuario atual logado
     const fetchChannelInfo = async () => {
@@ -280,8 +273,6 @@ export default function Sidobar() {
 
     return (
         <div>
-            <h1>Contador:</h1>
-            <p>{userIds}</p>
             <div className="h-fit w-fit bg-red-200 p-4">
                         <h2 className="mb-4 text-xl font-bold">
                             Buscar Informações do Canal do YouTube

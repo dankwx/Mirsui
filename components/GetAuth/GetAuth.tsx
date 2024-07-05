@@ -46,8 +46,7 @@ import { createClient } from '@/utils/supabase/server'
 import Deslog from '@/app/logout/page'
 
 export default async function GetAuth() {
-    const app = initializeApp(firebaseConfig)
-    const auth = getAuth(app)
+
     const supabase = createClient()
 
     const { data, error } = await supabase.auth.getUser()
@@ -150,7 +149,7 @@ export default async function GetAuth() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
                         <Link
-                            href={`/user/${auth.currentUser?.displayName}/claimed`}
+                            href={`/user/${username}/claimed`}
                         >
                             Profile
                         </Link>

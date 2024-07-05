@@ -93,7 +93,7 @@ export default function ClaimedChannel ({
                 const { data: users, error: usersError } = await supabase
                     .from('profiles')
                     .select('id')
-                    .eq('username', loggedUser)
+                    .eq('username', params.slug)
                     .single()
 
                 if (usersError) {
@@ -101,7 +101,7 @@ export default function ClaimedChannel ({
                 }
 
                 const user_id = users ? users.id : null
-                setUser_id(user_id)
+                setUser_id(params.slug)
 
                 const { data: userVideosData, error } = await supabase
                     .from('videos')

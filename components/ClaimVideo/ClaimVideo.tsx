@@ -1,15 +1,6 @@
 'use client'
-
+import { createClient } from '@/utils/supabase/client'
 import { useEffect, useState } from 'react'
-import Header from '../../components/Header/Header'
-import Sidebar from '../../components/Sidebar/Sidebar'
-import { getAuth } from 'firebase/auth'
-import { initializeApp } from 'firebase/app'
-import firebaseConfig from '../firebase-config'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-
-const app = initializeApp(firebaseConfig)
-const auth = getAuth(app)
 
 export interface UserVideo {
     video_url: string
@@ -22,27 +13,48 @@ export interface UserVideo {
     claimedat: Date
 }
 
-const NewAddVideo = () => {
+export default function ClaimVideo() {
     const [loggedUser, setLoggedUser] = useState<string | null>(null)
     const [authStateChangedComplete, setAuthStateChangedComplete] =
         useState(false)
+    const [channelInput, setChannelInput] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    const [successMessage, setSuccessMessage] = useState('')
+    const [userIds, setUserIds] = useState<string[]>([])
+    const [error, setError] = useState('')
+    const [isAuthChecked, setIsAuthChecked] = useState(false)
+    const [userUsername, setUserUsername] = useState('')
+    const [user_id, setUser_id] = useState<string | null>(null)
+    const [userVideos, setUserVideos] = useState<UserVideo[]>([])
+    const [loadingVideos, setLoadingVideos] = useState(true) // Estado para controlar o carregamento dos vídeos
     const [videoUrl, setVideoUrl] = useState('')
-    const supabase = createClientComponentClient()
+
+    const supabase = createClient()
 
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                setLoggedUser(user.uid)
-                console.log('Usuário logado')
-            } else {
-                setLoggedUser(null)
-                console.log('Usuário não logado')
-            }
-            setAuthStateChangedComplete(true)
-        })
+        fetchChannelInfo()
+    }, [])
 
-        return () => unsubscribe()
-    }, [auth])
+    //fetch o usuario atual logado
+    const fetchChannelInfo = async () => {
+        try {
+            const { data, error } = await supabase.auth.getUser()
+            const username = data.user?.user_metadata?.sub
+
+            if (error) {
+                throw error
+            }
+
+            if (data) {
+                setUserIds(username)
+                setLoggedUser(username)
+            }
+        } catch (error) {
+            console.log('nao deu pra fazer fetch de usuario', error)
+        } finally {
+            setIsAuthChecked(true)
+        }
+    }
 
     const handleClaimVideo = async () => {
         if (!loggedUser) {
@@ -56,9 +68,9 @@ const NewAddVideo = () => {
             }
 
             const { data: users, error: usersError } = await supabase
-                .from('users')
+                .from('profiles')
                 .select('id')
-                .eq('uid', loggedUser)
+                .eq('id', loggedUser)
                 .single()
 
             if (usersError) {
@@ -89,11 +101,14 @@ const NewAddVideo = () => {
 
             const snippet = data.items[0].snippet
             const statistics = data.items[0].statistics
-            
+
+            if (!snippet || !statistics) {
+    throw new Error('Dados do vídeo não encontrados.')
+}
 
             // Consulta para contar quantas vezes a video_url já foi inserida
             const { count: videoCount, error: countError } = await supabase
-                .from('videosnew')
+                .from('videos')
                 .select('*', { count: 'exact' })
                 .eq('video_url', videoUrl)
 
@@ -125,7 +140,7 @@ const NewAddVideo = () => {
 
             // Inserir no banco de dados Supabase
             const { data: insertedVideo, error } = await supabase
-                .from('videosnew')
+                .from('videos')
                 .insert([
                     {
                         video_url: newVideo.video_url,
@@ -158,6 +173,7 @@ const NewAddVideo = () => {
         channelId: string,
         apiKey: string
     ): Promise<number> => {
+        ;('')
         try {
             const apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`
             const response = await fetch(apiUrl)
@@ -175,16 +191,10 @@ const NewAddVideo = () => {
         }
     }
 
-    if (!authStateChangedComplete) {
-        return null // Ou algum indicador de carregamento, se necessário
-    }
-
     return (
-        <main className="flex min-h-screen flex-col">
-            <Header />
+        <main>
             <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
                 <div className="flex h-full flex-1">
-                    <Sidebar />
                     <div className="flex flex-col p-4">
                         <p className="mb-4 text-lg font-semibold">
                             Salvar vídeo
@@ -210,5 +220,3 @@ const NewAddVideo = () => {
         </main>
     )
 }
-
-export default NewAddVideo

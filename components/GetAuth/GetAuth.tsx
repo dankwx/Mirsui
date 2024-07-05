@@ -1,5 +1,3 @@
-'use client'
-
 import firebaseConfig from '../../app/firebase-config'
 import { initializeApp } from 'firebase/app'
 import {
@@ -18,7 +16,6 @@ import {
     QuerySnapshot,
     Timestamp,
 } from 'firebase/firestore'
-import { useEffect, useState } from 'react'
 import { getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import {
     DropdownMenu,
@@ -44,90 +41,43 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '../ui/button'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/utils/supabase/server'
+import Deslog from '@/app/logout/page'
 
-const GetAuth = () => {
-    const app = initializeApp(firebaseConfig)
-    const auth = getAuth(app)
-    const [loggedUser, setLoggedUser] = useState<unknown | null>(null)
-    const [authStateChangedComplete, setAuthStateChangedComplete] =
-        useState(false)
-    const [loginEmail, setLoginEmail] = useState('')
-    const [loginPassword, setLoginPassword] = useState('')
-    const [name, setName] = useState('')
-    const [paswrd, setPaswrd] = useState('')
-    const [hide, setHide] = useState(false)
-    const [userError, setUserError] = useState(false)
-    const [paswrdError, setPaswrdError] = useState(false)
-    const router = useRouter()
+export default async function GetAuth() {
 
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                setLoggedUser(user.email)
-                console.log('logado')
-            } else {
-                setLoggedUser(null)
-                console.log('não logado')
-            }
-            setAuthStateChangedComplete(true) // Marca como completo após a execução
-        })
+    const supabase = createClient()
 
-        return () => unsubscribe()
-    }, [auth])
+    const { data, error } = await supabase.auth.getUser()
 
-    const login = async () => {
-        logout()
-        try {
-            logout()
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const user = await signInWithEmailAndPassword(
-                auth,
-                loginEmail,
-                loginPassword
-            )
-            localStorage.setItem('authenticated', 'messages')
-            // refrsh page
-            window.location.reload()
-            // goToHome();
-        } catch (error) {
-            setUserError(true)
-            setPaswrdError(true)
-            console.log('(400) Error logging in')
-            setHide(true)
-        }
-    }
-
-    const logout = async () => {
-        await signOut(auth)
-    }
+    const username = data.user?.user_metadata?.username || 'User'
 
     return (
         <div className="flex">
-            {loggedUser ? (
-                <p>{auth.currentUser?.displayName}</p>
+            {!data.user ? (
+                <p>Login</p>
             ) : (
-                <Dialog>
-                    <DialogTrigger>Log In</DialogTrigger>
-                    <DialogContent
-                        onOpenAutoFocus={(e) => e.preventDefault()}
-                        className="sm:max-w-[425px]"
-                    >
-                        <DialogHeader>
-                            <DialogTitle>Log In</DialogTitle>
-                            <DialogDescription>
-                                By continuing, you agree to our User Agreement
-                                and acknowledge that you understand the Privacy
-                                Policy.
-                            </DialogDescription>
-                            <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label
-                                        htmlFor="name"
-                                        className="text-right"
-                                    >
-                                        Email
-                                    </Label>
-                                    <Input
+                <div>
+                    <Dialog>
+                        <DialogTrigger>{username}</DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Log In</DialogTitle>
+                                <DialogDescription>
+                                    By continuing, you agree to our User
+                                    Agreement and acknowledge that you
+                                    understand the Privacy Policy.
+                                </DialogDescription>
+                                <div className="grid gap-4 py-4">
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label
+                                            htmlFor="name"
+                                            className="text-right"
+                                        >
+                                            Email
+                                        </Label>
+                                        {/* <Input
                                         id="name"
                                         className="col-span-3"
                                         value={name}
@@ -136,52 +86,46 @@ const GetAuth = () => {
                                             setName(event.target.value)
                                             setLoginEmail(event.target.value)
                                         }}
+                                    /> */}
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label
+                                        htmlFor="username"
+                                        className="text-right"
+                                    >
+                                        Password
+                                    </Label>
+                                    <Input
+                                        id="password"
+                                        className="col-span-3"
+                                        type="password"
+                                        placeholder="*******"
+                                        // value={paswrd}
+                                        // onChange={(event) => {
+                                        //     setPaswrd(event.target.value)
+                                        //     setLoginPassword(event.target.value)
+                                        // }}
                                     />
                                 </div>
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label
-                                    htmlFor="username"
-                                    className="text-right"
-                                >
-                                    Password
-                                </Label>
-                                <Input
-                                    id="password"
-                                    className="col-span-3"
-                                    type="password"
-                                    placeholder="*******"
-                                    value={paswrd}
-                                    onChange={(event) => {
-                                        setPaswrd(event.target.value)
-                                        setLoginPassword(event.target.value)
-                                    }}
-                                />
-                            </div>
-                            <DialogDescription className="pt-4 text-blue-600">
-                                Forgot Password?
-                            </DialogDescription>
-                            <DialogDescription className="pt-4 text-blue-600">
-                                Doesn't Have an account? Register
-                            </DialogDescription>
+                                <DialogDescription className="pt-4 text-blue-600">
+                                    Forgot Password?
+                                </DialogDescription>
+                                <DialogDescription className="pt-4 text-blue-600">
+                                    Doesn't Have an account? Register
+                                </DialogDescription>
 
-                            <DialogFooter>
-                                <Button
-                                    type="submit"
-                                    onClick={(event) => {
-                                        login()
-                                    }}
-                                >
-                                    Log In
-                                </Button>
-                            </DialogFooter>
-                        </DialogHeader>
-                    </DialogContent>
-                </Dialog>
+                                <DialogFooter>
+                                    <Button type="submit">Log In</Button>
+                                </DialogFooter>
+                            </DialogHeader>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             )}
             <DropdownMenu>
                 <DropdownMenuTrigger className="ml-2 outline-none">
-                    {loggedUser ? (
+                    {supabase.auth ? (
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="20"
@@ -205,7 +149,7 @@ const GetAuth = () => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
                         <Link
-                            href={`/user/${auth.currentUser?.displayName}/claimed`}
+                            href={`/user/${username}/claimed`}
                         >
                             Profile
                         </Link>
@@ -214,16 +158,11 @@ const GetAuth = () => {
                     <DropdownMenuItem>Team</DropdownMenuItem>
                     <DropdownMenuItem>Subscription</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={logout}
-                    >
-                        Log Out
+                    <DropdownMenuItem className="cursor-pointer">
+                        <Deslog />
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>
     )
 }
-
-export default GetAuth

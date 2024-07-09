@@ -1,6 +1,7 @@
 import Header from '../components/Header/Header'
 import Sidebar from '../components/Sidebar/Sidebar'
 import GetLatestClaims from '@/components/GetLatestClaims/GetLatestClaims'
+import ClaimArtist from '@/components/ClaimArtist/ClaimArtist'
 
 export default async function Home() {
     return (
@@ -10,6 +11,7 @@ export default async function Home() {
                 <div className="flex h-full flex-1">
                     <Sidebar />
                     <div className="flex flex-col">
+                        <ClaimArtist />
                         <GetLatestClaims />
                     </div>
                 </div>

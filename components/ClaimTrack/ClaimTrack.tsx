@@ -54,9 +54,9 @@ export default function ClaimTrack() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret)
+                Authorization: 'Basic ' + btoa(clientId + ':' + clientSecret),
             },
-            body: 'grant_type=client_credentials'
+            body: 'grant_type=client_credentials',
         })
 
         const data = await response.json()
@@ -74,8 +74,12 @@ export default function ClaimTrack() {
             return
         }
 
-        try {
+        if (!isAuthChecked) {
+            console.log('Auth check failed')
+            return
+        }
 
+        try {
             const { data: users, error: usersError } = await supabase
                 .from('profiles')
                 .select('id')
@@ -87,9 +91,9 @@ export default function ClaimTrack() {
             }
             const user_id = users ? users.id : null
 
-
             // Extrair o ID da faixa do URL do Spotify
-            const trackIdRegex = /(?:https:\/\/open\.spotify\.com\/track\/)([a-zA-Z0-9]+)/
+            const trackIdRegex =
+                /(?:https:\/\/open\.spotify\.com\/track\/)([a-zA-Z0-9]+)/
             const match = trackUrl.match(trackIdRegex)
 
             if (!match || !match[1]) {
@@ -97,7 +101,7 @@ export default function ClaimTrack() {
             }
 
             const trackId = match[1]
-            
+
             const trackInfo = await fetchTrackInfo(trackId)
 
             // Consulta para contar quantas vezes a track_url já foi inserida
@@ -157,11 +161,14 @@ export default function ClaimTrack() {
     }
 
     const fetchTrackInfo = async (trackId: string) => {
-        const response = await fetch(`https://api.spotify.com/v1/tracks/${trackId}`, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
+        const response = await fetch(
+            `https://api.spotify.com/v1/tracks/${trackId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
             }
-        })
+        )
 
         if (!response.ok) {
             throw new Error('Falha ao buscar informações da faixa')

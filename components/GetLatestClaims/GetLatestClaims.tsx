@@ -95,8 +95,7 @@ export default function GetLatestClaims() {
                                     {claim.username}
                                 </Link>{' '}
                                 resgatou o {claim.claim_type === 'channel' ? 'canal' : 'artista'}{' '}
-                                {claim.entity_name} com {claim.count_at_claim}{' '}
-                                {claim.claim_type === 'channel' ? 'inscritos' : 'de popularidade'}
+                                {claim.entity_name}
                             </p>{' '}
                             <img
                                 src={claim.profile_image_url}

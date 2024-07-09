@@ -1,24 +1,36 @@
 'use client'
-import { createClient } from '@/utils/supabase/client'
-import { useEffect, useState } from 'react'
 
-export interface Artist {
+import { useEffect, useState } from 'react'
+import { createClient } from '@/utils/supabase/client'
+
+interface ArtistData {
+    id: string
+    name: string
+    images: { url: string }[]
+    followers: { total: number }
+    popularity: number
+}
+
+interface Artist {
     id: string
     artist_url: string
     artist_image_url: string
     artist_name: string
-    creation_date: Date
+    creation_date: string
     current_popularity: number
-    last_updated: Date
+    last_updated: string
 }
 
 export default function ClaimArtist() {
-    const [loggedUser, setLoggedUser] = useState<string | null>(null)
-    const [isAuthChecked, setIsAuthChecked] = useState(false)
-    const [artistUrl, setArtistUrl] = useState('')
-    const [accessToken, setAccessToken] = useState<string | null>(null)
-
     const supabase = createClient()
+    const [loggedUser, setLoggedUser] = useState<string | null>(null)
+    const [artistData, setArtistData] = useState<ArtistData | null>(null)
+    const [artistInput, setArtistInput] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    const [successMessage, setSuccessMessage] = useState('')
+    const [error, setError] = useState('')
+    const [isAuthChecked, setIsAuthChecked] = useState(false)
+    const [accessToken, setAccessToken] = useState<string | null>(null)
 
     useEffect(() => {
         fetchUserInfo()
@@ -61,106 +73,185 @@ export default function ClaimArtist() {
         setAccessToken(data.access_token)
     }
 
-    const handleClaimArtist = async () => {
+    const extractArtistId = (input: string) => {
+        const urlMatch = input.match(/spotify\.com\/artist\/([a-zA-Z0-9]+)/)
+        return urlMatch ? urlMatch[1] : input
+    }
+
+    const fetchArtistInformation = async () => {
         if (!loggedUser) {
             console.log('Usuário não autenticado.')
             return
         }
-
+    
         if (!accessToken) {
             console.log('Token do Spotify não disponível.')
             return
         }
-
-        if (!isAuthChecked) {
-            console.log('Auth check failed')
-            return
-        }
-
+    
         try {
-            // Extrair o ID do artista do URL do Spotify
-            const artistIdRegex =
-                /(?:https:\/\/open\.spotify\.com\/artist\/)([a-zA-Z0-9]+)/
-            const match = artistUrl.match(artistIdRegex)
-
-            if (!match || !match[1]) {
-                throw new Error('URL do Spotify inválida.')
+            setIsLoading(true)
+            setError('')
+            setSuccessMessage('')
+            const artistId = extractArtistId(artistInput)
+    
+            const response = await fetch(
+                `https://api.spotify.com/v1/artists/${artistId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            )
+    
+            if (!response.ok) {
+                throw new Error('Artista não encontrado')
             }
-
-            const artistId = match[1]
-
-            const artistInfo = await fetchArtistInfo(artistId)
-
-            // Construir objeto Artist
-            const newArtist: Artist = {
-                id: artistId,
-                artist_url: artistUrl,
-                artist_image_url: artistInfo.images[0]?.url || '',
-                artist_name: artistInfo.name,
-                creation_date: new Date(),
-                current_popularity: artistInfo.popularity,
-                last_updated: new Date(),
-            }
-
-            // Inserir no banco de dados Supabase
-            const { data: insertedArtist, error } = await supabase
+    
+            const artistInfo: ArtistData = await response.json()
+            setArtistData(artistInfo)
+    
+            // Check if artist exists in Artists table
+            const { data: existingArtists, error: checkError } = await supabase
                 .from('artists')
-                .upsert([newArtist], { onConflict: 'id' })
-
-            if (error) {
-                throw error
+                .select()
+                .eq('id', artistInfo.id)
+    
+            if (checkError) {
+                throw new Error(`Error checking artist: ${checkError.message}`)
             }
-
-            console.log('Artista reinvidicado com sucesso:', insertedArtist)
-            setArtistUrl('') // Limpar campo de input após inserção bem-sucedida
+    
+            let existingArtist: Artist | null = null
+            if (existingArtists && existingArtists.length > 0) {
+                existingArtist = existingArtists[0] as Artist
+            }
+    
+            if (!existingArtist) {
+                // Artist doesn't exist, so create it
+                const { data: newArtist, error: insertError } = await supabase
+                    .from('artists')
+                    .insert({
+                        id: artistInfo.id,
+                        artist_url: `https://open.spotify.com/artist/${artistInfo.id}`,
+                        artist_image_url: artistInfo.images[0]?.url || '',
+                        artist_name: artistInfo.name,
+                        creation_date: new Date().toISOString().split('T')[0],
+                        current_popularity: artistInfo.popularity,
+                        last_updated: new Date().toISOString(),
+                    })
+                    .select()
+                    .single()
+    
+                if (insertError) {
+                    throw new Error(`Error creating artist: ${insertError.message}`)
+                }
+    
+                existingArtist = newArtist
+            } else {
+                // Artist exists, update popularity and last_updated
+                const { data: updatedArtist, error: updateError } = await supabase
+                    .from('artists')
+                    .update({
+                        current_popularity: artistInfo.popularity,
+                        last_updated: new Date().toISOString(),
+                    })
+                    .eq('id', artistInfo.id)
+                    .select()
+                    .single()
+    
+                if (updateError) {
+                    throw new Error(`Error updating artist: ${updateError.message}`)
+                }
+    
+                existingArtist = updatedArtist
+            }
+    
+            // Check if user has already claimed this artist
+            const { data: existingClaim, error: claimCheckError } = await supabase
+                .from('userartistclaims')
+                .select()
+                .eq('user_id', loggedUser)
+                .eq('artist_id', artistInfo.id)
+    
+            if (claimCheckError) {
+                throw new Error('Error checking existing claim')
+            }
+    
+            if (existingClaim && existingClaim.length > 0) {
+                setSuccessMessage('You have already claimed this artist')
+            } else {
+                // Create the user claim
+                const { error: claimError } = await supabase
+                    .from('userartistclaims')
+                    .insert({
+                        user_id: loggedUser,
+                        artist_id: artistInfo.id,
+                        popularity_at_claim: artistInfo.popularity,
+                    })
+    
+                if (claimError) {
+                    throw new Error('Error storing claim')
+                }
+    
+                setSuccessMessage('Artist claimed successfully!')
+            }
         } catch (error) {
-            console.error('Erro ao reinvidicar artista:', error)
+            console.error('Error:', error)
+            setArtistData(null)
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : 'An unknown error occurred'
+            )
+        } finally {
+            setIsLoading(false)
         }
-    }
-
-    const fetchArtistInfo = async (artistId: string) => {
-        const response = await fetch(
-            `https://api.spotify.com/v1/artists/${artistId}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            }
-        )
-
-        if (!response.ok) {
-            throw new Error('Falha ao buscar informações do artista')
-        }
-
-        return await response.json()
     }
 
     return (
-        <main>
-            <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
-                <div className="flex h-full flex-1">
-                    <div className="flex flex-col p-4">
-                        <p className="mb-4 text-lg font-semibold">
-                            Salvar artista do Spotify
-                        </p>
-                        <div className="flex flex-col space-y-2">
-                            <input
-                                type="text"
-                                className="rounded-md border border-gray-300 p-2"
-                                placeholder="Insira a URL do artista do Spotify"
-                                value={artistUrl}
-                                onChange={(e) => setArtistUrl(e.target.value)}
+        <div>
+            <div className="h-fit w-fit bg-green-200 p-4">
+                <h2 className="mb-4 text-xl font-bold">
+                    Buscar Informações do Artista do Spotify
+                </h2>
+                <input
+                    type="text"
+                    value={artistInput}
+                    onChange={(e) => setArtistInput(e.target.value)}
+                    placeholder="Enter Spotify artist URL or ID"
+                    className="mb-4 w-full rounded border border-gray-300 p-2"
+                />
+                <button
+                    className="rounded bg-green-500 p-2 text-white"
+                    onClick={fetchArtistInformation}
+                    disabled={isLoading}
+                >
+                    {isLoading ? 'Buscando...' : 'Buscar'}
+                </button>
+                {error && <p className="mt-2 text-red-500">{error}</p>}
+                {successMessage && (
+                    <p className="mt-2 text-green-500">
+                        {successMessage}
+                    </p>
+                )}
+                {artistData && (
+                    <div className="mt-4">
+                        <h3 className="text-lg font-semibold">
+                            {artistData.name}
+                        </h3>
+                        <p>Artist ID: {artistData.id}</p>
+                        <p>Followers: {artistData.followers.total}</p>
+                        <p>Popularity: {artistData.popularity}</p>
+                        {artistData.images[0] && (
+                            <img
+                                src={artistData.images[0].url}
+                                alt="Artist Image"
+                                className="mt-2 h-32 w-32"
                             />
-                            <button
-                                onClick={handleClaimArtist}
-                                className="rounded-md bg-green-500 px-4 py-2 text-white shadow-md hover:bg-green-600"
-                            >
-                                Reinvidicar
-                            </button>
-                        </div>
+                        )}
                     </div>
-                </div>
+                )}
             </div>
-        </main>
+        </div>
     )
 }

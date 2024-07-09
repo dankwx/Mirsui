@@ -6,16 +6,14 @@ import Link from 'next/link'
 
 interface Claim {
     id: number
-    subscriber_count_at_claim: number
+    claim_type: 'channel' | 'artist'
+    user_id: string
+    username: string
+    count_at_claim: number
     claim_date: string
-    profiles: {
-        username: string
-    }
-    channels: {
-        channel_name: string
-        profile_image_url: string
-        current_subscribers_count: number
-    }
+    entity_name: string
+    profile_image_url: string
+    current_count: number
 }
 
 export default function GetLatestClaims() {
@@ -25,14 +23,8 @@ export default function GetLatestClaims() {
     useEffect(() => {
         async function fetchClaims() {
             const { data, error } = await supabase
-                .from('userchannelclaims')
-                .select(
-                    `
-                    *,
-                    profiles:user_id (username),
-                    channels:channel_id (channel_name, profile_image_url, current_subscribers_count)
-                `
-                )
+                .from('combined_claims')
+                .select('*')
                 .order('claim_date', { ascending: false })
 
             if (error) {
@@ -47,12 +39,10 @@ export default function GetLatestClaims() {
 
     return (
         <div className="p-4 font-sans">
-            <h1 className="font-sans text-2xl font-bold">
-                O que as pessoas estão salvado
-            </h1>
+            <h1 className="font-sans text-2xl font-bold">O que as pessoas estão salvando</h1>
             {claims.map((claim) => (
                 <div
-                    key={claim.id}
+                    key={`${claim.claim_type}-${claim.id}`}
                     style={{
                         marginBottom: '20px',
                         borderBottom: '1px solid #ccc',
@@ -63,16 +53,17 @@ export default function GetLatestClaims() {
                         <p>
                             <Link
                                 className="font-bold"
-                                href={`http://localhost:3000/user/${claim.profiles.username}/claimed`}
+                                href={`http://localhost:3000/user/${claim.username}/claimed`}
                             >
-                                {claim.profiles.username}
+                                {claim.username}
                             </Link>{' '}
-                            resgatou o canal {claim.channels.channel_name} com{' '}
-                            {claim.subscriber_count_at_claim} inscritos
+                            resgatou o {claim.claim_type === 'channel' ? 'canal' : 'artista'}{' '}
+                            {claim.entity_name} com {claim.count_at_claim}{' '}
+                            {claim.claim_type === 'channel' ? 'inscritos' : 'de popularidade'}
                         </p>{' '}
                         <img
-                            src={claim.channels.profile_image_url}
-                            alt={`${claim.channels.channel_name} logo`}
+                            src={claim.profile_image_url}
+                            alt={`${claim.entity_name} logo`}
                             style={{
                                 width: '40px',
                                 height: '40px',

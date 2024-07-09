@@ -6,6 +6,7 @@ export default function Sidebar() {
             <div className="flex w-fit flex-col">
                 <Link href="/getchannel">Claim Channel</Link>
                 <Link href="/claimvideo">Claim Video</Link>
+                <Link href="/claimtrack">Claim Track</Link>
             </div>
         </main>
     )

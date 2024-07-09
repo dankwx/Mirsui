@@ -2,21 +2,21 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import Link from 'next/link'
 
 interface Claim {
-    id: number;
-    subscriber_count_at_claim: number;
-    claim_date: string;
+    id: number
+    subscriber_count_at_claim: number
+    claim_date: string
     profiles: {
-      username: string;
-    };
+        username: string
+    }
     channels: {
-      channel_name: string;
-      profile_image_url: string;
-      current_subscribers_count: number;
-    };
-  }
-
+        channel_name: string
+        profile_image_url: string
+        current_subscribers_count: number
+    }
+}
 
 export default function GetLatestClaims() {
     const supabase = createClient()
@@ -26,11 +26,13 @@ export default function GetLatestClaims() {
         async function fetchClaims() {
             const { data, error } = await supabase
                 .from('userchannelclaims')
-                .select(`
+                .select(
+                    `
                     *,
                     profiles:user_id (username),
                     channels:channel_id (channel_name, profile_image_url, current_subscribers_count)
-                `)
+                `
+                )
                 .order('claim_date', { ascending: false })
 
             if (error) {
@@ -44,25 +46,42 @@ export default function GetLatestClaims() {
     }, [])
 
     return (
-        <main>
-            <div>
-                <h1>Últimas Reivindicações</h1>
-                {claims.map((claim) => (
-                    <div key={claim.id} style={{ marginBottom: '20px', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
-                        <img 
-                            src={claim.channels.profile_image_url} 
-                            alt={`${claim.channels.channel_name} logo`} 
-                            style={{ width: '50px', height: '50px', borderRadius: '50%' }}
-                        />
+        <div className="p-4 font-sans">
+            <h1 className="font-sans text-2xl font-bold">
+                O que as pessoas estão salvado
+            </h1>
+            {claims.map((claim) => (
+                <div
+                    key={claim.id}
+                    style={{
+                        marginBottom: '20px',
+                        borderBottom: '1px solid #ccc',
+                        paddingBottom: '10px',
+                    }}
+                >
+                    <div className="flex items-center">
                         <p>
-                            {claim.profiles.username} resgatou o canal {claim.channels.channel_name} com{' '}
+                            <Link
+                                className="font-bold"
+                                href={`http://localhost:3000/user/${claim.profiles.username}/claimed`}
+                            >
+                                {claim.profiles.username}
+                            </Link>{' '}
+                            resgatou o canal {claim.channels.channel_name} com{' '}
                             {claim.subscriber_count_at_claim} inscritos
-                        </p>
-                        <p>Data da reivindicação: {new Date(claim.claim_date).toLocaleString()}</p>
-                        <p>Inscritos atuais: {claim.channels.current_subscribers_count}</p>
+                        </p>{' '}
+                        <img
+                            src={claim.channels.profile_image_url}
+                            alt={`${claim.channels.channel_name} logo`}
+                            style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                            }}
+                        />
                     </div>
-                ))}
-            </div>
-        </main>
+                </div>
+            ))}
+        </div>
     )
 }

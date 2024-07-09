@@ -44,7 +44,7 @@ import { Button } from '../ui/button'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Deslog from '@/app/logout/page'
-
+import LoginModalButton from '../LoginModal/page'
 export default async function GetAuth() {
 
     const supabase = createClient()
@@ -56,7 +56,7 @@ export default async function GetAuth() {
     return (
         <div className="flex">
             {!data.user ? (
-                <p>Login</p>
+                <LoginModalButton />
             ) : (
                 <div>
                     <Dialog>
@@ -121,9 +121,7 @@ export default async function GetAuth() {
                             </DialogHeader>
                         </DialogContent>
                     </Dialog>
-                </div>
-            )}
-            <DropdownMenu>
+                    <DropdownMenu>
                 <DropdownMenuTrigger className="ml-2 outline-none">
                     {supabase.auth ? (
                         <svg
@@ -163,6 +161,9 @@ export default async function GetAuth() {
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
+                </div>
+            )}
+            
         </div>
     )
 }

@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { login, signup } from '../../app/login/actions'
+import { sign } from 'crypto'
 
 interface LoginModalProps {
     trigger: React.ReactNode
@@ -68,21 +69,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="username" className="text-right">
-                                Username
-                            </Label>
-                            <Input
-                                id="username"
-                                name="username"
-                                className="col-span-3"
-                                required
-                                type="text"
-                                placeholder="Username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                            />
-                        </div>
                     </div>
                     <DialogDescription className="pt-4 text-blue-600">
                         Forgot Password?
@@ -91,8 +77,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                         Don't have an account? Register
                     </DialogDescription>
                     <DialogFooter>
-                        <Button type="submit" formAction={signup}>
-                            Register
+                        <Button type='submit' formAction={login}>
+                            Login
                         </Button>
                     </DialogFooter>
                 </form>

@@ -114,3 +114,16 @@
     background-size: 200% 50%;
     animation: subtle-wave 10s linear infinite;
   }
+
+  .username-field {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin 0.3s ease-out;
+  }
+  
+  .username-field.show {
+    max-height: 100px; /* Ajuste conforme necessário */
+    opacity: 1;
+    margin-top: 1rem; /* Ajuste conforme necessário */
+  }

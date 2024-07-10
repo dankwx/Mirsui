@@ -1,13 +1,25 @@
 import Header from '../components/Header/Header'
 import GetLatestClaims from '@/components/GetLatestClaims/GetLatestClaims'
 import Sidebar from '@/components/Sidebar/Sidebar'
+import { createClient } from '@/utils/supabase/server'
+import { redirect } from 'next/navigation'
 
 export default async function Home() {
+    const supabase = createClient()
+    const { data, error } = await supabase.auth.getUser()
+
+    if (data.user) {
+        redirect('/faq')
+    }
+
+
     return (
         <main className="flex min-h-screen flex-col">
             <Header />
             <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
                 <div className="flex h-full flex-1">
+                    {data.user ? <Sidebar /> : null}
+
                     <div className="flex h-full w-full flex-col items-center pt-8">
                         <div className="flex w-1/2 flex-col items-center align-middle">
                             <div className="my-6 flex h-fit flex-col items-center justify-center">

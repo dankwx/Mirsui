@@ -8,13 +8,12 @@ export default async function Home() {
             <Header />
             <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
                 <div className="flex h-full flex-1">
-                    <Sidebar />
-                    <div className="flex h-full w-full flex-col items-center">
+                    <div className="flex h-full w-full flex-col items-center pt-8">
                         <div className="flex w-1/2 flex-col items-center align-middle">
                             <div className="my-6 flex h-fit flex-col items-center justify-center">
                                 <p className="py-6 font-sans text-9xl font-bold">
                                     <span className="relative inline-block">
-                                        <span className="subtle-wave-text">
+                                        <span className="subtle-wave-text text-nowrap">
                                             eternize all.
                                         </span>
                                         <span className="absolute -bottom-2 left-0 h-1 w-full animate-underline bg-black"></span>

@@ -97,7 +97,7 @@ const config = {
                 'accordion-down': 'accordion-down 0.2s ease-out',
                 'accordion-up': 'accordion-up 0.2s ease-out',
                 'slide-down': 'slideDown 0.5s ease-out',
-                'fade-out': 'fadeOut 0.5s ease-out forwards',
+                'fade-out': 'fadeOut 10s ease-out forwards',
                 underline: 'underline 14s ease-in-out infinite',
             },
         },

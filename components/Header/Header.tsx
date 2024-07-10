@@ -6,7 +6,7 @@ import Logo from './Logo'
 
 export default function () {
     return (
-        <main className="fixed bg-white flex h-16 w-full flex-col">
+        <main className="fixed bg-white flex h-16 w-full flex-col z-10">
             <div className="flex flex-grow items-center justify-center border-b-2 border-solid border-gray-200 font-sans font-medium">
                 <div className="flex w-3/4 items-center">
                     <div className="flex w-full items-center justify-between text-xl">

@@ -9,7 +9,7 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from '@/components/ui/card'
+} from '@/app/components/ui/card'
 import {
     Dialog,
     DialogClose,
@@ -19,9 +19,9 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from '@/components/ui/dialog'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Button } from '@/components/ui/button'
+} from '@/app/components/ui/dialog'
+import { Skeleton } from '@/app/components/ui/skeleton'
+import { Button } from '@/app/components/ui/button'
 import Link from 'next/link'
 
 interface UserVideo {

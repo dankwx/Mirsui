@@ -1,6 +1,6 @@
 'use client'
 
-import LoginModal from '@/components/ModalLogin/page'
+import LoginModal from "../ModalLogin/ModalLogin"
 
 
 export default function LoginModalButton() {

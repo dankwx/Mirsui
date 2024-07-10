@@ -6,7 +6,7 @@ export async function generateStaticParams() {
 
     return posts?.map(({ id }) => ({
         id,
-    }))
+    })) || []
 }
 
 export const revalidate = 0

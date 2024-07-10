@@ -1,12 +1,14 @@
+'use server'
+
 import Link from 'next/link'
 import GetAuth from '../GetAuth/GetAuth'
 import { Input } from '../ui/input'
 import { SearchIcon } from 'lucide-react'
 import Logo from './Logo'
 
-export default function () {
+export default async function Header() {
     return (
-        <main className="fixed bg-white flex h-16 w-full flex-col z-10">
+        <main className="fixed z-10 flex h-16 w-full flex-col bg-white">
             <div className="flex flex-grow items-center justify-center border-b-2 border-solid border-gray-200 font-sans font-medium">
                 <div className="flex w-3/4 items-center">
                     <div className="flex w-full items-center justify-between text-xl">

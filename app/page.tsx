@@ -1,5 +1,5 @@
-import Header from '../components/Header/Header'
-import GetLatestClaims from '@/components/GetLatestClaims/GetLatestClaims'
+import Header from './components/Header/Header'
+import GetLatestClaims from '@/app/components/GetLatestClaims/GetLatestClaims'
 
 export default async function Home() {
     return (
@@ -18,7 +18,7 @@ export default async function Home() {
                             <p className="break-words text-center font-sans text-lg font-normal text-neutral-800">
                                 Why not have a simple way to showoff that you
                                 hear that music way before it gets viral on the
-                                web? And also have a score 'cause you discovered
+                                web? And also have a score &apos;cause you discovered
                                 before everyone
                             </p>
                         </div>

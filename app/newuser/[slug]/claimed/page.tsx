@@ -1,5 +1,5 @@
-import ClaimedChannels from '@/components/ClaimedChannels/ClaimedChannel'
-import Header from '@/components/Header/Header'
+import ClaimedChannels from '@/app/components/ClaimedChannels/ClaimedChannel'
+import Header from '@/app/components/Header/Header'
 
 export default function NewUser({
     params,

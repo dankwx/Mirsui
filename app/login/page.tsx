@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { login, signup } from './actions'
-import LoginModal from '@/components/ModalLogin/page'
+import LoginModal from '../components/ModalLogin/ModalLogin'
 
 export default function LoginPage() {
     const [registrationStep, setRegistrationStep] = useState(1)

@@ -7,5 +7,5 @@ export default function Page({
     params: { slug: string }
     searchParams?: { [key: string]: string | string[] | undefined }
 }) {
-    return <h1>Helo""{params.slug}</h1>
+    return <h1>Helo&quot;&quot;{params.slug}</h1>
 }

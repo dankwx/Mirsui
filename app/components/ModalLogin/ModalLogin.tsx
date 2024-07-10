@@ -7,11 +7,11 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { login, signup } from '../../app/login/actions'
+} from '@/app/components/ui/dialog'
+import { Button } from '@/app/components/ui/button'
+import { Input } from '@/app/components/ui/input'
+import { Label } from '@/app/components/ui/label'
+import { login, signup } from '../../login/actions'
 
 interface LoginModalProps {
     trigger: React.ReactNode
@@ -81,7 +81,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                 className="pt-4 text-blue-600 cursor-pointer"
                 onClick={() => setIsRegistering(true)}
             >
-                Don't have an account? Register
+                Don&apos;t have an account? Register
             </DialogDescription>
         </>
     )

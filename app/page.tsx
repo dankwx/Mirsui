@@ -10,8 +10,8 @@ export default async function Home() {
                     <div className="flex w-1/2 flex-col items-center align-middle">
                         <div className="my-6 flex h-fit flex-col items-center justify-center">
                             <p className="py-6 font-sans text-9xl font-bold">
-                                <span className="relative inline-block">
-                                    eternize all.
+                            <span className="relative inline-block">
+                                    <span className="subtle-wave-text">eternize all.</span>
                                     <span className="animate-underline absolute -bottom-2 left-0 h-1 w-full bg-black"></span>
                                 </span>
                             </p>

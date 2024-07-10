@@ -91,3 +91,26 @@
     animation: underlineAnimation 2s ease-in-out infinite;
   }
   
+  @keyframes subtle-wave {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  .subtle-wave-text {
+    background: linear-gradient(
+      90deg,
+      #000000 0%,
+      #1a1a1a 25%,
+      #333333 50%,
+      #21452b 75%,
+      #77ffb7 110%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    background-size: 200% 50%;
+    animation: subtle-wave 10s linear infinite;
+  }

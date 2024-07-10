@@ -1,22 +1,21 @@
 import Header from '../components/Header/Header'
-import Sidebar from '../components/Sidebar/Sidebar'
 import GetLatestClaims from '@/components/GetLatestClaims/GetLatestClaims'
-import ClaimArtist from '@/components/ClaimArtist/ClaimArtist'
 
 export default async function Home() {
     return (
         <main className="flex min-h-screen flex-col">
             <Header />
-            <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
+            <div className="flex min-h-full w-full flex-1 flex-col justify-between pt-8 font-mono text-sm">
                 <div className="flex h-full w-full flex-col items-center">
-                    {/* <Sidebar /> */}
                     <div className="flex w-1/2 flex-col items-center align-middle">
-                        {/* <ClaimArtist /> */}
                         <div className="my-6 flex h-fit flex-col items-center justify-center">
                             <p className="py-6 font-sans text-9xl font-bold">
-                                eternize all.
+                                <span className="relative inline-block">
+                                    eternize all.
+                                    <span className="animate-underline absolute -bottom-2 left-0 h-1 w-full bg-black"></span>
+                                </span>
                             </p>
-                            <p className="break-words text-center font-sans font-normal text-lg text-neutral-800">
+                            <p className="break-words text-center font-sans text-lg font-normal text-neutral-800">
                                 Why not have a simple way to showoff that you
                                 hear that music way before it gets viral on the
                                 web? And also have a score 'cause you discovered
@@ -24,8 +23,18 @@ export default async function Home() {
                             </p>
                         </div>
                     </div>
-                    <div className="h-fit w-full bg-gray-100">
-                        <GetLatestClaims />
+                    <div className="h-fit w-full bg-gray-100 px-6">
+                        <div className="h-96">
+                            <div className="h-full w-1/3 border-2 border-solid border-black"></div>
+                        </div>
+                    </div>
+                    <GetLatestClaims />
+                    <div className="flex flex-col">
+                        <p className="m-6">aa</p>
+                        <p className="m-6">aa</p>
+                        <p className="m-6">aa</p>
+                        <p className="m-6">aa</p>
+                        <p className="m-6">aa</p>
                     </div>
                 </div>
             </div>

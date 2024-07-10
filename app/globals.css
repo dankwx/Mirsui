@@ -75,3 +75,19 @@
     }
   }
   
+  .animatedUnderline {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .animatedUnderline::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: black;
+    animation: underlineAnimation 2s ease-in-out infinite;
+  }
+  

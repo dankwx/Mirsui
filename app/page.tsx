@@ -20,7 +20,7 @@ export default async function Home() {
                                 Why not have a simple way to showoff that you
                                 hear that music way before it gets viral on the
                                 web? And also have a score 'cause you discovered
-                                before anyone
+                                before everyone
                             </p>
                         </div>
                     </div>

@@ -1,6 +1,6 @@
-import ClaimTrack from '@/app/components/ClaimTrack/ClaimTrack'
-import Header from '@/app/components/Header/Header'
-import Sidebar from '@/app/components/Sidebar/Sidebar'
+import ClaimTrack from '@/components/ClaimTrack/ClaimTrack'
+import Header from '@/components/Header/Header'
+import Sidebar from '@/components/Sidebar/Sidebar'
 
 export default function ClaimTrackPage() {
     return (

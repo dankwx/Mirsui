@@ -1,4 +1,4 @@
-import firebaseConfig from '../../firebase-config'
+import firebaseConfig from '../../app/firebase-config'
 import { initializeApp } from 'firebase/app'
 import {
     QueryDocumentSnapshot,
@@ -24,7 +24,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from '@/app/components/ui/dropdown-menu'
+} from '@/components/ui/dropdown-menu'
 import { useRouter } from 'next/navigation'
 
 import Link from 'next/link'
@@ -37,9 +37,9 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from '@/app/components/ui/dialog'
-import { Input } from '@/app/components/ui/input'
-import { Label } from '@/app/components/ui/label'
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Button } from '../ui/button'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'

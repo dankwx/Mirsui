@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Header from '../components/Header/Header'
-import Sidebar from '../components/Sidebar/Sidebar'
+import Header from '../../components/Header/Header'
+import Sidebar from '../../components/Sidebar/Sidebar'
 import { getAuth } from 'firebase/auth'
 import { initializeApp } from 'firebase/app'
 import firebaseConfig from '../firebase-config'

@@ -7,11 +7,11 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from '@/app/components/ui/dialog'
-import { Button } from '@/app/components/ui/button'
-import { Input } from '@/app/components/ui/input'
-import { Label } from '@/app/components/ui/label'
-import { login, signup } from '../../login/actions'
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { login, signup } from '../../app/login/actions'
 
 interface LoginModalProps {
     trigger: React.ReactNode

@@ -3,9 +3,9 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import firebaseConfig from '../firebase-config'
 import { getAuth } from 'firebase/auth'
 import { initializeApp } from 'firebase/app'
-import Header from '@/app/components/Header/Header'
-import Sidebar from '@/app/components/Sidebar/Sidebar'
-import ClaimChannel from '@/app/components/ClaimChannel/ClaimChannel'
+import Header from '@/components/Header/Header'
+import Sidebar from '@/components/Sidebar/Sidebar'
+import ClaimChannel from '@/components/ClaimChannel/ClaimChannel'
 
 export default function GetChannelInfo() {
     return (

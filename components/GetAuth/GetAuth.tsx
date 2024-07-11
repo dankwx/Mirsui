@@ -145,7 +145,7 @@ export default async function GetAuth() {
                             <DropdownMenuLabel>My Account</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem>
-                                <Link href={`/user/${username}/claimed`}>
+                                <Link href={`/user/${username}`}>
                                     Profile
                                 </Link>
                             </DropdownMenuItem>

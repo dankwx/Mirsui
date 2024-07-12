@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createClient } from '@/utils/supabase/server'
 import GetDisplayName from './GetDisplayName'
+import GetUsername from './GetUsername'
 
 export default async function UserProfile({
     params,
@@ -19,11 +20,12 @@ export default async function UserProfile({
                     <AvatarFallback>PF</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
+                    <GetUsername params={params} searchParams={searchParams} />
+
                     <GetDisplayName
                         params={params}
                         searchParams={searchParams}
                     />
-                    
                 </div>
             </div>
         </div>

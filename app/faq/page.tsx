@@ -1,5 +1,6 @@
 import Header from '../../components/Header/Header'
 import Sidebar from '../../components/Sidebar/Sidebar'
+import GetLatestClaims from '@/components/GetLatestClaims/GetLatestClaims'
 
 export default function faq() {
     return (
@@ -8,8 +9,9 @@ export default function faq() {
             <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
                 <div className="flex h-full w-full flex-1">
                     <Sidebar />
-                    <div className="flex">
+                    <div className="flex mt-16">
                         <p>faq</p>
+                        <GetLatestClaims />
                     </div>
                 </div>
             </div>

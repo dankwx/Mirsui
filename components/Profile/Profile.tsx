@@ -20,7 +20,6 @@ export default async function UserProfile({
                     <AvatarFallback>PF</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                    <GetUsername params={params} searchParams={searchParams} />
 
                     <GetDisplayName
                         params={params}

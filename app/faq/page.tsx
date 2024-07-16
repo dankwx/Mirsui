@@ -9,7 +9,7 @@ export default function faq() {
             <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
                 <div className="flex h-full w-full flex-1">
                     <Sidebar />
-                    <div className="flex mt-16">
+                    <div className="mt-16 flex">
                         <p>faq</p>
                         <GetLatestClaims />
                     </div>

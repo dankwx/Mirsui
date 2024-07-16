@@ -1,33 +1,71 @@
-// pages/get-usernames.tsx
-import { createClient } from '@/utils/supabase/server'
+'use client'
 
-export default async function GetUsernames({
-    params,
-    searchParams,
-}: {
-    params: { slug: string }
-    searchParams?: { [key: string]: string | string[] | undefined }
-}) {
-    const supabase = createClient()
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 
-    // Query para buscar os usernames
-    const { data, error } = await supabase
-        .from('profiles')
-        .select('username')
+interface UserProfileProps {
+  username: string;
+  displayName: string;
+  updateUsernameAction?: (formData: FormData) => Promise<{ success: boolean; newUsername?: string }>;
+  isOwnProfile: boolean;
+}
 
-    if (error) {
-        console.error('Erro ao buscar usernames:', error)
-        return <div>Erro ao buscar usernames</div>
+export default function UserProfile({
+  username,
+  displayName,
+  updateUsernameAction,
+  isOwnProfile
+}: UserProfileProps) {
+  const [open, setOpen] = useState(false)
+  const [currentUsername, setCurrentUsername] = useState(username)
+
+  const handleSubmit = async (formData: FormData) => {
+    if (updateUsernameAction) {
+      const result = await updateUsernameAction(formData)
+      if (result.success && result.newUsername) {
+        setCurrentUsername(result.newUsername)
+        setOpen(false)
+      }
     }
+  }
 
-    return (
-        <div>
-            <h1>Usernames</h1>
-            <ul>
-                {data?.map((profile) => (
-                    <li key={profile.username}>{profile.username}</li>
-                ))}
-            </ul>
-        </div>
-    )
+  return (
+    <div className="flex flex-col">
+      <p className="font-sans text-3xl font-bold">{displayName}</p>
+      {isOwnProfile ? (
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button variant="link" className="p-0">
+              {currentUsername}
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Change Username</DialogTitle>
+            </DialogHeader>
+            <form action={handleSubmit}>
+              <Input
+                name="username"
+                placeholder="New username"
+                defaultValue={currentUsername}
+              />
+              <Button type="submit" className="mt-4">
+                Update Username
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      ) : (
+        <p>{currentUsername}</p>
+      )}
+    </div>
+  )
 }

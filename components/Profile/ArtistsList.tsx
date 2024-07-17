@@ -1,10 +1,9 @@
 // File: ArtistsList.tsx
 import React from 'react'
 import { fetchArtists } from '@/utils/fetchArtists'
-import { TabsContent } from './ui/tabs'
-import { Badge } from './ui/badge'
+import { Badge } from '../ui/badge'
 import { CircleIcon, StarIcon } from 'lucide-react'
-import { Button } from './ui/button'
+import { Button } from '../ui/button'
 
 type Artist = {
     artist_id: string

@@ -2,13 +2,12 @@ import { notFound } from 'next/navigation'
 
 import Header from '@/components/Header/Header'
 import Sidebar from '@/components/Sidebar/Sidebar'
-import ProfileDetails from '@/components/ProfileDetails'
-import CardsSection from '@/components/CardsSection'
-import TabsSection from '@/components/TabsSection'
-import SavedArtists from '@/components/SavedArtists'
+import ProfileDetails from '@/components/Profile/ProfileDetails'
+import CardsSection from '@/components/Profile/CardsSection'
+import TabsSection from '@/components/Profile/TabsSection'
 import { fetchArtists } from '@/utils/fetchArtists'
 import { fetchUserData, fetchAuthData } from '@/utils/profileService'
-import ArtistsList from '@/components/ArtistsList'
+import { fetchSongs } from '@/utils/fetchSongs'
 
 export default async function ProfilePage({
     params,
@@ -28,6 +27,7 @@ export default async function ProfilePage({
     const isOwnProfile = authData.user?.id === userData.id
 
     const artists = await fetchArtists(userData.id)
+    const songs = await fetchSongs(userData.id)
     console.log('Fetched artists:', artists)
 
     return (
@@ -45,10 +45,7 @@ export default async function ProfilePage({
                             <main className="container flex-1 py-8">
                                 <CardsSection />
                                 <div className="mt-8">
-                                    <TabsSection artists={artists} />
-                                </div>
-                                <div className="mt-8">
-                                    {/* <ArtistsList artists={artists} /> */}
+                                    <TabsSection artists={artists} songs={songs} />
                                 </div>
                             </main>
                         </div>

@@ -2,37 +2,40 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CircleIcon, StarIcon } from 'lucide-react'
 
-interface Artist {
+interface Song {
     id: string
+    track_url: string
+    track_title: string
     artist_name: string
-    artist_image_url: string
-    popularity_at_claim: number
-    claim_date: string
+    album_name: string
+    popularity: number
+    track_thumbnail: string
+    claimedat: string
 }
 
-interface SavedArtistsProps {
-    artists: Artist[]
+interface SavedSongsProps {
+    songs: Song[]
 }
 
-const SavedArtists: React.FC<SavedArtistsProps> = ({ artists }) => {
-    console.log('Artists in SavedArtists component:', artists);
-    if (!artists || artists.length === 0) {
-        return <div>No saved artists found.</div>;
+const SavedSongs: React.FC<SavedSongsProps> = ({ songs }) => {
+    if (!songs || songs.length === 0) {
+        return <div>No saved songs found.</div>;
     }
 
     return (
         <div className="grid gap-6">
-            {artists.map((artist) => (
-                <div key={artist.id} className="flex items-center gap-4 rounded-lg bg-muted p-4">
-                    {artist.artist_image_url && (
-                        <img src={artist.artist_image_url} alt={artist.artist_name} width={64} height={64} className="rounded-full" />
+            {songs.map((song) => (
+                <div key={song.id} className="flex items-center gap-4 rounded-lg bg-muted p-4">
+                    {song.track_thumbnail && (
+                        <img src={song.track_thumbnail} alt={song.track_title} width={64} height={64} className="rounded-md" />
                     )}
                     <div className="flex-1">
-                        <div className="text-lg font-medium">{artist.artist_name}</div>
+                        <div className="text-lg font-medium">{song.track_title}</div>
+                        <div className="text-sm text-muted-foreground">{song.artist_name}</div>
                         <div className="mt-2 flex items-center gap-2">
                             <Badge variant="outline" className="border-green-600 bg-background">
                                 <CircleIcon className="h-3 w-3 -translate-x-1 animate-pulse fill-green-300 text-green-300" />
-                                Listened before they went mainstream
+                                Listened before it went viral
                             </Badge>
                             <Badge variant="outline" className="border-orange-600 bg-background">
                                 <StarIcon className="h-3 w-3 -translate-x-1 animate-pulse fill-orange-300 text-orange-300" />
@@ -40,7 +43,7 @@ const SavedArtists: React.FC<SavedArtistsProps> = ({ artists }) => {
                             </Badge>
                         </div>
                         <Button variant="outline" size="sm" className="mt-2">
-                            View Discography
+                            View Album
                         </Button>
                     </div>
                 </div>
@@ -49,4 +52,4 @@ const SavedArtists: React.FC<SavedArtistsProps> = ({ artists }) => {
     );
 };
 
-export default SavedArtists;
+export default SavedSongs;

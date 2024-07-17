@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { CircleIcon, PlusIcon, SearchIcon, StarIcon } from 'lucide-react'
 import ArtistsList from './ArtistsList'
+import SongsList from './SongsList'
 
-const TabsSection: React.FC<{ artists: any[] }> = ({ artists }) => {
+const TabsSection: React.FC<{ artists: any[], songs: any[] }> = ({ artists, songs }) => {
     return (
         <Tabs defaultValue="songs">
             <TabsList className="mb-6 flex items-center justify-between">
@@ -25,26 +26,7 @@ const TabsSection: React.FC<{ artists: any[] }> = ({ artists }) => {
                 </div>
             </TabsList>
             <TabsContent value="songs">
-                <div className="grid gap-6">
-                    {/* Repeat this block for each song */}
-                    <div className="flex items-center gap-4 rounded-lg bg-muted p-4">
-                        <img src="/placeholder.jpeg" alt="Album Art" width={64} height={64} className="rounded-md" />
-                        <div className="flex-1">
-                            <div className="text-lg font-medium">Bohemian Rhapsody</div>
-                            <div className="text-sm text-muted-foreground">Queen</div>
-                            <div className="mt-2 flex items-center gap-2">
-                                <Badge variant="outline" className="border-green-600 bg-background">
-                                    <CircleIcon className="h-3 w-3 -translate-x-1 animate-pulse fill-green-300 text-green-300" />
-                                    Listened before it went viral
-                                </Badge>
-                                <Badge variant="outline" className="border-orange-600 bg-background">
-                                    <StarIcon className="h-3 w-3 -translate-x-1 animate-pulse fill-orange-300 text-orange-300" />
-                                    Rare find
-                                </Badge>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <SongsList songs={songs} />
             </TabsContent>
             <TabsContent value="youtube">
                 <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4">

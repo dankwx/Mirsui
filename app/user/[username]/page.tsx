@@ -32,6 +32,10 @@ export default async function ProfilePage({
     const channels = await fetchChannels(userData.id)
     console.log('Fetched artists:', artists)
 
+    const totalSavedSongs = songs.length
+    const totalSavedYouTubeChannels = channels.length
+    const totalSavedSpotifyArtists = artists.length
+
     return (
         <main className="flex min-h-screen flex-col">
             <Header />
@@ -45,7 +49,11 @@ export default async function ProfilePage({
                         />
                         <div className="flex min-h-screen flex-col bg-background text-foreground">
                             <main className="container flex-1 py-8">
-                                <CardsSection />
+                            <CardsSection
+                                    totalSavedSongs={totalSavedSongs}
+                                    totalSavedYouTubeChannels={totalSavedYouTubeChannels}
+                                    totalSavedSpotifyArtists={totalSavedSpotifyArtists}
+                                />
                                 <div className="mt-8">
                                     <TabsSection artists={artists} songs={songs} channels={channels} />
                                 </div>

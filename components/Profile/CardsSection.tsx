@@ -1,6 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-const CardsSection: React.FC = () => {
+interface CardsSectionProps {
+    totalSavedSongs: number;
+    totalSavedYouTubeChannels: number;
+    totalSavedSpotifyArtists: number;
+}
+
+const CardsSection: React.FC<CardsSectionProps> = ({ totalSavedSongs, totalSavedYouTubeChannels, totalSavedSpotifyArtists }) => {
     return (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Card className="bg-muted p-4">
@@ -8,7 +14,7 @@ const CardsSection: React.FC = () => {
                     <CardTitle>Total Saved Songs</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="text-4xl font-bold">142</div>
+                    <div className="text-4xl font-bold">{totalSavedSongs}</div>
                 </CardContent>
             </Card>
             <Card className="bg-muted p-4">
@@ -16,7 +22,7 @@ const CardsSection: React.FC = () => {
                     <CardTitle>Total Saved YouTube Channels</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="text-4xl font-bold">24</div>
+                    <div className="text-4xl font-bold">{totalSavedYouTubeChannels}</div>
                 </CardContent>
             </Card>
             <Card className="bg-muted p-4">
@@ -24,7 +30,7 @@ const CardsSection: React.FC = () => {
                     <CardTitle>Total Saved Spotify Artists</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="text-4xl font-bold">18</div>
+                    <div className="text-4xl font-bold">{totalSavedSpotifyArtists}</div>
                 </CardContent>
             </Card>
         </div>

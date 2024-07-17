@@ -8,6 +8,7 @@ import TabsSection from '@/components/Profile/TabsSection'
 import { fetchArtists } from '@/utils/fetchArtists'
 import { fetchUserData, fetchAuthData } from '@/utils/profileService'
 import { fetchSongs } from '@/utils/fetchSongs'
+import { fetchChannels } from '@/utils/fetchChannels'
 
 export default async function ProfilePage({
     params,
@@ -28,6 +29,7 @@ export default async function ProfilePage({
 
     const artists = await fetchArtists(userData.id)
     const songs = await fetchSongs(userData.id)
+    const channels = await fetchChannels(userData.id)
     console.log('Fetched artists:', artists)
 
     return (
@@ -45,7 +47,7 @@ export default async function ProfilePage({
                             <main className="container flex-1 py-8">
                                 <CardsSection />
                                 <div className="mt-8">
-                                    <TabsSection artists={artists} songs={songs} />
+                                    <TabsSection artists={artists} songs={songs} channels={channels} />
                                 </div>
                             </main>
                         </div>

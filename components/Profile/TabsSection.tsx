@@ -4,8 +4,9 @@ import { Badge } from '@/components/ui/badge'
 import { CircleIcon, PlusIcon, SearchIcon, StarIcon } from 'lucide-react'
 import ArtistsList from './ArtistsList'
 import SongsList from './SongsList'
+import ChannelsList from './ChannelsList'
 
-const TabsSection: React.FC<{ artists: any[], songs: any[] }> = ({ artists, songs }) => {
+const TabsSection: React.FC<{ artists: any[], songs: any[], channels: any[] }> = ({ artists, songs, channels }) => {
     return (
         <Tabs defaultValue="songs">
             <TabsList className="mb-6 flex items-center justify-between">
@@ -29,19 +30,7 @@ const TabsSection: React.FC<{ artists: any[], songs: any[] }> = ({ artists, song
                 <SongsList songs={songs} />
             </TabsContent>
             <TabsContent value="youtube">
-                <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4">
-                    {/* Repeat this block for each YouTube channel */}
-                    <div className="flex flex-col items-center gap-2 rounded-lg bg-muted p-4">
-                        <img src="/placeholder.svg" alt="Channel Thumbnail" width={128} height={72} className="rounded-md" />
-                        <div className="text-center text-sm font-medium">Coding Tech</div>
-                        <div className="mt-2 flex items-center gap-2">
-                            <Badge variant="outline" className="border-green-600 bg-background">
-                                <CircleIcon className="h-3 w-3 -translate-x-1 animate-pulse fill-green-300 text-green-300" />
-                                Watched before it went viral
-                            </Badge>
-                        </div>
-                    </div>
-                </div>
+                <ChannelsList channels={channels} />
             </TabsContent>
             <TabsContent value="artists">
                 <ArtistsList artists={artists} />

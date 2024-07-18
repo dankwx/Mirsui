@@ -30,7 +30,6 @@ export default async function ProfilePage({
     const artists = await fetchArtists(userData.id)
     const songs = await fetchSongs(userData.id)
     const channels = await fetchChannels(userData.id)
-    console.log('Fetched artists:', artists)
 
     const totalSavedSongs = songs.length
     const totalSavedYouTubeChannels = channels.length

@@ -49,14 +49,14 @@ export async function GET(request: Request) {
 
         if (error) throw error
 
-        console.log('Raw data:', JSON.stringify(data, null, 2))
+      
 
         if (!data || data.length === 0) {
             return NextResponse.json([])
         }
 
         const formattedData: FormattedArtist[] = data.map((item: any) => {
-            console.log('Processing item:', JSON.stringify(item, null, 2))
+        
             return {
                 id: item.artist_id,
                 artist_name: item.artists?.artist_name || 'Unknown Artist',

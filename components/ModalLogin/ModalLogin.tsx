@@ -101,7 +101,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
     )
 
     return (
-        <Dialog>
+        <Dialog modal={false}>
             <DialogTrigger asChild>{trigger}</DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>

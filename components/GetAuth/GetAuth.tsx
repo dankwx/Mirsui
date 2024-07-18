@@ -120,7 +120,7 @@ export default async function GetAuth() {
                             </DialogHeader>
                         </DialogContent>
                     </Dialog>
-                    <DropdownMenu>
+                    <DropdownMenu modal={false}>
                         <DropdownMenuTrigger className="ml-2 outline-none">
                             {supabase.auth ? (
                                 <svg

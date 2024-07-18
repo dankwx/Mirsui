@@ -45,10 +45,10 @@ const SongsList: React.FC<SongsListProps> = ({ songs }) => {
                         <Button variant="outline" size="sm" className="mt-2">
                             View Album
                         </Button>
-                        <p>
+                        {/* <p>
                             Claimed on: {new Date(song.claimedat).toLocaleDateString()}
                         </p>
-                        <p>Popularity at claim: {song.popularity}</p>
+                        <p>Popularity at claim: {song.popularity}</p> */}
                     </div>
                 </div>
             ))}

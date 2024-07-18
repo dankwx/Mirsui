@@ -38,10 +38,10 @@ const ChannelsList: React.FC<ChannelsListProps> = ({ channels }) => {
                         <Button variant="outline" size="sm" className="mt-2">
                             View Channel
                         </Button>
-                        <p>
+                        {/* <p>
                             Claimed on: {new Date(channel.claim_date).toLocaleDateString()}
                         </p>
-                        <p>Subscribers at claim: {channel.subscriber_count_at_claim}</p>
+                        <p>Subscribers at claim: {channel.subscriber_count_at_claim}</p> */}
                     </div>
                 </div>
             ))}

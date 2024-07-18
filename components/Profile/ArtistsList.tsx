@@ -28,7 +28,7 @@ const ArtistsList: React.FC<ArtistsListProps> = ({ artists }) => {
                     <img
                         src={artist.artists.artist_image_url}
                         alt={artist.artists.artist_name}
-                        width={64} height={64} className="rounded-full"
+                        width={64} height={6} className="rounded"
                     />
                     <div className="flex-1">
                         <div className="text-lg font-medium">{artist.artists.artist_name}</div>
@@ -45,10 +45,10 @@ const ArtistsList: React.FC<ArtistsListProps> = ({ artists }) => {
                         <Button variant="outline" size="sm" className="mt-2">
                             View Discography
                         </Button>
-                        <p>
+                        {/* <p>
                             Claimed on: {new Date(artist.claim_date).toLocaleDateString()}
                         </p>
-                        <p>Popularity at claim: {artist.popularity_at_claim}</p>
+                        <p>Popularity at claim: {artist.popularity_at_claim}</p> */}
                     </div>
                 </div>
             ))}

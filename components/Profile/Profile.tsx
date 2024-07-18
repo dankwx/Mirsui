@@ -30,7 +30,7 @@ export default function Profile({
                     updateUsernameAction={updateUsernameAction}
                     isOwnProfile={isOwnProfile}
                 />
-                <UserRating />
+                {/* <UserRating /> */}
             </div>
         </div>
     )

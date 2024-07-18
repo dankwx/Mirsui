@@ -10,6 +10,8 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
+import UserBadges from './UserBadges'
+import UserRating from './UserRating'
 
 interface UserProfileProps {
     username: string
@@ -40,14 +42,28 @@ export default function UserProfile({
     }
 
     return (
-        <div className="flex flex-col">
-            <p className="font-sans text-3xl font-bold">{displayName}</p>
+        <div className="flex h-fit flex-col">
+            <div className="flex">
+                <p className="h-fit font-sans text-3xl font-bold">
+                    {displayName}
+                </p>
+                <UserRating />
+            </div>
+
             {isOwnProfile ? (
                 <Dialog open={open} onOpenChange={setOpen}>
-                    <DialogTrigger className="m-0 justify-start items-start p-0" asChild>
-                        <Button variant="link" className="p-0">
-                            {currentUsername}
-                        </Button>
+                    <DialogTrigger
+                        className="m-0 items-start justify-start p-0"
+                        asChild
+                    >
+                        <div>
+                            <Button
+                                variant="link"
+                                className="m-0 h-fit w-fit p-0"
+                            >
+                                {currentUsername}
+                            </Button>
+                        </div>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
@@ -68,6 +84,7 @@ export default function UserProfile({
             ) : (
                 <p>{currentUsername}</p>
             )}
+            <UserBadges />
         </div>
     )
 }

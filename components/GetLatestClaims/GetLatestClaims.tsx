@@ -134,7 +134,7 @@ export default function GetLatestClaims() {
                             <p className="ml-2">
                                 <Link
                                     className="font-bold"
-                                    href={`http://localhost:3000/user/${claim.username}/`}
+                                    href={`/user/${claim.username}/`}
                                 >
                                     {claim.username}
                                 </Link>{' '}

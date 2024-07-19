@@ -41,20 +41,28 @@ export default async function ProfilePage({
             <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
                 <div className="flex h-full flex-1">
                     <Sidebar />
-                    <div className="flex flex-col font-sans">
+                    <div className="flex w-full flex-col font-sans">
                         <ProfileDetails
                             userData={userData}
                             isOwnProfile={isOwnProfile}
                         />
-                        <div className="flex min-h-screen flex-col bg-background text-foreground">
+                        <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
                             <main className="container flex-1 py-8">
                                 <CardsSection
                                     totalSavedSongs={totalSavedSongs}
-                                    totalSavedYouTubeChannels={totalSavedYouTubeChannels}
-                                    totalSavedSpotifyArtists={totalSavedSpotifyArtists}
+                                    totalSavedYouTubeChannels={
+                                        totalSavedYouTubeChannels
+                                    }
+                                    totalSavedSpotifyArtists={
+                                        totalSavedSpotifyArtists
+                                    }
                                 />
-                                <div className="mt-8">
-                                    <TabsSection artists={artists} songs={songs} channels={channels} />
+                                <div className="mt-8 w-full">
+                                    <TabsSection
+                                        artists={artists}
+                                        songs={songs}
+                                        channels={channels}
+                                    />
                                 </div>
                             </main>
                         </div>

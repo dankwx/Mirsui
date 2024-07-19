@@ -8,7 +8,7 @@ import ChannelsList from './ChannelsList'
 
 const TabsSection: React.FC<{ artists: any[], songs: any[], channels: any[] }> = ({ artists, songs, channels }) => {
     return (
-        <Tabs defaultValue="songs" className='w-11/12'>
+        <Tabs defaultValue="songs" className='min-w-full max-w-full flex-1'>
             <TabsList className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <TabsTrigger value="songs">Saved Songs</TabsTrigger>

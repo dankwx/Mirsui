@@ -6,6 +6,6 @@ A social network for claiming and showcasing discoveries before they went viral
 
 
 ## To-do
-- [ ] User Description section for profile
+- [x] User Description section for profile
 - [ ] Admin page
 - [ ] Send Suggestion page

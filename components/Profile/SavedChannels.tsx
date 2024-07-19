@@ -21,7 +21,7 @@ const SavedChannels: React.FC<SavedChannelsProps> = ({ channels }) => {
     }
 
     return (
-        <div className="grid gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
             {channels.map((channel) => (
                 <div key={channel.id} className="flex items-center gap-4 rounded-lg bg-muted p-4">
                     {channel.channel_thumbnail && (

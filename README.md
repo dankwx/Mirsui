@@ -1,6 +1,11 @@
 ## Eternizing v-2
-### A social network focused in claiming and showoff people discoveries
+A social network for claiming and showcasing discoveries before they went viral
 
-- [ ] Create User Description section to profile
-- [ ] Create admin page
-- [ ] Create Send Suggestion page
+![image](https://github.com/user-attachments/assets/629955e2-06f7-4188-b92d-32960d42d0b2)
+
+
+
+## To-do
+- [ ] User Description section for profile
+- [ ] Admin page
+- [ ] Send Suggestion page

@@ -1,20 +1,25 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import UserProfile from './GetUsername'
-import UserRating from './UserRating'
 
 interface ProfileProps {
     username: string
     displayName: string
+    description: string
     updateUsernameAction?: (
         formData: FormData
     ) => Promise<{ success: boolean; newUsername?: string }>
+    updateDescriptionAction?: (
+        formData: FormData
+    ) => Promise<{ success: boolean; newDescription?: string | null }>
     isOwnProfile: boolean
 }
 
 export default function Profile({
     username,
     displayName,
+    description,
     updateUsernameAction,
+    updateDescriptionAction,
     isOwnProfile,
 }: ProfileProps) {
     return (
@@ -29,8 +34,10 @@ export default function Profile({
                     displayName={displayName}
                     updateUsernameAction={updateUsernameAction}
                     isOwnProfile={isOwnProfile}
+                    description={description}
+                    updateDescriptionAction={updateDescriptionAction}
                 />
-                {/* <UserRating /> */}
+                
             </div>
         </div>
     )

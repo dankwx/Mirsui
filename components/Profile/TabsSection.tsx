@@ -8,7 +8,7 @@ import ChannelsList from './ChannelsList'
 
 const TabsSection: React.FC<{ artists: any[], songs: any[], channels: any[] }> = ({ artists, songs, channels }) => {
     return (
-        <Tabs defaultValue="songs">
+        <Tabs defaultValue="songs" className='w-11/12'>
             <TabsList className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <TabsTrigger value="songs">Saved Songs</TabsTrigger>
@@ -26,7 +26,7 @@ const TabsSection: React.FC<{ artists: any[], songs: any[], channels: any[] }> =
                     </Button>
                 </div>
             </TabsList>
-            <TabsContent value="songs">
+            <TabsContent value="songs" className='w-full'>
                 <SongsList songs={songs} />
             </TabsContent>
             <TabsContent value="youtube">

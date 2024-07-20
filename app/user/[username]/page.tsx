@@ -41,13 +41,13 @@ export default async function ProfilePage({
             <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
                 <div className="flex h-full flex-1">
                     <Sidebar />
-                    <div className="flex w-full flex-col font-sans ml-20">
+                    <div className="flex w-full flex-col font-sans ml-20 px-6">
                         <ProfileDetails
                             userData={userData}
                             isOwnProfile={isOwnProfile}
                         />
                         <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
-                            <main className="container flex-1 py-8">
+                            <main className=" py-8">
                                 <CardsSection
                                     totalSavedSongs={totalSavedSongs}
                                     totalSavedYouTubeChannels={

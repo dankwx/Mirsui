@@ -41,7 +41,7 @@ export default async function ProfilePage({
             <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
                 <div className="flex h-full flex-1">
                     <Sidebar />
-                    <div className="flex w-full flex-col font-sans ml-10">
+                    <div className="flex w-full flex-col font-sans ml-20">
                         <ProfileDetails
                             userData={userData}
                             isOwnProfile={isOwnProfile}

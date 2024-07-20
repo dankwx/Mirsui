@@ -8,11 +8,13 @@ export default function Sidebar() {
 
     return (
         <aside
-            className={`absolute z-50 flex min-h-full border-r-2 border-solid border-gray-200 bg-gray-50 pt-16 transition-all duration-300 ease-in-out ${isExpanded ? 'min-w-64' : 'min-w-16'}`}
+            className={`fixed z-50 flex min-h-screen border-r-2 border-solid border-gray-200 bg-gray-50 pt-16 transition-all duration-300 ease-in-out ${
+                isExpanded ? 'w-56' : 'w-20'
+            }`}
             onMouseEnter={() => setIsExpanded(true)}
             onMouseLeave={() => setIsExpanded(false)}
         >
-            <div className=" flex w-fit flex-col overflow-hidden whitespace-nowrap text-black">
+            <div className="flex w-fit flex-col overflow-hidden whitespace-nowrap text-black min-h-screen">
                 <Link href="/getchannel" className="p-2 hover:bg-gray-200">
                     {isExpanded ? '📺 Claim Channel' : '📺'}
                 </Link>

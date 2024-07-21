@@ -10,3 +10,4 @@ A social network for claiming and showcasing discoveries before they went viral
 - [ ] Admin page
 - [ ] Send Suggestion page
 - [ ] Add followers system
+- [ ] Complete home page

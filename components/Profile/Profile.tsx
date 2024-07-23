@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import UserProfile from './GetUsername'
 
 interface ProfileProps {
+    isLoggedIn: boolean
     username: string
     displayName: string
     description: string
@@ -25,6 +26,7 @@ export default function Profile({
     description,
     updateUsernameAction,
     updateDescriptionAction,
+    isLoggedIn,
     isOwnProfile,
     totalFollowers,
     totalFollowing,
@@ -39,6 +41,7 @@ export default function Profile({
                     <AvatarFallback>PF</AvatarFallback>
                 </Avatar>
                 <UserProfile
+                    isLoggedIn={isLoggedIn}
                     username={username}
                     displayName={displayName}
                     updateUsernameAction={updateUsernameAction}

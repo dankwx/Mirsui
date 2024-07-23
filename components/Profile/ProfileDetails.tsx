@@ -3,6 +3,7 @@ import { updateUsername } from '@/components/Profile/actions'
 import { updateDescription } from '@/components/Profile/actions'
 
 interface ProfileDetailsProps {
+    isLoggedIn: any
     userData: any
     isOwnProfile: boolean
     totalFollowers: number
@@ -11,13 +12,16 @@ interface ProfileDetailsProps {
 }
 
 const ProfileDetails: React.FC<ProfileDetailsProps> = ({
+    isLoggedIn,
     userData,
     isOwnProfile,
     totalFollowers,
     totalFollowing,
 }) => {
+
     return (
         <Profile
+            isLoggedIn={isLoggedIn}
             username={userData.username}
             displayName={userData.display_name || userData.username}
             updateUsernameAction={isOwnProfile ? updateUsername : undefined}
@@ -26,10 +30,10 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
             }
             isOwnProfile={isOwnProfile}
             description={userData.description}
-            totalFollowers={totalFollowers} totalFollowing={totalFollowing}
+            totalFollowers={totalFollowers}
+            totalFollowing={totalFollowing}
             followingId={userData.id}
             initialIsFollowing={userData.isFollowing}
-
         />
     )
 }

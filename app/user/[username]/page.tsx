@@ -26,6 +26,7 @@ export default async function ProfilePage({
     }
 
     const authData = await fetchAuthData()
+    const isLoggedIn = !!authData.user;
     const isOwnProfile = authData.user?.id === userData.id
 
     const artists = await fetchArtists(userData.id)
@@ -51,6 +52,7 @@ export default async function ProfilePage({
                     <div className="ml-20 flex w-full flex-col px-6 font-sans">
                         <div className="flex">
                             <ProfileDetails
+                                isLoggedIn={isLoggedIn}
                                 userData={userData}
                                 isOwnProfile={isOwnProfile}
                                 totalFollowers={totalFollowers}

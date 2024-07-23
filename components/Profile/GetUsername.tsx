@@ -28,11 +28,11 @@ interface UserProfileProps {
         formData: FormData
     ) => Promise<{ success: boolean; newDescription?: string | null }>
     isOwnProfile: boolean
+    isLoggedIn: boolean
     totalFollowers: number
     totalFollowing: number
     followingId: string
     initialIsFollowing: boolean
-
 }
 
 export default function UserProfile({
@@ -42,10 +42,11 @@ export default function UserProfile({
     updateUsernameAction,
     updateDescriptionAction,
     isOwnProfile,
+    isLoggedIn,
     totalFollowers,
     totalFollowing,
     followingId,
-    initialIsFollowing
+    initialIsFollowing,
 }: UserProfileProps) {
     const [openUsername, setOpenUsername] = useState(false)
     const [openDescription, setOpenDescription] = useState(false)
@@ -86,114 +87,122 @@ export default function UserProfile({
     return (
         <div className="flex h-fit flex-col">
             <div className="flex">
-                <div className='flex flex-col '>
-                {isOwnProfile ? (
-                <Dialog open={openUsername} onOpenChange={setOpenUsername}>
-                    <DialogTrigger
-                        className="m-0  justify-end items-end text-right p-0"
-                        asChild
-                    >
-                        <div className='justify-end items-end text-right'>
-                            <Button
-                                variant="link"
-                                className="m-0 h-fit w-fit p-0 justify-end items-end text-right"
+                <div className="flex flex-col">
+                    {isOwnProfile ? (
+                        <Dialog
+                            open={openUsername}
+                            onOpenChange={setOpenUsername}
+                        >
+                            <DialogTrigger
+                                className="m-0 items-end justify-end p-0 text-right"
+                                asChild
                             >
-                                {currentUsername}
-                            </Button>
-                        </div>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Change Username</DialogTitle>
-                        </DialogHeader>
-                        <form action={handleUsernameSubmit}>
-                            <Input
-                                name="username"
-                                placeholder="New username"
-                                defaultValue={currentUsername}
-                            />
-                            <Button type="submit" className="mt-4">
-                                Update Username
-                            </Button>
-                        </form>
-                    </DialogContent>
-                </Dialog>
-            ) : (
-                <p className='justify-end items-end text-right'>{currentUsername}</p>
-            )}
-                <p className="h-fit font-sans text-3xl font-bold">
-                    {displayName}
-                </p>
-                {isOwnProfile ? (
-                <Dialog
-                    open={openDescription}
-                    onOpenChange={setOpenDescription}
-                >
-                    <DialogTrigger
-                        className="m-0 items-start justify-start p-0"
-                        asChild
-                    >
-                        <div className="flex items-center text-gray-600 hover:text-gray-800">
-                            <p className="font-sans text-sm">
-                                {currentDescription === null ? (
-                                    <span className="italic">
-                                        No description
-                                    </span>
-                                ) : (
-                                    currentDescription
-                                )}
-                            </p>
-                            <PencilIcon
-                                size={16}
-                                className="ml-2 cursor-pointer"
-                            />
-                        </div>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Change Description</DialogTitle>
-                        </DialogHeader>
-                        <form action={handleDescriptionSubmit}>
-                            <Textarea
-                                name="description"
-                                placeholder="New description"
-                                defaultValue={
-                                    currentDescription === 'No description'
-                                        ? ''
-                                        : currentDescription || ''
-                                }
-                            />
-                            <Button type="submit" className="mt-4">
-                                Update Description
-                            </Button>
-                        </form>
-                    </DialogContent>
-                </Dialog>
-            ) : (
-                <p className="font-sans text-sm text-gray-600">
-                    {currentDescription === null ? (
-                        <span className="italic">No description</span>
+                                <div className="items-end justify-end text-right">
+                                    <Button
+                                        variant="link"
+                                        className="m-0 h-fit w-fit items-end justify-end p-0 text-right"
+                                    >
+                                        {currentUsername}
+                                    </Button>
+                                </div>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Change Username</DialogTitle>
+                                </DialogHeader>
+                                <form action={handleUsernameSubmit}>
+                                    <Input
+                                        name="username"
+                                        placeholder="New username"
+                                        defaultValue={currentUsername}
+                                    />
+                                    <Button type="submit" className="mt-4">
+                                        Update Username
+                                    </Button>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
                     ) : (
-                        currentDescription
+                        <p className="items-end justify-end text-right">
+                            {currentUsername}
+                        </p>
                     )}
-                </p>
-            )}
+                    <p className="h-fit font-sans text-3xl font-bold">
+                        {displayName}
+                    </p>
+                    {isOwnProfile ? (
+                        <Dialog
+                            open={openDescription}
+                            onOpenChange={setOpenDescription}
+                        >
+                            <DialogTrigger
+                                className="m-0 items-start justify-start p-0"
+                                asChild
+                            >
+                                <div className="flex items-center text-gray-600 hover:text-gray-800">
+                                    <p className="font-sans text-sm">
+                                        {currentDescription === null ? (
+                                            <span className="italic">
+                                                No description
+                                            </span>
+                                        ) : (
+                                            currentDescription
+                                        )}
+                                    </p>
+                                    <PencilIcon
+                                        size={16}
+                                        className="ml-2 cursor-pointer"
+                                    />
+                                </div>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>
+                                        Change Description
+                                    </DialogTitle>
+                                </DialogHeader>
+                                <form action={handleDescriptionSubmit}>
+                                    <Textarea
+                                        name="description"
+                                        placeholder="New description"
+                                        defaultValue={
+                                            currentDescription ===
+                                            'No description'
+                                                ? ''
+                                                : currentDescription || ''
+                                        }
+                                    />
+                                    <Button type="submit" className="mt-4">
+                                        Update Description
+                                    </Button>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    ) : (
+                        <p className="font-sans text-sm text-gray-600">
+                            {currentDescription === null ? (
+                                <span className="italic">No description</span>
+                            ) : (
+                                currentDescription
+                            )}
+                        </p>
+                    )}
                 </div>
-                
+
                 <FollowersFollowingSection
                     totalFollowers={totalFollowers}
                     totalFollowing={totalFollowing}
                 />
-               {!isOwnProfile && (
-                            <FollowButton
-                                followingId={followingId}
-                                initialIsFollowing={initialIsFollowing}
-                            />
-                        )}
+
+                {!isOwnProfile && isLoggedIn && (
+                    <FollowButton
+                        followingId={followingId}
+                        initialIsFollowing={initialIsFollowing}
+                    />
+                )}
                 <UserRating />
             </div>
-            
-            
+
             <UserBadges />
         </div>
     )

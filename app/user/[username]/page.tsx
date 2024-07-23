@@ -55,15 +55,17 @@ export default async function ProfilePage({
                                 userData={userData}
                                 isOwnProfile={isOwnProfile}
                             />
-                            
                         </div>
                         <FollowersFollowingSection
-                                totalFollowers={totalFollowers}
-                                totalFollowing={totalFollowing}
+                            totalFollowers={totalFollowers}
+                            totalFollowing={totalFollowing}
+                        />
+                        {!isOwnProfile && (
+                            <FollowButton
+                                followingId={userData.id}
+                                initialIsFollowing={userData.isFollowing}
                             />
-                            {!isOwnProfile && (
-                                <FollowButton followingId={userData.id} />
-                            )}
+                        )}
                         <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
                             <main className="py-8">
                                 <CardsSection

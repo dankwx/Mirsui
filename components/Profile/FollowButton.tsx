@@ -1,32 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { toggleFollow } from './actions'
 
 interface FollowButtonProps {
   followingId: string
+  initialIsFollowing: boolean
 }
 
-export default function FollowButton({ followingId }: FollowButtonProps) {
-  const [isFollowing, setIsFollowing] = useState<boolean | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    const checkFollowStatus = async () => {
-      try {
-        const response = await fetch(`/api/follow-status?followingId=${followingId}`)
-        const data = await response.json()
-        setIsFollowing(data.isFollowing)
-      } catch (error) {
-        console.error('Error fetching follow status:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    checkFollowStatus()
-  }, [followingId])
+export default function FollowButton({ followingId, initialIsFollowing }: FollowButtonProps) {
+  const [isFollowing, setIsFollowing] = useState(initialIsFollowing)
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleToggleFollow = async () => {
     setIsLoading(true)

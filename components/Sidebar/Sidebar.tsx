@@ -15,7 +15,7 @@ export default function Sidebar() {
             onMouseLeave={() => setIsExpanded(false)}
         >
             <div className="flex w-fit flex-col overflow-hidden whitespace-nowrap text-black min-h-screen">
-                <Link href="/getchannel" className="p-2 hover:bg-gray-200">
+                <Link href="/claimchannel" className="p-2 hover:bg-gray-200">
                     {isExpanded ? '📺 Claim Channel' : '📺'}
                 </Link>
                 <Link href="/claimvideo" className="p-2 hover:bg-gray-200">

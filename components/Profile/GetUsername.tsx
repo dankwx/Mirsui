@@ -14,6 +14,8 @@ import {
 import UserBadges from './UserBadges'
 import UserRating from './UserRating'
 import { PencilIcon } from 'lucide-react' // Importe o ícone de lápis
+import FollowersFollowingSection from './UserFollowers'
+import FollowButton from './FollowButton'
 
 interface UserProfileProps {
     username: string
@@ -26,6 +28,11 @@ interface UserProfileProps {
         formData: FormData
     ) => Promise<{ success: boolean; newDescription?: string | null }>
     isOwnProfile: boolean
+    totalFollowers: number
+    totalFollowing: number
+    followingId: string
+    initialIsFollowing: boolean
+
 }
 
 export default function UserProfile({
@@ -35,6 +42,10 @@ export default function UserProfile({
     updateUsernameAction,
     updateDescriptionAction,
     isOwnProfile,
+    totalFollowers,
+    totalFollowing,
+    followingId,
+    initialIsFollowing
 }: UserProfileProps) {
     const [openUsername, setOpenUsername] = useState(false)
     const [openDescription, setOpenDescription] = useState(false)
@@ -78,8 +89,17 @@ export default function UserProfile({
                 <p className="h-fit font-sans text-3xl font-bold">
                     {displayName}
                 </p>
+                <FollowersFollowingSection
+                    totalFollowers={totalFollowers}
+                    totalFollowing={totalFollowing}
+                />
+               {!isOwnProfile && (
+                            <FollowButton
+                                followingId={followingId}
+                                initialIsFollowing={initialIsFollowing}
+                            />
+                        )}
                 <UserRating />
-               
             </div>
             {isOwnProfile ? (
                 <Dialog

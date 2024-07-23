@@ -10,7 +10,6 @@ import { fetchUserData, fetchAuthData } from '@/utils/profileService'
 import { fetchSongs } from '@/utils/fetchSongs'
 import { fetchChannels } from '@/utils/fetchChannels'
 import { fetchFollowers, fetchFollowing } from '@/utils/fetchFollowersFollowing'
-import FollowersFollowingSection from '@/components/Profile/UserFollowers'
 import FollowButton from '@/components/Profile/FollowButton'
 export default async function ProfilePage({
     params,
@@ -54,18 +53,11 @@ export default async function ProfilePage({
                             <ProfileDetails
                                 userData={userData}
                                 isOwnProfile={isOwnProfile}
+                                totalFollowers={totalFollowers}
+                                totalFollowing={totalFollowing}
+                                followingId={userData.id}
                             />
                         </div>
-                        <FollowersFollowingSection
-                            totalFollowers={totalFollowers}
-                            totalFollowing={totalFollowing}
-                        />
-                        {!isOwnProfile && (
-                            <FollowButton
-                                followingId={userData.id}
-                                initialIsFollowing={userData.isFollowing}
-                            />
-                        )}
                         <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
                             <main className="py-8">
                                 <CardsSection

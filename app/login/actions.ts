@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 
 import { createClient } from '@/utils/supabase/server'
 
@@ -17,11 +18,9 @@ function generateRandomDisplayName(): string {
   }
 
   
-export async function login(formData: FormData) {
+  export async function login(formData: FormData) {
     const supabase = createClient()
 
-    // type-casting here for convenience
-    // in practice, you should validate your inputs
     const data = {
         email: formData.get('email') as string,
         password: formData.get('password') as string,
@@ -33,38 +32,46 @@ export async function login(formData: FormData) {
         redirect('/error')
     }
 
-    revalidatePath('/', 'layout')
-    redirect('/')
+    // Obter o caminho atual
+    const headersList = headers()
+    const referer = headersList.get('referer') || '/'
+    const currentPath = new URL(referer).pathname
+
+    // Revalidar o caminho atual
+    revalidatePath(currentPath)
 }
 
 export async function signup(formData: FormData) {
     const supabase = createClient()
-  
+
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const username = formData.get('username') as string;
     
-    // Gerar um display name aleatório
     const displayName = generateRandomDisplayName();
-  
+
     const data = {
-      email,
-      password,
-      options: {
-        data: {
-          username,
-          display_name: displayName,
+        email,
+        password,
+        options: {
+            data: {
+                username,
+                display_name: displayName,
+            },
         },
-      },
     }
-  
+
     const { error } = await supabase.auth.signUp(data)
-  
+
     if (error) {
-      redirect('/error')
+        redirect('/error')
     }
-  
-    revalidatePath('/', 'layout')
-    redirect('/')
-  }
-  
+
+    // Obter o caminho atual
+    const headersList = headers()
+    const referer = headersList.get('referer') || '/'
+    const currentPath = new URL(referer).pathname
+
+    // Revalidar o caminho atual
+    revalidatePath(currentPath)
+}

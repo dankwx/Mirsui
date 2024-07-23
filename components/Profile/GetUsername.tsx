@@ -86,22 +86,45 @@ export default function UserProfile({
     return (
         <div className="flex h-fit flex-col">
             <div className="flex">
+                <div className='flex flex-col '>
+                {isOwnProfile ? (
+                <Dialog open={openUsername} onOpenChange={setOpenUsername}>
+                    <DialogTrigger
+                        className="m-0  justify-end items-end text-right p-0"
+                        asChild
+                    >
+                        <div className='justify-end items-end text-right'>
+                            <Button
+                                variant="link"
+                                className="m-0 h-fit w-fit p-0 justify-end items-end text-right"
+                            >
+                                {currentUsername}
+                            </Button>
+                        </div>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Change Username</DialogTitle>
+                        </DialogHeader>
+                        <form action={handleUsernameSubmit}>
+                            <Input
+                                name="username"
+                                placeholder="New username"
+                                defaultValue={currentUsername}
+                            />
+                            <Button type="submit" className="mt-4">
+                                Update Username
+                            </Button>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+            ) : (
+                <p className='justify-end items-end text-right'>{currentUsername}</p>
+            )}
                 <p className="h-fit font-sans text-3xl font-bold">
                     {displayName}
                 </p>
-                <FollowersFollowingSection
-                    totalFollowers={totalFollowers}
-                    totalFollowing={totalFollowing}
-                />
-               {!isOwnProfile && (
-                            <FollowButton
-                                followingId={followingId}
-                                initialIsFollowing={initialIsFollowing}
-                            />
-                        )}
-                <UserRating />
-            </div>
-            {isOwnProfile ? (
+                {isOwnProfile ? (
                 <Dialog
                     open={openDescription}
                     onOpenChange={setOpenDescription}
@@ -155,40 +178,22 @@ export default function UserProfile({
                     )}
                 </p>
             )}
-            {isOwnProfile ? (
-                <Dialog open={openUsername} onOpenChange={setOpenUsername}>
-                    <DialogTrigger
-                        className="m-0 items-start justify-start p-0"
-                        asChild
-                    >
-                        <div>
-                            <Button
-                                variant="link"
-                                className="m-0 h-fit w-fit p-0"
-                            >
-                                {currentUsername}
-                            </Button>
-                        </div>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Change Username</DialogTitle>
-                        </DialogHeader>
-                        <form action={handleUsernameSubmit}>
-                            <Input
-                                name="username"
-                                placeholder="New username"
-                                defaultValue={currentUsername}
+                </div>
+                
+                <FollowersFollowingSection
+                    totalFollowers={totalFollowers}
+                    totalFollowing={totalFollowing}
+                />
+               {!isOwnProfile && (
+                            <FollowButton
+                                followingId={followingId}
+                                initialIsFollowing={initialIsFollowing}
                             />
-                            <Button type="submit" className="mt-4">
-                                Update Username
-                            </Button>
-                        </form>
-                    </DialogContent>
-                </Dialog>
-            ) : (
-                <p>{currentUsername}</p>
-            )}
+                        )}
+                <UserRating />
+            </div>
+            
+            
             <UserBadges />
         </div>
     )

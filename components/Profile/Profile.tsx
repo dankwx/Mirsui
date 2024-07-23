@@ -1,6 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import UserProfile from './GetUsername'
-import FollowersFollowingSection from './UserFollowers'
 
 interface ProfileProps {
     username: string
@@ -14,9 +13,9 @@ interface ProfileProps {
         formData: FormData
     ) => Promise<{ success: boolean; newDescription?: string | null }>
     isOwnProfile: boolean
-    totalFollowers: number,
-    totalFollowing: number,
-    followingId: string,
+    totalFollowers: number
+    totalFollowing: number
+    followingId: string
     initialIsFollowing: boolean
 }
 
@@ -30,7 +29,7 @@ export default function Profile({
     totalFollowers,
     totalFollowing,
     followingId,
-    initialIsFollowing
+    initialIsFollowing,
 }: ProfileProps) {
     return (
         <div className="mt-16 pt-4">
@@ -48,11 +47,9 @@ export default function Profile({
                     updateDescriptionAction={updateDescriptionAction}
                     totalFollowers={totalFollowers}
                     totalFollowing={totalFollowing}
-                    followingId={followingId} initialIsFollowing={initialIsFollowing}
+                    followingId={followingId}
+                    initialIsFollowing={initialIsFollowing}
                 />
-                <p>asdas</p>
-                {/* <FollowersFollowingSection totalFollowers={totalFollowers} totalFollowing={totalFollowing} /> */}
-                
             </div>
         </div>
     )

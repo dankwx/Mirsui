@@ -4,7 +4,7 @@ import { Badge } from '../ui/badge'
 export default function UserBadges() {
     return (
         <div>
-            <div className="ml-0 mt-2 flex justify-center">
+            <div className="ml-0 mt-2 flex justify-start">
                 <Badge
                     variant={'outline'}
                     className="mr-2 border-purple-300 bg-purple-100 text-purple-800"

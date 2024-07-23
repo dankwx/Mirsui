@@ -9,5 +9,5 @@ A social network for claiming and showcasing discoveries before they went viral
 - [x] User Description section for profile
 - [ ] Admin page
 - [ ] Send Suggestion page
-- [ ] Add followers system
+- [x] Add followers system
 - [ ] Complete home page

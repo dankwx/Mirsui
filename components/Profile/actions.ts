@@ -5,16 +5,16 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation';
 
 
-export async function updateUsername(formData: FormData): Promise<{ success: boolean; newUsername?: string }> {
-  const newUsername = formData.get('username')
+export async function updateDisplayName(formData: FormData): Promise<{ success: boolean; newDisplayName?: string }> {
+  const newDisplayName = formData.get('display_name')
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
-  if (user && newUsername && typeof newUsername === 'string') {
-    // Atualizar o username na tabela 'profiles'
+  if (user && newDisplayName && typeof newDisplayName === 'string') {
+    // Atualizar o display_name na tabela 'profiles'
     const { error: profileError } = await supabase
       .from('profiles')
-      .update({ username: newUsername })
+      .update({ display_name: newDisplayName })
       .eq('id', user.id)
 
     if (profileError) {
@@ -22,9 +22,9 @@ export async function updateUsername(formData: FormData): Promise<{ success: boo
       return { success: false }
     }
 
-    // Atualizar o username nos metadados do usuário
+    // Atualizar o display_name nos metadados do usuário
     const { error: userError } = await supabase.auth.updateUser({
-      data: { username: newUsername }
+      data: { display_name: newDisplayName }
     })
 
     if (userError) {
@@ -32,8 +32,7 @@ export async function updateUsername(formData: FormData): Promise<{ success: boo
       return { success: false }
     }
 
-    revalidatePath(`/user/${newUsername}`)
-    redirect(`/user/${newUsername}`)
+    return { success: true, newDisplayName }
   }
   return { success: false }
 }

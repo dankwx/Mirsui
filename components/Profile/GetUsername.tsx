@@ -21,9 +21,9 @@ interface UserProfileProps {
     username: string
     displayName: string
     description: string | null
-    updateUsernameAction?: (
+    updateDisplayNameAction?: (
         formData: FormData
-    ) => Promise<{ success: boolean; newUsername?: string }>
+    ) => Promise<{ success: boolean; newDisplayName?: string }>
     updateDescriptionAction?: (
         formData: FormData
     ) => Promise<{ success: boolean; newDescription?: string | null }>
@@ -39,7 +39,7 @@ export default function UserProfile({
     username,
     displayName,
     description,
-    updateUsernameAction,
+    updateDisplayNameAction,
     updateDescriptionAction,
     isOwnProfile,
     isLoggedIn,
@@ -48,19 +48,27 @@ export default function UserProfile({
     followingId,
     initialIsFollowing,
 }: UserProfileProps) {
-    const [openUsername, setOpenUsername] = useState(false)
+    const [openDisplayName, setOpenDisplayName] = useState(false)
     const [openDescription, setOpenDescription] = useState(false)
-    const [currentUsername, setCurrentUsername] = useState(username)
+    const [currentDisplayName, setCurrentDisplayName] = useState(displayName)
     const [currentDescription, setCurrentDescription] = useState<string | null>(
         description || null
     )
 
-    const handleUsernameSubmit = async (formData: FormData) => {
-        if (updateUsernameAction) {
-            const result = await updateUsernameAction(formData)
-            if (result.success && result.newUsername) {
-                setCurrentUsername(result.newUsername)
-                setOpenUsername(false)
+    const handleDisplayNameSubmit = async (formData: FormData) => {
+        if (updateDisplayNameAction) {
+            try {
+                const result = await updateDisplayNameAction(formData)
+                if (result.success && result.newDisplayName) {
+                    setCurrentDisplayName(result.newDisplayName)
+                    setOpenDisplayName(false)
+                    // Recarregar a página
+                   
+                } else {
+                    console.error('Failed to update display name')
+                }
+            } catch (error) {
+                console.error('Error in updateDisplayNameAction:', error)
             }
         }
     }
@@ -90,9 +98,12 @@ export default function UserProfile({
                 <div className="flex flex-col">
                     {isOwnProfile ? (
                         <Dialog
-                            open={openUsername}
-                            onOpenChange={setOpenUsername}
+                            open={openDisplayName}
+                            onOpenChange={setOpenDisplayName}
                         >
+                            <p className="items-end justify-end text-right">
+                                {username}
+                            </p>
                             <DialogTrigger
                                 className="m-0 items-end justify-end p-0 text-right"
                                 asChild
@@ -100,36 +111,40 @@ export default function UserProfile({
                                 <div className="items-end justify-end text-right">
                                     <Button
                                         variant="link"
-                                        className="m-0 h-fit w-fit items-end justify-end p-0 text-right"
+                                        className="m-0 h-fit w-fit items-end justify-end p-0 text-right font-sans text-3xl font-bold"
                                     >
-                                        {currentUsername}
+                                        {currentDisplayName}
                                     </Button>
                                 </div>
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
-                                    <DialogTitle>Change Username</DialogTitle>
+                                    <DialogTitle>
+                                        Change DisplayName
+                                    </DialogTitle>
                                 </DialogHeader>
-                                <form action={handleUsernameSubmit}>
+                                <form action={handleDisplayNameSubmit}>
                                     <Input
-                                        name="username"
-                                        placeholder="New username"
-                                        defaultValue={currentUsername}
+                                        name="display_name"
+                                        placeholder="New displayname"
+                                        defaultValue={currentDisplayName}
                                     />
                                     <Button type="submit" className="mt-4">
-                                        Update Username
+                                        Update Displayname
                                     </Button>
                                 </form>
                             </DialogContent>
                         </Dialog>
                     ) : (
-                        <p className="items-end justify-end text-right">
-                            {currentUsername}
-                        </p>
+                        <>
+                            <p className="items-end justify-end text-right">
+                                {username}
+                            </p>
+                            <p className="h-fit font-sans text-3xl font-bold">
+                                {currentDisplayName}
+                            </p>
+                        </>
                     )}
-                    <p className="h-fit font-sans text-3xl font-bold">
-                        {displayName}
-                    </p>
                     {isOwnProfile ? (
                         <Dialog
                             open={openDescription}

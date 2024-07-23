@@ -1,5 +1,5 @@
 import Profile from '@/components/Profile/Profile'
-import { updateUsername } from '@/components/Profile/actions'
+import { updateDisplayName } from '@/components/Profile/actions'
 import { updateDescription } from '@/components/Profile/actions'
 
 interface ProfileDetailsProps {
@@ -24,7 +24,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
             isLoggedIn={isLoggedIn}
             username={userData.username}
             displayName={userData.display_name || userData.username}
-            updateUsernameAction={isOwnProfile ? updateUsername : undefined}
+            updateDisplayNameAction={isOwnProfile ? updateDisplayName : undefined}
             updateDescriptionAction={
                 isOwnProfile ? updateDescription : undefined
             }

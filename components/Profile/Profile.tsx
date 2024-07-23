@@ -7,9 +7,9 @@ interface ProfileProps {
     displayName: string
     description: string
 
-    updateUsernameAction?: (
+    updateDisplayNameAction?: (
         formData: FormData
-    ) => Promise<{ success: boolean; newUsername?: string }>
+    ) => Promise<{ success: boolean; newDisplayName?: string }>
     updateDescriptionAction?: (
         formData: FormData
     ) => Promise<{ success: boolean; newDescription?: string | null }>
@@ -24,7 +24,7 @@ export default function Profile({
     username,
     displayName,
     description,
-    updateUsernameAction,
+    updateDisplayNameAction,
     updateDescriptionAction,
     isLoggedIn,
     isOwnProfile,
@@ -44,7 +44,7 @@ export default function Profile({
                     isLoggedIn={isLoggedIn}
                     username={username}
                     displayName={displayName}
-                    updateUsernameAction={updateUsernameAction}
+                    updateDisplayNameAction={updateDisplayNameAction}
                     isOwnProfile={isOwnProfile}
                     description={description}
                     updateDescriptionAction={updateDescriptionAction}

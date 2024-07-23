@@ -62,8 +62,6 @@ export default function UserProfile({
                 if (result.success && result.newDisplayName) {
                     setCurrentDisplayName(result.newDisplayName)
                     setOpenDisplayName(false)
-                    // Recarregar a página
-                   
                 } else {
                     console.error('Failed to update display name')
                 }

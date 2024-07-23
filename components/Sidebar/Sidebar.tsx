@@ -24,6 +24,9 @@ export default function Sidebar() {
                 <Link href="/claimtrack" className="p-2 hover:bg-gray-200">
                     {isExpanded ? '🎵 Claim Track' : '🎵'}
                 </Link>
+                <Link href="/claimartist" className="p-2 hover:bg-gray-200">
+                    {isExpanded ? '🎵 Claim Artist' : '🎵'}
+                </Link>
             </div>
         </aside>
     )

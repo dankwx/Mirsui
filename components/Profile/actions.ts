@@ -73,3 +73,57 @@ export async function updateDescription(formData: FormData): Promise<{ success: 
   }
   return { success: false }
 }
+
+export async function toggleFollow(followingId: string): Promise<{ success: boolean; isFollowing: boolean }> {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { success: false, isFollowing: false }
+  }
+
+  const follower_id = user.id
+  
+  // Check if already following
+  const { data: existingFollow, error: checkError } = await supabase
+    .from('followers')
+    .select()
+    .eq('follower_id', follower_id)
+    .eq('following_id', followingId)
+    .single()
+
+  if (checkError && checkError.code !== 'PGRST116') {
+    console.error('Error checking follow status:', checkError)
+    return { success: false, isFollowing: false }
+  }
+
+  if (existingFollow) {
+    // Unfollow
+    const { error: unfollowError } = await supabase
+      .from('followers')
+      .delete()
+      .eq('follower_id', follower_id)
+      .eq('following_id', followingId)
+
+    if (unfollowError) {
+      console.error('Error unfollowing:', unfollowError)
+      return { success: false, isFollowing: true }
+    }
+
+    revalidatePath(`/user/${followingId}`)
+    return { success: true, isFollowing: false }
+  } else {
+    // Follow
+    const { error: followError } = await supabase
+      .from('followers')
+      .insert({ follower_id, following_id: followingId })
+
+    if (followError) {
+      console.error('Error following:', followError)
+      return { success: false, isFollowing: false }
+    }
+
+    revalidatePath(`/user/${followingId}`)
+    return { success: true, isFollowing: !existingFollow }
+  }
+}

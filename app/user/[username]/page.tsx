@@ -9,7 +9,9 @@ import { fetchArtists } from '@/utils/fetchArtists'
 import { fetchUserData, fetchAuthData } from '@/utils/profileService'
 import { fetchSongs } from '@/utils/fetchSongs'
 import { fetchChannels } from '@/utils/fetchChannels'
-
+import { fetchFollowers, fetchFollowing } from '@/utils/fetchFollowersFollowing'
+import FollowersFollowingSection from '@/components/Profile/UserFollowers'
+import FollowButton from '@/components/Profile/FollowButton'
 export default async function ProfilePage({
     params,
 }: {
@@ -30,10 +32,16 @@ export default async function ProfilePage({
     const artists = await fetchArtists(userData.id)
     const songs = await fetchSongs(userData.id)
     const channels = await fetchChannels(userData.id)
+    const followers = await fetchFollowers(userData.id)
+    const following = await fetchFollowing(userData.id)
 
     const totalSavedSongs = songs.length
     const totalSavedYouTubeChannels = channels.length
     const totalSavedSpotifyArtists = artists.length
+    const totalFollowers = followers.length
+    const totalFollowing = following.length
+
+    console.log(userData.id)
 
     return (
         <main className="flex min-h-screen flex-col">
@@ -41,13 +49,23 @@ export default async function ProfilePage({
             <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
                 <div className="flex h-full flex-1">
                     <Sidebar />
-                    <div className="flex w-full flex-col font-sans ml-20 px-6">
-                        <ProfileDetails
-                            userData={userData}
-                            isOwnProfile={isOwnProfile}
-                        />
+                    <div className="ml-20 flex w-full flex-col px-6 font-sans">
+                        <div className="flex">
+                            <ProfileDetails
+                                userData={userData}
+                                isOwnProfile={isOwnProfile}
+                            />
+                            
+                        </div>
+                        <FollowersFollowingSection
+                                totalFollowers={totalFollowers}
+                                totalFollowing={totalFollowing}
+                            />
+                            {!isOwnProfile && (
+                                <FollowButton followingId={userData.id} />
+                            )}
                         <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
-                            <main className=" py-8">
+                            <main className="py-8">
                                 <CardsSection
                                     totalSavedSongs={totalSavedSongs}
                                     totalSavedYouTubeChannels={
@@ -56,7 +74,10 @@ export default async function ProfilePage({
                                     totalSavedSpotifyArtists={
                                         totalSavedSpotifyArtists
                                     }
+                                    totalFollowers={totalFollowers}
+                                    totalFollowing={totalFollowing}
                                 />
+
                                 <div className="mt-8 w-full">
                                     <TabsSection
                                         artists={artists}

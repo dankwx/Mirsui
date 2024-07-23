@@ -39,7 +39,9 @@ export default function UserProfile({
     const [openUsername, setOpenUsername] = useState(false)
     const [openDescription, setOpenDescription] = useState(false)
     const [currentUsername, setCurrentUsername] = useState(username)
-    const [currentDescription, setCurrentDescription] = useState<string | null>(description || null)
+    const [currentDescription, setCurrentDescription] = useState<string | null>(
+        description || null
+    )
 
     const handleUsernameSubmit = async (formData: FormData) => {
         if (updateUsernameAction) {
@@ -54,14 +56,15 @@ export default function UserProfile({
     const handleDescriptionSubmit = async (formData: FormData) => {
         if (updateDescriptionAction) {
             const newDescription = formData.get('description') as string
-            const descriptionToUpdate = newDescription.trim() === '' ? null : newDescription
-    
+            const descriptionToUpdate =
+                newDescription.trim() === '' ? null : newDescription
+
             // Crie um novo FormData com a descrição atualizada
             const updatedFormData = new FormData()
             updatedFormData.append('description', descriptionToUpdate || '')
-    
+
             const result = await updateDescriptionAction(updatedFormData)
-    
+
             if (result.success) {
                 setCurrentDescription(result.newDescription || null)
                 setOpenDescription(false)
@@ -76,22 +79,31 @@ export default function UserProfile({
                     {displayName}
                 </p>
                 <UserRating />
+               
             </div>
             {isOwnProfile ? (
-                <Dialog open={openDescription} onOpenChange={setOpenDescription}>
+                <Dialog
+                    open={openDescription}
+                    onOpenChange={setOpenDescription}
+                >
                     <DialogTrigger
                         className="m-0 items-start justify-start p-0"
                         asChild
                     >
                         <div className="flex items-center text-gray-600 hover:text-gray-800">
                             <p className="font-sans text-sm">
-                                {currentDescription === null? (
-                                    <span className="italic">No description</span>
+                                {currentDescription === null ? (
+                                    <span className="italic">
+                                        No description
+                                    </span>
                                 ) : (
                                     currentDescription
                                 )}
                             </p>
-                            <PencilIcon size={16} className="ml-2 cursor-pointer" />
+                            <PencilIcon
+                                size={16}
+                                className="ml-2 cursor-pointer"
+                            />
                         </div>
                     </DialogTrigger>
                     <DialogContent>
@@ -102,7 +114,11 @@ export default function UserProfile({
                             <Textarea
                                 name="description"
                                 placeholder="New description"
-                                defaultValue={currentDescription === "No description" ? "" : currentDescription || ''}
+                                defaultValue={
+                                    currentDescription === 'No description'
+                                        ? ''
+                                        : currentDescription || ''
+                                }
                             />
                             <Button type="submit" className="mt-4">
                                 Update Description

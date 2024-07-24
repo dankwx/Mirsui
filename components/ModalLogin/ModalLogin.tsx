@@ -24,17 +24,31 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
     const [username, setUsername] = React.useState('')
     const [isRegistering, setIsRegistering] = React.useState(false)
     const [isForgotPassword, setIsForgotPassword] = React.useState(false)
+    const [error, setError] = React.useState<string | null>(null)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        setError(null)
         const formData = new FormData()
         formData.append('email', email)
         formData.append('password', password)
         if (isRegistering) {
             formData.append('username', username)
-            await signup(formData)
+            const result = await signup(formData)
+            if (result.error) {
+                setError(result.error)
+            } else {
+                // Handle successful signup
+                onLogin(email, password)
+            }
         } else {
-            await login(formData)
+            const result = await login(formData)
+            if (result.error) {
+                setError(result.error)
+            } else {
+                // Handle successful login
+                onLogin(email, password)
+            }
         }
     }
 
@@ -116,6 +130,11 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                 </DialogHeader>
                 <form onSubmit={isForgotPassword ? handleForgotPassword : handleSubmit}>
                     {renderForm()}
+                    {error && (
+                        <div className="text-red-500 text-sm mt-2">
+                            {error}
+                        </div>
+                    )}
                     <DialogFooter>
                         <Button type="submit">
                             {isForgotPassword ? 'Reset Password' : isRegistering ? 'Register' : 'Login'}
@@ -128,6 +147,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                         onClick={() => {
                             setIsRegistering(!isRegistering)
                             setIsForgotPassword(false)
+                            setError(null)
                         }}
                     >
                         {isRegistering ? 'Already have an account? Log in' : "Don't have an account? Register"}
@@ -138,6 +158,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                             onClick={() => {
                                 setIsForgotPassword(!isForgotPassword)
                                 setIsRegistering(false)
+                                setError(null)
                             }}
                         >
                             {isForgotPassword ? 'Back to Login' : 'Forgot Password?'}

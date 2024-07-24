@@ -44,7 +44,7 @@ import { Button } from '../ui/button'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Deslog from '@/app/logout/page'
-import LoginModalButton from '../LoginModalButton/page'
+import LoginModalButton from '../LoginModalButton/LoginModalButton'
 export default async function GetAuth() {
     const supabase = createClient()
 

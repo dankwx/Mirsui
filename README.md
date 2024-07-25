@@ -12,3 +12,5 @@ A social network for claiming and showcasing discoveries before they went viral
 - [x] Add followers system
 - [ ] Complete home page
 - [ ] Add Privacy Policies page
+- [ ] Add Profile User Configuration page
+

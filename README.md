@@ -13,4 +13,5 @@ A social network for claiming and showcasing discoveries before they went viral
 - [ ] Complete home page
 - [ ] Add Privacy Policies page
 - [ ] Add Profile User Configuration page
+- [ ] Index page on Google Search
 

@@ -15,3 +15,4 @@ A social network for claiming and showcasing discoveries before they went viral
 - [ ] Add Profile User Configuration page
 - [ ] Index page on Google Search
 - [ ] Add following and followers listing on profile
+- [ ] Add dark mode

@@ -27,7 +27,7 @@ export default async function ProfilePage() {
   return (
     <div className="container" style={{ padding: '50px 0 100px 0' }}>
       <div>
-        <h1>Perfil do Usuário</h1>
+        <h1>Este usuário segue:</h1>
         <pre>{JSON.stringify(followingData, null, 2)}</pre>
       </div>
     </div>

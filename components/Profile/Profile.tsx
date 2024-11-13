@@ -15,10 +15,18 @@ interface ProfileProps {
     ) => Promise<{ success: boolean; newDescription?: string | null }>
     isOwnProfile: boolean
     totalFollowers: number
-    totalFollowing: number
+    totalFollowing: User[]
     followingId: string
     initialIsFollowing: boolean
 }
+
+interface User {
+    id: string
+    first_name: string
+    last_name: string
+    avatar_url: string | null
+    username: string | null
+  }
 
 export default function Profile({
     username,

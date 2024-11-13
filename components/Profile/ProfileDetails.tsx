@@ -2,14 +2,24 @@ import Profile from '@/components/Profile/Profile'
 import { updateDisplayName } from '@/components/Profile/actions'
 import { updateDescription } from '@/components/Profile/actions'
 
+interface User {
+    id: string
+    first_name: string
+    last_name: string
+    avatar_url: string | null
+    username: string | null
+  }
+
 interface ProfileDetailsProps {
     isLoggedIn: any
     userData: any
     isOwnProfile: boolean
     totalFollowers: number
-    totalFollowing: number
+    totalFollowing: User[]
     followingId: string
 }
+
+
 
 const ProfileDetails: React.FC<ProfileDetailsProps> = ({
     isLoggedIn,

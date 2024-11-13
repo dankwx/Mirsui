@@ -17,6 +17,14 @@ import { PencilIcon } from 'lucide-react' // Importe o ícone de lápis
 import FollowersFollowingSection from './UserFollowers'
 import FollowButton from './FollowButton'
 
+interface User {
+    id: string
+    first_name: string
+    last_name: string
+    avatar_url: string | null
+    username: string | null
+  }
+
 interface UserProfileProps {
     username: string
     displayName: string
@@ -30,7 +38,7 @@ interface UserProfileProps {
     isOwnProfile: boolean
     isLoggedIn: boolean
     totalFollowers: number
-    totalFollowing: number
+    totalFollowing: User[]
     followingId: string
     initialIsFollowing: boolean
 }

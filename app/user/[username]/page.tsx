@@ -11,6 +11,8 @@ import { fetchSongs } from '@/utils/fetchSongs'
 import { fetchChannels } from '@/utils/fetchChannels'
 import { fetchFollowers, fetchFollowing } from '@/utils/fetchFollowersFollowing'
 import FollowButton from '@/components/Profile/FollowButton'
+import { createClient } from '@/utils/supabase/server'
+
 export default async function ProfilePage({
     params,
 }: {
@@ -41,7 +43,28 @@ export default async function ProfilePage({
     const totalFollowers = followers.length
     const totalFollowing = following.length
 
-    console.log(userData.id)
+    const supabase = createClient()
+
+    const {
+        data: { session },
+      } = await supabase.auth.getSession()
+    
+      let followingData = null
+      if (session) {
+        const { data, error } = await supabase.rpc('get_user_following', {
+          user_uuid: userData.id,
+        })
+    
+        if (error) {
+          console.error('Error fetching profile:', error)
+        } else {
+          followingData = data
+          console.log("arraya baixo")
+          console.log(followingData)
+        }
+      }
+
+    console.log("testeeee",userData.id)
 
     return (
         <main className="flex min-h-screen flex-col">
@@ -56,7 +79,7 @@ export default async function ProfilePage({
                                 userData={userData}
                                 isOwnProfile={isOwnProfile}
                                 totalFollowers={totalFollowers}
-                                totalFollowing={totalFollowing}
+                                totalFollowing={followingData}
                                 followingId={userData.id}
                             />
                         </div>
@@ -71,7 +94,7 @@ export default async function ProfilePage({
                                         totalSavedSpotifyArtists
                                     }
                                     totalFollowers={totalFollowers}
-                                    totalFollowing={totalFollowing}
+                                    totalFollowing={followingData}
                                 />
 
                                 <div className="mt-8 w-full">

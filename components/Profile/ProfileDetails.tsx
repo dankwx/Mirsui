@@ -34,6 +34,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
             isLoggedIn={isLoggedIn}
             username={userData.username}
             displayName={userData.display_name || userData.username}
+            avatar_url={userData.avatar_url}
             updateDisplayNameAction={isOwnProfile ? updateDisplayName : undefined}
             updateDescriptionAction={
                 isOwnProfile ? updateDescription : undefined

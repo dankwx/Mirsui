@@ -10,12 +10,20 @@ interface User {
     username: string | null
   }
 
+  interface Achievments {
+    achievement_id: string
+    title: string
+    description: string
+    achieved_at: string
+}
+
 interface ProfileDetailsProps {
     isLoggedIn: any
     userData: any
     isOwnProfile: boolean
     totalFollowers: User[]
     totalFollowing: User[]
+    userAchievments: Achievments[]
     followingId: string
 }
 
@@ -27,6 +35,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
     isOwnProfile,
     totalFollowers,
     totalFollowing,
+    userAchievments
 }) => {
 
     return (
@@ -43,6 +52,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
             description={userData.description}
             totalFollowers={totalFollowers}
             totalFollowing={totalFollowing}
+            userAchievments={userAchievments}
             followingId={userData.id}
             initialIsFollowing={userData.isFollowing}
         />

@@ -103,6 +103,7 @@ export default async function ProfilePage({
                                 isOwnProfile={isOwnProfile}
                                 totalFollowers={followersData}
                                 totalFollowing={followingData}
+                                userAchievments={achievmentData}
                                 followingId={userData.id}
                             />
                         </div>

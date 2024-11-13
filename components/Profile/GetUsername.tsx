@@ -25,6 +25,13 @@ interface User {
     username: string | null
   }
 
+  interface Achievments {
+    achievement_id: string
+    title: string
+    description: string
+    achieved_at: string
+}
+
 interface UserProfileProps {
     username: string
     displayName: string
@@ -39,6 +46,7 @@ interface UserProfileProps {
     isLoggedIn: boolean
     totalFollowers: User[]
     totalFollowing: User[]
+    userAchievments: Achievments[]
     followingId: string
     initialIsFollowing: boolean
 }
@@ -53,6 +61,7 @@ export default function UserProfile({
     isLoggedIn,
     totalFollowers,
     totalFollowing,
+    userAchievments,
     followingId,
     initialIsFollowing,
 }: UserProfileProps) {
@@ -224,7 +233,8 @@ export default function UserProfile({
                 <UserRating />
             </div>
 
-            <UserBadges />
+            <UserBadges
+            userAchievments={userAchievments} />
         </div>
     )
 }

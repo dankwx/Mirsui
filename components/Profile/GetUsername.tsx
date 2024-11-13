@@ -37,7 +37,7 @@ interface UserProfileProps {
     ) => Promise<{ success: boolean; newDescription?: string | null }>
     isOwnProfile: boolean
     isLoggedIn: boolean
-    totalFollowers: number
+    totalFollowers: User[]
     totalFollowing: User[]
     followingId: string
     initialIsFollowing: boolean

@@ -14,7 +14,7 @@ interface ProfileProps {
         formData: FormData
     ) => Promise<{ success: boolean; newDescription?: string | null }>
     isOwnProfile: boolean
-    totalFollowers: number
+    totalFollowers: User[]
     totalFollowing: User[]
     followingId: string
     initialIsFollowing: boolean

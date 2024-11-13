@@ -14,7 +14,7 @@ interface ProfileDetailsProps {
     isLoggedIn: any
     userData: any
     isOwnProfile: boolean
-    totalFollowers: number
+    totalFollowers: User[]
     totalFollowing: User[]
     followingId: string
 }

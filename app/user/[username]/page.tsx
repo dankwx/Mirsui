@@ -50,19 +50,28 @@ export default async function ProfilePage({
       } = await supabase.auth.getSession()
     
       let followingData = null
+      let followersData = null
       if (session) {
-        const { data, error } = await supabase.rpc('get_user_following', {
-          user_uuid: userData.id,
-        })
-    
-        if (error) {
-          console.error('Error fetching profile:', error)
-        } else {
-          followingData = data
-          console.log("arraya baixo")
-          console.log(followingData)
-        }
-      }
+          const { data: followingResult, error: followingError } = await supabase.rpc('get_user_following', {
+              user_uuid: userData.id,
+          })
+      
+          const { data: followersResult, error: followersError } = await supabase.rpc('get_user_followers', {
+              user_uuid: userData.id,
+          })
+      
+          if (followingError) {
+              console.error('Error fetching following:', followingError)
+          } else {
+              followingData = followingResult
+          }
+      
+          if (followersError) {
+              console.error('Error fetching followers:', followersError)
+          } else {
+              followersData = followersResult
+          }
+      
 
     console.log("testeeee",userData.id)
 
@@ -78,7 +87,7 @@ export default async function ProfilePage({
                                 isLoggedIn={isLoggedIn}
                                 userData={userData}
                                 isOwnProfile={isOwnProfile}
-                                totalFollowers={totalFollowers}
+                                totalFollowers={followersData}
                                 totalFollowing={followingData}
                                 followingId={userData.id}
                             />
@@ -93,7 +102,7 @@ export default async function ProfilePage({
                                     totalSavedSpotifyArtists={
                                         totalSavedSpotifyArtists
                                     }
-                                    totalFollowers={totalFollowers}
+                                    totalFollowers={followersData}
                                     totalFollowing={followingData}
                                 />
 
@@ -111,4 +120,5 @@ export default async function ProfilePage({
             </div>
         </main>
     )
+}
 }

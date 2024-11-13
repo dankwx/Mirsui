@@ -74,6 +74,7 @@ export default async function ProfilePage({
       
 
     console.log("testeeee",userData.id)
+    console.log("testeeee",followersData)
 
     return (
         <main className="flex min-h-screen flex-col">

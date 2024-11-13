@@ -1,11 +1,12 @@
-import React from 'react';
+import React from 'react'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
 
 interface User {
     id: string
@@ -13,8 +14,7 @@ interface User {
     last_name: string
     avatar_url: string | null
     username: string | null
-  }
-  
+}
 
 interface FollowersFollowingSectionProps {
     totalFollowers: User[]
@@ -26,12 +26,16 @@ const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
     totalFollowing,
 }) => {
     return (
-        <div className="flex items-center space-x-4 font-sans bg-neutral-200 rounded-md ml-6 px-6 mr-2">
+        <div className="ml-6 mr-2 flex items-center space-x-4 rounded-md bg-neutral-200 px-6 font-sans">
             <Dialog>
                 <DialogTrigger asChild>
-                    <div className="flex flex-col items-center cursor-pointer hover:opacity-80">
-                        <span className="text-2xl font-bold text-gray-800">{totalFollowers.length}</span>
-                        <span className="text-sm text-gray-600">Seguidores</span>
+                    <div className="flex cursor-pointer flex-col items-center hover:opacity-80">
+                        <span className="text-2xl font-bold text-gray-800">
+                            {totalFollowers.length}
+                        </span>
+                        <span className="text-sm text-gray-600">
+                            Seguidores
+                        </span>
                     </div>
                 </DialogTrigger>
                 <DialogContent>
@@ -40,8 +44,18 @@ const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
                     </DialogHeader>
                     <div className="p-4">
                         {totalFollowers.map((user) => (
-                            <div key={user.id} className="py-2">
-                                <p className="text-gray-800">{user.last_name}</p>
+                            <div key={user.id} className="flex flex-row py-2 bg-red-300">
+                                <Avatar className="mr-4 h-20 w-20">
+                                    {user.avatar_url ? (
+                                        <AvatarImage src={user.avatar_url} />
+                                    ) : (
+                                        <AvatarFallback>PF</AvatarFallback>
+                                    )}
+                                </Avatar>
+
+                                <p className="text-gray-800">
+                                    {user.last_name}
+                                </p>
                             </div>
                         ))}
                     </div>
@@ -49,8 +63,10 @@ const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
             </Dialog>
             <Dialog>
                 <DialogTrigger asChild>
-                    <div className="flex flex-col items-center cursor-pointer hover:opacity-80">
-                        <span className="text-2xl font-bold text-gray-800">{totalFollowing.length}</span>
+                    <div className="flex cursor-pointer flex-col items-center hover:opacity-80">
+                        <span className="text-2xl font-bold text-gray-800">
+                            {totalFollowing.length}
+                        </span>
                         <span className="text-sm text-gray-600">Seguindo</span>
                     </div>
                 </DialogTrigger>
@@ -60,9 +76,19 @@ const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
                     </DialogHeader>
                     <div className="p-4">
                         {totalFollowing.map((user) => (
-                            <div key={user.id} className="py-2">
-                                <p className="text-gray-800">{user.last_name}</p>
-                            </div>
+                            <div key={user.id} className="flex flex-row py-2 bg-red-300">
+                            <Avatar className="mr-4 h-20 w-20">
+                                {user.avatar_url ? (
+                                    <AvatarImage src={user.avatar_url} />
+                                ) : (
+                                    <AvatarFallback>PF</AvatarFallback>
+                                )}
+                            </Avatar>
+
+                            <p className="text-gray-800">
+                                {user.last_name}
+                            </p>
+                        </div>
                         ))}
                     </div>
                 </DialogContent>

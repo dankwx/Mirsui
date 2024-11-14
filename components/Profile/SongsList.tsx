@@ -3,6 +3,7 @@ import { fetchSongs } from '@/utils/fetchSongs'
 import { Badge } from '../ui/badge'
 import { CircleIcon, StarIcon } from 'lucide-react'
 import { Button } from '../ui/button'
+import { Card, CardContent } from '../ui/card'
 
 type Song = {
     id: string
@@ -21,36 +22,35 @@ type SongsListProps = {
 
 const SongsList: React.FC<SongsListProps> = ({ songs }) => {
     return (
-        <div className="grid gap-6">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
             {songs.map((song) => (
-                <div key={song.id} className="flex items-center gap-4 bg-muted p-4 rounded-lg">
-                    <img
-                        src={song.track_thumbnail}
-                        alt={song.track_title}
-                        width={64} height={64} className="rounded-md"
-                    />
-                    <div className="flex-1">
-                        <div className="text-lg font-medium">{song.track_title}</div>
-                        <div className="text-sm text-muted-foreground">{song.artist_name}</div>
-                        <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="outline" className="border-green-600 bg-background">
-                                <CircleIcon className="h-3 w-3 -translate-x-1 animate-pulse fill-green-300 text-green-300" />
+                <Card key={song.id} className="overflow-hidden">
+                    <div className="aspect-square relative">
+                        <img
+                            src={song.track_thumbnail}
+                            alt={song.track_title}
+                            className="object-cover"
+                            style={{ aspectRatio: "1/1", objectFit: "cover" }}
+                        />
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                            <Button variant="secondary">View Album</Button>
+                        </div>
+                    </div>
+                    <CardContent className="p-4">
+                        <h3 className="font-semibold truncate">{song.track_title}</h3>
+                        <p className="text-sm text-muted-foreground truncate">{song.artist_name}</p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                            <Badge variant="secondary" className="bg-green-100 text-green-800">
+                                <CircleIcon className="mr-1 h-3 w-3 -translate-x-1 animate-pulse fill-green-300 text-green-300" />
                                 Listened before it went viral
                             </Badge>
-                            <Badge variant="outline" className="border-orange-600 bg-background">
-                                <StarIcon className="h-3 w-3 -translate-x-1 animate-pulse fill-orange-300 text-orange-300" />
+                            <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                                <StarIcon className="mr-1 h-3 w-3 -translate-x-1 animate-pulse fill-orange-300 text-orange-300" />
                                 Rare find
                             </Badge>
                         </div>
-                        <Button variant="outline" size="sm" className="mt-2">
-                            View Album
-                        </Button>
-                        {/* <p>
-                            Claimed on: {new Date(song.claimedat).toLocaleDateString()}
-                        </p>
-                        <p>Popularity at claim: {song.popularity}</p> */}
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
             ))}
         </div>
     )

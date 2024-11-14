@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
 import { Badge } from '../ui/badge'
+import { Button } from '../ui/button'
 
 interface User {
     id: string
@@ -47,23 +48,32 @@ const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
                     <DialogHeader>
                         <DialogTitle>Seguidores</DialogTitle>
                     </DialogHeader>
-                    <div className="p-4">
+                    <div className="py-4">
                         {totalFollowers.map((user) => (
                             <div
                                 key={user.id}
-                                className="flex flex-row bg-red-300 py-2"
+                                className="flex flex-row items-center justify-between"
                             >
-                                <Avatar className="mr-4 h-20 w-20">
-                                    {user.avatar_url ? (
-                                        <AvatarImage src={user.avatar_url} />
-                                    ) : (
-                                        <AvatarFallback>PF</AvatarFallback>
-                                    )}
-                                </Avatar>
+                                <div className="flex items-center justify-center">
+                                    <Avatar className="mr-4 h-16 w-16 overflow-hidden rounded-full">
+                                        {user.avatar_url ? (
+                                            <AvatarImage
+                                                src={user.avatar_url}
+                                                className="h-full w-full object-cover"
+                                            />
+                                        ) : (
+                                            <AvatarFallback>PF</AvatarFallback>
+                                        )}
+                                    </Avatar>
 
-                                <p className="text-gray-800">
-                                    {user.last_name}
-                                </p>
+                                    <p className="text-gray-800">
+                                        {user.last_name}
+                                    </p>
+                                </div>
+
+                                <Button variant="outline" size="sm">
+                                    Unfollow
+                                </Button>
                             </div>
                         ))}
                     </div>
@@ -84,23 +94,32 @@ const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
                         <DialogTitle>Seguindo</DialogTitle>
                     </DialogHeader>
 
-                    <div className="p-4">
+                    <div className="py-4">
                         {totalFollowing.map((user) => (
                             <div
                                 key={user.id}
-                                className="flex flex-row bg-red-300 py-2"
+                                className="flex flex-row items-center justify-between"
                             >
-                                <Avatar className="mr-4 h-20 w-20">
-                                    {user.avatar_url ? (
-                                        <AvatarImage src={user.avatar_url} />
-                                    ) : (
-                                        <AvatarFallback>PF</AvatarFallback>
-                                    )}
-                                </Avatar>
+                                <div className="flex items-center justify-center">
+                                    <Avatar className="mr-4 h-16 w-16 overflow-hidden rounded-full">
+                                        {user.avatar_url ? (
+                                            <AvatarImage
+                                                src={user.avatar_url}
+                                                className="h-full w-full object-cover"
+                                            />
+                                        ) : (
+                                            <AvatarFallback>PF</AvatarFallback>
+                                        )}
+                                    </Avatar>
 
-                                <p className="text-gray-800">
-                                    {user.last_name}
-                                </p>
+                                    <p className="text-gray-800">
+                                        {user.last_name}
+                                    </p>
+                                </div>
+
+                                <Button variant="outline" size="sm">
+                                    Unfollow
+                                </Button>
                             </div>
                         ))}
                     </div>

@@ -12,7 +12,6 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import UserBadges from './UserBadges'
-import UserRating from './UserRating'
 import { PencilIcon } from 'lucide-react' // Importe o ícone de lápis
 import FollowersFollowingSection from './UserFollowers'
 import FollowButton from './FollowButton'
@@ -23,9 +22,14 @@ interface User {
     last_name: string
     avatar_url: string | null
     username: string | null
-  }
+}
 
-  interface Achievments {
+interface Rating {
+    id: string
+    rating: number
+}
+
+interface Achievments {
     achievement_id: string
     title: string
     description: string
@@ -46,6 +50,7 @@ interface UserProfileProps {
     isLoggedIn: boolean
     totalFollowers: User[]
     totalFollowing: User[]
+    rating: Rating[]
     userAchievments: Achievments[]
     followingId: string
     initialIsFollowing: boolean
@@ -61,6 +66,7 @@ export default function UserProfile({
     isLoggedIn,
     totalFollowers,
     totalFollowing,
+    rating,
     userAchievments,
     followingId,
     initialIsFollowing,
@@ -116,20 +122,20 @@ export default function UserProfile({
                             open={openDisplayName}
                             onOpenChange={setOpenDisplayName}
                         >
-                            <p className="items-end justify-end text-right">
-                                {username}
-                            </p>
                             <DialogTrigger
-                                className="m-0 items-end justify-end p-0 text-right"
+                                className="m-0 items-center text-left"
                                 asChild
                             >
-                                <div className="items-end justify-end text-right">
+                                <div className="flex flex-row text-left">
                                     <Button
                                         variant="link"
-                                        className="m-0 h-fit w-fit items-end justify-end p-0 text-right font-sans text-3xl font-bold"
+                                        className="m-0 h-fit w-fit items-center justify-center p-0 text-right font-sans text-3xl font-bold"
                                     >
                                         {currentDisplayName}
                                     </Button>
+                                    <p className="ml-2 items-start justify-center text-left text-gray-600">
+                                        {username}
+                                    </p>
                                 </div>
                             </DialogTrigger>
                             <DialogContent>
@@ -152,7 +158,7 @@ export default function UserProfile({
                         </Dialog>
                     ) : (
                         <>
-                            <p className="items-end justify-end text-right">
+                            <p className="items-start justify-start text-left">
                                 {username}
                             </p>
                             <p className="h-fit font-sans text-3xl font-bold">
@@ -160,6 +166,11 @@ export default function UserProfile({
                             </p>
                         </>
                     )}
+                    <FollowersFollowingSection
+                        totalFollowers={totalFollowers}
+                        totalFollowing={totalFollowing}
+                        rating={rating}
+                    />
                     {isOwnProfile ? (
                         <Dialog
                             open={openDescription}
@@ -219,22 +230,15 @@ export default function UserProfile({
                     )}
                 </div>
 
-                <FollowersFollowingSection
-                    totalFollowers={totalFollowers}
-                    totalFollowing={totalFollowing}
-                />
-
                 {!isOwnProfile && isLoggedIn && (
                     <FollowButton
                         followingId={followingId}
                         initialIsFollowing={initialIsFollowing}
                     />
                 )}
-                <UserRating />
             </div>
 
-            <UserBadges
-            userAchievments={userAchievments} />
+            <UserBadges userAchievments={userAchievments} />
         </div>
     )
 }

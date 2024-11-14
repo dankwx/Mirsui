@@ -8,6 +8,7 @@ interface User {
     last_name: string
     avatar_url: string | null
     username: string | null
+    rating: number
   }
 
   interface Achievments {
@@ -17,12 +18,18 @@ interface User {
     achieved_at: string
 }
 
+interface Rating {
+    id: string
+    rating: number
+}
+
 interface ProfileDetailsProps {
     isLoggedIn: any
     userData: any
     isOwnProfile: boolean
     totalFollowers: User[]
     totalFollowing: User[]
+    rating: Rating[]
     userAchievments: Achievments[]
     followingId: string
 }
@@ -35,6 +42,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
     isOwnProfile,
     totalFollowers,
     totalFollowing,
+    rating,
     userAchievments
 }) => {
 
@@ -52,6 +60,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
             description={userData.description}
             totalFollowers={totalFollowers}
             totalFollowing={totalFollowing}
+            rating={rating}
             userAchievments={userAchievments}
             followingId={userData.id}
             initialIsFollowing={userData.isFollowing}

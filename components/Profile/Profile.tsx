@@ -17,6 +17,7 @@ interface ProfileProps {
     isOwnProfile: boolean
     totalFollowers: User[]
     totalFollowing: User[]
+    rating: Rating[]
     userAchievments: Achievments[]
     followingId: string
     initialIsFollowing: boolean
@@ -29,6 +30,11 @@ interface User {
     avatar_url: string | null
     username: string | null
   }
+
+  interface Rating {
+    id: string
+    rating: number
+}
 
   interface Achievments {
     achievement_id: string
@@ -48,6 +54,7 @@ export default function Profile({
     isOwnProfile,
     totalFollowers,
     totalFollowing,
+    rating,
     userAchievments,
     followingId,
     initialIsFollowing,
@@ -69,6 +76,7 @@ export default function Profile({
                     updateDescriptionAction={updateDescriptionAction}
                     totalFollowers={totalFollowers}
                     totalFollowing={totalFollowing}
+                    rating={rating}
                     followingId={followingId}
                     initialIsFollowing={initialIsFollowing}
                     userAchievments={userAchievments}

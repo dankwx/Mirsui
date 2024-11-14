@@ -52,6 +52,7 @@ export default async function ProfilePage({
       let followingData = null
       let followersData = null
       let achievmentData = null
+      let ratingData = null
       if (session) {
           const { data: followingResult, error: followingError } = await supabase.rpc('get_user_following', {
               user_uuid: userData.id,
@@ -62,6 +63,10 @@ export default async function ProfilePage({
           })
 
           const {data: achievmentResult, error: achievmentError} = await supabase.rpc('get_user_achievements', {
+            user_uuid: userData.id,
+          })
+
+          const {data: ratingResult, error: ratingError} = await supabase.rpc('get_user_rating', {
             user_uuid: userData.id,
           })
       
@@ -82,11 +87,19 @@ export default async function ProfilePage({
           }else {
             achievmentData = achievmentResult
           }
+
+          if(ratingError) {
+            console.error('Error fetching achievments', ratingError)
+          } else {
+            ratingData = ratingResult
+          }
       
 
     console.log("testeeee",userData.id)
-    console.log("testeeee",followersData)
-    console.log("achievmts:",achievmentData)
+    // console.log("testeeee",followersData)
+    // console.log("achievmts:",achievmentData)
+    console.log("rating:",ratingData)
+
 
 
     return (
@@ -103,6 +116,7 @@ export default async function ProfilePage({
                                 isOwnProfile={isOwnProfile}
                                 totalFollowers={followersData}
                                 totalFollowing={followingData}
+                                rating={ratingData}
                                 userAchievments={achievmentData}
                                 followingId={userData.id}
                             />

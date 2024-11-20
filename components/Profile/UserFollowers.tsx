@@ -9,6 +9,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
+import FollowButton from './FollowButton'
 
 interface User {
     id: string
@@ -27,12 +28,16 @@ interface FollowersFollowingSectionProps {
     totalFollowers: User[]
     totalFollowing: User[]
     rating: Rating[]
+    isOwnProfile?: boolean
+    isLoggedIn?: boolean
 }
 
 const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
     totalFollowers,
     totalFollowing,
     rating,
+    isOwnProfile = false,
+    isLoggedIn = true
 }) => {
     return (
         <div className="mt-2 flex items-center space-x-4 font-sans">
@@ -116,9 +121,14 @@ const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
                                         {user.last_name}
                                     </p>
                                 </div>
-
+                                {!isOwnProfile && isLoggedIn && (
+                                    <FollowButton
+                                        followingId={user.id}
+                                        initialIsFollowing={true} // Você pode ajustar isso conforme necessário
+                                    />
+                                )}
                                 <Button variant="outline" size="sm">
-                                    Unfollow
+                                    Unfollow                                                            {/* BOTAO DE UNFOLLOW*/}
                                 </Button>
                             </div>
                         ))}

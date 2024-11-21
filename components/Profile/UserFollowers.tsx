@@ -130,9 +130,10 @@ const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
                                     
                                     <div>
                                         <FollowButton
-                                        followingId={followingId}
+                                        followingId={user.id}
                                         initialIsFollowing={true} // Você pode ajustar isso conforme necessário
                                         type='text'
+
                                     />
                                     </div>
                                 )}

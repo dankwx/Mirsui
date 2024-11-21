@@ -11,10 +11,9 @@ interface FollowButtonProps {
   followingId: string
   initialIsFollowing: boolean
   type?: ButtonType
-  variant?: 'default' | 'secondary' | 'outline'
 }
 
-export default function FollowButton({ followingId, initialIsFollowing,type='icon', variant='default' }: FollowButtonProps) {
+export default function FollowButton({ followingId, initialIsFollowing, type='icon' }: FollowButtonProps) {
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -33,26 +32,35 @@ export default function FollowButton({ followingId, initialIsFollowing,type='ico
   }
 
   if (type === 'icon') {
-    return (
-      <Button 
-        variant={variant}
-        className='relative w-8 h-8 p-0'
-        onClick={handleToggleFollow} 
-        disabled={isLoading}
-        title={isFollowing ? 'Unfollow' : 'Follow'}
-      >
-        {isLoading ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
-        ) : (
-          isFollowing ? <UserMinus className="h-5 w-5" /> : <UserPlus className="h-5 w-5" />
-        )}
-      </Button>
-    )
-  }
 
   return (
-    <Button variant="outline" size="sm">
-                                    Unfollow                                                            {/* BOTAO DE UNFOLLOW*/}
-                                </Button>
+    <Button 
+      className='relative w-8 h-8 p-0'
+      onClick={handleToggleFollow} 
+      disabled={isLoading}
+      title={isFollowing ? 'Unfollow' : 'Follow'}
+    >
+      {isLoading ? (
+        <Loader2 className="h-5 w-5 animate-spin" />
+      ) : (
+        isFollowing ? <UserMinus className="h-5 w-5" /> : <UserPlus className="h-5 w-5" />
+      )}
+    </Button>
   )
+}else{
+  return (
+    <Button 
+
+      onClick={handleToggleFollow} 
+      disabled={isLoading}
+      title={isFollowing ? 'Unfollow' : 'Follow'}
+    >
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : (
+        isFollowing ? <p>Unfollow</p> : <p>Follow</p>
+      )}
+    </Button>
+  )
+}
 }

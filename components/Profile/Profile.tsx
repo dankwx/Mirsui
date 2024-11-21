@@ -29,6 +29,8 @@ interface User {
     last_name: string
     avatar_url: string | null
     username: string | null
+    followingId: string
+    
   }
 
   interface Rating {

@@ -17,6 +17,7 @@ interface User {
     last_name: string
     avatar_url: string | null
     username: string | null
+    followingId: string
 }
 
 interface Rating {
@@ -28,17 +29,21 @@ interface FollowersFollowingSectionProps {
     totalFollowers: User[]
     totalFollowing: User[]
     rating: Rating[]
-    isOwnProfile?: boolean
-    isLoggedIn?: boolean
+    isOwnProfile: boolean
+    isLoggedIn: boolean
+    followingId : string
 }
 
 const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
     totalFollowers,
     totalFollowing,
     rating,
-    isOwnProfile = false,
-    isLoggedIn = true
+    isOwnProfile,
+    isLoggedIn,
+    followingId
 }) => {
+
+    console.log("loggeid do componente baixo",isLoggedIn)
     return (
         <div className="mt-2 flex items-center space-x-4 font-sans">
             <Dialog>
@@ -121,15 +126,20 @@ const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
                                         {user.last_name}
                                     </p>
                                 </div>
-                                {!isOwnProfile && isLoggedIn && (
-                                    <FollowButton
-                                        followingId={user.id}
+                                {isOwnProfile && !isLoggedIn &&(
+                                    
+                                    <div>
+                                        <FollowButton
+                                        followingId={followingId}
                                         initialIsFollowing={true} // Você pode ajustar isso conforme necessário
+                                        type='text'
                                     />
+                                    </div>
                                 )}
-                                <Button variant="outline" size="sm">
-                                    Unfollow                                                            {/* BOTAO DE UNFOLLOW*/}
-                                </Button>
+                                
+                                
+                                
+                                
                             </div>
                         ))}
                     </div>

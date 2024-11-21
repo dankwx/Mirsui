@@ -22,6 +22,7 @@ interface User {
     last_name: string
     avatar_url: string | null
     username: string | null
+    followingId: string
 }
 
 interface Rating {
@@ -170,6 +171,9 @@ export default function UserProfile({
                         totalFollowers={totalFollowers}
                         totalFollowing={totalFollowing}
                         rating={rating}
+                        followingId={followingId}
+                        isLoggedIn={isLoggedIn}
+                        isOwnProfile={isOwnProfile}
                     />
                     {isOwnProfile ? (
                         <Dialog
@@ -230,7 +234,7 @@ export default function UserProfile({
                     )}
                 </div>
 
-                {!isOwnProfile && isLoggedIn && (
+                {!isOwnProfile && !isLoggedIn && (
                     <FollowButton
                         followingId={followingId}
                         initialIsFollowing={initialIsFollowing}

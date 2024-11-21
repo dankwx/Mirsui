@@ -9,6 +9,8 @@ interface User {
     avatar_url: string | null
     username: string | null
     rating: number
+    followingId: string
+
   }
 
   interface Achievments {

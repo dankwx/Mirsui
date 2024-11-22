@@ -119,7 +119,8 @@ export default function UserProfile({
             <div className="flex">
                 <div className="flex flex-col">
                     {isOwnProfile && !isLoggedIn ? (
-                        <Dialog
+                        <div className='flex items-center'>
+<Dialog
                             open={openDisplayName}
                             onOpenChange={setOpenDisplayName}
                         >
@@ -135,10 +136,11 @@ export default function UserProfile({
                                         {currentDisplayName}
                                     </Button>
                                     <p className="ml-2 items-start justify-center text-left text-gray-600">
-                                        {username}
+                                        
                                     </p>
                                 </div>
                             </DialogTrigger>
+                            {username}
                             <DialogContent>
                                 <DialogHeader>
                                     <DialogTitle>
@@ -157,6 +159,8 @@ export default function UserProfile({
                                 </form>
                             </DialogContent>
                         </Dialog>
+                        </div>
+                        
                     ) : (
                         <div className="flex flex-row text-left items-center">
                             <p className="m-0 h-fit w-fit items-center justify-center p-0 text-right font-sans text-3xl font-bold">

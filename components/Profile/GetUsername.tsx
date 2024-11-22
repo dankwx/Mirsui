@@ -118,7 +118,7 @@ export default function UserProfile({
         <div className="flex h-fit flex-col">
             <div className="flex">
                 <div className="flex flex-col">
-                    {isOwnProfile ? (
+                    {isOwnProfile && !isLoggedIn ? (
                         <Dialog
                             open={openDisplayName}
                             onOpenChange={setOpenDisplayName}

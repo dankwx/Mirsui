@@ -158,14 +158,14 @@ export default function UserProfile({
                             </DialogContent>
                         </Dialog>
                     ) : (
-                        <>
-                            <p className="items-start justify-start text-left">
+                        <div className="flex flex-row text-left items-center">
+                            <p className="m-0 h-fit w-fit items-center justify-center p-0 text-right font-sans text-3xl font-bold">
+                            {currentDisplayName}
+                            </p>
+                            <p className="ml-2 items-start justify-center text-left text-gray-600">
                                 {username}
                             </p>
-                            <p className="h-fit font-sans text-3xl font-bold">
-                                {currentDisplayName}
-                            </p>
-                        </>
+                            </div>
                     )}
                     <FollowersFollowingSection
                         totalFollowers={totalFollowers}

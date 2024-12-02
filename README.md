@@ -1,8 +1,11 @@
-## Eternizing v-2
-
+<br/>
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/e900d415-41a2-4a1b-a388-6caa631586ca" alt="Eternizing v-2">
+</div>
+<br/>
 A social network for claiming and showcasing discoveries before they went viral.
 
-![image](https://github.com/user-attachments/assets/629955e2-06f7-4188-b92d-32960d42d0b2)
+
 
 
 ## To-do

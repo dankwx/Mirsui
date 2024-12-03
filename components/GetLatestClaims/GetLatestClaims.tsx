@@ -112,7 +112,7 @@ export default function GetLatestClaims() {
     )
 
     return (
-        <div className="p-4 font-sans w-fit">
+        <div className="w-fit p-4 font-sans">
             <h1 className="font-sans text-2xl font-bold">
                 O que as pessoas estão salvando
             </h1>

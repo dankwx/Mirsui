@@ -1,7 +1,6 @@
 'use client'
 
-import LoginModal from "../ModalLogin/ModalLogin"
-
+import LoginModal from '../ModalLogin/ModalLogin'
 
 export default function LoginModalButton() {
     const handleLogin = (email: string, password: string) => {

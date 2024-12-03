@@ -24,20 +24,33 @@ const ArtistsList: React.FC<ArtistsListProps> = ({ artists }) => {
     return (
         <div className="grid gap-6">
             {artists.map((artist) => (
-                <div key={artist.artist_id} className="flex items-center gap-4 bg-muted p-4 rounded-lg">
+                <div
+                    key={artist.artist_id}
+                    className="flex items-center gap-4 rounded-lg bg-muted p-4"
+                >
                     <img
                         src={artist.artists.artist_image_url}
                         alt={artist.artists.artist_name}
-                        width={64} height={6} className="rounded"
+                        width={64}
+                        height={6}
+                        className="rounded"
                     />
                     <div className="flex-1">
-                        <div className="text-lg font-medium">{artist.artists.artist_name}</div>
-                        <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="outline" className="border-green-600 bg-background">
+                        <div className="text-lg font-medium">
+                            {artist.artists.artist_name}
+                        </div>
+                        <div className="mt-2 flex items-center gap-2">
+                            <Badge
+                                variant="outline"
+                                className="border-green-600 bg-background"
+                            >
                                 <CircleIcon className="h-3 w-3 -translate-x-1 animate-pulse fill-green-300 text-green-300" />
                                 Listened before they went mainstream
                             </Badge>
-                            <Badge variant="outline" className="border-orange-600 bg-background">
+                            <Badge
+                                variant="outline"
+                                className="border-orange-600 bg-background"
+                            >
                                 <StarIcon className="h-3 w-3 -translate-x-1 animate-pulse fill-orange-300 text-orange-300" />
                                 Rare find
                             </Badge>

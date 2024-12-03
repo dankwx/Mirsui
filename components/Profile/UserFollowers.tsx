@@ -31,7 +31,7 @@ interface FollowersFollowingSectionProps {
     rating: Rating[]
     isOwnProfile: boolean
     isLoggedIn: boolean
-    followingId : string
+    followingId: string
 }
 
 const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
@@ -40,10 +40,9 @@ const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
     rating,
     isOwnProfile,
     isLoggedIn,
-    followingId
+    followingId,
 }) => {
-
-    console.log("loggeid do componente baixo",isLoggedIn)
+    console.log('loggeid do componente baixo', isLoggedIn)
     return (
         <div className="mt-2 flex items-center space-x-4 font-sans">
             <Dialog>
@@ -126,21 +125,15 @@ const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
                                         {user.last_name}
                                     </p>
                                 </div>
-                                {isOwnProfile && !isLoggedIn &&(
-                                    
+                                {isOwnProfile && !isLoggedIn && (
                                     <div>
                                         <FollowButton
-                                        followingId={user.id}
-                                        initialIsFollowing={true} // Você pode ajustar isso conforme necessário
-                                        type='text'
-
-                                    />
+                                            followingId={user.id}
+                                            initialIsFollowing={true} // Você pode ajustar isso conforme necessário
+                                            type="text"
+                                        />
                                     </div>
                                 )}
-                                
-                                
-                                
-                                
                             </div>
                         ))}
                     </div>

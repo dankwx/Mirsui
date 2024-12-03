@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState } from 'react'
 import { login, signup } from './actions'
@@ -10,7 +10,7 @@ export default function LoginPage() {
         email: '',
         password: '',
         username: '',
-        displayName: ''
+        displayName: '',
     })
 
     const handleLogin = (email: string, password: string) => {
@@ -52,24 +52,48 @@ export default function LoginPage() {
             {registrationStep === 1 ? (
                 <form onSubmit={handleNextStep}>
                     <label htmlFor="email">Email:</label>
-                    <input id="email" name="email" type="email" required 
-                           value={formData.email} onChange={handleInputChange} />
+                    <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={handleInputChange}
+                    />
 
                     <label htmlFor="password">Password:</label>
-                    <input id="password" name="password" type="password" required 
-                           value={formData.password} onChange={handleInputChange} />
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        required
+                        value={formData.password}
+                        onChange={handleInputChange}
+                    />
 
                     <label htmlFor="username">Username:</label>
-                    <input id="username" name="username" type="text" required 
-                           value={formData.username} onChange={handleInputChange} />
+                    <input
+                        id="username"
+                        name="username"
+                        type="text"
+                        required
+                        value={formData.username}
+                        onChange={handleInputChange}
+                    />
 
                     <button type="submit">Próxima etapa</button>
                 </form>
             ) : (
                 <form onSubmit={handleSignup}>
                     <label htmlFor="displayName">Display Name:</label>
-                    <input id="displayName" name="displayName" type="text" required 
-                           value={formData.displayName} onChange={handleInputChange} />
+                    <input
+                        id="displayName"
+                        name="displayName"
+                        type="text"
+                        required
+                        value={formData.displayName}
+                        onChange={handleInputChange}
+                    />
 
                     <button type="submit">Finalizar registro</button>
                 </form>

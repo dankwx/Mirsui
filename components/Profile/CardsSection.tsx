@@ -17,21 +17,31 @@ const CardsSection: React.FC<CardsSectionProps> = ({
     totalFollowing,
 }) => {
     return (
-        <div className="mb-8 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg p-6 text-white">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="text-4xl font-bold mb-2">{totalSavedSongs}</div>
-              <div className="text-sm opacity-80">Saved Songs</div>
+        <div className="mb-8 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 p-6 text-white">
+            <div className="grid grid-cols-3 gap-4">
+                <div className="text-center">
+                    <div className="mb-2 text-4xl font-bold">
+                        {totalSavedSongs}
+                    </div>
+                    <div className="text-sm opacity-80">Saved Songs</div>
+                </div>
+                <div className="text-center">
+                    <div className="mb-2 text-4xl font-bold">
+                        {totalSavedYouTubeChannels}
+                    </div>
+                    <div className="text-sm opacity-80">
+                        Saved YouTube Channels
+                    </div>
+                </div>
+                <div className="text-center">
+                    <div className="mb-2 text-4xl font-bold">
+                        {totalSavedSpotifyArtists}
+                    </div>
+                    <div className="text-sm opacity-80">
+                        Saved Spotify Artists
+                    </div>
+                </div>
             </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold mb-2">{totalSavedYouTubeChannels}</div>
-              <div className="text-sm opacity-80">Saved YouTube Channels</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold mb-2">{totalSavedSpotifyArtists}</div>
-              <div className="text-sm opacity-80">Saved Spotify Artists</div>
-            </div>
-          </div>
         </div>
     )
 }

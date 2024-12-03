@@ -1,6 +1,6 @@
-"use client"
+'use client'
 
-import { SignOut } from "./actions"
+import { SignOut } from './actions'
 
 export default function Deslog() {
     return (

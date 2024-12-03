@@ -10,10 +10,9 @@ interface User {
     username: string | null
     rating: number
     followingId: string
+}
 
-  }
-
-  interface Achievments {
+interface Achievments {
     achievement_id: string
     title: string
     description: string
@@ -36,8 +35,6 @@ interface ProfileDetailsProps {
     followingId: string
 }
 
-
-
 const ProfileDetails: React.FC<ProfileDetailsProps> = ({
     isLoggedIn,
     userData,
@@ -45,16 +42,17 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
     totalFollowers,
     totalFollowing,
     rating,
-    userAchievments
+    userAchievments,
 }) => {
-
     return (
         <Profile
             isLoggedIn={isLoggedIn}
             username={userData.username}
             displayName={userData.display_name || userData.username}
             avatar_url={userData.avatar_url}
-            updateDisplayNameAction={isOwnProfile ? updateDisplayName : undefined}
+            updateDisplayNameAction={
+                isOwnProfile ? updateDisplayName : undefined
+            }
             updateDescriptionAction={
                 isOwnProfile ? updateDescription : undefined
             }

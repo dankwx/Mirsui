@@ -83,18 +83,18 @@ export default function ClaimArtist() {
             console.log('Usuário não autenticado.')
             return
         }
-    
+
         if (!accessToken) {
             console.log('Token do Spotify não disponível.')
             return
         }
-    
+
         try {
             setIsLoading(true)
             setError('')
             setSuccessMessage('')
             const artistId = extractArtistId(artistInput)
-    
+
             const response = await fetch(
                 `https://api.spotify.com/v1/artists/${artistId}`,
                 {
@@ -103,29 +103,29 @@ export default function ClaimArtist() {
                     },
                 }
             )
-    
+
             if (!response.ok) {
                 throw new Error('Artista não encontrado')
             }
-    
+
             const artistInfo: ArtistData = await response.json()
             setArtistData(artistInfo)
-    
+
             // Check if artist exists in Artists table
             const { data: existingArtists, error: checkError } = await supabase
                 .from('artists')
                 .select()
                 .eq('id', artistInfo.id)
-    
+
             if (checkError) {
                 throw new Error(`Error checking artist: ${checkError.message}`)
             }
-    
+
             let existingArtist: Artist | null = null
             if (existingArtists && existingArtists.length > 0) {
                 existingArtist = existingArtists[0] as Artist
             }
-    
+
             if (!existingArtist) {
                 // Artist doesn't exist, so create it
                 const { data: newArtist, error: insertError } = await supabase
@@ -141,42 +141,48 @@ export default function ClaimArtist() {
                     })
                     .select()
                     .single()
-    
+
                 if (insertError) {
-                    throw new Error(`Error creating artist: ${insertError.message}`)
+                    throw new Error(
+                        `Error creating artist: ${insertError.message}`
+                    )
                 }
-    
+
                 existingArtist = newArtist
             } else {
                 // Artist exists, update popularity and last_updated
-                const { data: updatedArtist, error: updateError } = await supabase
-                    .from('artists')
-                    .update({
-                        current_popularity: artistInfo.popularity,
-                        last_updated: new Date().toISOString(),
-                    })
-                    .eq('id', artistInfo.id)
-                    .select()
-                    .single()
-    
+                const { data: updatedArtist, error: updateError } =
+                    await supabase
+                        .from('artists')
+                        .update({
+                            current_popularity: artistInfo.popularity,
+                            last_updated: new Date().toISOString(),
+                        })
+                        .eq('id', artistInfo.id)
+                        .select()
+                        .single()
+
                 if (updateError) {
-                    throw new Error(`Error updating artist: ${updateError.message}`)
+                    throw new Error(
+                        `Error updating artist: ${updateError.message}`
+                    )
                 }
-    
+
                 existingArtist = updatedArtist
             }
-    
+
             // Check if user has already claimed this artist
-            const { data: existingClaim, error: claimCheckError } = await supabase
-                .from('userartistclaims')
-                .select()
-                .eq('user_id', loggedUser)
-                .eq('artist_id', artistInfo.id)
-    
+            const { data: existingClaim, error: claimCheckError } =
+                await supabase
+                    .from('userartistclaims')
+                    .select()
+                    .eq('user_id', loggedUser)
+                    .eq('artist_id', artistInfo.id)
+
             if (claimCheckError) {
                 throw new Error('Error checking existing claim')
             }
-    
+
             if (existingClaim && existingClaim.length > 0) {
                 setSuccessMessage('You have already claimed this artist')
             } else {
@@ -188,11 +194,11 @@ export default function ClaimArtist() {
                         artist_id: artistInfo.id,
                         popularity_at_claim: artistInfo.popularity,
                     })
-    
+
                 if (claimError) {
                     throw new Error('Error storing claim')
                 }
-    
+
                 setSuccessMessage('Artist claimed successfully!')
             }
         } catch (error) {
@@ -230,9 +236,7 @@ export default function ClaimArtist() {
                 </button>
                 {error && <p className="mt-2 text-red-500">{error}</p>}
                 {successMessage && (
-                    <p className="mt-2 text-green-500">
-                        {successMessage}
-                    </p>
+                    <p className="mt-2 text-green-500">{successMessage}</p>
                 )}
                 {artistData && (
                     <div className="mt-4">

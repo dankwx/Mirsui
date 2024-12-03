@@ -30,15 +30,14 @@ interface User {
     avatar_url: string | null
     username: string | null
     followingId: string
-    
-  }
+}
 
-  interface Rating {
+interface Rating {
     id: string
     rating: number
 }
 
-  interface Achievments {
+interface Achievments {
     achievement_id: string
     title: string
     description: string

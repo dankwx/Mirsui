@@ -55,7 +55,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
     const handleForgotPassword = (e: React.FormEvent) => {
         e.preventDefault()
         // Implement forgot password logic here
-        console.log("Forgot password for email:", email)
+        console.log('Forgot password for email:', email)
     }
 
     const renderForm = () => (
@@ -75,9 +75,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                     onChange={(e) => setEmail(e.target.value)}
                 />
             </div>
-            <div 
-                className={`grid grid-cols-4 items-center gap-4 transition-all duration-300 ease-in-out origin-top
-                            ${!isForgotPassword ? 'max-h-20 opacity-100 scale-y-100' : 'max-h-0 opacity-0 scale-y-0'}`}
+            <div
+                className={`grid origin-top grid-cols-4 items-center gap-4 transition-all duration-300 ease-in-out ${!isForgotPassword ? 'max-h-20 scale-y-100 opacity-100' : 'max-h-0 scale-y-0 opacity-0'}`}
             >
                 <Label htmlFor="password" className="text-right">
                     Password
@@ -93,9 +92,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                     onChange={(e) => setPassword(e.target.value)}
                 />
             </div>
-            <div 
-                className={`grid grid-cols-4 items-center gap-4 transition-all duration-300 ease-in-out origin-top
-                            ${isRegistering && !isForgotPassword ? 'max-h-20 opacity-100 scale-y-100' : 'max-h-0 opacity-0 scale-y-0'}`}
+            <div
+                className={`grid origin-top grid-cols-4 items-center gap-4 transition-all duration-300 ease-in-out ${isRegistering && !isForgotPassword ? 'max-h-20 scale-y-100 opacity-100' : 'max-h-0 scale-y-0 opacity-0'}`}
             >
                 <Label htmlFor="username" className="text-right">
                     Username
@@ -120,28 +118,38 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>
-                        {isForgotPassword ? 'Forgot Password' : isRegistering ? 'Register' : 'Log In'}
+                        {isForgotPassword
+                            ? 'Forgot Password'
+                            : isRegistering
+                              ? 'Register'
+                              : 'Log In'}
                     </DialogTitle>
                     <DialogDescription>
-                        {isForgotPassword 
-                            ? 'Enter your email address and we\'ll send you a link to reset your password.' 
+                        {isForgotPassword
+                            ? "Enter your email address and we'll send you a link to reset your password."
                             : 'By continuing, you agree to our User Agreement and acknowledge that you understand the Privacy Policy.'}
                     </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={isForgotPassword ? handleForgotPassword : handleSubmit}>
+                <form
+                    onSubmit={
+                        isForgotPassword ? handleForgotPassword : handleSubmit
+                    }
+                >
                     {renderForm()}
                     {error && (
-                        <div className="text-red-500 text-sm mt-2">
-                            {error}
-                        </div>
+                        <div className="mt-2 text-sm text-red-500">{error}</div>
                     )}
                     <DialogFooter>
                         <Button type="submit">
-                            {isForgotPassword ? 'Reset Password' : isRegistering ? 'Register' : 'Login'}
+                            {isForgotPassword
+                                ? 'Reset Password'
+                                : isRegistering
+                                  ? 'Register'
+                                  : 'Login'}
                         </Button>
                     </DialogFooter>
                 </form>
-                <div className="flex justify-between mt-4">
+                <div className="mt-4 flex justify-between">
                     <DialogDescription
                         className="cursor-pointer text-blue-600"
                         onClick={() => {
@@ -150,7 +158,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                             setError(null)
                         }}
                     >
-                        {isRegistering ? 'Already have an account? Log in' : "Don't have an account? Register"}
+                        {isRegistering
+                            ? 'Already have an account? Log in'
+                            : "Don't have an account? Register"}
                     </DialogDescription>
                     {!isRegistering && (
                         <DialogDescription
@@ -161,7 +171,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                                 setError(null)
                             }}
                         >
-                            {isForgotPassword ? 'Back to Login' : 'Forgot Password?'}
+                            {isForgotPassword
+                                ? 'Back to Login'
+                                : 'Forgot Password?'}
                         </DialogDescription>
                     )}
                 </div>

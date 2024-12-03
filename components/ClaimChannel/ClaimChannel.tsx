@@ -40,8 +40,7 @@ export default function ClaimChannel() {
     const [successMessage, setSuccessMessage] = useState('')
     const [userIds, setUserIds] = useState<string[]>([])
     const [error, setError] = useState('')
-    const [isAuthChecked, setIsAuthChecked] = useState(false);
-    
+    const [isAuthChecked, setIsAuthChecked] = useState(false)
 
     useEffect(() => {
         fetchChannelInfo()
@@ -63,7 +62,7 @@ export default function ClaimChannel() {
             }
         } catch (error) {
             console.log('nao deu pra fazer fetch de usuario', error)
-        } finally{
+        } finally {
             setIsAuthChecked(true)
         }
     }
@@ -274,50 +273,42 @@ export default function ClaimChannel() {
     return (
         <div>
             <div className="h-fit w-fit bg-red-200 p-4">
-                        <h2 className="mb-4 text-xl font-bold">
-                            Buscar Informações do Canal do YouTube
-                        </h2>
-                        <input
-                            type="text"
-                            value={channelInput}
-                            onChange={(e) => setChannelInput(e.target.value)}
-                            placeholder="Enter YouTube channel URL or username"
-                            className="mb-4 w-full rounded border border-gray-300 p-2"
+                <h2 className="mb-4 text-xl font-bold">
+                    Buscar Informações do Canal do YouTube
+                </h2>
+                <input
+                    type="text"
+                    value={channelInput}
+                    onChange={(e) => setChannelInput(e.target.value)}
+                    placeholder="Enter YouTube channel URL or username"
+                    className="mb-4 w-full rounded border border-gray-300 p-2"
+                />
+                <button
+                    className="rounded bg-blue-500 p-2 text-white"
+                    onClick={fetchChannelInformation}
+                    disabled={isLoading}
+                >
+                    {isLoading ? 'Buscando...' : 'Buscar'}
+                </button>
+                {error && <p className="mt-2 text-red-500">{error}</p>}
+                {successMessage && (
+                    <p className="mt-2 text-green-500">{successMessage}</p>
+                )}
+                {channelData && (
+                    <div className="mt-4">
+                        <h3 className="text-lg font-semibold">
+                            {channelData.snippet.title}
+                        </h3>
+                        <p>Channel ID: {channelData.id}</p>
+                        <p>Published At: {channelData.snippet.publishedAt}</p>
+                        <img
+                            src={channelData.snippet.thumbnails.default.url}
+                            alt="Channel Thumbnail"
+                            className="mt-2"
                         />
-                        <button
-                            className="rounded bg-blue-500 p-2 text-white"
-                            onClick={fetchChannelInformation}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? 'Buscando...' : 'Buscar'}
-                        </button>
-                        {error && <p className="mt-2 text-red-500">{error}</p>}
-                        {successMessage && (
-                            <p className="mt-2 text-green-500">
-                                {successMessage}
-                            </p>
-                        )}
-                        {channelData && (
-                            <div className="mt-4">
-                                <h3 className="text-lg font-semibold">
-                                    {channelData.snippet.title}
-                                </h3>
-                                <p>Channel ID: {channelData.id}</p>
-                                <p>
-                                    Published At:{' '}
-                                    {channelData.snippet.publishedAt}
-                                </p>
-                                <img
-                                    src={
-                                        channelData.snippet.thumbnails.default
-                                            .url
-                                    }
-                                    alt="Channel Thumbnail"
-                                    className="mt-2"
-                                />
-                            </div>
-                        )}
                     </div>
+                )}
+            </div>
         </div>
     )
 }

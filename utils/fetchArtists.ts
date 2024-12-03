@@ -7,7 +7,8 @@ export async function fetchArtists(userId: string) {
 
     const { data, error } = await supabase
         .from('userartistclaims')
-        .select(`
+        .select(
+            `
             artist_id,
             claim_date,
             popularity_at_claim,
@@ -16,7 +17,8 @@ export async function fetchArtists(userId: string) {
                 artist_name,
                 artist_image_url
             )
-        `)
+        `
+        )
         .eq('user_id', userId)
         .order('claim_date', { ascending: false })
 
@@ -33,8 +35,8 @@ export async function fetchArtists(userId: string) {
         artists: {
             id: item.artists.id,
             artist_name: item.artists.artist_name,
-            artist_image_url: item.artists.artist_image_url
-        }
+            artist_image_url: item.artists.artist_image_url,
+        },
     }))
 
     return formattedData

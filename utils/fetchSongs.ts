@@ -5,7 +5,8 @@ export async function fetchSongs(userId: string) {
 
     const { data, error } = await supabase
         .from('tracks')
-        .select(`
+        .select(
+            `
             id,
             track_url,
             track_title,
@@ -14,7 +15,8 @@ export async function fetchSongs(userId: string) {
             popularity,
             track_thumbnail,
             claimedat
-        `)
+        `
+        )
         .eq('user_id', userId)
         .order('claimedat', { ascending: false })
 
@@ -32,7 +34,7 @@ export async function fetchSongs(userId: string) {
         album_name: item.album_name,
         popularity: item.popularity,
         track_thumbnail: item.track_thumbnail,
-        claimedat: item.claimedat
+        claimedat: item.claimedat,
     }))
 
     return formattedData

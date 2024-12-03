@@ -6,14 +6,22 @@ import ArtistsList from './ArtistsList'
 import SongsList from './SongsList'
 import ChannelsList from './ChannelsList'
 
-const TabsSection: React.FC<{ artists: any[], songs: any[], channels: any[] }> = ({ artists, songs, channels }) => {
+const TabsSection: React.FC<{
+    artists: any[]
+    songs: any[]
+    channels: any[]
+}> = ({ artists, songs, channels }) => {
     return (
-        <Tabs defaultValue="songs" className='min-w-full max-w-full flex-1'>
+        <Tabs defaultValue="songs" className="min-w-full max-w-full flex-1">
             <TabsList className="mb-6 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <TabsTrigger value="songs">Saved Songs</TabsTrigger>
-                    <TabsTrigger value="youtube">Saved YouTube Channels</TabsTrigger>
-                    <TabsTrigger value="artists">Saved Spotify Artists</TabsTrigger>
+                    <TabsTrigger value="youtube">
+                        Saved YouTube Channels
+                    </TabsTrigger>
+                    <TabsTrigger value="artists">
+                        Saved Spotify Artists
+                    </TabsTrigger>
                 </div>
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="sm">
@@ -26,7 +34,7 @@ const TabsSection: React.FC<{ artists: any[], songs: any[], channels: any[] }> =
                     </Button>
                 </div>
             </TabsList>
-            <TabsContent value="songs" className='w-full'>
+            <TabsContent value="songs" className="w-full">
                 <SongsList songs={songs} />
             </TabsContent>
             <TabsContent value="youtube">

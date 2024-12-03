@@ -1,4 +1,3 @@
-
 export const firebaseConfig = {
     apiKey: 'AIzaSyCu9z1qvcuB3GZaHSP7fJKHpTqdlWcXrr8',
     authDomain: 'eternizing-ec5a2.firebaseapp.com',

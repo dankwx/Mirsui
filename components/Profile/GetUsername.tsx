@@ -119,57 +119,54 @@ export default function UserProfile({
             <div className="flex">
                 <div className="flex flex-col">
                     {isOwnProfile && !isLoggedIn ? (
-                        <div className='flex items-center'>
-<Dialog
-                            open={openDisplayName}
-                            onOpenChange={setOpenDisplayName}
-                        >
-                            <DialogTrigger
-                                className="m-0 items-center text-left"
-                                asChild
+                        <div className="flex items-center">
+                            <Dialog
+                                open={openDisplayName}
+                                onOpenChange={setOpenDisplayName}
                             >
-                                <div className="flex flex-row text-left">
-                                    <Button
-                                        variant="link"
-                                        className="m-0 h-fit w-fit items-center justify-center p-0 text-right font-sans text-3xl font-bold"
-                                    >
-                                        {currentDisplayName}
-                                    </Button>
-                                    <p className="ml-2 items-start justify-center text-left text-gray-600">
-                                        
-                                    </p>
-                                </div>
-                            </DialogTrigger>
-                            {username}
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>
-                                        Change DisplayName
-                                    </DialogTitle>
-                                </DialogHeader>
-                                <form action={handleDisplayNameSubmit}>
-                                    <Input
-                                        name="display_name"
-                                        placeholder="New displayname"
-                                        defaultValue={currentDisplayName}
-                                    />
-                                    <Button type="submit" className="mt-4">
-                                        Update Displayname
-                                    </Button>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
+                                <DialogTrigger
+                                    className="m-0 items-center text-left"
+                                    asChild
+                                >
+                                    <div className="flex flex-row text-left">
+                                        <Button
+                                            variant="link"
+                                            className="m-0 h-fit w-fit items-center justify-center p-0 text-right font-sans text-3xl font-bold"
+                                        >
+                                            {currentDisplayName}
+                                        </Button>
+                                        <p className="ml-2 items-start justify-center text-left text-gray-600"></p>
+                                    </div>
+                                </DialogTrigger>
+                                {username}
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>
+                                            Change DisplayName
+                                        </DialogTitle>
+                                    </DialogHeader>
+                                    <form action={handleDisplayNameSubmit}>
+                                        <Input
+                                            name="display_name"
+                                            placeholder="New displayname"
+                                            defaultValue={currentDisplayName}
+                                        />
+                                        <Button type="submit" className="mt-4">
+                                            Update Displayname
+                                        </Button>
+                                    </form>
+                                </DialogContent>
+                            </Dialog>
                         </div>
-                        
                     ) : (
-                        <div className="flex flex-row text-left items-center">
+                        <div className="flex flex-row items-center text-left">
                             <p className="m-0 h-fit w-fit items-center justify-center p-0 text-right font-sans text-3xl font-bold">
-                            {currentDisplayName}
+                                {currentDisplayName}
                             </p>
                             <p className="ml-2 items-start justify-center text-left text-gray-600">
                                 {username}
                             </p>
-                            </div>
+                        </div>
                     )}
                     <FollowersFollowingSection
                         totalFollowers={totalFollowers}

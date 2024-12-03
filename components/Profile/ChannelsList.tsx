@@ -19,18 +19,28 @@ type ChannelsListProps = {
 
 const ChannelsList: React.FC<ChannelsListProps> = ({ channels }) => {
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4">
             {channels.map((channel) => (
-                <div key={channel.id} className="flex items-center gap-4 bg-muted p-4 rounded-lg">
+                <div
+                    key={channel.id}
+                    className="flex items-center gap-4 rounded-lg bg-muted p-4"
+                >
                     <img
                         src={channel.channel_thumbnail}
                         alt={channel.channel_name}
-                        width={64} height={64} className="rounded-md"
+                        width={64}
+                        height={64}
+                        className="rounded-md"
                     />
                     <div className="flex-1">
-                        <div className="text-lg font-medium">{channel.channel_name}</div>
-                        <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="outline" className="border-green-600 bg-background">
+                        <div className="text-lg font-medium">
+                            {channel.channel_name}
+                        </div>
+                        <div className="mt-2 flex items-center gap-2">
+                            <Badge
+                                variant="outline"
+                                className="border-green-600 bg-background"
+                            >
                                 <CircleIcon className="h-3 w-3 -translate-x-1 animate-pulse fill-green-300 text-green-300" />
                                 Watched before it went viral
                             </Badge>

@@ -5,7 +5,8 @@ export async function fetchChannels(userId: string) {
 
     const { data, error } = await supabase
         .from('userchannelclaims')
-        .select(`
+        .select(
+            `
             id,
             channel_id,
             claim_date,
@@ -15,7 +16,8 @@ export async function fetchChannels(userId: string) {
                 channel_name,
                 profile_image_url
             )
-        `)
+        `
+        )
         .eq('user_id', userId)
         .order('claim_date', { ascending: false })
 
@@ -31,7 +33,7 @@ export async function fetchChannels(userId: string) {
         claim_date: item.claim_date,
         subscriber_count_at_claim: item.subscriber_count_at_claim,
         channel_name: item.channels.channel_name,
-        channel_thumbnail: item.channels.profile_image_url
+        channel_thumbnail: item.channels.profile_image_url,
     }))
 
     return formattedData

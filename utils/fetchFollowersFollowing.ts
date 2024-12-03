@@ -6,23 +6,24 @@ export async function fetchFollowers(userId: string) {
     try {
         const { data, error, status } = await supabase
             .from('followers')
-            .select(`
+            .select(
+                `
                 follower:follower_id (
                     id,
                     email
                    
                 )
-            `)
+            `
+            )
             .eq('following_id', userId)
 
         if (error && status !== 406) {
             throw error
         }
 
-        
         // Extrair apenas os dados do follower
-        const followers = data?.map(item => item.follower) || []
-        
+        const followers = data?.map((item) => item.follower) || []
+
         return followers
     } catch (error) {
         console.error('Erro ao buscar seguidores:', error)
@@ -37,22 +38,23 @@ export async function fetchFollowing(userId: string) {
     try {
         const { data, error, status } = await supabase
             .from('followers')
-            .select(`
+            .select(
+                `
                 following:following_id (
                     id,
                     email
                 
                 )
-            `)
+            `
+            )
             .eq('follower_id', userId)
 
         if (error && status !== 406) {
             throw error
         }
 
-
         if (data) {
-            const following = data.map(item => item.following)
+            const following = data.map((item) => item.following)
             return following
         } else {
             console.log('Nenhum seguido encontrado')

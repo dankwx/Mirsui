@@ -103,8 +103,8 @@ export default function ClaimVideo() {
             const statistics = data.items[0].statistics
 
             if (!snippet || !statistics) {
-    throw new Error('Dados do vídeo não encontrados.')
-}
+                throw new Error('Dados do vídeo não encontrados.')
+            }
 
             // Consulta para contar quantas vezes a video_url já foi inserida
             const { count: videoCount, error: countError } = await supabase

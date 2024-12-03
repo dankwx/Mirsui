@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
@@ -9,12 +9,14 @@ export default function ProfilePage() {
     const [profile, setProfile] = useState<any>(null)
 
     async function handleGetProfile() {
-        const { data: { session } } = await supabase.auth.getSession()
+        const {
+            data: { session },
+        } = await supabase.auth.getSession()
         if (session) {
             const { data, error } = await supabase.rpc('get_user_profile', {
                 user_id: session.user.id,
             })
-    
+
             if (error) {
                 console.error('Error fetching profile:', error)
             } else {

@@ -1,7 +1,7 @@
 import React from 'react'
 import { fetchSongs } from '@/utils/fetchSongs'
 import { Badge } from '../ui/badge'
-import { CircleIcon, StarIcon } from 'lucide-react'
+import { CircleIcon, ClockIcon, StarIcon, TrendingUpIcon } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Card, CardContent } from '../ui/card'
 
@@ -32,8 +32,32 @@ const SongsList: React.FC<SongsListProps> = ({ songs }) => {
                             className="object-cover"
                             style={{ aspectRatio: '1/1', objectFit: 'cover' }}
                         />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity hover:opacity-100">
-                            <Button variant="secondary">View Album</Button>
+
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/70 p-4 opacity-0 transition-opacity hover:opacity-100">
+                            <div className="space-y-2 text-center text-white">
+                                <div className="flex items-center justify-center gap-2">
+                                    <ClockIcon className="h-5 w-5" />
+                                    <span className="text-sm">
+                                        Claimed on:{' '}
+                                        {new Date(
+                                            song.claimedat
+                                        ).toLocaleDateString()}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-center gap-2">
+                                    <TrendingUpIcon className="h-5 w-5" />
+                                    <span className="text-sm">
+                                        Popularity: {song.popularity}/100
+                                    </span>
+                                </div>
+                                <div className="mt-2 text-xs opacity-75">
+                                    {song.popularity > 80
+                                        ? '🔥 Hot track! Trending worldwide'
+                                        : song.popularity > 50
+                                          ? '🚀 Gaining momentum'
+                                          : '🌱 Underground gem'}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <CardContent className="p-4">

@@ -41,7 +41,7 @@ const SongsList: React.FC<SongsListProps> = ({ songs }) => {
                                         Claimed on:{' '}
                                         {new Date(
                                             song.claimedat
-                                        ).toLocaleDateString()}
+                                        ).toLocaleDateString('pt-BR')}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-center gap-2">

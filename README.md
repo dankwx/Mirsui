@@ -1,7 +1,9 @@
 <br/>
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/e900d415-41a2-4a1b-a388-6caa631586ca" alt="Eternizing v-2">
+  <img src="https://github.com/user-attachments/assets/e210b7d1-16b8-4914-8f9d-fd0f7d835b33" alt="Eternizing v-2">
 </div>
+
+
 <br/>
 A social network for claiming and showcasing discoveries before they went viral.
 

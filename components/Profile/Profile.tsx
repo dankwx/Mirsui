@@ -1,5 +1,8 @@
+'use client'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import UserProfile from './GetUsername'
+import { useState } from 'react'
 
 interface ProfileProps {
     isLoggedIn: boolean
@@ -21,6 +24,7 @@ interface ProfileProps {
     userAchievments: Achievments[]
     followingId: string
     initialIsFollowing: boolean
+    onAvatarClick?: (isClicked: boolean) => void // New prop for avatar click handler
 }
 
 interface User {
@@ -59,11 +63,25 @@ export default function Profile({
     userAchievments,
     followingId,
     initialIsFollowing,
+    onAvatarClick,
 }: ProfileProps) {
+    const [isAvatarClicked, setIsAvatarClicked] = useState(false)
+
+    const handleAvatarClick = () => {
+        console.log(isAvatarClicked)
+        const newClickedState = !isAvatarClicked
+        setIsAvatarClicked(newClickedState)
+
+        // If onAvatarClick prop is provided, call it with the new state
+        if (onAvatarClick) {
+            onAvatarClick(newClickedState)
+        }
+    }
+
     return (
         <div className="mt-16 pt-4">
             <div className="flex">
-                <Avatar className="mr-4 h-20 w-20">
+                <Avatar className="mr-4 h-20 w-20" onClick={handleAvatarClick}>
                     <AvatarImage src={avatar_url} />
                     <AvatarFallback>PF</AvatarFallback>
                 </Avatar>

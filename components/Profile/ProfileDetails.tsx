@@ -1,6 +1,10 @@
+'use client'
+
 import Profile from '@/components/Profile/Profile'
 import { updateDisplayName } from '@/components/Profile/actions'
 import { updateDescription } from '@/components/Profile/actions'
+import { useState } from 'react'
+import ModalChangeAvatar from '../ModalChangeAvatar/ModalChangeAvatar'
 
 interface User {
     id: string
@@ -44,6 +48,17 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
     rating,
     userAchievments,
 }) => {
+    const [avatarClicked, setAvatarClicked] = useState(false)
+
+    const handleAvatarClick = (isClicked: boolean) => {
+        setAvatarClicked(isClicked)
+        // Do whatever you want when avatar is clicked
+    }
+    if (avatarClicked && !isLoggedIn && isOwnProfile) {
+        return (
+            <ModalChangeAvatar username={userData.username} id={userData.id} />
+        )
+    }
     return (
         <Profile
             isLoggedIn={isLoggedIn}
@@ -64,6 +79,7 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
             userAchievments={userAchievments}
             followingId={userData.id}
             initialIsFollowing={userData.isFollowing}
+            onAvatarClick={handleAvatarClick}
         />
     )
 }

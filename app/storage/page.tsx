@@ -63,16 +63,35 @@ export default function ImageUpload() {
 
             // Gera um nome único para o arquivo
             const fileExt = file.name.split('.').pop()
-            const fileName = `${user.id}_${Math.random().toString(36).substr(2)}.${fileExt}`
-            const filePath = `user-profile-images/${user.id}/${fileName}`
+            const filePath = `${user.id}/profile-picture`
 
             // Faz upload para o Supabase Storage
             const { error } = await supabase.storage
                 .from('user-profile-images')
-                .upload(filePath, file)
+                .upload(filePath, file, {
+                    cacheControl: '300', // The image will be cached for 5 minutes
+                    upsert: false,
+                })
 
-            if (error) throw error
+            if (error?.message === 'The resource already exists') {
+                const { error: updateError } = await supabase.storage
+                    .from('user-profile-images')
+                    .update(filePath, file, {
+                        cacheControl: '300', // The image will be cached for 5 minutes
+                        upsert: false,
+                    })
 
+                if (updateError) throw updateError
+            }
+
+            // Gera e exibe a URL pública do arquivo
+            const {
+                data: { publicUrl },
+            } = supabase.storage
+                .from('user-profile-images')
+                .getPublicUrl(filePath)
+
+            console.log('URL pública do arquivo:', publicUrl)
             setUploadSuccess(true)
         } catch (error) {
             console.error('Erro no upload:', error)

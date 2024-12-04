@@ -49,38 +49,45 @@ const ProfileDetails: React.FC<ProfileDetailsProps> = ({
     userAchievments,
 }) => {
     const [avatarClicked, setAvatarClicked] = useState(false)
-
     const handleAvatarClick = (isClicked: boolean) => {
-        setAvatarClicked(isClicked)
-        // Do whatever you want when avatar is clicked
+        // Só permite abrir o modal se for o próprio perfil e estiver logado
+        if (!isLoggedIn && isOwnProfile) {
+            setAvatarClicked((prev) => !prev)
+        }
     }
-    if (avatarClicked && !isLoggedIn && isOwnProfile) {
-        return (
-            <ModalChangeAvatar username={userData.username} id={userData.id} />
-        )
-    }
+
     return (
-        <Profile
-            isLoggedIn={isLoggedIn}
-            username={userData.username}
-            displayName={userData.display_name || userData.username}
-            avatar_url={userData.avatar_url}
-            updateDisplayNameAction={
-                isOwnProfile ? updateDisplayName : undefined
-            }
-            updateDescriptionAction={
-                isOwnProfile ? updateDescription : undefined
-            }
-            isOwnProfile={isOwnProfile}
-            description={userData.description}
-            totalFollowers={totalFollowers}
-            totalFollowing={totalFollowing}
-            rating={rating}
-            userAchievments={userAchievments}
-            followingId={userData.id}
-            initialIsFollowing={userData.isFollowing}
-            onAvatarClick={handleAvatarClick}
-        />
+        <div>
+            <Profile
+                isLoggedIn={isLoggedIn}
+                username={userData.username}
+                displayName={userData.display_name || userData.username}
+                avatar_url={userData.avatar_url}
+                updateDisplayNameAction={
+                    isOwnProfile ? updateDisplayName : undefined
+                }
+                updateDescriptionAction={
+                    isOwnProfile ? updateDescription : undefined
+                }
+                isOwnProfile={isOwnProfile}
+                description={userData.description}
+                totalFollowers={totalFollowers}
+                totalFollowing={totalFollowing}
+                rating={rating}
+                userAchievments={userAchievments}
+                followingId={userData.id}
+                initialIsFollowing={userData.isFollowing}
+                onAvatarClick={handleAvatarClick}
+            />
+            {avatarClicked && (
+                <ModalChangeAvatar
+                    username={userData.username}
+                    id={userData.id}
+                    onAvatarClick={setAvatarClicked}
+                    avatar_url={userData.avatar_url}
+                />
+            )}
+        </div>
     )
 }
 

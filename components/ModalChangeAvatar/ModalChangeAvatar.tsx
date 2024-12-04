@@ -2,6 +2,17 @@
 
 import React, { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { LoaderCircle, Upload, Check } from 'lucide-react'
 
 // Ensure these environment variables are set in your .env.local
 const supabase = createClient(
@@ -12,9 +23,16 @@ const supabase = createClient(
 interface UserProps {
     username: string | null
     id: string
+    onAvatarClick: (isClicked: boolean) => void
+    avatar_url?: string | null
 }
 
-export default function ModalChangeAvatar({ username, id }: UserProps) {
+export default function ModalChangeAvatar({
+    username,
+    id,
+    onAvatarClick,
+    avatar_url,
+}: UserProps) {
     const [file, setFile] = useState<File | null>(null)
     const [uploading, setUploading] = useState(false)
     const [uploadSuccess, setUploadSuccess] = useState(false)
@@ -25,7 +43,6 @@ export default function ModalChangeAvatar({ username, id }: UserProps) {
             const selectedFile = e.target.files[0]
             setFile(selectedFile)
 
-            // Create a preview of the selected image
             const reader = new FileReader()
             reader.onloadend = () => {
                 setPreviewUrl(reader.result as string)
@@ -40,20 +57,17 @@ export default function ModalChangeAvatar({ username, id }: UserProps) {
         try {
             setUploading(true)
 
-            // Generate a unique file path
             const filePath = `${id}/profile-picture`
 
-            // Upload to Supabase Storage
             const { error } = await supabase.storage
                 .from('user-profile-images')
                 .upload(filePath, file, {
-                    cacheControl: '300', // The image will be cached for 5 minutes
-                    upsert: true, // Allow overwriting existing file
+                    cacheControl: '300',
+                    upsert: true,
                 })
 
             if (error) throw error
 
-            // Generate and log the public URL
             const {
                 data: { publicUrl },
             } = supabase.storage
@@ -62,14 +76,21 @@ export default function ModalChangeAvatar({ username, id }: UserProps) {
 
             console.log('Profile picture URL:', publicUrl)
 
-            // Update user's profile with the new avatar URL if needed
-            // You might want to add this to your user profile in the database
+            // TODO: Implement avatar URL update in your users table
             // const { error: updateError } = await supabase
             //     .from('users')
             //     .update({ avatar_url: publicUrl })
             //     .eq('id', id)
 
             setUploadSuccess(true)
+
+            // Reset state and close modal after success
+            setTimeout(() => {
+                onAvatarClick(false)
+                setUploadSuccess(false)
+                setFile(null)
+                setPreviewUrl(null)
+            }, 1500)
         } catch (error) {
             console.error('Error uploading profile picture:', error)
             alert('Failed to upload profile picture')
@@ -79,47 +100,66 @@ export default function ModalChangeAvatar({ username, id }: UserProps) {
     }
 
     return (
-        <div className="mx-auto max-w-md p-6">
-            <h2 className="mb-4 text-2xl font-bold">Change Profile Picture</h2>
+        <Dialog open={true} onOpenChange={(open) => onAvatarClick(open)}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Change Profile Picture</DialogTitle>
+                    <DialogDescription>
+                        Upload a new profile picture for {username}
+                    </DialogDescription>
+                </DialogHeader>
 
-            {previewUrl && (
-                <div className="mb-4">
-                    <img
-                        src={previewUrl}
-                        alt="Preview"
-                        className="mx-auto mb-4 h-32 w-32 rounded-full object-cover"
+                <div className="grid w-full gap-4">
+                    {(previewUrl || avatar_url) && (
+                        <div className="flex justify-center">
+                            <img
+                                src={previewUrl || avatar_url || ''}
+                                alt="Preview"
+                                className="h-32 w-32 rounded-full object-cover"
+                            />
+                        </div>
+                    )}
+
+                    <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="w-full"
                     />
                 </div>
-            )}
 
-            <div className="mb-4">
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="w-full"
-                />
-            </div>
-
-            <button
-                onClick={handleUpload}
-                disabled={!file || uploading}
-                className="w-full rounded bg-blue-500 py-2 text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300"
-            >
-                {uploading ? 'Uploading...' : 'Upload Profile Picture'}
-            </button>
-
-            {uploadSuccess && (
-                <p className="mt-4 text-center text-green-500">
-                    Profile picture uploaded successfully!
-                </p>
-            )}
-
-            {username && (
-                <p className="mt-4 text-center text-gray-600">
-                    Editing profile for: {username}
-                </p>
-            )}
-        </div>
+                <DialogFooter>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => onAvatarClick(false)}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleUpload}
+                        disabled={!file || uploading}
+                        className="min-w-[120px]"
+                    >
+                        {uploading ? (
+                            <>
+                                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                                Uploading...
+                            </>
+                        ) : uploadSuccess ? (
+                            <>
+                                <Check className="mr-2 h-4 w-4" />
+                                Uploaded
+                            </>
+                        ) : (
+                            <>
+                                <Upload className="mr-2 h-4 w-4" />
+                                Upload
+                            </>
+                        )}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     )
 }

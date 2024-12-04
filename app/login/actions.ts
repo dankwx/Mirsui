@@ -71,7 +71,7 @@ export async function signup(formData: FormData) {
 
     // URL padrão para o avatar
     const defaultAvatarUrl =
-        'https://tqprioqqitimssshcrcr.supabase.co/storage/v1/object/public/user-profile-images/222d9dae-90fd-47fa-832d-da1c4d8b92aa/profile-picture'
+        'https://tqprioqqitimssshcrcr.supabase.co/storage/v1/object/public/user-profile-images/default.jpg'
 
     const data = {
         email,

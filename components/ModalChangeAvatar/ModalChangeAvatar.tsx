@@ -76,11 +76,10 @@ export default function ModalChangeAvatar({
 
             console.log('Profile picture URL:', publicUrl)
 
-            // TODO: Implement avatar URL update in your users table
-            // const { error: updateError } = await supabase
-            //     .from('users')
-            //     .update({ avatar_url: publicUrl })
-            //     .eq('id', id)
+            const { error: updateError } = await supabase
+                .from('profiles')
+                .update({ avatar_url: publicUrl })
+                .eq('id', id)
 
             setUploadSuccess(true)
 

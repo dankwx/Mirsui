@@ -66,7 +66,12 @@ export async function signup(formData: FormData) {
     const password = formData.get('password') as string
     const username = formData.get('username') as string
 
+    // Gerar um display name aleatório
     const displayName = generateRandomDisplayName()
+
+    // URL padrão para o avatar
+    const defaultAvatarUrl =
+        'https://tqprioqqitimssshcrcr.supabase.co/storage/v1/object/public/user-profile-images/222d9dae-90fd-47fa-832d-da1c4d8b92aa/profile-picture'
 
     const data = {
         email,
@@ -75,6 +80,7 @@ export async function signup(formData: FormData) {
             data: {
                 username,
                 display_name: displayName,
+                avatar_url: defaultAvatarUrl,
             },
         },
     }

@@ -176,7 +176,7 @@ export default function UserProfile({
                         isLoggedIn={isLoggedIn}
                         isOwnProfile={isOwnProfile}
                     />
-                    {isOwnProfile ? (
+                    {isOwnProfile && !isLoggedIn ? (
                         <Dialog
                             open={openDescription}
                             onOpenChange={setOpenDescription}

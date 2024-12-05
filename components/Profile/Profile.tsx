@@ -82,13 +82,7 @@ export default function Profile({
         <div className="mt-16 pt-4">
             <div className="flex">
                 <Avatar className="mr-4 h-20 w-20" onClick={handleAvatarClick}>
-                    <AvatarImage
-                        src={
-                            avatar_url
-                                ? avatar_url
-                                : 'https://tqprioqqitimssshcrcr.supabase.co/storage/v1/object/public/user-profile-images/default.jpg'
-                        }
-                    />
+                    <AvatarImage src={avatar_url} />
                     <AvatarFallback>PF</AvatarFallback>
                 </Avatar>
                 <UserProfile

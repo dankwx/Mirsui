@@ -68,16 +68,18 @@ const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
                                         {user.avatar_url ? (
                                             <AvatarImage
                                                 src={user.avatar_url}
-                                                className="h-full w-full object-cover"
                                             />
                                         ) : (
                                             <AvatarFallback>PF</AvatarFallback>
                                         )}
                                     </Avatar>
 
-                                    <p className="text-gray-800">
+                                    <a
+                                        href={`http://localhost:3000/user/${user.last_name}`}
+                                        className="text-gray-800 hover:text-blue-500"
+                                    >
                                         {user.last_name}
-                                    </p>
+                                    </a>
                                 </div>
 
                                 <Button variant="outline" size="sm">
@@ -113,7 +115,11 @@ const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
                                     <Avatar className="mr-4 h-16 w-16 overflow-hidden rounded-full">
                                         {user.avatar_url ? (
                                             <AvatarImage
-                                                src={user.avatar_url}
+                                                src={
+                                                    user.avatar_url
+                                                        ? user.avatar_url
+                                                        : 'https://tqprioqqitimssshcrcr.supabase.co/storage/v1/object/public/user-profile-images/default.jpg'
+                                                }
                                                 className="h-full w-full object-cover"
                                             />
                                         ) : (
@@ -121,9 +127,12 @@ const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
                                         )}
                                     </Avatar>
 
-                                    <p className="text-gray-800">
+                                    <a
+                                        href={`http://localhost:3000/user/${user.last_name}`}
+                                        className="text-gray-800 hover:text-blue-500"
+                                    >
                                         {user.last_name}
-                                    </p>
+                                    </a>
                                 </div>
                                 {isOwnProfile && !isLoggedIn && (
                                     <div>

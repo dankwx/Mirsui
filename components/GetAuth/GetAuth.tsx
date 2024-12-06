@@ -147,9 +147,8 @@ export default async function GetAuth() {
                             <DropdownMenuItem>
                                 <Link href={`/user/${username}`}>Profile</Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem>Billing</DropdownMenuItem>
-                            <DropdownMenuItem>Team</DropdownMenuItem>
-                            <DropdownMenuItem>Subscription</DropdownMenuItem>
+                            <DropdownMenuItem>Help</DropdownMenuItem>
+                            <DropdownMenuItem>Privacy Policy</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="cursor-pointer">
                                 <Deslog />

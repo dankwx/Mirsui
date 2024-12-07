@@ -22,3 +22,4 @@ A social network for claiming and showcasing discoveries before they went viral.
 - [x] Add following and followers listing on profile
 - [ ] Add dark mode
 - [x] Add user profile custom avatar image
+- [ ] implement daisy ui

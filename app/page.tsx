@@ -9,7 +9,7 @@ export default async function Home() {
     const { data, error } = await supabase.auth.getUser()
 
     if (data.user) {
-        redirect('/faq')
+        redirect('/now')
     }
 
     return (

@@ -75,7 +75,7 @@ const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
                                     </Avatar>
 
                                     <a
-                                        href={`http://localhost:3000/user/${user.last_name}`}
+                                        href={`/user/${user.last_name}`}
                                         className="text-gray-800 hover:text-blue-500"
                                     >
                                         {user.last_name}
@@ -128,7 +128,7 @@ const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
                                     </Avatar>
 
                                     <a
-                                        href={`http://localhost:3000/user/${user.last_name}`}
+                                        href={`/user/${user.last_name}`}
                                         className="text-gray-800 hover:text-blue-500"
                                     >
                                         {user.last_name}

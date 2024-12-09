@@ -9,7 +9,9 @@ export default function ClaimTrackPage() {
             <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
                 <div className="flex h-full flex-1">
                     <Sidebar />
-                    <ClaimTrack />
+                    <div className="ml-20 mt-16">
+                        <ClaimTrack />
+                    </div>
                 </div>
             </div>
         </main>

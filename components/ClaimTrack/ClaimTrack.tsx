@@ -181,8 +181,8 @@ export default function ClaimTrack() {
         <main>
             <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
                 <div className="flex h-full flex-1">
-                    <div className="flex flex-col p-4">
-                        <p className="mb-4 text-lg font-semibold">
+                    <div className="flex flex-col">
+                        <p className="text-lg font-semibold">
                             Salvar faixa do Spotify
                         </p>
                         <div className="flex flex-col space-y-2">

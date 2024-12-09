@@ -1,11 +1,11 @@
 <br/>
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/0e672797-24cc-4cf5-a1c5-c11bd98ec109" alt="Eternizing v-2">
+  <img src="https://github.com/user-attachments/assets/0e672797-24cc-4cf5-a1c5-c11bd98ec109" alt="SoundSage">
 </div>
 
 
 <br/>
-A social network for claiming and showcasing discoveries before they went viral.
+Discover before the world does.
 
 
 

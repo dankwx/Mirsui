@@ -25,7 +25,7 @@ export default async function Home() {
                                 <p className="py-6 font-sans text-9xl font-bold">
                                     <span className="relative inline-block">
                                         <span className="subtle-wave-text text-nowrap">
-                                            eternize all.
+                                            sound sage
                                         </span>
                                         <span className="absolute -bottom-2 left-0 h-1 w-full animate-underline bg-black"></span>
                                     </span>

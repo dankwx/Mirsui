@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react'
 
 export interface UserTrack {
     track_url: string
+    track_uri: string
     track_title: string
     artist_name: string
     album_name: string
     popularity: number
+    discover_rating: number
     track_thumbnail: string
     position: number
     claimedat: Date
@@ -103,12 +105,13 @@ export default function ClaimTrack() {
             const trackId = match[1]
 
             const trackInfo = await fetchTrackInfo(trackId) // aqui da fetch de informações da música pela API do Spotify
+            console.log('Dados brutos da faixa obtidos da API do Spotify:', trackInfo)
 
             // Consulta para contar quantas vezes a track_url já foi inserida
             const { count: trackCount, error: countError } = await supabase
                 .from('tracks')
                 .select('*', { count: 'exact' })
-                .eq('track_url', trackUrl)
+                .eq('track_uri', trackInfo.uri)
 
             if (countError) {
                 throw countError
@@ -120,10 +123,12 @@ export default function ClaimTrack() {
             // Construir objeto UserTrack
             const newTrack: UserTrack = {
                 track_url: trackUrl,
+                track_uri: trackInfo.uri,
                 track_title: trackInfo.name,
                 artist_name: trackInfo.artists[0].name,
                 album_name: trackInfo.album.name,
                 popularity: trackInfo.popularity,
+                discover_rating: (100 - trackInfo.popularity + 100/ nextPosition),
                 track_thumbnail: trackInfo.album.images[0].url,
                 position: nextPosition,
                 claimedat: new Date(),
@@ -135,10 +140,12 @@ export default function ClaimTrack() {
                 .insert([
                     {
                         track_url: newTrack.track_url,
+                        track_uri: newTrack.track_uri,
                         track_title: newTrack.track_title,
                         artist_name: newTrack.artist_name,
                         album_name: newTrack.album_name,
                         popularity: newTrack.popularity,
+                        discover_rating: newTrack.discover_rating,
                         track_thumbnail: newTrack.track_thumbnail,
                         user_id: user_id,
                         position: newTrack.position,

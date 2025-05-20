@@ -8,10 +8,12 @@ import { Card, CardContent } from '../ui/card'
 type Song = {
     id: string
     track_url: string
+    track_uri: string
     track_title: string
     artist_name: string
     album_name: string
     popularity: number
+    discover_rating: number,
     track_thumbnail: string
     claimedat: string
 }
@@ -47,7 +49,7 @@ const SongsList: React.FC<SongsListProps> = ({ songs }) => {
                                 <div className="flex items-center justify-center gap-2">
                                     <TrendingUpIcon className="h-5 w-5" />
                                     <span className="text-sm">
-                                        Popularity: {song.popularity}/100
+                                        Discover Score: {song.discover_rating}
                                     </span>
                                 </div>
                                 <div className="mt-2 text-xs opacity-75">

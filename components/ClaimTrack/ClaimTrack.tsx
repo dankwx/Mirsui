@@ -102,7 +102,7 @@ export default function ClaimTrack() {
 
             const trackId = match[1]
 
-            const trackInfo = await fetchTrackInfo(trackId)
+            const trackInfo = await fetchTrackInfo(trackId) // aqui da fetch de informações da música pela API do Spotify
 
             // Consulta para contar quantas vezes a track_url já foi inserida
             const { count: trackCount, error: countError } = await supabase

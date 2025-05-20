@@ -13,6 +13,7 @@ export async function fetchSongs(userId: string) {
             artist_name,
             album_name,
             popularity,
+            discover_rating,
             track_thumbnail,
             claimedat
         `
@@ -33,6 +34,7 @@ export async function fetchSongs(userId: string) {
         artist_name: item.artist_name,
         album_name: item.album_name,
         popularity: item.popularity,
+        discover_rating: item.discover_rating,
         track_thumbnail: item.track_thumbnail,
         claimedat: item.claimedat,
     }))

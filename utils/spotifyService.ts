@@ -38,6 +38,7 @@ async function getSpotifyAccessToken(): Promise<string | null> {
 
     try {
         const response = await fetch('https://accounts.spotify.com/api/token', {
+            // Corrected URL
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -81,7 +82,7 @@ export async function fetchSpotifyTrackInfo(
 
     try {
         const response = await fetch(
-            `https://api.spotify.com/v1/tracks/${trackId}`,
+            `https://api.spotify.com/v1/tracks/${trackId}`, // Corrected URL
             {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,

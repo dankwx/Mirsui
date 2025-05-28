@@ -10,11 +10,13 @@ export interface SpotifyTrack {
     album: {
         name: string
         images: { url: string }[]
+        release_date: string
     }
     artists: { name: string }[]
     name: string
     popularity: number
     uri: string
+    duration_ms: number
 }
 
 // Em vez de variáveis globais simples, vamos usar um cache de módulo (singleton no servidor)

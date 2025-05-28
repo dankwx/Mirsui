@@ -39,6 +39,7 @@ export default async function TrackDetailsPage({
     let trackInfo: SpotifyTrack | null = null
     if (trackId) {
         trackInfo = await fetchSpotifyTrackInfo(trackId)
+        console.log({ trackInfo })
     }
 
     // Determine artist names
@@ -123,21 +124,36 @@ export default async function TrackDetailsPage({
                                                     'Álbum Desconhecido'}{' '}
                                                 •{' '}
                                                 {/* Placeholder for year if not available from Spotify API */}
-                                                {trackInfo
-                                                    ? '2019'
-                                                    : 'Ano Desconhecido'}{' '}
+                                                {trackInfo?.album.release_date
+                                                    ? new Date(
+                                                          trackInfo.album.release_date
+                                                      ).getFullYear()
+                                                    : 'Ano Desconhecido'}
                                             </p>
                                         </div>
 
                                         <div className="flex items-center gap-4 text-sm text-gray-500">
                                             <div className="flex items-center gap-1">
                                                 <Clock className="h-4 w-4" />
-                                                3:20{' '}
+                                                {trackInfo
+                                                    ? `${Math.floor(
+                                                          trackInfo.duration_ms /
+                                                              60000
+                                                      )}:${Math.floor(
+                                                          (trackInfo.duration_ms %
+                                                              60000) /
+                                                              1000
+                                                      )
+                                                          .toString()
+                                                          .padStart(2, '0')}`
+                                                    : 'N/A'}
                                                 {/* Placeholder for duration */}
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <Calendar className="h-4 w-4" />
-                                                29 Nov 2019{' '}
+                                                {trackInfo?.album
+                                                    .release_date || 'N/A'}
+                                                {/* Placeholder for release date */}
                                                 {/* Placeholder for release date */}
                                             </div>
                                         </div>

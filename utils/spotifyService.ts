@@ -17,11 +17,32 @@ export interface SpotifyTrack {
     popularity: number
     uri: string
     duration_ms: number
+    id: string
 }
 
-// Em vez de variáveis globais simples, vamos usar um cache de módulo (singleton no servidor)
-// para simular um cache persistente para o token dentro de uma única instância do servidor.
-// No entanto, para ambientes serverless, você precisará de uma estratégia diferente (veja ponto 2).
+// Nova interface para os resultados de busca
+export interface SpotifySearchResponse {
+    tracks: {
+        items: SpotifyTrack[]
+        total: number
+        limit: number
+        offset: number
+    }
+    artists: {
+        items: {
+            id: string
+            name: string
+            images: { url: string }[]
+            followers: { total: number }
+            genres: string[]
+        }[]
+        total: number
+        limit: number
+        offset: number
+    }
+}
+
+// Cache do token
 let cachedSpotifyAccessToken: string | null = null
 let cachedTokenExpiryTime: number | null = null
 
@@ -48,16 +69,13 @@ async function getSpotifyAccessToken(): Promise<string | null> {
 
     try {
         const response = await fetch('https://accounts.spotify.com/api/token', {
-            // <<-- CORRIGIDO AQUI
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 Authorization: 'Basic ' + btoa(clientId + ':' + clientSecret),
             },
             body: 'grant_type=client_credentials',
-            // O cache do Next.js para a requisição de token pode ser útil,
-            // mas o mais importante é o controle do token em si.
-            next: { revalidate: 3600 }, // Cache a resposta da requisição por 1 hora
+            next: { revalidate: 3600 },
         })
 
         if (!response.ok) {
@@ -72,7 +90,6 @@ async function getSpotifyAccessToken(): Promise<string | null> {
 
         const data: SpotifyTokenResponse = await response.json()
         cachedSpotifyAccessToken = data.access_token
-        // Define o tempo de expiração 5 minutos antes da expiração real
         cachedTokenExpiryTime =
             Date.now() + data.expires_in * 1000 - 5 * 60 * 1000
         console.log('Novo token do Spotify obtido e cacheado.')
@@ -95,14 +112,12 @@ export async function fetchSpotifyTrackInfo(
 
     try {
         const response = await fetch(
-            `https://api.spotify.com/v1/tracks/${trackId}`, // <<-- CORRIGIDO AQUI
+            `https://api.spotify.com/v1/tracks/${trackId}`,
             {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
-                // O cache do Next.js para as informações da faixa pode ser bem longo,
-                // já que as informações da faixa raramente mudam.
-                next: { revalidate: 86400 }, // Cache por 24 horas (exemplo)
+                next: { revalidate: 86400 },
             }
         )
 
@@ -113,7 +128,6 @@ export async function fetchSpotifyTrackInfo(
                 response.status,
                 errorText
             )
-            // Se o token expirou, forçamos a busca de um novo token na próxima tentativa
             if (
                 response.status === 401 &&
                 errorText.includes('The access token expired')
@@ -121,7 +135,7 @@ export async function fetchSpotifyTrackInfo(
                 console.warn(
                     'Token do Spotify expirou. Forçando renovação na próxima requisição.'
                 )
-                cachedSpotifyAccessToken = null // Invalida o token para forçar a renovação
+                cachedSpotifyAccessToken = null
                 cachedTokenExpiryTime = null
             }
             return null
@@ -130,6 +144,61 @@ export async function fetchSpotifyTrackInfo(
         return await response.json()
     } catch (error) {
         console.error(`Erro ao buscar informações da faixa ${trackId}:`, error)
+        return null
+    }
+}
+
+// Nova função para buscar no Spotify
+export async function searchSpotify(
+    query: string,
+    type: 'track' | 'artist' | 'album' = 'track',
+    limit: number = 10
+): Promise<SpotifySearchResponse | null> {
+    const accessToken = await getSpotifyAccessToken()
+
+    if (!accessToken) {
+        console.error('Token do Spotify não disponível.')
+        return null
+    }
+
+    if (!query.trim()) {
+        return null
+    }
+
+    try {
+        // Codifica a query para URL
+        const encodedQuery = encodeURIComponent(query.trim())
+        const searchTypes = type === 'track' ? 'track,artist' : type
+
+        const response = await fetch(
+            `https://api.spotify.com/v1/search?q=${encodedQuery}&type=${searchTypes}&limit=${limit}&market=BR`,
+            {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+                next: { revalidate: 300 }, // Cache por 5 minutos para buscas
+            }
+        )
+
+        if (!response.ok) {
+            const errorText = await response.text()
+            console.error(
+                `Falha ao buscar no Spotify para "${query}":`,
+                response.status,
+                errorText
+            )
+
+            if (response.status === 401) {
+                console.warn('Token do Spotify expirou. Invalidando cache.')
+                cachedSpotifyAccessToken = null
+                cachedTokenExpiryTime = null
+            }
+            return null
+        }
+
+        return await response.json()
+    } catch (error) {
+        console.error(`Erro ao buscar no Spotify para "${query}":`, error)
         return null
     }
 }

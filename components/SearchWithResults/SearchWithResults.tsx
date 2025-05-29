@@ -269,7 +269,8 @@ export default function SearchWithResults() {
                         {!results.tracks?.items?.length &&
                             !results.artists?.items?.length && (
                                 <div className="p-4 text-center text-sm text-gray-500">
-                                    Nenhum resultado encontrado para "{query}"
+                                    Nenhum resultado encontrado para &#34{query}
+                                    &#34
                                 </div>
                             )}
                     </div>

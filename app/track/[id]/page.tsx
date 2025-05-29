@@ -24,6 +24,9 @@ import {
     Star,
 } from 'lucide-react'
 
+// Import the new ClaimButton component
+import ClaimButton from '@/components/ClaimButton/ClaimButton'
+
 export default async function TrackDetailsPage({
     params,
 }: {
@@ -56,6 +59,28 @@ export default async function TrackDetailsPage({
     if (trackInfo?.uri) {
         totalClaims = await countTrackOccurrences(trackInfo.uri)
     }
+
+    // Check if current user has already claimed this track
+    let hasUserClaimed = false
+    let userClaimPosition = null
+
+    if (isLoggedIn && trackInfo?.uri) {
+        const supabase = createClient()
+        const { data: userClaim, error } = await supabase
+            .from('tracks')
+            .select('position')
+            .eq('user_id', authData.user?.id)
+            .eq('track_uri', trackInfo.uri)
+            .single()
+
+        if (!error && userClaim) {
+            hasUserClaimed = true
+            userClaimPosition = userClaim.position
+        }
+    }
+
+    // Construct Spotify URL for the track
+    const trackUrl = `https://open.spotify.com/track/${trackId}`
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
@@ -159,10 +184,34 @@ export default async function TrackDetailsPage({
                                         </div>
 
                                         <div className="flex gap-3 pt-4">
-                                            <Button className="flex-1">
-                                                <Heart className="mr-2 h-4 w-4" />
-                                                Reivindicar Música
-                                            </Button>
+                                            {/* Replace the old button with the new ClaimButton component */}
+                                            {trackInfo && (
+                                                <ClaimButton
+                                                    trackUri={trackInfo.uri}
+                                                    trackTitle={trackInfo.name}
+                                                    artistName={
+                                                        trackInfo.artists[0]
+                                                            ?.name ||
+                                                        'Artista Desconhecido'
+                                                    }
+                                                    albumName={
+                                                        trackInfo.album.name
+                                                    }
+                                                    popularity={
+                                                        trackInfo.popularity
+                                                    }
+                                                    trackThumbnail={
+                                                        albumImageUrl
+                                                    }
+                                                    trackUrl={trackUrl}
+                                                    initialClaimed={
+                                                        hasUserClaimed
+                                                    }
+                                                    userPosition={
+                                                        userClaimPosition
+                                                    }
+                                                />
+                                            )}
                                             <Button
                                                 variant="outline"
                                                 size="icon"

@@ -26,6 +26,8 @@ import {
 
 // Import the new ClaimButton component
 import ClaimButton from '@/components/ClaimButton/ClaimButton'
+import Header from '@/components/Header/Header'
+import Sidebar from '@/components/Sidebar/Sidebar'
 
 export default async function TrackDetailsPage({
     params,
@@ -85,21 +87,8 @@ export default async function TrackDetailsPage({
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
             {/* Header */}
-            <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm">
-                <div className="container mx-auto flex items-center justify-between px-4 py-4">
-                    <div className="flex items-center gap-2">
-                        <Music className="h-8 w-8 text-purple-600" />
-                        <span className="text-xl font-bold text-gray-900">
-                            SoundClaim
-                        </span>
-                    </div>
-                    <Button variant="outline" size="sm">
-                        <Share2 className="mr-2 h-4 w-4" />
-                        Compartilhar
-                    </Button>
-                </div>
-            </header>
-
+            <Header />
+            <Sidebar />
             {/* Main Content */}
             <div className="container mx-auto px-4 py-8">
                 <div className="grid gap-8 lg:grid-cols-3">

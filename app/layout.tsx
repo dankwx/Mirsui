@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/toaster'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-    title: 'SoungSage',
+    title: 'SoundSage',
     description:
         'Claim your music and prove that you litened to it before it got popular',
 }

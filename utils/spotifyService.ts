@@ -202,3 +202,71 @@ export async function searchSpotify(
         return null
     }
 }
+
+// Adicione esta interface junto com as outras interfaces no seu spotifyService.ts
+
+export interface SpotifyArtist {
+    id: string
+    name: string
+    images: { url: string }[]
+    followers: { total: number }
+    genres: string[]
+    popularity: number
+    uri: string
+    external_urls: {
+        spotify: string
+    }
+}
+
+// Adicione esta função no final do seu spotifyService.ts
+
+export async function fetchSpotifyArtistInfo(
+    artistId: string
+): Promise<SpotifyArtist | null> {
+    const accessToken = await getSpotifyAccessToken()
+
+    if (!accessToken) {
+        console.error('Token do Spotify não disponível.')
+        return null
+    }
+
+    try {
+        const response = await fetch(
+            `https://api.spotify.com/v1/artists/${artistId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+                next: { revalidate: 86400 },
+            }
+        )
+
+        if (!response.ok) {
+            const errorText = await response.text()
+            console.error(
+                `Falha ao buscar informações do artista ${artistId}:`,
+                response.status,
+                errorText
+            )
+            if (
+                response.status === 401 &&
+                errorText.includes('The access token expired')
+            ) {
+                console.warn(
+                    'Token do Spotify expirou. Forçando renovação na próxima requisição.'
+                )
+                cachedSpotifyAccessToken = null
+                cachedTokenExpiryTime = null
+            }
+            return null
+        }
+
+        return await response.json()
+    } catch (error) {
+        console.error(
+            `Erro ao buscar informações do artista ${artistId}:`,
+            error
+        )
+        return null
+    }
+}

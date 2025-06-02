@@ -28,8 +28,8 @@ export default async function ProfilePage({
     }
 
     const authData = await fetchAuthData()
-    const isLoggedIn = !authData ? true : false
-    const isOwnProfile = authData.user?.id === userData.id
+    const isLoggedIn = !!authData?.user // Corrigido: true se user existe
+    const isOwnProfile = authData?.user?.id === userData.id
 
     const artists = await fetchArtists(userData.id)
     const songs = await fetchSongs(userData.id)
@@ -45,213 +45,95 @@ export default async function ProfilePage({
 
     const supabase = createClient()
 
-    const {
-        data: { session },
-    } = await supabase.auth.getSession()
+    // Buscar dados adicionais
+    const { data: followingResult, error: followingError } = await supabase.rpc(
+        'get_user_following',
+        { user_uuid: userData.id }
+    )
 
-    let followingData = null
-    let followersData = null
-    let achievmentData = null
-    let ratingData = null
-    if (session) {
-        const { data: followingResult, error: followingError } =
-            await supabase.rpc('get_user_following', {
-                user_uuid: userData.id,
-            })
+    const { data: followersResult, error: followersError } = await supabase.rpc(
+        'get_user_followers',
+        { user_uuid: userData.id }
+    )
 
-        const { data: followersResult, error: followersError } =
-            await supabase.rpc('get_user_followers', {
-                user_uuid: userData.id,
-            })
+    const { data: achievmentResult, error: achievmentError } =
+        await supabase.rpc('get_user_achievements', { user_uuid: userData.id })
 
-        const { data: achievmentResult, error: achievmentError } =
-            await supabase.rpc('get_user_achievements', {
-                user_uuid: userData.id,
-            })
+    const { data: ratingResult, error: ratingError } = await supabase.rpc(
+        'get_user_rating',
+        { user_uuid: userData.id }
+    )
 
-        const { data: ratingResult, error: ratingError } = await supabase.rpc(
-            'get_user_rating',
-            {
-                user_uuid: userData.id,
-            }
-        )
-
-        if (followingError) {
-            console.error('Error fetching following:', followingError)
-        } else {
-            followingData = followingResult
-        }
-
-        if (followersError) {
-            console.error('Error fetching followers:', followersError)
-        } else {
-            followersData = followersResult
-        }
-
-        if (achievmentError) {
-            console.error('Error fetching achievments', achievmentError)
-        } else {
-            achievmentData = achievmentResult
-        }
-
-        if (ratingError) {
-            console.error('Error fetching achievments', ratingError)
-        } else {
-            ratingData = ratingResult
-        }
-
-        console.log('testeeee', userData.id)
-        // console.log("testeeee",followersData)
-        // console.log("achievmts:",achievmentData)
-        console.log('rating:', ratingData)
-        console.log('esta logado: ', isLoggedIn)
-
-        return (
-            <main className="flex min-h-screen flex-col">
-                <Header />
-                <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
-                    <div className="flex h-full flex-1">
-                        <Sidebar />
-                        <div className="ml-20 flex w-full flex-col px-6 font-sans">
-                            <div className="flex">
-                                <ProfileDetails
-                                    isLoggedIn={isLoggedIn}
-                                    userData={userData}
-                                    isOwnProfile={isOwnProfile}
-                                    totalFollowers={followersData}
-                                    totalFollowing={followingData}
-                                    rating={ratingData}
-                                    userAchievments={achievmentData}
-                                    followingId={userData.id}
-                                />
-                            </div>
-                            <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
-                                <main className="py-8">
-                                    <CardsSection
-                                        totalSavedSongs={totalSavedSongs}
-                                        totalSavedYouTubeChannels={
-                                            totalSavedYouTubeChannels
-                                        }
-                                        totalSavedSpotifyArtists={
-                                            totalSavedSpotifyArtists
-                                        }
-                                        totalFollowers={followersData}
-                                        totalFollowing={followingData}
-                                    />
-
-                                    <div className="mt-8 w-full">
-                                        <TabsSection
-                                            artists={artists}
-                                            songs={songs}
-                                            channels={channels}
-                                        />
-                                    </div>
-                                </main>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        )
-    } else {
-        const { data: followingResult, error: followingError } =
-            await supabase.rpc('get_user_following', {
-                user_uuid: userData.id,
-            })
-
-        const { data: followersResult, error: followersError } =
-            await supabase.rpc('get_user_followers', {
-                user_uuid: userData.id,
-            })
-
-        const { data: achievmentResult, error: achievmentError } =
-            await supabase.rpc('get_user_achievements', {
-                user_uuid: userData.id,
-            })
-
-        const { data: ratingResult, error: ratingError } = await supabase.rpc(
-            'get_user_rating',
-            {
-                user_uuid: userData.id,
-            }
-        )
-
-        if (followingError) {
-            console.error('Error fetching following:', followingError)
-        } else {
-            followingData = followingResult
-        }
-
-        if (followersError) {
-            console.error('Error fetching followers:', followersError)
-        } else {
-            followersData = followersResult
-        }
-
-        if (achievmentError) {
-            console.error('Error fetching achievments', achievmentError)
-        } else {
-            achievmentData = achievmentResult
-        }
-
-        if (ratingError) {
-            console.error('Error fetching achievments', ratingError)
-        } else {
-            ratingData = ratingResult
-        }
-
-        console.log('testeeee', userData.id)
-        // console.log("testeeee",followersData)
-        // console.log("achievmts:",achievmentData)
-        console.log('rating:', ratingData)
-        console.log('esta logado: ', isLoggedIn)
-
-        return (
-            <main className="flex min-h-screen flex-col">
-                <Header />
-                <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
-                    <div className="flex h-full flex-1">
-                        <Sidebar />
-                        <div className="ml-20 flex w-full flex-col px-6 font-sans">
-                            <div className="flex">
-                                <ProfileDetails
-                                    isLoggedIn={!isLoggedIn}
-                                    userData={userData}
-                                    isOwnProfile={!isOwnProfile}
-                                    totalFollowers={followersData}
-                                    totalFollowing={followingData}
-                                    rating={ratingData}
-                                    userAchievments={achievmentData}
-                                    followingId={userData.id}
-                                />
-                            </div>
-                            <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
-                                <main className="py-8">
-                                    <CardsSection
-                                        totalSavedSongs={totalSavedSongs}
-                                        totalSavedYouTubeChannels={
-                                            totalSavedYouTubeChannels
-                                        }
-                                        totalSavedSpotifyArtists={
-                                            totalSavedSpotifyArtists
-                                        }
-                                        totalFollowers={followersData}
-                                        totalFollowing={followingData}
-                                    />
-
-                                    <div className="mt-8 w-full">
-                                        <TabsSection
-                                            artists={artists}
-                                            songs={songs}
-                                            channels={channels}
-                                        />
-                                    </div>
-                                </main>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        )
+    // Tratamento de erros
+    if (followingError) {
+        console.error('Error fetching following:', followingError)
     }
+    if (followersError) {
+        console.error('Error fetching followers:', followersError)
+    }
+    if (achievmentError) {
+        console.error('Error fetching achievements:', achievmentError)
+    }
+    if (ratingError) {
+        console.error('Error fetching rating:', ratingError)
+    }
+
+    const followingData = followingResult || null
+    const followersData = followersResult || null
+    const achievmentData = achievmentResult || null
+    const ratingData = ratingResult || null
+
+    console.log('User ID:', userData.id)
+    console.log('Rating:', ratingData)
+    console.log('Is logged in:', isLoggedIn)
+    console.log('Is own profile:', isOwnProfile)
+
+    return (
+        <main className="flex min-h-screen flex-col">
+            <Header />
+            <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
+                <div className="flex h-full flex-1">
+                    <Sidebar />
+                    <div className="ml-20 flex w-full flex-col px-6 font-sans">
+                        <div className="flex">
+                            <ProfileDetails
+                                isLoggedIn={isLoggedIn}
+                                userData={userData}
+                                isOwnProfile={isOwnProfile}
+                                totalFollowers={followersData}
+                                totalFollowing={followingData}
+                                rating={ratingData}
+                                userAchievments={achievmentData}
+                                followingId={userData.id}
+                            />
+                        </div>
+                        <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
+                            <main className="py-8">
+                                <CardsSection
+                                    totalSavedSongs={totalSavedSongs}
+                                    totalSavedYouTubeChannels={
+                                        totalSavedYouTubeChannels
+                                    }
+                                    totalSavedSpotifyArtists={
+                                        totalSavedSpotifyArtists
+                                    }
+                                    totalFollowers={followersData}
+                                    totalFollowing={followingData}
+                                />
+
+                                <div className="mt-8 w-full">
+                                    <TabsSection
+                                        artists={artists}
+                                        songs={songs}
+                                        channels={channels}
+                                        canRemove={isOwnProfile} // Permite remoção apenas no próprio perfil
+                                    />
+                                </div>
+                            </main>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    )
 }

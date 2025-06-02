@@ -138,3 +138,57 @@ export async function toggleFollow(
         return { success: true, isFollowing: !existingFollow }
     }
 }
+
+export async function removeTrack(
+    trackId: string
+): Promise<{ success: boolean; message?: string }> {
+    const supabase = createClient()
+    const {
+        data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { success: false, message: 'User not authenticated' }
+    }
+
+    try {
+        // Verificar se a track pertence ao usuário logado
+        const { data: track, error: fetchError } = await supabase
+            .from('tracks')
+            .select('user_id')
+            .eq('id', trackId)
+            .single()
+
+        if (fetchError) {
+            console.error('Error fetching track:', fetchError)
+            return { success: false, message: 'Track not found' }
+        }
+
+        if (track.user_id !== user.id) {
+            return {
+                success: false,
+                message: 'Unauthorized to delete this track',
+            }
+        }
+
+        // Remover a track
+        const { error: deleteError } = await supabase
+            .from('tracks')
+            .delete()
+            .eq('id', trackId)
+            .eq('user_id', user.id) // Segurança adicional
+
+        if (deleteError) {
+            console.error('Error deleting track:', deleteError)
+            return { success: false, message: 'Failed to delete track' }
+        }
+
+        // Revalidar as páginas relevantes
+        revalidatePath(`/user/${user.id}`)
+
+        return { success: true, message: 'Track removed successfully' }
+    } catch (error) {
+        console.error('Unexpected error removing track:', error)
+        return { success: false, message: 'Unexpected error occurred' }
+    }
+}

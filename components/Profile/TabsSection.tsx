@@ -10,7 +10,8 @@ const TabsSection: React.FC<{
     artists: any[]
     songs: any[]
     channels: any[]
-}> = ({ artists, songs, channels }) => {
+    canRemove?: boolean // Nova prop para controlar se pode remover
+}> = ({ artists, songs, channels, canRemove = false }) => {
     return (
         <Tabs defaultValue="songs" className="min-w-full max-w-full flex-1">
             <TabsList className="mb-6 flex items-center justify-between">
@@ -35,7 +36,7 @@ const TabsSection: React.FC<{
                 </div>
             </TabsList>
             <TabsContent value="songs" className="w-full">
-                <SongsList songs={songs} />
+                <SongsList songs={songs} canRemove={canRemove} />
             </TabsContent>
             <TabsContent value="youtube">
                 <ChannelsList channels={channels} />

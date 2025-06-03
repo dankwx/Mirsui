@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { Music, Tv, Video, Mic, Menu, X } from 'lucide-react'
+import { Music, Tv, Video, Mic, Menu, X, Home, Library } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 
 // Tipo para o perfil do usuário
@@ -17,6 +17,12 @@ interface UserProfile {
 }
 
 const navigationItems = [
+    {
+        title: 'Home',
+        url: '/',
+        icon: Home,
+    },
+    { title: 'My Library', url: '/library', icon: Library },
     {
         title: 'Claim Channel',
         url: '/claimchannel',
@@ -112,7 +118,7 @@ export default function Sidebar() {
 
     return (
         <aside
-            className={`flex h-screen shrink-0 flex-col border-r border-border bg-slate-100 transition-all duration-300 ease-in-out ${
+            className={`flex h-screen shrink-0 flex-col border-r border-border bg-[#fafafa] transition-all duration-300 ease-in-out ${
                 isExpanded ? 'w-64' : 'w-16'
             }`}
         >

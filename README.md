@@ -22,3 +22,5 @@ Discover before the world does.
 -   [ ] implement daisy ui
 -   [ ] finish artist page
 -   [ ] finish artist page
+-   [ ] create documentation for the project
+-   [ ] migrate project from supabase to docker

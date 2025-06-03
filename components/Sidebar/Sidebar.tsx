@@ -40,7 +40,7 @@ const navigationItems = [
 ]
 
 export default function Sidebar() {
-    const [isExpanded, setIsExpanded] = useState(false)
+    const [isExpanded, setIsExpanded] = useState(true)
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
     const [isAuthChecked, setIsAuthChecked] = useState(false)
 

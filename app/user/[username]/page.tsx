@@ -71,45 +71,47 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
     }
 
     return (
-        <main className="flex min-h-screen flex-col">
-            <Header />
-            <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
-                <div className="flex h-full flex-1">
-                    <Sidebar />
-                    <div className="ml-20 flex w-full flex-col px-6 font-sans">
+        <div className="grid h-screen w-screen grid-cols-[auto_1fr] grid-rows-1 overflow-hidden">
+            {/* Sidebar - ocupa toda altura da tela */}
+            <Sidebar />
+
+            {/* Área principal - header + conteúdo */}
+            <div className="flex min-h-0 flex-col overflow-hidden">
+                {/* Header fixo */}
+                <Header />
+
+                {/* Conteúdo com scroll */}
+                <main className="flex-1 overflow-y-auto bg-background text-foreground">
+                    <div className="px-6 font-sans">
                         <ProfileDetails
                             userData={profileData}
                             isLoggedIn={isLoggedIn}
                             isOwnProfile={isOwnProfile}
                         />
 
-                        <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
-                            <main className="py-8">
-                                <CardsSection
-                                    totalSavedSongs={counters.savedSongs}
-                                    totalSavedYouTubeChannels={
-                                        counters.savedChannels
-                                    }
-                                    totalSavedSpotifyArtists={
-                                        counters.savedArtists
-                                    }
-                                    totalFollowers={followersResult.data || []}
-                                    totalFollowing={followingResult.data || []}
-                                />
+                        <div className="py-8">
+                            <CardsSection
+                                totalSavedSongs={counters.savedSongs}
+                                totalSavedYouTubeChannels={
+                                    counters.savedChannels
+                                }
+                                totalSavedSpotifyArtists={counters.savedArtists}
+                                totalFollowers={followersResult.data || []}
+                                totalFollowing={followingResult.data || []}
+                            />
 
-                                <div className="mt-8 w-full">
-                                    <TabsSection
-                                        artists={artists}
-                                        songs={songs}
-                                        channels={channels}
-                                        canRemove={isOwnProfile}
-                                    />
-                                </div>
-                            </main>
+                            <div className="mt-8 w-full">
+                                <TabsSection
+                                    artists={artists}
+                                    songs={songs}
+                                    channels={channels}
+                                    canRemove={isOwnProfile}
+                                />
+                            </div>
                         </div>
                     </div>
-                </div>
+                </main>
             </div>
-        </main>
+        </div>
     )
 }

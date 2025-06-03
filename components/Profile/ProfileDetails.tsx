@@ -1,94 +1,66 @@
+// ===================================
+// components/Profile/ProfileDetails.tsx
+// ===================================
+
 'use client'
 
-import Profile from '@/components/Profile/Profile'
-import { updateDisplayName } from '@/components/Profile/actions'
-import { updateDescription } from '@/components/Profile/actions'
 import { useState } from 'react'
+import Profile from '@/components/Profile/Profile'
 import ModalChangeAvatar from '../ModalChangeAvatar/ModalChangeAvatar'
-
-interface User {
-    id: string
-    first_name: string
-    last_name: string
-    avatar_url: string | null
-    username: string | null
-    rating: number
-    followingId: string
-}
-
-interface Achievments {
-    achievement_id: string
-    title: string
-    description: string
-    achieved_at: string
-}
-
-interface Rating {
-    id: string
-    rating: number
-}
+import {
+    updateDisplayName,
+    updateDescription,
+} from '@/components/Profile/actions'
+import type { User, Achievement, Rating } from '@/types/profile'
 
 interface ProfileDetailsProps {
-    isLoggedIn: any
-    userData: any
+    userData: User & {
+        totalFollowers: User[]
+        totalFollowing: User[]
+        achievements: Achievement[]
+        rating: Rating[]
+    }
+    isLoggedIn: boolean
     isOwnProfile: boolean
-    totalFollowers: User[]
-    totalFollowing: User[]
-    rating: Rating[]
-    userAchievments: Achievments[]
-    followingId: string
 }
 
-const ProfileDetails: React.FC<ProfileDetailsProps> = ({
-    isLoggedIn,
+export default function ProfileDetails({
     userData,
+    isLoggedIn,
     isOwnProfile,
-    totalFollowers,
-    totalFollowing,
-    rating,
-    userAchievments,
-}) => {
-    const [avatarClicked, setAvatarClicked] = useState(false)
-    const handleAvatarClick = (isClicked: boolean) => {
-        // Só permite abrir o modal se for o próprio perfil e estiver logado
-        if (!isLoggedIn && isOwnProfile) {
-            setAvatarClicked((prev) => !prev)
+}: ProfileDetailsProps) {
+    const [showAvatarModal, setShowAvatarModal] = useState(false)
+
+    const handleAvatarClick = () => {
+        // Only allow avatar change if it's own profile and user is logged in
+        if (isOwnProfile && isLoggedIn) {
+            setShowAvatarModal(true)
         }
     }
 
     return (
-        <div>
+        <>
             <Profile
+                userData={userData}
                 isLoggedIn={isLoggedIn}
-                username={userData.username}
-                displayName={userData.display_name || userData.username}
-                avatar_url={userData.avatar_url}
+                isOwnProfile={isOwnProfile}
                 updateDisplayNameAction={
                     isOwnProfile ? updateDisplayName : undefined
                 }
                 updateDescriptionAction={
                     isOwnProfile ? updateDescription : undefined
                 }
-                isOwnProfile={isOwnProfile}
-                description={userData.description}
-                totalFollowers={totalFollowers}
-                totalFollowing={totalFollowing}
-                rating={rating}
-                userAchievments={userAchievments}
-                followingId={userData.id}
-                initialIsFollowing={userData.isFollowing}
                 onAvatarClick={handleAvatarClick}
             />
-            {avatarClicked && (
+
+            {showAvatarModal && (
                 <ModalChangeAvatar
                     username={userData.username}
                     id={userData.id}
-                    onAvatarClick={setAvatarClicked}
                     avatar_url={userData.avatar_url}
+                    onAvatarClick={setShowAvatarModal}
                 />
             )}
-        </div>
+        </>
     )
 }
-
-export default ProfileDetails

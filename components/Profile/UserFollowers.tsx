@@ -1,3 +1,7 @@
+// ===================================
+// components/Profile/UserFollowers.tsx
+// ===================================
+
 import React from 'react'
 import {
     Dialog,
@@ -6,155 +10,131 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
-import { Badge } from '../ui/badge'
-import { Button } from '../ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import FollowButton from './FollowButton'
-
-interface User {
-    id: string
-    first_name: string
-    last_name: string
-    avatar_url: string | null
-    username: string | null
-    followingId: string
-}
-
-interface Rating {
-    id: string
-    rating: number
-}
+import type { User, Rating } from '@/types/profile'
 
 interface FollowersFollowingSectionProps {
-    totalFollowers: User[]
-    totalFollowing: User[]
+    followers: User[]
+    following: User[]
     rating: Rating[]
     isOwnProfile: boolean
     isLoggedIn: boolean
-    followingId: string
+    currentUserId: string
 }
 
-const FollowersFollowingSection: React.FC<FollowersFollowingSectionProps> = ({
-    totalFollowers,
-    totalFollowing,
+export default function FollowersFollowingSection({
+    followers,
+    following,
     rating,
     isOwnProfile,
     isLoggedIn,
-    followingId,
-}) => {
-    console.log('loggeid do componente baixo', isLoggedIn)
+    currentUserId,
+}: FollowersFollowingSectionProps) {
+    const currentRating = rating.length > 0 ? rating[0].rating : 0
+
+    const UserListItem = ({
+        user,
+        showFollowButton = false,
+    }: {
+        user: User
+        showFollowButton?: boolean
+    }) => (
+        <div className="flex items-center justify-between py-2">
+            <div className="flex items-center">
+                <Avatar className="mr-3 h-12 w-12">
+                    <AvatarImage
+                        src={user.avatar_url || undefined}
+                        alt={`${user.username}'s avatar`}
+                    />
+                    <AvatarFallback>
+                        {user.first_name?.[0] || user.username?.[0] || 'U'}
+                    </AvatarFallback>
+                </Avatar>
+                <a
+                    href={`/user/${user.username}`}
+                    className="font-medium text-gray-800 hover:text-blue-500"
+                >
+                    @{user.username}
+                </a>
+            </div>
+
+            {showFollowButton && isLoggedIn && user.id !== currentUserId && (
+                <FollowButton
+                    followingId={user.id}
+                    initialIsFollowing={user.isFollowing || false}
+                    type="text"
+                />
+            )}
+        </div>
+    )
+
     return (
         <div className="mt-2 flex items-center space-x-4 font-sans">
             <Dialog>
                 <DialogTrigger asChild>
-                    <div className="flex cursor-pointer flex-col items-center hover:opacity-80">
-                        <span className="text-sm text-gray-600">
-                            {totalFollowers.length} Seguidores
-                        </span>
-                    </div>
+                    <button className="cursor-pointer text-sm text-gray-600 hover:text-gray-800">
+                        <span className="font-semibold">
+                            {followers.length}
+                        </span>{' '}
+                        Seguidores
+                    </button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-w-md">
                     <DialogHeader>
                         <DialogTitle>Seguidores</DialogTitle>
                     </DialogHeader>
-                    <div className="py-4">
-                        {totalFollowers.map((user) => (
-                            <div
-                                key={user.id}
-                                className="flex flex-row items-center justify-between"
-                            >
-                                <div className="flex items-center justify-center">
-                                    <Avatar className="mr-4 h-16 w-16 overflow-hidden rounded-full">
-                                        {user.avatar_url ? (
-                                            <AvatarImage
-                                                src={user.avatar_url}
-                                            />
-                                        ) : (
-                                            <AvatarFallback>PF</AvatarFallback>
-                                        )}
-                                    </Avatar>
-
-                                    <a
-                                        href={`/user/${user.last_name}`}
-                                        className="text-gray-800 hover:text-blue-500"
-                                    >
-                                        {user.last_name}
-                                    </a>
-                                </div>
-
-                                <Button variant="outline" size="sm">
-                                    Unfollow
-                                </Button>
-                            </div>
-                        ))}
+                    <div className="max-h-96 overflow-y-auto">
+                        {followers.length > 0 ? (
+                            followers.map((user) => (
+                                <UserListItem
+                                    key={user.id}
+                                    user={user}
+                                    showFollowButton={!isOwnProfile}
+                                />
+                            ))
+                        ) : (
+                            <p className="py-4 text-center text-gray-500">
+                                Nenhum seguidor ainda
+                            </p>
+                        )}
                     </div>
                 </DialogContent>
             </Dialog>
+
             <Dialog>
                 <DialogTrigger asChild>
-                    <div className="flex">
-                        <div className="flex cursor-pointer flex-row items-center hover:opacity-80">
-                            <span className="text-sm text-gray-600">
-                                {totalFollowing.length} Seguindo
-                            </span>
-                        </div>
-                    </div>
+                    <button className="cursor-pointer text-sm text-gray-600 hover:text-gray-800">
+                        <span className="font-semibold">
+                            {following.length}
+                        </span>{' '}
+                        Seguindo
+                    </button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-w-md">
                     <DialogHeader>
                         <DialogTitle>Seguindo</DialogTitle>
                     </DialogHeader>
-
-                    <div className="py-4">
-                        {totalFollowing.map((user) => (
-                            <div
-                                key={user.id}
-                                className="flex flex-row items-center justify-between"
-                            >
-                                <div className="flex items-center justify-center">
-                                    <Avatar className="mr-4 h-16 w-16 overflow-hidden rounded-full">
-                                        {user.avatar_url ? (
-                                            <AvatarImage
-                                                src={
-                                                    user.avatar_url
-                                                        ? user.avatar_url
-                                                        : 'https://tqprioqqitimssshcrcr.supabase.co/storage/v1/object/public/user-profile-images/default.jpg'
-                                                }
-                                                className="h-full w-full object-cover"
-                                            />
-                                        ) : (
-                                            <AvatarFallback>PF</AvatarFallback>
-                                        )}
-                                    </Avatar>
-
-                                    <a
-                                        href={`/user/${user.last_name}`}
-                                        className="text-gray-800 hover:text-blue-500"
-                                    >
-                                        {user.last_name}
-                                    </a>
-                                </div>
-                                {isOwnProfile && !isLoggedIn && (
-                                    <div>
-                                        <FollowButton
-                                            followingId={user.id}
-                                            initialIsFollowing={true} // Você pode ajustar isso conforme necessário
-                                            type="text"
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                    <div className="max-h-96 overflow-y-auto">
+                        {following.length > 0 ? (
+                            following.map((user) => (
+                                <UserListItem
+                                    key={user.id}
+                                    user={user}
+                                    showFollowButton={isOwnProfile}
+                                />
+                            ))
+                        ) : (
+                            <p className="py-4 text-center text-gray-500">
+                                Não segue ninguém ainda
+                            </p>
+                        )}
                     </div>
                 </DialogContent>
             </Dialog>
-            <div>
-                <Badge variant="secondary">
-                    {rating.length > 0 ? rating[0].rating : 'N/A'} points
-                </Badge>
-            </div>
+
+            <Badge variant="secondary">{currentRating} pontos</Badge>
         </div>
     )
 }
-
-export default FollowersFollowingSection

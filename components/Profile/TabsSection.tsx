@@ -11,6 +11,7 @@ const TabsSection: React.FC<{
     songs: any[]
     channels: any[]
     canRemove?: boolean // Nova prop para controlar se pode remover
+    currentUserId?: string // ID do usuário atual, se necessário
 }> = ({ artists, songs, channels, canRemove = false }) => {
     return (
         <Tabs defaultValue="songs" className="min-w-full max-w-full flex-1">

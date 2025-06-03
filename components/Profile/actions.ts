@@ -2,7 +2,6 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 export async function updateDisplayName(
     formData: FormData
@@ -190,5 +189,115 @@ export async function removeTrack(
     } catch (error) {
         console.error('Unexpected error removing track:', error)
         return { success: false, message: 'Unexpected error occurred' }
+    }
+}
+
+// NOVA FUNÇÃO: Toggle Favorite
+export async function toggleFavorite(
+    trackId: string
+): Promise<{ success: boolean; isFavorited: boolean; message?: string }> {
+    const supabase = createClient()
+    const {
+        data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+        return {
+            success: false,
+            isFavorited: false,
+            message: 'User not authenticated',
+        }
+    }
+
+    try {
+        // Verificar se a track existe
+        const { data: track, error: trackError } = await supabase
+            .from('tracks')
+            .select('id')
+            .eq('id', trackId)
+            .single()
+
+        if (trackError || !track) {
+            return {
+                success: false,
+                isFavorited: false,
+                message: 'Track not found',
+            }
+        }
+
+        // Verificar se já está favoritada
+        const { data: existingFavorite, error: checkError } = await supabase
+            .from('favorites')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('track_id', parseInt(trackId))
+            .single()
+
+        if (checkError && checkError.code !== 'PGRST116') {
+            console.error('Error checking favorite status:', checkError)
+            return {
+                success: false,
+                isFavorited: false,
+                message: 'Error checking favorite status',
+            }
+        }
+
+        if (existingFavorite) {
+            // Desfavoritar
+            const { error: unfavoriteError } = await supabase
+                .from('favorites')
+                .delete()
+                .eq('user_id', user.id)
+                .eq('track_id', parseInt(trackId))
+
+            if (unfavoriteError) {
+                console.error('Error unfavoriting track:', unfavoriteError)
+                return {
+                    success: false,
+                    isFavorited: true,
+                    message: 'Error removing favorite',
+                }
+            }
+
+            // Revalidar páginas
+            revalidatePath(`/user/${user.id}`)
+            return {
+                success: true,
+                isFavorited: false,
+                message: 'Removed from favorites',
+            }
+        } else {
+            // Favoritar
+            const { error: favoriteError } = await supabase
+                .from('favorites')
+                .insert({
+                    user_id: user.id,
+                    track_id: parseInt(trackId),
+                })
+
+            if (favoriteError) {
+                console.error('Error favoriting track:', favoriteError)
+                return {
+                    success: false,
+                    isFavorited: false,
+                    message: 'Error adding favorite',
+                }
+            }
+
+            // Revalidar páginas
+            revalidatePath(`/user/${user.id}`)
+            return {
+                success: true,
+                isFavorited: true,
+                message: 'Added to favorites',
+            }
+        }
+    } catch (error) {
+        console.error('Unexpected error toggling favorite:', error)
+        return {
+            success: false,
+            isFavorited: false,
+            message: 'Unexpected error occurred',
+        }
     }
 }

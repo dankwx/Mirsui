@@ -30,11 +30,12 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
     const authData = await fetchAuthData()
     const isLoggedIn = !!authData?.user
     const isOwnProfile = authData?.user?.id === userData.id
+    const currentUserId = authData?.user?.id
 
     // Fetch all data in parallel
     const [
         artists,
-        songs,
+        songs, // Agora com informações de favoritos
         channels,
         followers,
         following,
@@ -44,7 +45,7 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
         ratingResult,
     ] = await Promise.all([
         fetchArtists(userData.id),
-        fetchSongs(userData.id),
+        fetchSongs(userData.id, currentUserId), // Passar o ID do usuário atual
         fetchChannels(userData.id),
         fetchFollowers(userData.id),
         fetchFollowing(userData.id),
@@ -106,6 +107,7 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
                                     songs={songs}
                                     channels={channels}
                                     canRemove={isOwnProfile}
+                                    currentUserId={currentUserId} // Passar o ID do usuário atual
                                 />
                             </div>
                         </div>

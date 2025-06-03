@@ -17,7 +17,7 @@ Discover before the world does.
 -   [ ] Add Profile User Configuration page
 -   [ ] Index page on Google Search
 -   [x] Add following and followers listing on profile
--   [ ] Add dark mode
+-   [ ] Add responsive website theme based on system color preference white/dark
 -   [x] Add user profile custom avatar image
 -   [ ] implement daisy ui
 -   [ ] finish artist page

@@ -5,6 +5,7 @@ import { countTrackOccurrences } from '@/utils/fetchTrackInfo'
 
 // UI Components from shadcn/ui
 import Image from 'next/image'
+import Link from 'next/link' // Import the Link component
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -47,9 +48,14 @@ export default async function TrackDetailsPage({
         console.log({ trackInfo })
     }
 
-    // Determine artist names
+    // Determine artist names and IDs
+    const artists =
+        trackInfo?.artists?.map((artist) => ({
+            name: artist.name,
+            id: artist.id,
+        })) || []
     const artistNames =
-        trackInfo?.artists?.map((artist) => artist.name).join(', ') ||
+        artists.map((artist) => artist.name).join(', ') ||
         'Artista Desconhecido'
 
     // Get album image URL
@@ -131,7 +137,21 @@ export default async function TrackDetailsPage({
                                                     'Música Desconhecida'}
                                             </h1>
                                             <p className="mb-1 text-xl text-gray-600">
-                                                {artistNames}
+                                                {artists.map(
+                                                    (artist, index) => (
+                                                        <span key={artist.id}>
+                                                            <Link
+                                                                href={`/artist/${artist.id}`}
+                                                                className="text-blue-600 hover:underline"
+                                                            >
+                                                                {artist.name}
+                                                            </Link>
+                                                            {index <
+                                                                artists.length -
+                                                                    1 && ', '}
+                                                        </span>
+                                                    )
+                                                )}
                                             </p>
                                             <p className="text-gray-500">
                                                 {trackInfo?.album.name ||

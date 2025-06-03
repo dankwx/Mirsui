@@ -1,3 +1,7 @@
+// ===================================
+// components/Profile/GetUsername.tsx
+// ===================================
+
 'use client'
 
 import { useState } from 'react'
@@ -11,239 +15,200 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
+import { PencilIcon } from 'lucide-react'
 import UserBadges from './UserBadges'
-import { PencilIcon } from 'lucide-react' // Importe o ícone de lápis
 import FollowersFollowingSection from './UserFollowers'
 import FollowButton from './FollowButton'
-
-interface User {
-    id: string
-    first_name: string
-    last_name: string
-    avatar_url: string | null
-    username: string | null
-    followingId: string
-}
-
-interface Rating {
-    id: string
-    rating: number
-}
-
-interface Achievments {
-    achievement_id: string
-    title: string
-    description: string
-    achieved_at: string
-}
+import type { User, Achievement, Rating } from '@/types/profile'
 
 interface UserProfileProps {
-    username: string
-    displayName: string
-    description: string | null
+    userData: User & {
+        totalFollowers: User[]
+        totalFollowing: User[]
+        achievements: Achievement[]
+        rating: Rating[]
+    }
+    isLoggedIn: boolean
+    isOwnProfile: boolean
     updateDisplayNameAction?: (
         formData: FormData
     ) => Promise<{ success: boolean; newDisplayName?: string }>
     updateDescriptionAction?: (
         formData: FormData
     ) => Promise<{ success: boolean; newDescription?: string | null }>
-    isOwnProfile: boolean
-    isLoggedIn: boolean
-    totalFollowers: User[]
-    totalFollowing: User[]
-    rating: Rating[]
-    userAchievments: Achievments[]
-    followingId: string
-    initialIsFollowing: boolean
 }
 
 export default function UserProfile({
-    username,
-    displayName,
-    description,
+    userData,
+    isLoggedIn,
+    isOwnProfile,
     updateDisplayNameAction,
     updateDescriptionAction,
-    isOwnProfile,
-    isLoggedIn,
-    totalFollowers,
-    totalFollowing,
-    rating,
-    userAchievments,
-    followingId,
-    initialIsFollowing,
 }: UserProfileProps) {
     const [openDisplayName, setOpenDisplayName] = useState(false)
     const [openDescription, setOpenDescription] = useState(false)
-    const [currentDisplayName, setCurrentDisplayName] = useState(displayName)
-    const [currentDescription, setCurrentDescription] = useState<string | null>(
-        description || null
+    const [currentDisplayName, setCurrentDisplayName] = useState(
+        userData.display_name || userData.username || ''
+    )
+    const [currentDescription, setCurrentDescription] = useState(
+        userData.description || null
     )
 
+    const canEdit = isOwnProfile && isLoggedIn
+
     const handleDisplayNameSubmit = async (formData: FormData) => {
-        if (updateDisplayNameAction) {
-            try {
-                const result = await updateDisplayNameAction(formData)
-                if (result.success && result.newDisplayName) {
-                    setCurrentDisplayName(result.newDisplayName)
-                    setOpenDisplayName(false)
-                } else {
-                    console.error('Failed to update display name')
-                }
-            } catch (error) {
-                console.error('Error in updateDisplayNameAction:', error)
+        if (!updateDisplayNameAction) return
+
+        try {
+            const result = await updateDisplayNameAction(formData)
+            if (result.success && result.newDisplayName) {
+                setCurrentDisplayName(result.newDisplayName)
+                setOpenDisplayName(false)
             }
+        } catch (error) {
+            console.error('Error updating display name:', error)
         }
     }
 
     const handleDescriptionSubmit = async (formData: FormData) => {
-        if (updateDescriptionAction) {
-            const newDescription = formData.get('description') as string
-            const descriptionToUpdate =
-                newDescription.trim() === '' ? null : newDescription
+        if (!updateDescriptionAction) return
 
-            // Crie um novo FormData com a descrição atualizada
-            const updatedFormData = new FormData()
-            updatedFormData.append('description', descriptionToUpdate || '')
-
-            const result = await updateDescriptionAction(updatedFormData)
-
+        try {
+            const result = await updateDescriptionAction(formData)
             if (result.success) {
                 setCurrentDescription(result.newDescription || null)
                 setOpenDescription(false)
             }
+        } catch (error) {
+            console.error('Error updating description:', error)
         }
+    }
+
+    const DisplayNameSection = () => {
+        if (canEdit) {
+            return (
+                <Dialog
+                    open={openDisplayName}
+                    onOpenChange={setOpenDisplayName}
+                >
+                    <DialogTrigger asChild>
+                        <Button
+                            variant="link"
+                            className="m-0 h-fit w-fit p-0 font-sans text-3xl font-bold hover:underline"
+                        >
+                            {currentDisplayName}
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Change Display Name</DialogTitle>
+                        </DialogHeader>
+                        <form action={handleDisplayNameSubmit}>
+                            <Input
+                                name="display_name"
+                                placeholder="New display name"
+                                defaultValue={currentDisplayName}
+                                required
+                            />
+                            <Button type="submit" className="mt-4">
+                                Update Display Name
+                            </Button>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+            )
+        }
+
+        return (
+            <h1 className="font-sans text-3xl font-bold">
+                {currentDisplayName}
+            </h1>
+        )
+    }
+
+    const DescriptionSection = () => {
+        const displayDescription = currentDescription || 'No description'
+
+        if (canEdit) {
+            return (
+                <Dialog
+                    open={openDescription}
+                    onOpenChange={setOpenDescription}
+                >
+                    <DialogTrigger asChild>
+                        <div className="flex cursor-pointer items-center text-gray-600 hover:text-gray-800">
+                            <p
+                                className={`font-sans text-sm ${!currentDescription ? 'italic' : ''}`}
+                            >
+                                {displayDescription}
+                            </p>
+                            <PencilIcon size={16} className="ml-2" />
+                        </div>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Change Description</DialogTitle>
+                        </DialogHeader>
+                        <form action={handleDescriptionSubmit}>
+                            <Textarea
+                                name="description"
+                                placeholder="Write a description about yourself..."
+                                defaultValue={currentDescription || ''}
+                                rows={4}
+                            />
+                            <Button type="submit" className="mt-4">
+                                Update Description
+                            </Button>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+            )
+        }
+
+        return (
+            <p
+                className={`font-sans text-sm text-gray-600 ${!currentDescription ? 'italic' : ''}`}
+            >
+                {displayDescription}
+            </p>
+        )
     }
 
     return (
         <div className="flex h-fit flex-col">
-            <div className="flex">
+            <div className="flex items-start justify-between">
                 <div className="flex flex-col">
-                    {isOwnProfile && !isLoggedIn ? (
-                        <div className="flex items-center">
-                            <Dialog
-                                open={openDisplayName}
-                                onOpenChange={setOpenDisplayName}
-                            >
-                                <DialogTrigger
-                                    className="m-0 items-center text-left"
-                                    asChild
-                                >
-                                    <div className="flex flex-row text-left">
-                                        <Button
-                                            variant="link"
-                                            className="m-0 h-fit w-fit items-center justify-center p-0 text-right font-sans text-3xl font-bold"
-                                        >
-                                            {currentDisplayName}
-                                        </Button>
-                                        <p className="ml-2 items-start justify-center text-left text-gray-600"></p>
-                                    </div>
-                                </DialogTrigger>
-                                {username}
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle>
-                                            Change DisplayName
-                                        </DialogTitle>
-                                    </DialogHeader>
-                                    <form action={handleDisplayNameSubmit}>
-                                        <Input
-                                            name="display_name"
-                                            placeholder="New displayname"
-                                            defaultValue={currentDisplayName}
-                                        />
-                                        <Button type="submit" className="mt-4">
-                                            Update Displayname
-                                        </Button>
-                                    </form>
-                                </DialogContent>
-                            </Dialog>
-                        </div>
-                    ) : (
-                        <div className="flex flex-row items-center text-left">
-                            <p className="m-0 h-fit w-fit items-center justify-center p-0 text-right font-sans text-3xl font-bold">
-                                {currentDisplayName}
-                            </p>
-                            <p className="ml-2 items-start justify-center text-left text-gray-600">
-                                {username}
-                            </p>
-                        </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                        <DisplayNameSection />
+                        <span className="text-gray-600">
+                            @{userData.username}
+                        </span>
+                    </div>
+
                     <FollowersFollowingSection
-                        totalFollowers={totalFollowers}
-                        totalFollowing={totalFollowing}
-                        rating={rating}
-                        followingId={followingId}
-                        isLoggedIn={isLoggedIn}
+                        followers={userData.totalFollowers}
+                        following={userData.totalFollowing}
+                        rating={userData.rating}
                         isOwnProfile={isOwnProfile}
+                        isLoggedIn={isLoggedIn}
+                        currentUserId={userData.id}
                     />
-                    {isOwnProfile && !isLoggedIn ? (
-                        <Dialog
-                            open={openDescription}
-                            onOpenChange={setOpenDescription}
-                        >
-                            <DialogTrigger
-                                className="m-0 items-start justify-start p-0"
-                                asChild
-                            >
-                                <div className="flex items-center text-gray-600 hover:text-gray-800">
-                                    <p className="font-sans text-sm">
-                                        {currentDescription === null ? (
-                                            <span className="italic">
-                                                No description
-                                            </span>
-                                        ) : (
-                                            currentDescription
-                                        )}
-                                    </p>
-                                    <PencilIcon
-                                        size={16}
-                                        className="ml-2 cursor-pointer"
-                                    />
-                                </div>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>
-                                        Change Description
-                                    </DialogTitle>
-                                </DialogHeader>
-                                <form action={handleDescriptionSubmit}>
-                                    <Textarea
-                                        name="description"
-                                        placeholder="New description"
-                                        defaultValue={
-                                            currentDescription ===
-                                            'No description'
-                                                ? ''
-                                                : currentDescription || ''
-                                        }
-                                    />
-                                    <Button type="submit" className="mt-4">
-                                        Update Description
-                                    </Button>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
-                    ) : (
-                        <p className="font-sans text-sm text-gray-600">
-                            {currentDescription === null ? (
-                                <span className="italic">No description</span>
-                            ) : (
-                                currentDescription
-                            )}
-                        </p>
-                    )}
+
+                    <div className="mt-2">
+                        <DescriptionSection />
+                    </div>
                 </div>
 
-                {!isOwnProfile && !isLoggedIn && (
+                {!isOwnProfile && isLoggedIn && (
                     <FollowButton
-                        followingId={followingId}
-                        initialIsFollowing={initialIsFollowing}
+                        followingId={userData.id}
+                        initialIsFollowing={userData.isFollowing || false}
+                        type="text"
                     />
                 )}
             </div>
 
-            <UserBadges userAchievments={userAchievments} />
+            <UserBadges userAchievments={userData.achievements} />
         </div>
     )
 }

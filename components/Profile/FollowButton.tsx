@@ -1,3 +1,7 @@
+// ===================================
+// components/Profile/FollowButton.tsx
+// ===================================
+
 'use client'
 
 import { useState } from 'react'
@@ -25,7 +29,7 @@ export default function FollowButton({
         setIsLoading(true)
         try {
             const result = await toggleFollow(followingId)
-            if (result.success) {
+            if (result.success && typeof result.isFollowing === 'boolean') {
                 setIsFollowing(result.isFollowing)
             }
         } catch (error) {
@@ -35,38 +39,47 @@ export default function FollowButton({
         }
     }
 
+    const buttonProps = {
+        onClick: handleToggleFollow,
+        disabled: isLoading,
+        title: isFollowing ? 'Deixar de seguir' : 'Seguir',
+    }
+
     if (type === 'icon') {
         return (
             <Button
-                className="relative h-8 w-8 p-0"
-                onClick={handleToggleFollow}
-                disabled={isLoading}
-                title={isFollowing ? 'Unfollow' : 'Follow'}
+                {...buttonProps}
+                size="sm"
+                variant={isFollowing ? 'outline' : 'default'}
+                className="h-8 w-8 p-0"
             >
                 {isLoading ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                 ) : isFollowing ? (
-                    <UserMinus className="h-5 w-5" />
+                    <UserMinus className="h-4 w-4" />
                 ) : (
-                    <UserPlus className="h-5 w-5" />
-                )}
-            </Button>
-        )
-    } else {
-        return (
-            <Button
-                onClick={handleToggleFollow}
-                disabled={isLoading}
-                title={isFollowing ? 'Unfollow' : 'Follow'}
-            >
-                {isLoading ? (
-                    <p>Loading...</p>
-                ) : isFollowing ? (
-                    <p>Unfollow</p>
-                ) : (
-                    <p>Follow</p>
+                    <UserPlus className="h-4 w-4" />
                 )}
             </Button>
         )
     }
+
+    return (
+        <Button
+            {...buttonProps}
+            size="sm"
+            variant={isFollowing ? 'outline' : 'default'}
+        >
+            {isLoading ? (
+                <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Carregando...
+                </>
+            ) : isFollowing ? (
+                'Deixar de seguir'
+            ) : (
+                'Seguir'
+            )}
+        </Button>
+    )
 }

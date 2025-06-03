@@ -1,5 +1,8 @@
-import { notFound } from 'next/navigation'
+// ===================================
+// app/user/[username]/page.tsx
+// ===================================
 
+import { notFound } from 'next/navigation'
 import Header from '@/components/Header/Header'
 import Sidebar from '@/components/Sidebar/Sidebar'
 import ProfileDetails from '@/components/Profile/ProfileDetails'
@@ -10,83 +13,62 @@ import { fetchUserData, fetchAuthData } from '@/utils/profileService'
 import { fetchSongs } from '@/utils/fetchSongs'
 import { fetchChannels } from '@/utils/fetchChannels'
 import { fetchFollowers, fetchFollowing } from '@/utils/fetchFollowersFollowing'
-import FollowButton from '@/components/Profile/FollowButton'
 import { createClient } from '@/utils/supabase/server'
+import type { User, Achievement, Rating } from '@/types/profile'
 
-export default async function ProfilePage({
-    params,
-}: {
+interface ProfilePageParams {
     params: { username: string }
-}) {
-    console.log('Buscando usuário:', params.username)
+}
 
+export default async function ProfilePage({ params }: ProfilePageParams) {
     const { userData, error } = await fetchUserData(params.username)
 
     if (error || !userData) {
-        console.log('Usuário não encontrado ou erro:', error)
         notFound()
     }
 
     const authData = await fetchAuthData()
-    const isLoggedIn = !!authData?.user // Corrigido: true se user existe
+    const isLoggedIn = !!authData?.user
     const isOwnProfile = authData?.user?.id === userData.id
 
-    const artists = await fetchArtists(userData.id)
-    const songs = await fetchSongs(userData.id)
-    const channels = await fetchChannels(userData.id)
-    const followers = await fetchFollowers(userData.id)
-    const following = await fetchFollowing(userData.id)
+    // Fetch all data in parallel
+    const [
+        artists,
+        songs,
+        channels,
+        followers,
+        following,
+        followersResult,
+        followingResult,
+        achievementResult,
+        ratingResult,
+    ] = await Promise.all([
+        fetchArtists(userData.id),
+        fetchSongs(userData.id),
+        fetchChannels(userData.id),
+        fetchFollowers(userData.id),
+        fetchFollowing(userData.id),
+        createClient().rpc('get_user_followers', { user_uuid: userData.id }),
+        createClient().rpc('get_user_following', { user_uuid: userData.id }),
+        createClient().rpc('get_user_achievements', { user_uuid: userData.id }),
+        createClient().rpc('get_user_rating', { user_uuid: userData.id }),
+    ])
 
-    const totalSavedSongs = songs.length
-    const totalSavedYouTubeChannels = channels.length
-    const totalSavedSpotifyArtists = artists.length
-    const totalFollowers = followers.length
-    const totalFollowing = following.length
-
-    const supabase = createClient()
-
-    // Buscar dados adicionais
-    const { data: followingResult, error: followingError } = await supabase.rpc(
-        'get_user_following',
-        { user_uuid: userData.id }
-    )
-
-    const { data: followersResult, error: followersError } = await supabase.rpc(
-        'get_user_followers',
-        { user_uuid: userData.id }
-    )
-
-    const { data: achievmentResult, error: achievmentError } =
-        await supabase.rpc('get_user_achievements', { user_uuid: userData.id })
-
-    const { data: ratingResult, error: ratingError } = await supabase.rpc(
-        'get_user_rating',
-        { user_uuid: userData.id }
-    )
-
-    // Tratamento de erros
-    if (followingError) {
-        console.error('Error fetching following:', followingError)
-    }
-    if (followersError) {
-        console.error('Error fetching followers:', followersError)
-    }
-    if (achievmentError) {
-        console.error('Error fetching achievements:', achievmentError)
-    }
-    if (ratingError) {
-        console.error('Error fetching rating:', ratingError)
+    const profileData = {
+        ...userData,
+        totalFollowers: followersResult.data || [],
+        totalFollowing: followingResult.data || [],
+        achievements: achievementResult.data || [],
+        rating: ratingResult.data || [],
     }
 
-    const followingData = followingResult || null
-    const followersData = followersResult || null
-    const achievmentData = achievmentResult || null
-    const ratingData = ratingResult || null
-
-    console.log('User ID:', userData.id)
-    console.log('Rating:', ratingData)
-    console.log('Is logged in:', isLoggedIn)
-    console.log('Is own profile:', isOwnProfile)
+    const counters = {
+        savedSongs: songs.length,
+        savedChannels: channels.length,
+        savedArtists: artists.length,
+        followers: followersResult.data?.length || 0,
+        following: followingResult.data?.length || 0,
+    }
 
     return (
         <main className="flex min-h-screen flex-col">
@@ -95,30 +77,24 @@ export default async function ProfilePage({
                 <div className="flex h-full flex-1">
                     <Sidebar />
                     <div className="ml-20 flex w-full flex-col px-6 font-sans">
-                        <div className="flex">
-                            <ProfileDetails
-                                isLoggedIn={isLoggedIn}
-                                userData={userData}
-                                isOwnProfile={isOwnProfile}
-                                totalFollowers={followersData}
-                                totalFollowing={followingData}
-                                rating={ratingData}
-                                userAchievments={achievmentData}
-                                followingId={userData.id}
-                            />
-                        </div>
+                        <ProfileDetails
+                            userData={profileData}
+                            isLoggedIn={isLoggedIn}
+                            isOwnProfile={isOwnProfile}
+                        />
+
                         <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
                             <main className="py-8">
                                 <CardsSection
-                                    totalSavedSongs={totalSavedSongs}
+                                    totalSavedSongs={counters.savedSongs}
                                     totalSavedYouTubeChannels={
-                                        totalSavedYouTubeChannels
+                                        counters.savedChannels
                                     }
                                     totalSavedSpotifyArtists={
-                                        totalSavedSpotifyArtists
+                                        counters.savedArtists
                                     }
-                                    totalFollowers={followersData}
-                                    totalFollowing={followingData}
+                                    totalFollowers={followersResult.data || []}
+                                    totalFollowing={followingResult.data || []}
                                 />
 
                                 <div className="mt-8 w-full">
@@ -126,7 +102,7 @@ export default async function ProfilePage({
                                         artists={artists}
                                         songs={songs}
                                         channels={channels}
-                                        canRemove={isOwnProfile} // Permite remoção apenas no próprio perfil
+                                        canRemove={isOwnProfile}
                                     />
                                 </div>
                             </main>

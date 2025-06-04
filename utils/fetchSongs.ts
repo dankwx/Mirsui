@@ -37,40 +37,38 @@ export async function fetchSongs(
         return []
     }
 
-    // Se temos um usuário logado, buscar os favoritos
-    let favoritesData: any[] = []
-    if (currentUserId) {
-        const trackIds = tracksData.map((track) => track.id)
+    const trackIds = tracksData.map((track) => track.id)
 
-        const { data: favorites, error: favError } = await supabase
+    // CORREÇÃO: Buscar favoritos do DONO DO PERFIL (não do usuário logado)
+    const { data: ownerFavorites, error: favError } = await supabase
+        .from('favorites')
+        .select('track_id')
+        .eq('user_id', userId) // userId é o dono do perfil
+        .in('track_id', trackIds)
+
+    const ownerFavoritesData = favError ? [] : ownerFavorites || []
+
+    // Buscar favoritos do usuário logado (para funcionalidade de favoritar)
+    let userFavoritesData: any[] = []
+    if (currentUserId) {
+        const { data: userFavorites, error: userFavError } = await supabase
             .from('favorites')
             .select('track_id')
             .eq('user_id', currentUserId)
             .in('track_id', trackIds)
 
-        if (!favError && favorites) {
-            favoritesData = favorites
+        if (!userFavError && userFavorites) {
+            userFavoritesData = userFavorites
         }
     }
 
-    // Opcional: buscar contagem total de favoritos por track
-    const trackIds = tracksData.map((track) => track.id)
-    const { data: favoriteCounts } = await supabase
-        .from('favorites')
-        .select('track_id')
-        .in('track_id', trackIds)
-
-    // Criar mapa de contagens
-    const countsMap = new Map<string, number>()
-    if (favoriteCounts) {
-        favoriteCounts.forEach((fav) => {
-            const count = countsMap.get(fav.track_id) || 0
-            countsMap.set(fav.track_id, count + 1)
-        })
-    }
-
-    // Criar set de tracks favoritadas pelo usuário atual
-    const userFavorites = new Set(favoritesData.map((fav) => fav.track_id))
+    // Criar sets para favoritos
+    const ownerFavoriteSet = new Set(
+        ownerFavoritesData.map((fav) => fav.track_id)
+    )
+    const userFavoriteSet = new Set(
+        userFavoritesData.map((fav) => fav.track_id)
+    )
 
     // Format the songs array
     const formattedData: Song[] = tracksData.map((item: any) => ({
@@ -84,8 +82,9 @@ export async function fetchSongs(
         discover_rating: item.discover_rating,
         track_thumbnail: item.track_thumbnail,
         claimedat: item.claimedat,
-        is_favorited: userFavorites.has(item.id),
-        favorite_count: countsMap.get(item.id.toString()) || 0,
+        is_favorited: ownerFavoriteSet.has(item.id), // Favorito do DONO do perfil
+        is_user_favorited: userFavoriteSet.has(item.id), // Favorito do usuário logado (para funcionalidade)
+        favorite_count: 0, // Removido contador público
     }))
 
     return formattedData

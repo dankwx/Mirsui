@@ -28,14 +28,15 @@ export interface Rating {
 export interface Song {
     id: string
     track_url: string
-    track_uri?: string
+    track_uri: string | null
     track_title: string
     artist_name: string
     album_name: string
     popularity: number
-    discover_rating: number
-    track_thumbnail: string
-    claimedat: string
-    is_favorited?: boolean // Se a música está favoritada pelo usuário atual
-    favorite_count?: number // Quantos usuários favoritaram (opcional)
+    discover_rating: number | null
+    track_thumbnail: string | null
+    claimedat: string | null
+    is_favorited: boolean // Favorito do DONO do perfil (público)
+    is_user_favorited?: boolean // Favorito do usuário logado (para funcionalidade)
+    favorite_count?: number
 }

@@ -10,7 +10,7 @@ export default function Header() {
                     <div className="flex w-full text-xl">
                         <SearchWithResults />
                         <div className="flex items-center">
-                            {/* <GetAuth /> */}
+                            <GetAuth />
                         </div>
                     </div>
                 </div>

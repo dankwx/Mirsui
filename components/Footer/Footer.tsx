@@ -21,7 +21,7 @@ export default function Footer() {
                         <p className="max-w-md leading-relaxed text-slate-600">
                             Discover music before everyone else and build your
                             reputation as a true tastemaker. Join the community
-                            that spots tomorrow's hits today.
+                            that spots tomorrow&apos;s hits today.
                         </p>
                     </div>
 

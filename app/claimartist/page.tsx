@@ -6,13 +6,7 @@ import ClaimArtist from '@/components/ClaimArtist/ClaimArtist'
 export default function ClaimVideoPage() {
     return (
         <main className="flex min-h-screen flex-col">
-            <Header />
-            <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
-                <div className="flex h-full flex-1">
-                    <Sidebar />
-                    <ClaimArtist />
-                </div>
-            </div>
+            <ClaimArtist />
         </main>
     )
 }

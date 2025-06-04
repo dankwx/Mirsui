@@ -87,8 +87,8 @@ export default async function HomePage() {
                         <p className="mx-auto mb-10 max-w-3xl text-xl leading-relaxed text-slate-600 md:text-2xl">
                             Claim tracks before they go viral and build your
                             reputation as a true music tastemaker. Spot
-                            tomorrow's hits before they explode on TikTok and
-                            social media.
+                            tomorrow&apos;s hits before they explode on TikTok
+                            and social media.
                         </p>
                         <div className="flex flex-col justify-center gap-4 sm:flex-row">
                             <Button
@@ -463,8 +463,8 @@ export default async function HomePage() {
                         </h2>
                         <p className="mx-auto max-w-3xl text-xl leading-relaxed text-slate-600">
                             Build your reputation as a music tastemaker in three
-                            simple steps. Discover tomorrow's hits before they
-                            explode on social media.
+                            simple steps. Discover tomorrow&apos;s hits before
+                            they explode on social media.
                         </p>
                     </div>
 
@@ -536,11 +536,12 @@ export default async function HomePage() {
                         The Future of Music Discovery
                     </h2>
                     <p className="mb-8 text-xl leading-relaxed text-slate-600">
-                        Sound Sage is more than just a music platform—it's a
-                        community for true music enthusiasts who have an ear for
-                        what's next. Whether you're into indie pop, electronic,
-                        hip-hop, or alternative, our platform helps you discover
-                        and claim tracks before they become mainstream hits.
+                        Sound Sage is more than just a music platform—it&apos;s
+                        a community for true music enthusiasts who have an ear
+                        for what&apos;s next. Whether you&apos;re into indie
+                        pop, electronic, hip-hop, or alternative, our platform
+                        helps you discover and claim tracks before they become
+                        mainstream hits.
                     </p>
                     <p className="mb-10 text-lg leading-relaxed text-slate-600">
                         Join a community of music lovers who understand that
@@ -563,7 +564,7 @@ export default async function HomePage() {
             <section className="from-sage-50 bg-gradient-to-br to-blue-50 px-4 py-20">
                 <div className="mx-auto max-w-4xl text-center">
                     <h2 className="mb-6 text-3xl font-bold text-slate-800 md:text-4xl">
-                        Ready to Discover Tomorrow's Hits Today?
+                        Ready to Discover Tomorrow&apos;s Hits Today?
                     </h2>
                     <p className="mb-10 text-xl leading-relaxed text-slate-600">
                         Join the music discovery revolution. Start building your
@@ -575,7 +576,7 @@ export default async function HomePage() {
                             size="lg"
                             className="bg-sage-600 hover:bg-sage-700 px-10 py-4 text-lg text-white shadow-lg"
                         >
-                            Sign Up Now — It's Free
+                            Sign Up Now — It&apos;s Free
                             <ArrowRight className="ml-2" size={20} />
                         </Button>
                         <Button

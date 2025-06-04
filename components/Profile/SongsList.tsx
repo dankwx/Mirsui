@@ -132,7 +132,7 @@ const SongsList: React.FC<SongsListProps> = ({
                             />
 
                             {/* Botões no canto superior */}
-                            <div className="absolute right-2 top-2 z-10 flex gap-2">
+                            <div className="absolute left-2 top-2 z-10 flex gap-2">
                                 {/* Botão de favorito */}
                                 {canRemove && (
                                     <Button

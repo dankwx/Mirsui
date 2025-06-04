@@ -1,10 +1,5 @@
-// ===================================
 // app/user/[username]/page.tsx
-// ===================================
-
 import { notFound } from 'next/navigation'
-import Header from '@/components/Header/Header'
-import Sidebar from '@/components/Sidebar/Sidebar'
 import ProfileDetails from '@/components/Profile/ProfileDetails'
 import CardsSection from '@/components/Profile/CardsSection'
 import TabsSection from '@/components/Profile/TabsSection'
@@ -35,7 +30,7 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
     // Fetch all data in parallel
     const [
         artists,
-        songs, // Agora com informações de favoritos
+        songs,
         channels,
         followers,
         following,
@@ -45,7 +40,7 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
         ratingResult,
     ] = await Promise.all([
         fetchArtists(userData.id),
-        fetchSongs(userData.id, currentUserId), // Passar o ID do usuário atual
+        fetchSongs(userData.id, currentUserId),
         fetchChannels(userData.id),
         fetchFollowers(userData.id),
         fetchFollowing(userData.id),
@@ -72,47 +67,31 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
     }
 
     return (
-        <div className="grid h-screen w-screen grid-cols-[auto_1fr] grid-rows-1 overflow-hidden">
-            {/* Sidebar - ocupa toda altura da tela */}
-            <Sidebar />
+        <div className="px-6 font-sans">
+            <ProfileDetails
+                userData={profileData}
+                isLoggedIn={isLoggedIn}
+                isOwnProfile={isOwnProfile}
+            />
 
-            {/* Área principal - header + conteúdo */}
-            <div className="flex min-h-0 flex-col overflow-hidden">
-                {/* Header fixo */}
-                <Header />
+            <div className="py-8">
+                <CardsSection
+                    totalSavedSongs={counters.savedSongs}
+                    totalSavedYouTubeChannels={counters.savedChannels}
+                    totalSavedSpotifyArtists={counters.savedArtists}
+                    totalFollowers={followersResult.data || []}
+                    totalFollowing={followingResult.data || []}
+                />
 
-                {/* Conteúdo com scroll */}
-                <main className="flex-1 overflow-y-auto bg-background text-foreground">
-                    <div className="px-6 font-sans">
-                        <ProfileDetails
-                            userData={profileData}
-                            isLoggedIn={isLoggedIn}
-                            isOwnProfile={isOwnProfile}
-                        />
-
-                        <div className="py-8">
-                            <CardsSection
-                                totalSavedSongs={counters.savedSongs}
-                                totalSavedYouTubeChannels={
-                                    counters.savedChannels
-                                }
-                                totalSavedSpotifyArtists={counters.savedArtists}
-                                totalFollowers={followersResult.data || []}
-                                totalFollowing={followingResult.data || []}
-                            />
-
-                            <div className="mt-8 w-full">
-                                <TabsSection
-                                    artists={artists}
-                                    songs={songs}
-                                    channels={channels}
-                                    canRemove={isOwnProfile}
-                                    currentUserId={currentUserId} // Passar o ID do usuário atual
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </main>
+                <div className="mt-8 w-full">
+                    <TabsSection
+                        artists={artists}
+                        songs={songs}
+                        channels={channels}
+                        canRemove={isOwnProfile}
+                        currentUserId={currentUserId}
+                    />
+                </div>
             </div>
         </div>
     )

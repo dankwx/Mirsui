@@ -14,6 +14,7 @@ import {
     Share2,
     ArrowRight,
 } from 'lucide-react'
+import { Music, Clock, Target } from 'lucide-react'
 import GetAuth from '@/components/GetAuth/GetAuth'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
@@ -57,10 +58,10 @@ export default async function HomePage() {
                             Discover
                         </Link>
                         <Link
-                            href="#community"
+                            href="#about"
                             className="font-medium text-slate-600 hover:text-slate-800"
                         >
-                            Community
+                            About
                         </Link>
                     </div>
 
@@ -85,8 +86,9 @@ export default async function HomePage() {
                         </h1>
                         <p className="mx-auto mb-10 max-w-3xl text-xl leading-relaxed text-slate-600 md:text-2xl">
                             Claim tracks before they go viral and build your
-                            reputation as a true music tastemaker. Join the
-                            community that spots tomorrow&lsquo;s hits today.
+                            reputation as a true music tastemaker. Spot
+                            tomorrow's hits before they explode on TikTok and
+                            social media.
                         </p>
                         <div className="flex flex-col justify-center gap-4 sm:flex-row">
                             <Button
@@ -115,46 +117,58 @@ export default async function HomePage() {
                 </div>
             </section>
 
-            {/* Stats Section */}
+            {/* Value Proposition Section */}
             <section className="px-4 py-16">
                 <div className="mx-auto max-w-7xl">
                     <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
                         <Card className="from-sage-50 to-sage-100 border-sage-200/50 bg-gradient-to-br shadow-sm">
                             <CardContent className="pt-8 text-center">
-                                <h3 className="text-sage-700 mb-3 text-5xl font-bold">
-                                    10K+
+                                <div className="bg-sage-200 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
+                                    <Clock
+                                        className="text-sage-600"
+                                        size={32}
+                                    />
+                                </div>
+                                <h3 className="text-sage-700 mb-3 text-xl font-semibold">
+                                    Early Discovery
                                 </h3>
-                                <p className="text-sage-600 text-lg font-medium">
-                                    Tracks Claimed
-                                </p>
-                                <p className="mt-2 text-sm text-slate-500">
-                                    Before they went viral
+                                <p className="text-sage-600 leading-relaxed">
+                                    Find tracks before they become mainstream
+                                    and prove your music taste
                                 </p>
                             </CardContent>
                         </Card>
                         <Card className="border-blue-200/50 bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm">
                             <CardContent className="pt-8 text-center">
-                                <h3 className="mb-3 text-5xl font-bold text-blue-700">
-                                    5K+
+                                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-200">
+                                    <Target
+                                        className="text-blue-600"
+                                        size={32}
+                                    />
+                                </div>
+                                <h3 className="mb-3 text-xl font-semibold text-blue-700">
+                                    Build Reputation
                                 </h3>
-                                <p className="text-lg font-medium text-blue-600">
-                                    Viral Predictions
-                                </p>
-                                <p className="mt-2 text-sm text-slate-500">
-                                    Accurate forecasts
+                                <p className="leading-relaxed text-blue-600">
+                                    Earn recognition as your claimed tracks gain
+                                    popularity and go viral
                                 </p>
                             </CardContent>
                         </Card>
                         <Card className="border-rose-200/50 bg-gradient-to-br from-rose-50 to-rose-100 shadow-sm">
                             <CardContent className="pt-8 text-center">
-                                <h3 className="mb-3 text-5xl font-bold text-rose-700">
-                                    50K+
+                                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-200">
+                                    <Music
+                                        className="text-rose-600"
+                                        size={32}
+                                    />
+                                </div>
+                                <h3 className="mb-3 text-xl font-semibold text-rose-700">
+                                    Curated Selection
                                 </h3>
-                                <p className="text-lg font-medium text-rose-600">
-                                    Music Lovers
-                                </p>
-                                <p className="mt-2 text-sm text-slate-500">
-                                    Active community
+                                <p className="leading-relaxed text-rose-600">
+                                    Explore carefully selected emerging tracks
+                                    across all genres
                                 </p>
                             </CardContent>
                         </Card>
@@ -223,11 +237,11 @@ export default async function HomePage() {
                             <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
                                 <div className="flex items-center gap-2 text-sm text-slate-500">
                                     <Heart size={16} />
-                                    <span>243</span>
+                                    <span>New</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-slate-500">
                                     <Award size={16} />
-                                    <span>18 claims</span>
+                                    <span>Available</span>
                                 </div>
                             </CardFooter>
                         </Card>
@@ -276,11 +290,11 @@ export default async function HomePage() {
                             <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
                                 <div className="flex items-center gap-2 text-sm text-slate-500">
                                     <Heart size={16} />
-                                    <span>187</span>
+                                    <span>Fresh</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-slate-500">
                                     <Award size={16} />
-                                    <span>12 claims</span>
+                                    <span>Available</span>
                                 </div>
                             </CardFooter>
                         </Card>
@@ -329,11 +343,11 @@ export default async function HomePage() {
                             <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
                                 <div className="flex items-center gap-2 text-sm text-slate-500">
                                     <Heart size={16} />
-                                    <span>156</span>
+                                    <span>New</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-slate-500">
                                     <Award size={16} />
-                                    <span>8 claims</span>
+                                    <span>Available</span>
                                 </div>
                             </CardFooter>
                         </Card>
@@ -344,170 +358,9 @@ export default async function HomePage() {
                             variant="outline"
                             className="border-slate-300 px-8 text-slate-700 hover:bg-slate-50"
                         >
-                            View All Trending Tracks
+                            Explore More Tracks
                             <ArrowRight className="ml-2" size={16} />
                         </Button>
-                    </div>
-                </div>
-            </section>
-
-            {/* Top Tastemakers Section */}
-            <section id="community" className="px-4 py-16">
-                <div className="mx-auto max-w-7xl">
-                    <div className="mb-12 text-center">
-                        <h2 className="mb-4 text-3xl font-bold text-slate-800 md:text-4xl">
-                            Top Tastemakers
-                        </h2>
-                        <p className="mx-auto max-w-2xl text-lg text-slate-600">
-                            Meet the community members who consistently spot
-                            hits before they go viral.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-                        {/* Tastemaker 1 */}
-                        <Card className="border-slate-200/60 text-center transition-shadow hover:shadow-md">
-                            <CardContent className="pt-8">
-                                <Avatar className="border-sage-100 mx-auto mb-4 h-20 w-20 border-4">
-                                    <AvatarImage
-                                        src="/placeholder.svg?height=80&width=80"
-                                        alt="User"
-                                    />
-                                    <AvatarFallback className="bg-sage-100 text-sage-700 font-semibold">
-                                        MH
-                                    </AvatarFallback>
-                                </Avatar>
-                                <h3 className="font-semibold text-slate-800">
-                                    musichead
-                                </h3>
-                                <Badge className="bg-sage-100 text-sage-700 hover:bg-sage-200 mt-2">
-                                    Audiophile
-                                </Badge>
-                                <p className="mt-3 text-sm text-slate-500">
-                                    42 Claimed Tracks
-                                </p>
-                                <p className="text-xs text-slate-400">
-                                    89% accuracy rate
-                                </p>
-                            </CardContent>
-                            <CardFooter className="justify-center">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="border-slate-300 text-slate-700 hover:bg-slate-50"
-                                >
-                                    Follow
-                                </Button>
-                            </CardFooter>
-                        </Card>
-
-                        {/* Tastemaker 2 */}
-                        <Card className="border-slate-200/60 text-center transition-shadow hover:shadow-md">
-                            <CardContent className="pt-8">
-                                <Avatar className="mx-auto mb-4 h-20 w-20 border-4 border-emerald-100">
-                                    <AvatarImage
-                                        src="/placeholder.svg?height=80&width=80"
-                                        alt="User"
-                                    />
-                                    <AvatarFallback className="bg-emerald-100 font-semibold text-emerald-700">
-                                        TS
-                                    </AvatarFallback>
-                                </Avatar>
-                                <h3 className="font-semibold text-slate-800">
-                                    trendspotter
-                                </h3>
-                                <Badge className="mt-2 bg-emerald-100 text-emerald-700 hover:bg-emerald-200">
-                                    Trending Spotter
-                                </Badge>
-                                <p className="mt-3 text-sm text-slate-500">
-                                    38 Claimed Tracks
-                                </p>
-                                <p className="text-xs text-slate-400">
-                                    92% accuracy rate
-                                </p>
-                            </CardContent>
-                            <CardFooter className="justify-center">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="border-slate-300 text-slate-700 hover:bg-slate-50"
-                                >
-                                    Follow
-                                </Button>
-                            </CardFooter>
-                        </Card>
-
-                        {/* Tastemaker 3 */}
-                        <Card className="border-slate-200/60 text-center transition-shadow hover:shadow-md">
-                            <CardContent className="pt-8">
-                                <Avatar className="mx-auto mb-4 h-20 w-20 border-4 border-blue-100">
-                                    <AvatarImage
-                                        src="/placeholder.svg?height=80&width=80"
-                                        alt="User"
-                                    />
-                                    <AvatarFallback className="bg-blue-100 font-semibold text-blue-700">
-                                        CB
-                                    </AvatarFallback>
-                                </Avatar>
-                                <h3 className="font-semibold text-slate-800">
-                                    beatfinder
-                                </h3>
-                                <Badge className="mt-2 bg-blue-100 text-blue-700 hover:bg-blue-200">
-                                    Community Builder
-                                </Badge>
-                                <p className="mt-3 text-sm text-slate-500">
-                                    31 Claimed Tracks
-                                </p>
-                                <p className="text-xs text-slate-400">
-                                    85% accuracy rate
-                                </p>
-                            </CardContent>
-                            <CardFooter className="justify-center">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="border-slate-300 text-slate-700 hover:bg-slate-50"
-                                >
-                                    Follow
-                                </Button>
-                            </CardFooter>
-                        </Card>
-
-                        {/* Tastemaker 4 */}
-                        <Card className="border-slate-200/60 text-center transition-shadow hover:shadow-md">
-                            <CardContent className="pt-8">
-                                <Avatar className="mx-auto mb-4 h-20 w-20 border-4 border-amber-100">
-                                    <AvatarImage
-                                        src="/placeholder.svg?height=80&width=80"
-                                        alt="User"
-                                    />
-                                    <AvatarFallback className="bg-amber-100 font-semibold text-amber-700">
-                                        MF
-                                    </AvatarFallback>
-                                </Avatar>
-                                <h3 className="font-semibold text-slate-800">
-                                    futurehits
-                                </h3>
-                                <Badge className="mt-2 bg-amber-100 text-amber-700 hover:bg-amber-200">
-                                    Hit Predictor
-                                </Badge>
-                                <p className="mt-3 text-sm text-slate-500">
-                                    27 Claimed Tracks
-                                </p>
-                                <p className="text-xs text-slate-400">
-                                    94% accuracy rate
-                                </p>
-                            </CardContent>
-                            <CardFooter className="justify-center">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="border-slate-300 text-slate-700 hover:bg-slate-50"
-                                >
-                                    Follow
-                                </Button>
-                            </CardFooter>
-                        </Card>
                     </div>
                 </div>
             </section>
@@ -527,11 +380,11 @@ export default async function HomePage() {
                                 by Stellar Dreams
                             </h3>
                             <p className="mb-6 leading-relaxed text-slate-300">
-                                This ethereal track is predicted to go viral in
-                                the next 30 days. With its dreamy synths and
-                                captivating vocals, only 24 users have claimed
-                                it so far. Don&lsquo;t miss your chance to be
-                                ahead of the curve.
+                                This ethereal track combines dreamy synths with
+                                captivating vocals, creating an otherworldly
+                                listening experience. With its unique sound and
+                                growing buzz, it has all the elements to become
+                                the next viral sensation.
                             </p>
                             <div className="flex flex-col gap-4 sm:flex-row">
                                 <Button className="bg-white text-slate-800 hover:bg-slate-100">
@@ -609,9 +462,9 @@ export default async function HomePage() {
                             How Sound Sage Works
                         </h2>
                         <p className="mx-auto max-w-3xl text-xl leading-relaxed text-slate-600">
-                            Join the community that discovers tomorrow&lsquo;s
-                            hits today. Build your reputation as a music
-                            tastemaker in three simple steps.
+                            Build your reputation as a music tastemaker in three
+                            simple steps. Discover tomorrow's hits before they
+                            explode on social media.
                         </p>
                     </div>
 
@@ -630,7 +483,7 @@ export default async function HomePage() {
                                 <p className="leading-relaxed text-slate-600">
                                     Browse through our curated selection of
                                     emerging tracks from various genres and
-                                    discover hidden gems
+                                    discover hidden gems before anyone else
                                 </p>
                             </CardContent>
                         </Card>
@@ -649,7 +502,7 @@ export default async function HomePage() {
                                 <p className="leading-relaxed text-slate-600">
                                     Claim tracks you believe will become popular
                                     before they go viral on TikTok, Instagram,
-                                    or other platforms
+                                    or other social platforms
                                 </p>
                             </CardContent>
                         </Card>
@@ -668,7 +521,7 @@ export default async function HomePage() {
                                 <p className="leading-relaxed text-slate-600">
                                     Build your reputation as tracks you claimed
                                     become popular and earn badges for your
-                                    music discovery skills
+                                    exceptional music discovery skills
                                 </p>
                             </CardContent>
                         </Card>
@@ -676,23 +529,53 @@ export default async function HomePage() {
                 </div>
             </section>
 
+            {/* About Section */}
+            <section id="about" className="px-4 py-16">
+                <div className="mx-auto max-w-4xl text-center">
+                    <h2 className="mb-6 text-3xl font-bold text-slate-800 md:text-4xl">
+                        The Future of Music Discovery
+                    </h2>
+                    <p className="mb-8 text-xl leading-relaxed text-slate-600">
+                        Sound Sage is more than just a music platform—it's a
+                        community for true music enthusiasts who have an ear for
+                        what's next. Whether you're into indie pop, electronic,
+                        hip-hop, or alternative, our platform helps you discover
+                        and claim tracks before they become mainstream hits.
+                    </p>
+                    <p className="mb-10 text-lg leading-relaxed text-slate-600">
+                        Join a community of music lovers who understand that
+                        great music deserves to be discovered early. Build your
+                        reputation, connect with like-minded listeners, and
+                        prove that you have what it takes to spot the next big
+                        thing.
+                    </p>
+                    <Button
+                        size="lg"
+                        className="bg-sage-600 hover:bg-sage-700 px-10 py-4 text-lg text-white shadow-lg"
+                    >
+                        Start Your Journey
+                        <ArrowRight className="ml-2" size={20} />
+                    </Button>
+                </div>
+            </section>
+
             {/* CTA Section */}
             <section className="from-sage-50 bg-gradient-to-br to-blue-50 px-4 py-20">
                 <div className="mx-auto max-w-4xl text-center">
                     <h2 className="mb-6 text-3xl font-bold text-slate-800 md:text-4xl">
-                        Ready to Discover Tomorrow&lsquo;s Hits Today?
+                        Ready to Discover Tomorrow's Hits Today?
                     </h2>
                     <p className="mb-10 text-xl leading-relaxed text-slate-600">
-                        Join thousands of music enthusiasts who are shaping the
-                        future of music discovery. Start building your
-                        reputation as a tastemaker.
+                        Join the music discovery revolution. Start building your
+                        reputation as a tastemaker and prove you can spot hits
+                        before they go viral.
                     </p>
                     <div className="flex flex-col justify-center gap-4 sm:flex-row">
                         <Button
                             size="lg"
                             className="bg-sage-600 hover:bg-sage-700 px-10 py-4 text-lg text-white shadow-lg"
                         >
-                            Sign Up Now — It&lsquo;s Free
+                            Sign Up Now — It's Free
                             <ArrowRight className="ml-2" size={20} />
                         </Button>
                         <Button
@@ -705,137 +588,6 @@ export default async function HomePage() {
                     </div>
                 </div>
             </section>
-
-            {/* Footer */}
-            <footer className="border-t border-slate-200 bg-white px-4 py-12">
-                <div className="mx-auto max-w-7xl">
-                    <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-4">
-                        <div className="md:col-span-2">
-                            <div className="mb-4 flex items-center gap-3">
-                                <div className="from-sage-500 to-sage-600 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br font-bold text-white">
-                                    SS
-                                </div>
-                                <div>
-                                    <h1 className="text-xl font-bold text-slate-800">
-                                        Sound Sage
-                                    </h1>
-                                    <p className="text-sm text-slate-500">
-                                        Music Discovery Platform
-                                    </p>
-                                </div>
-                            </div>
-                            <p className="max-w-md leading-relaxed text-slate-600">
-                                Discover music before everyone else and build
-                                your reputation as a true tastemaker. Join the
-                                community that spots tomorrow&lsquo;s hits
-                                today.
-                            </p>
-                        </div>
-
-                        <div>
-                            <h3 className="mb-4 font-semibold text-slate-800">
-                                Platform
-                            </h3>
-                            <div className="space-y-2">
-                                <Link
-                                    href="#"
-                                    className="block text-slate-600 hover:text-slate-800"
-                                >
-                                    How It Works
-                                </Link>
-                                <Link
-                                    href="#"
-                                    className="block text-slate-600 hover:text-slate-800"
-                                >
-                                    Discover
-                                </Link>
-                                <Link
-                                    href="#"
-                                    className="block text-slate-600 hover:text-slate-800"
-                                >
-                                    Community
-                                </Link>
-                                <Link
-                                    href="#"
-                                    className="block text-slate-600 hover:text-slate-800"
-                                >
-                                    Leaderboard
-                                </Link>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h3 className="mb-4 font-semibold text-slate-800">
-                                Company
-                            </h3>
-                            <div className="space-y-2">
-                                <Link
-                                    href="#"
-                                    className="block text-slate-600 hover:text-slate-800"
-                                >
-                                    About
-                                </Link>
-                                <Link
-                                    href="#"
-                                    className="block text-slate-600 hover:text-slate-800"
-                                >
-                                    Privacy
-                                </Link>
-                                <Link
-                                    href="#"
-                                    className="block text-slate-600 hover:text-slate-800"
-                                >
-                                    Terms
-                                </Link>
-                                <Link
-                                    href="#"
-                                    className="block text-slate-600 hover:text-slate-800"
-                                >
-                                    Contact
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col items-center justify-between border-t border-slate-200 pt-8 md:flex-row">
-                        <p className="text-sm text-slate-500">
-                            © 2025 Sound Sage. All rights reserved.
-                        </p>
-                        <div className="mt-4 flex gap-6 md:mt-0">
-                            <Link
-                                href="#"
-                                className="text-slate-400 hover:text-slate-600"
-                            >
-                                <span className="sr-only">Twitter</span>
-                                <svg
-                                    className="h-5 w-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84" />
-                                </svg>
-                            </Link>
-                            <Link
-                                href="#"
-                                className="text-slate-400 hover:text-slate-600"
-                            >
-                                <span className="sr-only">Instagram</span>
-                                <svg
-                                    className="h-5 w-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path
-                                        fillRule="evenodd"
-                                        d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
-                                        clipRule="evenodd"
-                                    />
-                                </svg>
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </footer>
         </div>
     )
 }

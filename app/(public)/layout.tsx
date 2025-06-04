@@ -1,7 +1,7 @@
 // app/layout.tsx (Layout raiz - SEM 'use client')
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import './globals.css'
+import '../globals.css'
 import { Toaster } from '@/components/ui/toaster'
 import Footer from '@/components/Footer/Footer'
 
@@ -13,17 +13,17 @@ export const metadata: Metadata = {
         'Claim your music and prove that you litened to it before it got popular',
 }
 
-export default function RootLayout({
+export default function DashboardFooter({
     children,
-}: Readonly<{
+}: {
     children: React.ReactNode
-}>) {
+}) {
     return (
-        <html lang="en">
-            <body className={inter.className}>
+        <div className="flex min-h-screen flex-col">
+            <main className="flex-1 bg-background text-foreground">
                 {children}
-                <Toaster />
-            </body>
-        </html>
+            </main>
+            <Footer />
+        </div>
     )
 }

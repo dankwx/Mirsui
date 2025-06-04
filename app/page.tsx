@@ -86,7 +86,7 @@ export default async function HomePage() {
                         <p className="mx-auto mb-10 max-w-3xl text-xl leading-relaxed text-slate-600 md:text-2xl">
                             Claim tracks before they go viral and build your
                             reputation as a true music tastemaker. Join the
-                            community that spots tomorrow's hits today.
+                            community that spots tomorrow&lsquo;s hits today.
                         </p>
                         <div className="flex flex-col justify-center gap-4 sm:flex-row">
                             <Button
@@ -530,8 +530,8 @@ export default async function HomePage() {
                                 This ethereal track is predicted to go viral in
                                 the next 30 days. With its dreamy synths and
                                 captivating vocals, only 24 users have claimed
-                                it so far. Don't miss your chance to be ahead of
-                                the curve.
+                                it so far. Don&lsquo;t miss your chance to be
+                                ahead of the curve.
                             </p>
                             <div className="flex flex-col gap-4 sm:flex-row">
                                 <Button className="bg-white text-slate-800 hover:bg-slate-100">
@@ -609,9 +609,9 @@ export default async function HomePage() {
                             How Sound Sage Works
                         </h2>
                         <p className="mx-auto max-w-3xl text-xl leading-relaxed text-slate-600">
-                            Join the community that discovers tomorrow's hits
-                            today. Build your reputation as a music tastemaker
-                            in three simple steps.
+                            Join the community that discovers tomorrow&lsquo;s
+                            hits today. Build your reputation as a music
+                            tastemaker in three simple steps.
                         </p>
                     </div>
 
@@ -692,7 +692,7 @@ export default async function HomePage() {
                             size="lg"
                             className="bg-sage-600 hover:bg-sage-700 px-10 py-4 text-lg text-white shadow-lg"
                         >
-                            Sign Up Now — It's Free
+                            Sign Up Now — It&lsquo;s Free
                             <ArrowRight className="ml-2" size={20} />
                         </Button>
                         <Button
@@ -727,7 +727,8 @@ export default async function HomePage() {
                             <p className="max-w-md leading-relaxed text-slate-600">
                                 Discover music before everyone else and build
                                 your reputation as a true tastemaker. Join the
-                                community that spots tomorrow's hits today.
+                                community that spots tomorrow&lsquo;s hits
+                                today.
                             </p>
                         </div>
 

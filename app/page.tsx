@@ -680,7 +680,7 @@ export default async function HomePage() {
             <section className="from-sage-50 bg-gradient-to-br to-blue-50 px-4 py-20">
                 <div className="mx-auto max-w-4xl text-center">
                     <h2 className="mb-6 text-3xl font-bold text-slate-800 md:text-4xl">
-                        Ready to Discover Tomorrow's Hits Today?
+                        Ready to Discover Tomorrow&lsquo;s Hits Today?
                     </h2>
                     <p className="mb-10 text-xl leading-relaxed text-slate-600">
                         Join thousands of music enthusiasts who are shaping the

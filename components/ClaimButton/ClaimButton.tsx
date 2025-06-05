@@ -1,3 +1,5 @@
+//components/ClaimButton/ClaimButton.tsx
+
 'use client'
 
 import { useState } from 'react'

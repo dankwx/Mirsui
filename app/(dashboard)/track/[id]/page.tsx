@@ -1,11 +1,14 @@
+// app(dashboard)/track/[id]/page.tsx - versão otimizada
+
 import { createClient } from '@/utils/supabase/server'
 import { fetchAuthData } from '@/utils/profileService'
 import { fetchSpotifyTrackInfo, SpotifyTrack } from '@/utils/spotifyService'
 import { countTrackOccurrences } from '@/utils/fetchTrackInfo'
+import TrackClaimsMessages from '@/components/TrackClaimsMessages/TrackClaimsMessages'
 
 // UI Components from shadcn/ui
 import Image from 'next/image'
-import Link from 'next/link' // Import the Link component
+import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -25,8 +28,6 @@ import {
     Star,
 } from 'lucide-react'
 
-// Import the new ClaimButton component
-import ClaimButton from '@/components/ClaimButton/ClaimButton'
 import Header from '@/components/Header/Header'
 import Sidebar from '@/components/Sidebar/Sidebar'
 
@@ -37,7 +38,7 @@ export default async function TrackDetailsPage({
 }) {
     const { id: trackId } = params
 
-    // Fetch authentication data (if needed for other parts of your app)
+    // Fetch authentication data
     const authData = await fetchAuthData()
     const isLoggedIn = authData?.user ? true : false
 
@@ -60,9 +61,9 @@ export default async function TrackDetailsPage({
 
     // Get album image URL
     const albumImageUrl =
-        trackInfo?.album.images?.[0]?.url || '/placeholder.svg' // Fallback to placeholder if no image
+        trackInfo?.album.images?.[0]?.url || '/placeholder.svg'
 
-    // Fetch the total number of claims for this track using the new function
+    // Fetch the total number of claims for this track
     let totalClaims = 0
     if (trackInfo?.uri) {
         totalClaims = await countTrackOccurrences(trackInfo.uri)
@@ -124,7 +125,7 @@ export default async function TrackDetailsPage({
                                             className="mb-2"
                                         >
                                             <TrendingUp className="mr-1 h-3 w-3" />
-                                            Em Alta {/* Placeholder */}
+                                            Em Alta
                                         </Badge>
                                         <h1 className="mb-2 text-3xl font-bold text-gray-900">
                                             {trackInfo?.name ||
@@ -149,7 +150,6 @@ export default async function TrackDetailsPage({
                                             {trackInfo?.album.name ||
                                                 'Álbum Desconhecido'}{' '}
                                             •{' '}
-                                            {/* Placeholder for year if not available from Spotify API */}
                                             {trackInfo?.album.release_date
                                                 ? new Date(
                                                       trackInfo.album.release_date
@@ -173,41 +173,30 @@ export default async function TrackDetailsPage({
                                                       .toString()
                                                       .padStart(2, '0')}`
                                                 : 'N/A'}
-                                            {/* Placeholder for duration */}
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <Calendar className="h-4 w-4" />
                                             {trackInfo?.album.release_date ||
                                                 'N/A'}
-                                            {/* Placeholder for release date */}
-                                            {/* Placeholder for release date */}
                                         </div>
                                     </div>
 
                                     <div className="flex gap-3 pt-4">
-                                        {/* Replace the old button with the new ClaimButton component */}
                                         {trackInfo && (
-                                            <ClaimButton
+                                            <TrackClaimsMessages
                                                 trackUri={trackInfo.uri}
+                                                trackUrl={trackUrl}
                                                 trackTitle={trackInfo.name}
-                                                artistName={
-                                                    trackInfo.artists[0]
-                                                        ?.name ||
-                                                    'Artista Desconhecido'
-                                                }
+                                                artistName={artistNames}
                                                 albumName={trackInfo.album.name}
                                                 popularity={
                                                     trackInfo.popularity
                                                 }
                                                 trackThumbnail={albumImageUrl}
-                                                trackUrl={trackUrl}
                                                 initialClaimed={hasUserClaimed}
                                                 userPosition={userClaimPosition}
                                             />
                                         )}
-                                        <Button variant="outline" size="icon">
-                                            <Share2 className="h-4 w-4" />
-                                        </Button>
                                     </div>
                                 </div>
                             </div>
@@ -219,10 +208,8 @@ export default async function TrackDetailsPage({
                         <Card>
                             <CardContent className="p-6 text-center">
                                 <div className="mb-2 text-3xl font-bold text-purple-600">
-                                    {totalClaims}{' '}
-                                    {/* Display the actual count here */}
-                                </div>{' '}
-                                {/* Placeholder */}
+                                    {totalClaims}
+                                </div>
                                 <div className="text-sm text-gray-600">
                                     Total de Reivindicações
                                 </div>
@@ -242,8 +229,7 @@ export default async function TrackDetailsPage({
                             <CardContent className="p-6 text-center">
                                 <div className="mb-2 text-3xl font-bold text-orange-600">
                                     2.1B
-                                </div>{' '}
-                                {/* Placeholder */}
+                                </div>
                                 <div className="text-sm text-gray-600">
                                     Reproduções Totais
                                 </div>
@@ -275,18 +261,16 @@ export default async function TrackDetailsPage({
                             <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
                                     <span>Reivindicações esta semana</span>
-                                    <span>156</span> {/* Placeholder */}
+                                    <span>156</span>
                                 </div>
-                                <Progress value={78} className="h-2" />{' '}
-                                {/* Placeholder */}
+                                <Progress value={78} className="h-2" />
                             </div>
                             <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
                                     <span>Crescimento mensal</span>
-                                    <span>+23%</span> {/* Placeholder */}
+                                    <span>+23%</span>
                                 </div>
-                                <Progress value={65} className="h-2" />{' '}
-                                {/* Placeholder */}
+                                <Progress value={65} className="h-2" />
                             </div>
                         </CardContent>
                     </Card>
@@ -424,8 +408,7 @@ export default async function TrackDetailsPage({
                                 </span>
                                 <span className="text-sm font-medium">
                                     Synthpop, R&B
-                                </span>{' '}
-                                {/* Placeholder */}
+                                </span>
                             </div>
                             <Separator />
                             <div className="flex justify-between">
@@ -434,8 +417,7 @@ export default async function TrackDetailsPage({
                                 </span>
                                 <span className="text-sm font-medium">
                                     XO, Republic
-                                </span>{' '}
-                                {/* Placeholder */}
+                                </span>
                             </div>
                             <Separator />
                             <div className="flex justify-between">
@@ -444,16 +426,14 @@ export default async function TrackDetailsPage({
                                 </span>
                                 <span className="text-sm font-medium">
                                     The Weeknd, Max Martin
-                                </span>{' '}
-                                {/* Placeholder */}
+                                </span>
                             </div>
                             <Separator />
                             <div className="flex justify-between">
                                 <span className="text-sm text-gray-600">
                                     BPM
                                 </span>
-                                <span className="text-sm font-medium">171</span>{' '}
-                                {/* Placeholder */}
+                                <span className="text-sm font-medium">171</span>
                             </div>
                             <Separator />
                             <div className="flex justify-between">
@@ -462,8 +442,7 @@ export default async function TrackDetailsPage({
                                 </span>
                                 <span className="text-sm font-medium">
                                     F♯ menor
-                                </span>{' '}
-                                {/* Placeholder */}
+                                </span>
                             </div>
                         </CardContent>
                     </Card>

@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { Music } from 'lucide-react'
+
 export default function Footer() {
     return (
         <footer className="border-t border-slate-200 bg-white px-4 py-12">
@@ -6,8 +8,8 @@ export default function Footer() {
                 <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-4">
                     <div className="md:col-span-2">
                         <div className="mb-4 flex items-center gap-3">
-                            <div className="from-sage-500 to-sage-600 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br font-bold text-white">
-                                SS
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
+                                <Music className="h-4 w-4 text-white" />
                             </div>
                             <div>
                                 <h1 className="text-xl font-bold text-slate-800">

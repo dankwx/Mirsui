@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import firebaseConfig from '../firebase-config'
 import { getAuth } from 'firebase/auth'
 import { initializeApp } from 'firebase/app'
 import Header from '@/components/Header/Header'

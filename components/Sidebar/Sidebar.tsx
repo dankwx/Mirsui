@@ -1,9 +1,9 @@
+// components/Sidebar/Sidebar.tsx
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Music, Tv, Video, Mic, Menu, X, Home, Library } from 'lucide-react'
-import { createClient } from '@/utils/supabase/client'
 
 // Tipo para o perfil do usuário
 interface UserProfile {
@@ -14,6 +14,10 @@ interface UserProfile {
     display_name?: string
     avatar_url?: string
     rating?: number
+}
+
+interface SidebarProps {
+    userProfile: UserProfile | null
 }
 
 const navigationItems = [
@@ -45,57 +49,8 @@ const navigationItems = [
     },
 ]
 
-export default function Sidebar() {
+export default function Sidebar({ userProfile }: SidebarProps) {
     const [isExpanded, setIsExpanded] = useState(true)
-    const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
-    const [isAuthChecked, setIsAuthChecked] = useState(false)
-
-    const supabase = createClient()
-
-    useEffect(() => {
-        fetchUserInfo()
-    }, [])
-
-    const fetchUserInfo = async () => {
-        try {
-            const { data: authData, error: authError } =
-                await supabase.auth.getUser()
-
-            if (authError) {
-                throw authError
-            }
-
-            if (authData?.user) {
-                const userId = authData.user.id // UUID do usuário
-
-                // Buscar informações do perfil na tabela profiles
-                const { data: profileData, error: profileError } =
-                    await supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', userId)
-                        .single()
-
-                if (profileError) {
-                    console.log('Erro ao buscar perfil:', profileError)
-                    // Se não encontrar o perfil, usar dados básicos do auth
-                    setUserProfile({
-                        email: authData.user.email,
-                        display_name:
-                            authData.user.user_metadata?.full_name || 'User',
-                        avatar_url: undefined,
-                        username: undefined,
-                    })
-                } else {
-                    setUserProfile(profileData)
-                }
-            }
-        } catch (error) {
-            console.log('Falha ao buscar informações do usuário', error)
-        } finally {
-            setIsAuthChecked(true)
-        }
-    }
 
     // Função para gerar iniciais do nome ou email
     const getInitials = (
@@ -218,16 +173,12 @@ export default function Sidebar() {
                         </div>
                         <div className="grid flex-1 text-left text-sm leading-tight">
                             <span className="truncate font-semibold text-foreground">
-                                {isAuthChecked
-                                    ? userProfile?.display_name ||
-                                      userProfile?.username ||
-                                      'User'
-                                    : 'Loading...'}
+                                {userProfile?.display_name ||
+                                    userProfile?.username ||
+                                    'User'}
                             </span>
                             <span className="truncate text-xs text-muted-foreground">
-                                {isAuthChecked
-                                    ? userProfile?.email || 'Not logged in'
-                                    : 'Loading...'}
+                                {userProfile?.email || 'Not logged in'}
                             </span>
                         </div>
                     </div>

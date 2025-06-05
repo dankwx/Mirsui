@@ -1,18 +1,32 @@
-import GetAuth from '../GetAuth/GetAuth'
-import Logo from './Logo'
+import GetAuth from '@/components/GetAuth/GetAuth'
 import SearchWithResults from '../SearchWithResults/SearchWithResults'
 
-export default function Header() {
+// Tipo para o perfil do usuário
+interface UserProfile {
+    id?: string
+    email?: string
+    username?: string
+    description?: string
+    display_name?: string
+    avatar_url?: string
+    rating?: number
+}
+
+interface HeaderProps {
+    userProfile?: UserProfile | null
+}
+
+export default function Header({ userProfile }: HeaderProps) {
     return (
-        <header className="flex h-16 w-full shrink-0 items-center justify-start border-b-2 border-solid border-gray-200 bg-white font-sans font-medium">
-            <div className="flex w-full items-center">
-                <div className="flex w-full items-center">
-                    <div className="flex w-full text-xl">
-                        <SearchWithResults />
-                        <div className="flex items-center">
-                            <GetAuth />
-                        </div>
-                    </div>
+        <header className="border-b border-border bg-background px-4 py-3">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <SearchWithResults />
+                </div>
+
+                <div className="flex items-center gap-4">
+                    {/* Você pode usar userProfile aqui também se quiser customizar o GetAuth */}
+                    <GetAuth />
                 </div>
             </div>
         </header>

@@ -14,7 +14,6 @@ export default function NewUser({
             <Header />
             <div className="flex min-h-full w-full flex-1 flex-col justify-between font-mono text-sm">
                 <div className="flex h-full flex-1">
-                    <Sidebar />
                     <ClaimedChannels
                         params={params}
                         searchParams={searchParams}

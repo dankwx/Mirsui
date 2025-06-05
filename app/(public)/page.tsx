@@ -31,8 +31,8 @@ export default async function HomePage() {
             <nav className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/80 px-4 py-4 backdrop-blur-md">
                 <div className="mx-auto flex max-w-7xl items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="from-sage-500 to-sage-600 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br font-bold text-white shadow-sm">
-                            SS
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
+                            <Music className="h-4 w-4 text-white" />
                         </div>
                         <div>
                             <h1 className="text-xl font-bold text-slate-800">

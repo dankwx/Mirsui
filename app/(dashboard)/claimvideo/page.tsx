@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Header from '@/components/Header/Header'
 import Sidebar from '@/components/Sidebar/Sidebar'
-import ClaimVideo from '../../components/ClaimVideo/ClaimVideo'
+import ClaimVideo from '@/components/ClaimVideo/ClaimVideo'
 
 export default function ClaimVideoPage() {
     return (

@@ -12,7 +12,8 @@ import TrendingPage from '@/components/TrendingTracks/TrendingTracks'
 
 export default function ClaimTracksPage() {
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        // Remove min-h-screen and bg-gray-50 from this div
+        <div className="flex items-center justify-center">
             <div className="max-w-7xl p-6">
                 {/* Header */}
                 <div className="mb-8">
@@ -25,7 +26,10 @@ export default function ClaimTracksPage() {
                 </div>
 
                 {/* Search */}
-                <SearchWithResults />
+                <div className="mb-8">
+                    <SearchWithResults />
+                </div>
+
                 <div className="flex max-w-full">
                     <RecentActivity />
                     <TrendingPage />

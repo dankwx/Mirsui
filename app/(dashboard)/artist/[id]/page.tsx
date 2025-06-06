@@ -1,7 +1,14 @@
+// app(dashboard)/artist/[id]/page.tsx
 import { createClient } from '@/utils/supabase/server'
 import { fetchAuthData } from '@/utils/profileService'
-import { fetchSpotifyArtistInfo, SpotifyArtist } from '@/utils/spotifyService'
-// import { countArtistOccurrences } from '@/utils/fetchArtistInfo'
+import {
+    fetchSpotifyArtistInfo,
+    fetchSpotifyArtistAlbums,
+    fetchSpotifyArtistTopTracks,
+    SpotifyArtist,
+    SpotifyAlbum,
+    SpotifyTrack,
+} from '@/utils/spotifyService'
 
 // UI Components from shadcn/ui
 import Image from 'next/image'
@@ -11,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
     Heart,
     Play,
@@ -25,12 +33,41 @@ import {
     Mic,
     Disc,
     UserPlus,
+    ExternalLink,
 } from 'lucide-react'
 
 // Import components
-// import FollowArtistButton from '@/components/FollowArtistButton/FollowArtistButton'
 import Header from '@/components/Header/Header'
 import Sidebar from '@/components/Sidebar/Sidebar'
+import SpotifyButton from '@/components/SpotifyButton'
+import AlbumExternalLinkButton from '@/components/AlbumExternalLinkButton'
+
+// Helper function to format duration
+function formatDuration(ms: number): string {
+    const minutes = Math.floor(ms / 60000)
+    const seconds = Math.floor((ms % 60000) / 1000)
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+// Helper function to format release date
+function formatReleaseDate(dateString: string): string {
+    const date = new Date(dateString)
+    return date.getFullYear().toString()
+}
+
+// Helper function to get album type in Portuguese
+function getAlbumTypeLabel(type: string): string {
+    switch (type) {
+        case 'album':
+            return 'Álbum'
+        case 'single':
+            return 'Single'
+        case 'compilation':
+            return 'Coletânea'
+        default:
+            return type
+    }
+}
 
 export default async function ArtistDetailsPage({
     params,
@@ -45,10 +82,31 @@ export default async function ArtistDetailsPage({
 
     // Fetch Spotify artist information
     let artistInfo: SpotifyArtist | null = null
+    let artistAlbums: SpotifyAlbum[] = []
+    let topTracks: SpotifyTrack[] = []
+
     if (artistId) {
         artistInfo = await fetchSpotifyArtistInfo(artistId)
         console.log({ artistInfo })
+
+        if (artistInfo) {
+            // Fetch albums and top tracks
+            const albumsData = await fetchSpotifyArtistAlbums(artistId)
+            artistAlbums = albumsData || []
+
+            const topTracksData = await fetchSpotifyArtistTopTracks(artistId)
+            topTracks = topTracksData || []
+        }
     }
+
+    // Organize albums by type
+    const albums = artistAlbums.filter((album) => album.album_type === 'album')
+    const singles = artistAlbums.filter(
+        (album) => album.album_type === 'single'
+    )
+    const compilations = artistAlbums.filter(
+        (album) => album.album_type === 'compilation'
+    )
 
     // Get artist image URL
     const artistImageUrl =
@@ -56,29 +114,10 @@ export default async function ArtistDetailsPage({
 
     // Fetch the total number of follows for this artist (placeholder for now)
     let totalFollows = 142 // Placeholder value
-    // if (artistInfo?.uri) {
-    //     totalFollows = await countArtistOccurrences(artistInfo.uri)
-    // }
 
     // Check if current user is already following this artist (placeholder for now)
     let hasUserFollowed = false
     let userFollowDate = null
-
-    // Placeholder logic - would be implemented later
-    // if (isLoggedIn && artistInfo?.uri) {
-    //     const supabase = createClient()
-    //     const { data: userFollow, error } = await supabase
-    //         .from('artist_follows')
-    //         .select('created_at')
-    //         .eq('user_id', authData.user?.id)
-    //         .eq('artist_uri', artistInfo.uri)
-    //         .single()
-
-    //     if (!error && userFollow) {
-    //         hasUserFollowed = true
-    //         userFollowDate = userFollow.created_at
-    //     }
-    // }
 
     // Construct Spotify URL for the artist
     const artistUrl = `https://open.spotify.com/artist/${artistId}`
@@ -166,7 +205,6 @@ export default async function ArtistDetailsPage({
                                     </div>
 
                                     <div className="flex gap-3 pt-4">
-                                        {/* Placeholder Follow Button */}
                                         <Button className="flex items-center gap-2">
                                             <UserPlus className="h-4 w-4" />
                                             {hasUserFollowed
@@ -176,6 +214,7 @@ export default async function ArtistDetailsPage({
                                         <Button variant="outline" size="icon">
                                             <Share2 className="h-4 w-4" />
                                         </Button>
+                                        <SpotifyButton artistUrl={artistUrl} />
                                     </div>
                                 </div>
                             </div>
@@ -183,7 +222,7 @@ export default async function ArtistDetailsPage({
                     </Card>
 
                     {/* Stats Grid */}
-                    <div className="grid gap-4 md:grid-cols-3">
+                    <div className="grid gap-4 md:grid-cols-4">
                         <Card>
                             <CardContent className="p-6 text-center">
                                 <div className="mb-2 text-3xl font-bold text-purple-600">
@@ -218,91 +257,313 @@ export default async function ArtistDetailsPage({
                                 </div>
                             </CardContent>
                         </Card>
+                        <Card>
+                            <CardContent className="p-6 text-center">
+                                <div className="mb-2 text-3xl font-bold text-blue-600">
+                                    {artistAlbums.length}
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                    Lançamentos
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
 
-                    {/* Popularity Chart */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <TrendingUp className="h-5 w-5" />
-                                Métricas de Popularidade
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-sm">
-                                    <span>Popularidade Spotify</span>
-                                    <span>
-                                        {artistInfo?.popularity || 'N/A'}
-                                        /100
-                                    </span>
-                                </div>
-                                <Progress
-                                    value={artistInfo?.popularity || 0}
-                                    className="h-2"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-sm">
-                                    <span>Novos seguidores esta semana</span>
-                                    <span>247</span>
-                                </div>
-                                <Progress value={82} className="h-2" />
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-sm">
-                                    <span>Crescimento mensal</span>
-                                    <span>+18%</span>
-                                </div>
-                                <Progress value={72} className="h-2" />
-                            </div>
-                        </CardContent>
-                    </Card>
-
                     {/* Top Tracks */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Music className="h-5 w-5" />
-                                Músicas Mais Populares
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                            {/* This would be populated with actual top tracks from Spotify API */}
-                            {[
-                                { name: 'Hit Song #1', plays: '1.2B' },
-                                { name: 'Popular Track', plays: '890M' },
-                                { name: 'Fan Favorite', plays: '652M' },
-                                { name: 'Chart Topper', plays: '543M' },
-                                { name: 'Latest Single', plays: '321M' },
-                            ].map((track, index) => (
-                                <div
-                                    key={index}
-                                    className="flex items-center justify-between rounded-lg p-2 hover:bg-gray-50"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <span className="w-4 text-sm font-medium text-gray-500">
-                                            {index + 1}
-                                        </span>
-                                        <div>
-                                            <p className="font-medium">
-                                                {track.name}
-                                            </p>
-                                            <p className="text-sm text-gray-500">
-                                                {track.plays} reproduções
-                                            </p>
+                    {topTracks.length > 0 && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Music className="h-5 w-5" />
+                                    Músicas Mais Populares
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                {topTracks.slice(0, 5).map((track, index) => (
+                                    <div
+                                        key={track.id}
+                                        className="flex items-center justify-between rounded-lg p-3 transition-colors hover:bg-gray-50"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <span className="w-6 text-sm font-medium text-gray-500">
+                                                {index + 1}
+                                            </span>
+                                            <div className="relative h-12 w-12">
+                                                <Image
+                                                    src={
+                                                        track.album.images[0]
+                                                            ?.url ||
+                                                        '/placeholder-album.svg'
+                                                    }
+                                                    alt={track.album.name}
+                                                    fill
+                                                    className="rounded object-cover"
+                                                />
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-gray-900">
+                                                    {track.name}
+                                                </p>
+                                                <p className="text-sm text-gray-500">
+                                                    {track.album.name} •{' '}
+                                                    {formatReleaseDate(
+                                                        track.album.release_date
+                                                    )}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-sm text-gray-500">
+                                                {formatDuration(
+                                                    track.duration_ms
+                                                )}
+                                            </span>
+                                            <Button variant="ghost" size="sm">
+                                                <Play className="h-4 w-4" />
+                                            </Button>
                                         </div>
                                     </div>
-                                    <Button variant="ghost" size="sm">
-                                        <Play className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            ))}
+                                ))}
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Albums, EPs and Singles Tabs */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Disc className="h-5 w-5" />
+                                Discografia
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Tabs defaultValue="albums" className="w-full">
+                                <TabsList className="grid w-full grid-cols-3">
+                                    <TabsTrigger
+                                        value="albums"
+                                        className="flex items-center gap-2"
+                                    >
+                                        <Disc className="h-4 w-4" />
+                                        Álbuns ({albums.length})
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="singles"
+                                        className="flex items-center gap-2"
+                                    >
+                                        <Music className="h-4 w-4" />
+                                        Singles ({singles.length})
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="compilations"
+                                        className="flex items-center gap-2"
+                                    >
+                                        <Award className="h-4 w-4" />
+                                        Coletâneas ({compilations.length})
+                                    </TabsTrigger>
+                                </TabsList>
+
+                                {/* Albums Tab */}
+                                <TabsContent value="albums" className="mt-6">
+                                    {albums.length > 0 ? (
+                                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                            {albums.map((album) => (
+                                                <Card
+                                                    key={album.id}
+                                                    className="overflow-hidden transition-shadow hover:shadow-lg"
+                                                >
+                                                    <div className="relative aspect-square">
+                                                        <Image
+                                                            src={
+                                                                album.images[0]
+                                                                    ?.url ||
+                                                                '/placeholder-album.svg'
+                                                            }
+                                                            alt={album.name}
+                                                            fill
+                                                            className="object-cover"
+                                                        />
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity hover:opacity-100">
+                                                            <AlbumExternalLinkButton
+                                                                url={
+                                                                    album
+                                                                        .external_urls
+                                                                        .spotify
+                                                                }
+                                                                size="lg"
+                                                                className="h-12 w-12 rounded-full"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <CardContent className="p-4">
+                                                        <h3 className="mb-1 line-clamp-1 font-semibold text-gray-900">
+                                                            {album.name}
+                                                        </h3>
+                                                        <div className="flex items-center justify-between text-sm text-gray-500">
+                                                            <span>
+                                                                {formatReleaseDate(
+                                                                    album.release_date
+                                                                )}
+                                                            </span>
+                                                            <Badge
+                                                                variant="secondary"
+                                                                className="text-xs"
+                                                            >
+                                                                {getAlbumTypeLabel(
+                                                                    album.album_type
+                                                                )}
+                                                            </Badge>
+                                                        </div>
+                                                        <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+                                                            <Music className="h-3 w-3" />
+                                                            {album.total_tracks}{' '}
+                                                            faixas
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="py-8 text-center text-gray-500">
+                                            <Disc className="mx-auto mb-3 h-12 w-12 opacity-50" />
+                                            <p>Nenhum álbum encontrado</p>
+                                        </div>
+                                    )}
+                                </TabsContent>
+
+                                {/* Singles Tab */}
+                                <TabsContent value="singles" className="mt-6">
+                                    {singles.length > 0 ? (
+                                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                            {singles.map((single) => (
+                                                <Card
+                                                    key={single.id}
+                                                    className="overflow-hidden transition-shadow hover:shadow-lg"
+                                                >
+                                                    <div className="relative aspect-square">
+                                                        <Image
+                                                            src={
+                                                                single.images[0]
+                                                                    ?.url ||
+                                                                '/placeholder-album.svg'
+                                                            }
+                                                            alt={single.name}
+                                                            fill
+                                                            className="object-cover"
+                                                        />
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity hover:opacity-100">
+                                                            <AlbumExternalLinkButton
+                                                                url={
+                                                                    single
+                                                                        .external_urls
+                                                                        .spotify
+                                                                }
+                                                                size="sm"
+                                                                className="h-10 w-10 rounded-full"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <CardContent className="p-3">
+                                                        <h3 className="mb-1 line-clamp-2 text-sm font-semibold text-gray-900">
+                                                            {single.name}
+                                                        </h3>
+                                                        <div className="text-xs text-gray-500">
+                                                            {formatReleaseDate(
+                                                                single.release_date
+                                                            )}
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="py-8 text-center text-gray-500">
+                                            <Music className="mx-auto mb-3 h-12 w-12 opacity-50" />
+                                            <p>Nenhum single encontrado</p>
+                                        </div>
+                                    )}
+                                </TabsContent>
+
+                                {/* Compilations Tab */}
+                                <TabsContent
+                                    value="compilations"
+                                    className="mt-6"
+                                >
+                                    {compilations.length > 0 ? (
+                                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                            {compilations.map((compilation) => (
+                                                <Card
+                                                    key={compilation.id}
+                                                    className="overflow-hidden transition-shadow hover:shadow-lg"
+                                                >
+                                                    <div className="relative aspect-square">
+                                                        <Image
+                                                            src={
+                                                                compilation
+                                                                    .images[0]
+                                                                    ?.url ||
+                                                                '/placeholder-album.svg'
+                                                            }
+                                                            alt={
+                                                                compilation.name
+                                                            }
+                                                            fill
+                                                            className="object-cover"
+                                                        />
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity hover:opacity-100">
+                                                            <AlbumExternalLinkButton
+                                                                url={
+                                                                    compilation
+                                                                        .external_urls
+                                                                        .spotify
+                                                                }
+                                                                size="lg"
+                                                                className="h-12 w-12 rounded-full"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <CardContent className="p-4">
+                                                        <h3 className="mb-1 line-clamp-1 font-semibold text-gray-900">
+                                                            {compilation.name}
+                                                        </h3>
+                                                        <div className="flex items-center justify-between text-sm text-gray-500">
+                                                            <span>
+                                                                {formatReleaseDate(
+                                                                    compilation.release_date
+                                                                )}
+                                                            </span>
+                                                            <Badge
+                                                                variant="secondary"
+                                                                className="text-xs"
+                                                            >
+                                                                {getAlbumTypeLabel(
+                                                                    compilation.album_type
+                                                                )}
+                                                            </Badge>
+                                                        </div>
+                                                        <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+                                                            <Music className="h-3 w-3" />
+                                                            {
+                                                                compilation.total_tracks
+                                                            }{' '}
+                                                            faixas
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="py-8 text-center text-gray-500">
+                                            <Award className="mx-auto mb-3 h-12 w-12 opacity-50" />
+                                            <p>Nenhuma coletânea encontrada</p>
+                                        </div>
+                                    )}
+                                </TabsContent>
+                            </Tabs>
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* Right Column - Activity */}
+                {/* Right Column - Activity (mantido igual) */}
                 <div className="space-y-6">
                     {/* Recent Followers */}
                     <Card>
@@ -463,59 +724,12 @@ export default async function ArtistDetailsPage({
                             <Separator />
                             <div className="flex justify-between">
                                 <span className="text-sm text-gray-600">
-                                    Verificado
+                                    Total de Lançamentos
                                 </span>
                                 <span className="text-sm font-medium">
-                                    {artistInfo ? 'Sim' : 'N/A'}
+                                    {artistAlbums.length}
                                 </span>
                             </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Albums */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Disc className="h-5 w-5" />
-                                Álbuns Recentes
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                            {/* This would be populated with actual albums from Spotify API */}
-                            {[
-                                {
-                                    name: 'Latest Album',
-                                    year: '2024',
-                                    type: 'Album',
-                                },
-                                {
-                                    name: 'Hit Singles',
-                                    year: '2023',
-                                    type: 'Single',
-                                },
-                                {
-                                    name: 'Greatest Hits',
-                                    year: '2022',
-                                    type: 'Compilation',
-                                },
-                            ].map((album, index) => (
-                                <div
-                                    key={index}
-                                    className="flex items-center gap-3 rounded-lg p-2 hover:bg-gray-50"
-                                >
-                                    <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-200">
-                                        <Disc className="h-5 w-5 text-gray-500" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-medium">
-                                            {album.name}
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            {album.type} • {album.year}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
                         </CardContent>
                     </Card>
                 </div>

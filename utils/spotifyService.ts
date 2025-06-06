@@ -1,3 +1,5 @@
+// utils/spotifyService.ts
+
 import 'server-only'
 
 interface SpotifyTokenResponse {
@@ -40,6 +42,39 @@ export interface SpotifySearchResponse {
         limit: number
         offset: number
     }
+}
+
+export interface SpotifyArtist {
+    id: string
+    name: string
+    images: { url: string }[]
+    followers: { total: number }
+    genres: string[]
+    popularity: number
+    uri: string
+    external_urls: {
+        spotify: string
+    }
+}
+
+// Nova interface para álbuns
+export interface SpotifyAlbum {
+    id: string
+    name: string
+    album_type: 'album' | 'single' | 'compilation'
+    images: { url: string; height: number; width: number }[]
+    release_date: string
+    release_date_precision: string
+    total_tracks: number
+    external_urls: {
+        spotify: string
+    }
+    artists: { name: string; id: string }[]
+}
+
+// Interface para top tracks
+export interface SpotifyTopTracks {
+    tracks: SpotifyTrack[]
 }
 
 // Cache do token
@@ -203,23 +238,6 @@ export async function searchSpotify(
     }
 }
 
-// Adicione esta interface junto com as outras interfaces no seu spotifyService.ts
-
-export interface SpotifyArtist {
-    id: string
-    name: string
-    images: { url: string }[]
-    followers: { total: number }
-    genres: string[]
-    popularity: number
-    uri: string
-    external_urls: {
-        spotify: string
-    }
-}
-
-// Adicione esta função no final do seu spotifyService.ts
-
 export async function fetchSpotifyArtistInfo(
     artistId: string
 ): Promise<SpotifyArtist | null> {
@@ -265,6 +283,111 @@ export async function fetchSpotifyArtistInfo(
     } catch (error) {
         console.error(
             `Erro ao buscar informações do artista ${artistId}:`,
+            error
+        )
+        return null
+    }
+}
+
+// Nova função para buscar álbuns do artista
+export async function fetchSpotifyArtistAlbums(
+    artistId: string,
+    includeGroups: string = 'album,single,compilation',
+    limit: number = 50
+): Promise<SpotifyAlbum[] | null> {
+    const accessToken = await getSpotifyAccessToken()
+
+    if (!accessToken) {
+        console.error('Token do Spotify não disponível.')
+        return null
+    }
+
+    try {
+        const response = await fetch(
+            `https://api.spotify.com/v1/artists/${artistId}/albums?include_groups=${includeGroups}&market=BR&limit=${limit}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+                next: { revalidate: 86400 },
+            }
+        )
+
+        if (!response.ok) {
+            const errorText = await response.text()
+            console.error(
+                `Falha ao buscar álbuns do artista ${artistId}:`,
+                response.status,
+                errorText
+            )
+            if (
+                response.status === 401 &&
+                errorText.includes('The access token expired')
+            ) {
+                console.warn(
+                    'Token do Spotify expirou. Forçando renovação na próxima requisição.'
+                )
+                cachedSpotifyAccessToken = null
+                cachedTokenExpiryTime = null
+            }
+            return null
+        }
+
+        const data = await response.json()
+        return data.items || []
+    } catch (error) {
+        console.error(`Erro ao buscar álbuns do artista ${artistId}:`, error)
+        return null
+    }
+}
+
+// Nova função para buscar top tracks do artista
+export async function fetchSpotifyArtistTopTracks(
+    artistId: string
+): Promise<SpotifyTrack[] | null> {
+    const accessToken = await getSpotifyAccessToken()
+
+    if (!accessToken) {
+        console.error('Token do Spotify não disponível.')
+        return null
+    }
+
+    try {
+        const response = await fetch(
+            `https://api.spotify.com/v1/artists/${artistId}/top-tracks?market=BR`,
+            {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+                next: { revalidate: 86400 },
+            }
+        )
+
+        if (!response.ok) {
+            const errorText = await response.text()
+            console.error(
+                `Falha ao buscar top tracks do artista ${artistId}:`,
+                response.status,
+                errorText
+            )
+            if (
+                response.status === 401 &&
+                errorText.includes('The access token expired')
+            ) {
+                console.warn(
+                    'Token do Spotify expirou. Forçando renovação na próxima requisição.'
+                )
+                cachedSpotifyAccessToken = null
+                cachedTokenExpiryTime = null
+            }
+            return null
+        }
+
+        const data = await response.json()
+        return data.tracks || []
+    } catch (error) {
+        console.error(
+            `Erro ao buscar top tracks do artista ${artistId}:`,
             error
         )
         return null

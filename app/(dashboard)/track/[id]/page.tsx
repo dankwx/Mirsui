@@ -5,6 +5,7 @@ import { fetchAuthData } from '@/utils/profileService'
 import { fetchSpotifyTrackInfo, SpotifyTrack } from '@/utils/spotifyService'
 import { countTrackOccurrences } from '@/utils/fetchTrackInfo'
 import TrackClaimsMessages from '@/components/TrackClaimsMessages/TrackClaimsMessages'
+import TrackClaimers from '@/components/TrackClaimers.tsx/TrackClaimers'
 
 // UI Components from shadcn/ui
 import Image from 'next/image'
@@ -278,66 +279,8 @@ export default async function TrackDetailsPage({
 
                 {/* Right Column - Activity */}
                 <div className="space-y-6">
-                    {/* Recent Claims */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Users className="h-5 w-5" />
-                                Reivindicações Recentes
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {[
-                                {
-                                    name: 'Ana Silva',
-                                    time: '2 min atrás',
-                                    avatar: 'AS',
-                                },
-                                {
-                                    name: 'Carlos Santos',
-                                    time: '15 min atrás',
-                                    avatar: 'CS',
-                                },
-                                {
-                                    name: 'Maria Oliveira',
-                                    time: '1 hora atrás',
-                                    avatar: 'MO',
-                                },
-                                {
-                                    name: 'João Pedro',
-                                    time: '3 horas atrás',
-                                    avatar: 'JP',
-                                },
-                                {
-                                    name: 'Lucia Costa',
-                                    time: '5 horas atrás',
-                                    avatar: 'LC',
-                                },
-                            ].map((user, index) => (
-                                <div
-                                    key={index}
-                                    className="flex items-center gap-3"
-                                >
-                                    <Avatar className="h-8 w-8">
-                                        <AvatarImage
-                                            src={`/placeholder-user.jpg`}
-                                        />
-                                        <AvatarFallback className="text-xs">
-                                            {user.avatar}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div className="min-w-0 flex-1">
-                                        <p className="truncate text-sm font-medium text-gray-900">
-                                            {user.name}
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            {user.time}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
+                    {/* Recent Claims - substituído pelo TrackClaimers */}
+                    {trackInfo && <TrackClaimers trackUri={trackInfo.uri} />}
 
                     {/* Top Claimers */}
                     <Card>

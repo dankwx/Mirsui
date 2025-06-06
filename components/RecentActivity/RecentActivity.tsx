@@ -1,12 +1,14 @@
 // components/RecentActivity.tsx
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
+import Image from 'next/image'
 import SearchWithResults from '../SearchWithResults/SearchWithResults'
 
 interface ClaimedTrack {
     track_title: string
     artist_name: string
     username: string
+    avatar_url: string
     claimed_at: string
     claim_message?: string
     track_id?: string
@@ -61,7 +63,7 @@ export default async function RecentActivity() {
     }
 
     return (
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="mr-8 max-w-xl rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-6 text-lg font-semibold text-gray-900">
                 Recent Activity
             </h2>
@@ -70,11 +72,23 @@ export default async function RecentActivity() {
                 <div className="space-y-4">
                     {claimedTracksData.map((track, index) => (
                         <div key={index} className="flex items-start space-x-3">
-                            {/* Avatar placeholder */}
-                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-200">
-                                <span className="text-xs font-medium text-gray-600">
-                                    {track.username.charAt(0).toUpperCase()}
-                                </span>
+                            {/* Avatar */}
+                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200">
+                                {track.avatar_url ? (
+                                    <Image
+                                        src={track.avatar_url}
+                                        alt={`${track.username} avatar`}
+                                        width={32}
+                                        height={32}
+                                        className="h-full w-full rounded-full object-cover"
+                                        placeholder="blur"
+                                        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyEkJNij2iYP2i4OFbLFzjbW1VTl5fwqRVWodaOyqTdZEkKGWY4jVBJBJZiLUpYLCUZDCUBjCPQTGDqIjJIZSyQlAXJAJNJzBaZTGNFMBmkZa1ZQYKGDdGSkyJQXjdJkRjdOjQjPfJmQZGWXQRASGCMJDGGJQFJkBOmCQZAKJZlBhQxAVdHHDJWPJGAGPJGAGPJGAGPJGAGPJGAGMJGAGMJGAGMJGAGMJGAGMJGAGMJGAGMJGAGMJGAGP/2Q=="
+                                    />
+                                ) : (
+                                    <span className="text-xs font-medium text-gray-600">
+                                        {track.username.charAt(0).toUpperCase()}
+                                    </span>
+                                )}
                             </div>
 
                             {/* Content */}
@@ -87,7 +101,7 @@ export default async function RecentActivity() {
                                         {track.username}
                                     </Link>
                                     <span className="text-gray-500">
-                                        claimed
+                                        reinvidicou
                                     </span>
                                     <span className="text-gray-400">
                                         {formatClaimedAt(track.claimed_at)}

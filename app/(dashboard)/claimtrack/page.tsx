@@ -8,11 +8,12 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import RecentActivity from '@/components/RecentActivity/RecentActivity'
 import SearchWithResults from '@/components/SearchWithResults/SearchWithResults'
+import TrendingPage from '@/components/TrendingTracks/TrendingTracks'
 
 export default function ClaimTracksPage() {
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="max-w-3xl p-6">
+        <div className="flex min-h-screen items-center justify-center bg-gray-50">
+            <div className="max-w-7xl p-6">
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="mb-2 text-3xl font-bold text-gray-900">
@@ -25,8 +26,10 @@ export default function ClaimTracksPage() {
 
                 {/* Search */}
                 <SearchWithResults />
-
-                <RecentActivity />
+                <div className="flex max-w-full">
+                    <RecentActivity />
+                    <TrendingPage />
+                </div>
             </div>
         </div>
     )

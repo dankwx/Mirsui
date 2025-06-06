@@ -127,7 +127,7 @@ export default async function RecentActivity() {
 
                                     {track.claim_message && (
                                         <p className="mt-1 text-sm italic text-gray-600">
-                                            "{track.claim_message}"
+                                            &quot;{track.claim_message}&quot;
                                         </p>
                                     )}
                                 </div>

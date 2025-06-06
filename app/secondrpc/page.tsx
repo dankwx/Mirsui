@@ -167,7 +167,7 @@ export default async function ProfilePage() {
                                             <span className="font-semibold">
                                                 Comentário:
                                             </span>{' '}
-                                            "{track.claim_message}"
+                                            &quot;{track.claim_message}&quot;
                                         </p>
                                     )}
                                 </div>

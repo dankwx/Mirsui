@@ -1,11 +1,33 @@
-import ClaimTrack from '@/components/ClaimTrack/ClaimTrack'
-import Header from '@/components/Header/Header'
-import Sidebar from '@/components/Sidebar/Sidebar'
+import type React from 'react'
 
-export default function ClaimTrackPage() {
+import { Search, Music, Clock, Play, TrendingUp } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import RecentActivity from '@/components/RecentActivity/RecentActivity'
+import SearchWithResults from '@/components/SearchWithResults/SearchWithResults'
+
+export default function ClaimTracksPage() {
     return (
-        <main className="flex min-h-screen flex-col">
-            <ClaimTrack />
-        </main>
+        <div className="min-h-screen bg-gray-50">
+            <div className="max-w-3xl p-6">
+                {/* Header */}
+                <div className="mb-8">
+                    <h1 className="mb-2 text-3xl font-bold text-gray-900">
+                        Claim Tracks
+                    </h1>
+                    <p className="text-gray-600">
+                        Discover new music and claim tracks before they go viral
+                    </p>
+                </div>
+
+                {/* Search */}
+                <SearchWithResults />
+
+                <RecentActivity />
+            </div>
+        </div>
     )
 }

@@ -135,7 +135,7 @@ export default function SearchWithResults() {
     return (
         <div
             ref={searchRef}
-            className="ml-4 flex w-[500px] items-center justify-center align-middle"
+            className="flex w-[500px] items-center align-middle"
         >
             <div className="relative flex w-full max-w-md items-center">
                 <SearchIcon className="absolute left-3 z-10 h-5 w-5 text-muted-foreground" />

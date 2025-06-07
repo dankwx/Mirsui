@@ -7,7 +7,6 @@ import { fetchArtists } from '@/utils/fetchArtists'
 import { fetchUserData, fetchAuthData } from '@/utils/profileService'
 import { fetchSongs } from '@/utils/fetchSongs'
 import { fetchChannels } from '@/utils/fetchChannels'
-import { fetchFollowers, fetchFollowing } from '@/utils/fetchFollowersFollowing'
 import { createClient } from '@/utils/supabase/server'
 import type { User, Achievement, Rating } from '@/types/profile'
 
@@ -32,22 +31,18 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
         artists,
         songs,
         channels,
-        followers,
-        following,
-        followersResult,
-        followingResult,
         achievementResult,
         ratingResult,
+        followersResult,
+        followingResult,
     ] = await Promise.all([
         fetchArtists(userData.id),
         fetchSongs(userData.id, currentUserId),
         fetchChannels(userData.id),
-        fetchFollowers(userData.id),
-        fetchFollowing(userData.id),
-        createClient().rpc('get_user_followers', { user_uuid: userData.id }),
-        createClient().rpc('get_user_following', { user_uuid: userData.id }),
         createClient().rpc('get_user_achievements', { user_uuid: userData.id }),
         createClient().rpc('get_user_rating', { user_uuid: userData.id }),
+        createClient().rpc('get_user_followers', { user_uuid: userData.id }),
+        createClient().rpc('get_user_following', { user_uuid: userData.id }),
     ])
 
     const profileData = {
@@ -75,15 +70,17 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
             />
 
             <div className="py-8">
+                {/* CardsSection agora é server component, props são só dados puros */}
                 <CardsSection
                     totalSavedSongs={counters.savedSongs}
                     totalSavedYouTubeChannels={counters.savedChannels}
                     totalSavedSpotifyArtists={counters.savedArtists}
-                    totalFollowers={followersResult.data || []}
-                    totalFollowing={followingResult.data || []}
+                    totalFollowers={counters.followers}
+                    totalFollowing={counters.following}
                 />
 
                 <div className="mt-8 w-full">
+                    {/* TabsSection também server component, só recebe dados */}
                     <TabsSection
                         artists={artists}
                         songs={songs}

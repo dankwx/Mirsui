@@ -73,12 +73,13 @@ export default async function TrackDetailsPage({
     // Check if current user has already claimed this track
     let hasUserClaimed = false
     let userClaimPosition = null
+    let userClaimYoutubeUrl = null
 
     if (isLoggedIn && trackInfo?.uri) {
         const supabase = createClient()
         const { data: userClaim, error } = await supabase
             .from('tracks')
-            .select('position')
+            .select('position, youtube_url')
             .eq('user_id', authData.user?.id)
             .eq('track_uri', trackInfo.uri)
             .single()
@@ -86,6 +87,7 @@ export default async function TrackDetailsPage({
         if (!error && userClaim) {
             hasUserClaimed = true
             userClaimPosition = userClaim.position
+            userClaimYoutubeUrl = userClaim.youtube_url || null
         }
     }
 
@@ -196,6 +198,7 @@ export default async function TrackDetailsPage({
                                                 trackThumbnail={albumImageUrl}
                                                 initialClaimed={hasUserClaimed}
                                                 userPosition={userClaimPosition}
+                                                youtubeUrl={userClaimYoutubeUrl}
                                             />
                                         )}
                                     </div>

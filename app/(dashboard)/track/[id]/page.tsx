@@ -1,4 +1,4 @@
-// app(dashboard)/track/[id]/page.tsx - versão otimizada
+// app(dashboard)/track/[id]/page.tsx - versão com TrackPreview
 
 import { createClient } from '@/utils/supabase/server'
 import { fetchAuthData } from '@/utils/profileService'
@@ -6,6 +6,7 @@ import { fetchSpotifyTrackInfo, SpotifyTrack } from '@/utils/spotifyService'
 import { countTrackOccurrences } from '@/utils/fetchTrackInfo'
 import TrackClaimsMessages from '@/components/TrackClaimsMessages/TrackClaimsMessages'
 import TrackClaimers from '@/components/TrackClaimers.tsx/TrackClaimers'
+import TrackPreview from '@/components/TrackPreview/TrackPreview'
 
 // UI Components from shadcn/ui
 import Image from 'next/image'
@@ -206,6 +207,9 @@ export default async function TrackDetailsPage({
                             </div>
                         </CardContent>
                     </Card>
+
+                    {/* NOVO: Track Preview Component */}
+                    <TrackPreview trackId={trackId} />
 
                     {/* Stats Grid */}
                     <div className="grid gap-4 md:grid-cols-3">

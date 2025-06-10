@@ -67,7 +67,7 @@ export default async function DashboardLayout({
                 <Header userProfile={userProfile} />
 
                 {/* Conteúdo com scroll */}
-                <main className="flex-1 overflow-y-auto bg-background text-foreground">
+                <main className="flex-1 overflow-y-auto bg-[#f8f6f4] bg-background text-foreground">
                     {children}
                 </main>
             </div>

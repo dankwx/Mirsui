@@ -103,16 +103,21 @@ export default async function TrackDetailsPage({
                     {/* Hero Section */}
                     <Card className="overflow-hidden">
                         <CardContent className="p-0">
-                            <div className="flex flex-col md:flex-row">
-                                <div className="relative h-80 w-full md:w-80">
-                                    <Image
-                                        src={albumImageUrl}
-                                        alt={`Capa do álbum ${
-                                            trackInfo?.album.name || 'Música'
-                                        }`}
-                                        fill
-                                        className="object-cover"
-                                    />
+                            <div className="flex flex-col rounded-2xl bg-white p-8 shadow-sm dark:bg-slate-800 md:flex-row">
+                                <div className="relative h-72 w-full md:w-72">
+                                    <div className="rounded-2xl bg-white p-8 shadow-sm dark:bg-slate-800">
+                                        <div className="group relative"></div>
+                                        <Image
+                                            src={albumImageUrl}
+                                            alt={`Capa do álbum ${
+                                                trackInfo?.album.name ||
+                                                'Música'
+                                            }`}
+                                            fill
+                                            className="rounded-xl shadow-lg"
+                                        />
+                                    </div>
+
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity hover:opacity-100">
                                         <Button
                                             size="lg"
@@ -131,7 +136,7 @@ export default async function TrackDetailsPage({
                                             <TrendingUp className="mr-1 h-3 w-3" />
                                             Em Alta
                                         </Badge>
-                                        <h1 className="mb-2 text-3xl font-bold text-gray-900">
+                                        <h1 className="mb-2 text-3xl font-bold text-slate-900 dark:text-white md:text-4xl">
                                             {trackInfo?.name ||
                                                 'Música Desconhecida'}
                                         </h1>
@@ -140,7 +145,7 @@ export default async function TrackDetailsPage({
                                                 <span key={artist.id}>
                                                     <Link
                                                         href={`/artist/${artist.id}`}
-                                                        className="text-blue-600 hover:underline"
+                                                        className="text-xl font-medium text-purple-600 dark:text-purple-400"
                                                     >
                                                         {artist.name}
                                                     </Link>

@@ -202,18 +202,6 @@ export default function TrackPreview({
             </CardHeader>
             <CardContent className="space-y-4">
                 {/* Track Info */}
-                <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">
-                        {previewData.trackName}
-                    </h3>
-                    <p className="text-gray-600">{previewData.artistName}</p>
-                    <p className="text-sm text-gray-500">
-                        {previewData.albumName} • {previewData.duration}
-                    </p>
-                    <Badge variant="secondary" className="w-fit">
-                        Popularidade: {previewData.popularity}/100
-                    </Badge>
-                </div>
 
                 {/* YouTube Player */}
                 {youtubeVideoId ? (
@@ -229,22 +217,6 @@ export default function TrackPreview({
                         </div>
 
                         {/* Player Controls */}
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setIsMuted(!isMuted)}
-                            >
-                                {isMuted ? (
-                                    <VolumeX className="h-4 w-4" />
-                                ) : (
-                                    <Volume2 className="h-4 w-4" />
-                                )}
-                            </Button>
-                            <span className="text-xs text-gray-500">
-                                {isMuted ? 'Desmutado' : 'Com som'}
-                            </span>
-                        </div>
                     </div>
                 ) : (
                     <div className="flex aspect-video w-full items-center justify-center rounded-lg bg-gray-100">

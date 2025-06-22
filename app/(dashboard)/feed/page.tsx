@@ -4,7 +4,7 @@ import GetLatestClaims from '@/components/GetLatestClaims/GetLatestClaims'
 
 export default function faq() {
     return (
-        <main className="flex min-h-screen flex-col">
+        <main className="container mx-auto px-4 py-8">
             <p>faq</p>
             <GetLatestClaims />
         </main>

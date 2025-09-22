@@ -7,6 +7,7 @@ import { countTrackOccurrences } from '@/utils/fetchTrackInfo'
 import TrackClaimsMessages from '@/components/TrackClaimsMessages/TrackClaimsMessages'
 import TrackClaimers from '@/components/TrackClaimers.tsx/TrackClaimers'
 import TrackPreview from '@/components/TrackPreview/TrackPreview'
+import HipsterTimeline from '@/components/HipsterTimeline/HipsterTimeline'
 
 // UI Components from shadcn/ui
 import Image from 'next/image'
@@ -215,6 +216,13 @@ export default async function TrackDetailsPage({
 
                     {/* NOVO: Track Preview Component */}
                     <TrackPreview trackId={trackId} />
+
+                    {/* NOVO: Hipster Timeline Component */}
+                    <HipsterTimeline 
+                        trackId={trackId}
+                        trackTitle={trackInfo?.name || 'Música'}
+                        artistName={artistNames}
+                    />
 
                     {/* Stats Grid */}
                     <div className="grid gap-4 md:grid-cols-3">

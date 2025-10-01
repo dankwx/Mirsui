@@ -4,6 +4,7 @@ import { createClient } from '@/utils/supabase/server'
 import { fetchAuthData } from '@/utils/profileService'
 import { fetchSpotifyTrackInfo, SpotifyTrack } from '@/utils/spotifyService'
 import { countTrackOccurrences } from '@/utils/fetchTrackInfo'
+import { getTrackStats, getTopTrackClaimers, PopularityTrendData } from '@/utils/trackPopularityService'
 import TrackClaimsMessages from '@/components/TrackClaimsMessages/TrackClaimsMessages'
 import TrackClaimers from '@/components/TrackClaimers.tsx/TrackClaimers'
 import TrackPreview from '@/components/TrackPreview/TrackPreview'
@@ -70,6 +71,22 @@ export default async function TrackDetailsPage({
     let totalClaims = 0
     if (trackInfo?.uri) {
         totalClaims = await countTrackOccurrences(trackInfo.uri)
+    }
+
+    // Fetch track statistics
+    let trackStats = {
+        weeklyClaimsCount: 0,
+        monthlyGrowthPercentage: 0,
+        totalClaims: 0
+    }
+    if (trackInfo?.uri) {
+        trackStats = await getTrackStats(trackInfo.uri)
+    }
+
+    // Fetch top claimers
+    let topClaimers: any[] = []
+    if (trackInfo?.uri) {
+        topClaimers = await getTopTrackClaimers(trackInfo.uri, 3)
     }
 
     // Check if current user has already claimed this track
@@ -222,6 +239,7 @@ export default async function TrackDetailsPage({
                         trackId={trackId}
                         trackTitle={trackInfo?.name || 'Música'}
                         artistName={artistNames}
+                        trackUri={trackInfo?.uri}
                     />
 
                     {/* Stats Grid */}
@@ -282,16 +300,27 @@ export default async function TrackDetailsPage({
                             <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
                                     <span>Reivindicações esta semana</span>
-                                    <span>156</span>
+                                    <span>{trackStats.weeklyClaimsCount}</span>
                                 </div>
-                                <Progress value={78} className="h-2" />
+                                <Progress 
+                                    value={totalClaims > 0 ? Math.min(100, (trackStats.weeklyClaimsCount / totalClaims) * 100) : 0} 
+                                    className="h-2" 
+                                />
                             </div>
                             <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
                                     <span>Crescimento mensal</span>
-                                    <span>+23%</span>
+                                    <span>
+                                        {trackStats.monthlyGrowthPercentage > 0 
+                                            ? `+${trackStats.monthlyGrowthPercentage.toFixed(1)}%`
+                                            : `${trackStats.monthlyGrowthPercentage.toFixed(1)}%`
+                                        }
+                                    </span>
                                 </div>
-                                <Progress value={65} className="h-2" />
+                                <Progress 
+                                    value={Math.min(100, Math.abs(trackStats.monthlyGrowthPercentage))} 
+                                    className="h-2" 
+                                />
                             </div>
                         </CardContent>
                     </Card>
@@ -311,51 +340,43 @@ export default async function TrackDetailsPage({
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            {[
-                                {
-                                    name: 'MusicLover2024',
-                                    claims: 47,
-                                    rank: 1,
-                                },
-                                {
-                                    name: 'SoundHunter',
-                                    claims: 32,
-                                    rank: 2,
-                                },
-                                {
-                                    name: 'BeatCollector',
-                                    claims: 28,
-                                    rank: 3,
-                                },
-                            ].map((user, index) => (
-                                <div
-                                    key={index}
-                                    className="flex items-center gap-3"
-                                >
+                            {topClaimers.length > 0 ? (
+                                topClaimers.map((claimer, index) => (
                                     <div
-                                        className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
-                                            user.rank === 1
-                                                ? 'bg-yellow-100 text-yellow-800'
-                                                : user.rank === 2
-                                                  ? 'bg-gray-100 text-gray-800'
-                                                  : 'bg-orange-100 text-orange-800'
-                                        }`}
+                                        key={claimer.user_id}
+                                        className="flex items-center gap-3"
                                     >
-                                        {user.rank}
+                                        <div
+                                            className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+                                                index === 0
+                                                    ? 'bg-yellow-100 text-yellow-800'
+                                                    : index === 1
+                                                      ? 'bg-gray-100 text-gray-800'
+                                                      : 'bg-orange-100 text-orange-800'
+                                            }`}
+                                        >
+                                            {index + 1}
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium">
+                                                {claimer.profiles?.display_name || 
+                                                 claimer.profiles?.username || 
+                                                 'Usuário Anônimo'}
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                                Posição #{claimer.position}
+                                            </p>
+                                        </div>
+                                        {index === 0 && (
+                                            <Star className="h-4 w-4 text-yellow-500" />
+                                        )}
                                     </div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-medium">
-                                            {user.name}
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            {user.claims} reivindicações
-                                        </p>
-                                    </div>
-                                    {user.rank === 1 && (
-                                        <Star className="h-4 w-4 text-yellow-500" />
-                                    )}
-                                </div>
-                            ))}
+                                ))
+                            ) : (
+                                <p className="text-sm text-gray-500 text-center py-4">
+                                    Nenhuma reivindicação ainda
+                                </p>
+                            )}
                         </CardContent>
                     </Card>
 

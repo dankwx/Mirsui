@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
+import { getFeedPostsWithInteractions, FeedPostWithInteractions } from './socialInteractionsService'
 
 export interface FeedPost {
     id: string
@@ -20,76 +21,38 @@ export interface FeedPost {
     claim_message?: string
     timestamp: string
     discover_rating?: number
+    likes_count: number
+    comments_count: number
 }
 
+// Atualizar a função getFeedPosts para usar a nova versão com interações
 export async function getFeedPosts(limit: number = 20): Promise<FeedPost[]> {
-    const supabase = createClient()
-
-    try {
-        // Buscar claims recentes com informações dos usuários e tracks
-        const { data, error } = await supabase
-            .from('tracks')
-            .select(`
-                id,
-                track_title,
-                artist_name,
-                track_uri,
-                track_url,
-                track_thumbnail,
-                popularity,
-                position,
-                claim_message,
-                claimedat,
-                discover_rating,
-                user_id,
-                profiles:user_id (
-                    username,
-                    display_name,
-                    avatar_url
-                )
-            `)
-            .not('claimedat', 'is', null)
-            .order('claimedat', { ascending: false })
-            .limit(limit)
-
-        if (error) {
-            console.error('Erro ao buscar posts do feed:', error)
-            return []
-        }
-
-        // Transformar dados para o formato do feed
-        const feedPosts: FeedPost[] = (data || []).map(claim => {
-            const profile = Array.isArray(claim.profiles) ? claim.profiles[0] : claim.profiles
-            
-            return {
-                id: claim.id.toString(),
-                user: {
-                    username: profile?.username || `user_${claim.user_id.slice(0, 8)}`,
-                    display_name: profile?.display_name,
-                    avatar_url: profile?.avatar_url,
-                    user_id: claim.user_id
-                },
-                track: {
-                    title: claim.track_title,
-                    artist: claim.artist_name,
-                    track_uri: claim.track_uri,
-                    track_url: claim.track_url,
-                    track_thumbnail: claim.track_thumbnail,
-                    popularity: claim.popularity,
-                    position: claim.position
-                },
-                claim_message: claim.claim_message,
-                timestamp: claim.claimedat!,
-                discover_rating: claim.discover_rating
-            }
-        })
-
-        return feedPosts
-
-    } catch (error) {
-        console.error('Erro ao buscar dados do feed:', error)
-        return []
-    }
+    const posts = await getFeedPostsWithInteractions(limit, 0)
+    
+    // Transformar dados para o formato do feed
+    return posts.map(post => ({
+        id: post.id.toString(),
+        user: {
+            username: post.username,
+            display_name: post.display_name || undefined,
+            avatar_url: post.avatar_url || undefined,
+            user_id: post.user_id
+        },
+        track: {
+            title: post.track_title,
+            artist: post.artist_name,
+            track_uri: post.track_uri || undefined,
+            track_url: post.track_url,
+            track_thumbnail: post.track_thumbnail || undefined,
+            popularity: post.popularity,
+            position: post.position
+        },
+        claim_message: post.claim_message || undefined,
+        timestamp: post.claimedat!,
+        discover_rating: post.discover_rating || undefined,
+        likes_count: post.likes_count,
+        comments_count: post.comments_count
+    }))
 }
 
 // Helper function para formatar timestamp

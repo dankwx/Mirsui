@@ -4,26 +4,41 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { 
-    Heart, 
-    MessageCircle, 
-    Share2, 
     TrendingUp, 
     Music, 
     Sparkles,
     Crown,
     Plus,
-    Zap,
     Award,
     Target
 } from 'lucide-react'
 import GetLatestClaims from '@/components/GetLatestClaims/GetLatestClaims'
 import DiscoveryStats from '@/components/DiscoveryStats/DiscoveryStats'
-import { getFeedPosts, formatTimestamp, getUserBadge, isUserVerified } from '@/utils/feedService'
+import PostInteractions from '@/components/PostInteractions/PostInteractions'
+import { getFeedPostsWithInteractions, checkUserLikedTrack } from '@/utils/socialInteractionsService'
+import { createClient } from '@/utils/supabase/server'
+import { getUserBadge, isUserVerified } from '@/utils/feedService'
 import Link from 'next/link'
 
 export default async function FeedPage() {
-    // Buscar posts reais do feed
-    const feedPosts = await getFeedPosts(20)
+    const supabase = createClient()
+    
+    // Buscar dados do usuário
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    // Buscar posts do feed
+    const feedPosts = await getFeedPostsWithInteractions(20, 0)
+    
+    // Para cada post, verificar se o usuário logado curtiu
+    const postsWithLikes = await Promise.all(
+        feedPosts.map(async (post) => {
+            let isLiked = false
+            if (user) {
+                isLiked = await checkUserLikedTrack(post.id, user.id)
+            }
+            return { ...post, isLiked }
+        })
+    )
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
@@ -32,29 +47,6 @@ export default async function FeedPage() {
                     {/* Left Sidebar */}
                     <div className="lg:col-span-1">
                         <div className="space-y-6">
-                            {/* User Info */}
-                            <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-purple-50">
-                                <CardContent className="p-6">
-                                    <div className="text-center">
-                                        <Avatar className="h-16 w-16 mx-auto mb-4">
-                                            <AvatarFallback className="text-2xl bg-purple-100">
-                                                🎵
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <h3 className="font-semibold text-lg">Seu Feed Musical</h3>
-                                        <p className="text-gray-600 text-sm">
-                                            Descubra as últimas reivindicações da comunidade
-                                        </p>
-                                        <Link href="/claimtrack">
-                                            <Button className="w-full mt-4 gap-2">
-                                                <Plus className="h-4 w-4" />
-                                                Reivindicar Música
-                                            </Button>
-                                        </Link>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
                             {/* Discovery Stats */}
                             <DiscoveryStats />
                         </div>
@@ -64,48 +56,48 @@ export default async function FeedPage() {
                     <div className="lg:col-span-2">
                         <div className="space-y-6">
                             {/* Header */}
-                            <div className="text-center mb-8">
-                                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-                                    Feed Musical
+                            <div className="text-center py-6">
+                                <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                                    🎵 SoundSage Feed
                                 </h1>
                                 <p className="text-gray-600">
-                                    Acompanhe as descobertas mais recentes da comunidade
+                                    Descobertas musicais da comunidade em tempo real
                                 </p>
                             </div>
 
                             {/* Posts */}
                             <div className="space-y-6">
-                                {feedPosts.length > 0 ? (
-                                    feedPosts.map((post) => (
+                                {postsWithLikes.length > 0 ? (
+                                    postsWithLikes.map((post) => (
                                         <Card key={post.id} className="hover:shadow-lg transition-shadow duration-300 border-0 shadow-md">
                                             <CardContent className="p-6">
                                                 {/* Header do Post */}
                                                 <div className="flex items-start gap-3 mb-4">
                                                     <Avatar className="h-12 w-12">
-                                                        {post.user.avatar_url ? (
-                                                            <AvatarImage src={post.user.avatar_url} alt={post.user.username} />
+                                                        {post.avatar_url ? (
+                                                            <AvatarImage src={post.avatar_url} alt={post.username} />
                                                         ) : null}
                                                         <AvatarFallback className="text-lg bg-purple-100">
-                                                            {post.user.username.charAt(0).toUpperCase()}
+                                                            {(post.display_name || post.username || 'U').charAt(0).toUpperCase()}
                                                         </AvatarFallback>
                                                     </Avatar>
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2">
                                                             <Link 
-                                                                href={`/user/${post.user.username}`}
+                                                                href={`/user/${post.username}`}
                                                                 className="font-semibold hover:underline"
                                                             >
-                                                                {post.user.display_name || post.user.username}
+                                                                {post.display_name || post.username}
                                                             </Link>
-                                                            {isUserVerified(post.track.position) && (
+                                                            {isUserVerified(post.position) && (
                                                                 <Crown className="h-4 w-4 text-yellow-500" />
                                                             )}
                                                             <Badge variant="secondary" className="text-xs">
-                                                                {getUserBadge(post.track.position, post.discover_rating)}
+                                                                {getUserBadge(post.position, post.discover_rating || undefined)}
                                                             </Badge>
                                                             <span className="text-gray-500">•</span>
                                                             <span className="text-gray-500 text-sm">
-                                                                {formatTimestamp(post.timestamp)}
+                                                                {post.claimedat ? new Date(post.claimedat).toLocaleDateString('pt-BR') : 'Data não disponível'}
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center gap-1 mt-1">
@@ -120,40 +112,45 @@ export default async function FeedPage() {
                                                 {/* Conteúdo da música */}
                                                 <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 mb-4">
                                                     <div className="flex items-center gap-4">
-                                                        {post.track.track_thumbnail && (
+                                                        {post.track_thumbnail && (
                                                             <img
-                                                                src={post.track.track_thumbnail}
-                                                                alt={`Capa de ${post.track.title}`}
+                                                                src={post.track_thumbnail}
+                                                                alt={`Capa de ${post.track_title}`}
                                                                 className="h-16 w-16 rounded-lg shadow-md"
                                                             />
                                                         )}
                                                         <div className="flex-1">
                                                             <h3 className="font-semibold text-lg">
                                                                 <Link 
-                                                                    href={`/track/${post.track.track_url?.split('/').pop() || post.track.title}`}
+                                                                    href={`/track/${post.track_url?.split('/').pop() || post.track_title}`}
                                                                     className="hover:underline"
                                                                 >
-                                                                    {post.track.title}
+                                                                    {post.track_title}
                                                                 </Link>
                                                             </h3>
                                                             <p className="text-gray-600">
-                                                                {post.track.artist}
+                                                                {post.artist_name}
                                                             </p>
+                                                            {post.album_name && (
+                                                                <p className="text-gray-500 text-sm">
+                                                                    {post.album_name}
+                                                                </p>
+                                                            )}
                                                             <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
                                                                 <div className="flex items-center gap-1">
                                                                     <Award className="h-4 w-4" />
-                                                                    <span>#{post.track.position}</span>
+                                                                    <span>#{post.position}</span>
                                                                 </div>
-                                                                {post.track.popularity && (
+                                                                {post.popularity && (
                                                                     <div className="flex items-center gap-1">
                                                                         <TrendingUp className="h-4 w-4" />
-                                                                        <span>{post.track.popularity}% popularidade</span>
+                                                                        <span>{post.popularity}% popularidade</span>
                                                                     </div>
                                                                 )}
                                                                 {post.discover_rating && (
                                                                     <div className="flex items-center gap-1">
                                                                         <Sparkles className="h-4 w-4" />
-                                                                        <span>{post.discover_rating.toFixed(1)} discover</span>
+                                                                        <span>{post.discover_rating}/10 descoberta</span>
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -172,34 +169,30 @@ export default async function FeedPage() {
 
                                                 {/* Tags */}
                                                 <div className="flex gap-2 mb-4">
-                                                    {post.track.position === 1 && (
+                                                    {post.position === 1 && (
                                                         <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200">
                                                             primeiro-claim
                                                         </Badge>
                                                     )}
-                                                    {post.track.position <= 10 && (
+                                                    {post.position <= 10 && (
                                                         <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
                                                             early-bird
                                                         </Badge>
                                                     )}
-                                                    {post.discover_rating && post.discover_rating > 90 && (
+                                                    {post.discover_rating && post.discover_rating > 8 && (
                                                         <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
                                                             high-potential
                                                         </Badge>
                                                     )}
                                                 </div>
 
-                                                {/* Actions simplificadas */}
-                                                <div className="flex items-center gap-6 pt-4 border-t border-gray-100">
-                                                    <Button variant="ghost" size="sm" className="gap-2 text-gray-500 hover:text-purple-600">
-                                                        <Heart className="h-4 w-4" />
-                                                        <span className="text-sm">Curtir</span>
-                                                    </Button>
-                                                    <Button variant="ghost" size="sm" className="gap-2 text-gray-500 hover:text-blue-600">
-                                                        <MessageCircle className="h-4 w-4" />
-                                                        <span className="text-sm">Comentar</span>
-                                                    </Button>
-                                                </div>
+                                                {/* Interações sociais */}
+                                                <PostInteractions 
+                                                    trackId={post.id}
+                                                    initialLikesCount={post.likes_count}
+                                                    initialCommentsCount={post.comments_count}
+                                                    initialIsLiked={post.isLiked}
+                                                />
                                             </CardContent>
                                         </Card>
                                     ))
@@ -237,5 +230,4 @@ export default async function FeedPage() {
             </div>
         </div>
     )
-
 }

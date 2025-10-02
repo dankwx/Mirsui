@@ -18,6 +18,7 @@ import { Music, Clock, Target } from 'lucide-react'
 import GetAuth from '@/components/GetAuth/GetAuth'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import { getTrendingTracks, getFeaturedTrack } from '@/utils/homepageService'
 
 export default async function HomePage() {
     const supabase = createClient()
@@ -25,6 +26,11 @@ export default async function HomePage() {
     if (data.user) {
         redirect('/feed')
     }
+
+    // Buscar dados reais
+    const trendingTracks = await getTrendingTracks(3)
+    const featuredTrack = await getFeaturedTrack()
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
             {/* Navigation */}
@@ -67,9 +73,11 @@ export default async function HomePage() {
 
                     <div className="flex items-center gap-3">
                         <GetAuth />
-                        <Button className="bg-sage-600 hover:bg-sage-700 text-white shadow-sm">
-                            Get Started
-                        </Button>
+                        <Link href="/feed">
+                            <Button className="bg-sage-600 hover:bg-sage-700 text-white shadow-sm">
+                                Começar
+                            </Button>
+                        </Link>
                     </div>
                 </div>
             </nav>
@@ -91,19 +99,21 @@ export default async function HomePage() {
                             and social media.
                         </p>
                         <div className="flex flex-col justify-center gap-4 sm:flex-row">
-                            <Button
-                                size="lg"
-                                className="bg-sage-600 hover:bg-sage-700 px-8 py-4 text-lg text-white shadow-lg"
-                            >
-                                Start Discovering
-                                <ArrowRight className="ml-2" size={20} />
-                            </Button>
+                            <Link href="/feed">
+                                <Button
+                                    size="lg"
+                                    className="bg-sage-600 hover:bg-sage-700 px-8 py-4 text-lg text-white shadow-lg"
+                                >
+                                    Começar a Descobrir
+                                    <ArrowRight className="ml-2" size={20} />
+                                </Button>
+                            </Link>
                             <Button
                                 size="lg"
                                 variant="outline"
                                 className="border-slate-300 px-8 py-4 text-lg text-slate-700 hover:bg-slate-50"
                             >
-                                Watch Demo
+                                Como Funciona
                             </Button>
                         </div>
                     </div>
@@ -193,174 +203,241 @@ export default async function HomePage() {
                     </div>
 
                     <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                        {/* Track Card 1 */}
-                        <Card className="group border-slate-200/60 transition-all duration-300 hover:shadow-lg">
-                            <CardHeader className="from-sage-100 to-sage-200 relative aspect-square bg-gradient-to-br p-0">
-                                <Image
-                                    src="/placeholder.svg?height=300&width=300"
-                                    alt="Track artwork"
-                                    width={300}
-                                    height={300}
-                                    className="h-full w-full rounded-t-lg object-cover"
-                                />
-                                <Button
-                                    size="icon"
-                                    className="text-sage-600 absolute bottom-4 right-4 rounded-full bg-white/90 opacity-0 shadow-lg transition-opacity hover:bg-white group-hover:opacity-100"
-                                >
-                                    <Play size={20} className="ml-0.5" />
-                                </Button>
-                                <Badge className="absolute right-4 top-4 border-amber-200 bg-amber-100 text-amber-700">
-                                    Trending
-                                </Badge>
-                            </CardHeader>
-                            <CardContent className="pt-6">
-                                <div className="flex items-start justify-between">
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-slate-800">
-                                            Midnight Dreams
-                                        </h3>
-                                        <p className="text-slate-500">
-                                            Luna Nova
-                                        </p>
-                                        <p className="mt-1 text-xs text-slate-400">
-                                            Indie Pop • 2024
-                                        </p>
-                                    </div>
-                                    <Button
-                                        size="sm"
-                                        className="bg-sage-600 hover:bg-sage-700 text-white"
-                                    >
-                                        Claim
-                                    </Button>
-                                </div>
-                            </CardContent>
-                            <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
-                                <div className="flex items-center gap-2 text-sm text-slate-500">
-                                    <Heart size={16} />
-                                    <span>New</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-slate-500">
-                                    <Award size={16} />
-                                    <span>Available</span>
-                                </div>
-                            </CardFooter>
-                        </Card>
+                        {trendingTracks.length > 0 ? (
+                            trendingTracks.map((track, index) => (
+                                <Card key={track.id} className="group border-slate-200/60 transition-all duration-300 hover:shadow-lg">
+                                    <CardHeader className="relative aspect-square bg-gradient-to-br from-sage-100 to-sage-200 p-0">
+                                        <Image
+                                            src={track.track_thumbnail || "/placeholder.svg?height=300&width=300"}
+                                            alt={`Capa de ${track.track_title}`}
+                                            width={300}
+                                            height={300}
+                                            className="h-full w-full rounded-t-lg object-cover"
+                                        />
+                                        <Button
+                                            size="icon"
+                                            className="text-sage-600 absolute bottom-4 right-4 rounded-full bg-white/90 opacity-0 shadow-lg transition-opacity hover:bg-white group-hover:opacity-100"
+                                        >
+                                            <Play size={20} className="ml-0.5" />
+                                        </Button>
+                                        <Badge className={`absolute right-4 top-4 ${
+                                            index === 0 ? 'border-amber-200 bg-amber-100 text-amber-700' :
+                                            index === 1 ? 'border-emerald-200 bg-emerald-100 text-emerald-700' :
+                                            'border-violet-200 bg-violet-100 text-violet-700'
+                                        }`}>
+                                            {index === 0 ? 'Trending' : index === 1 ? 'Rising' : 'Hot'}
+                                        </Badge>
+                                    </CardHeader>
+                                    <CardContent className="pt-6">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-slate-800">
+                                                    {track.track_title}
+                                                </h3>
+                                                <p className="text-slate-500">
+                                                    {track.artist_name}
+                                                </p>
+                                                <p className="mt-1 text-xs text-slate-400">
+                                                    {track.genre} • {track.year}
+                                                </p>
+                                            </div>
+                                            <Link href={`/track/${track.track_url?.split('/').pop() || track.track_title}`}>
+                                                <Button
+                                                    size="sm"
+                                                    className="bg-sage-600 hover:bg-sage-700 text-white"
+                                                >
+                                                    Ver Track
+                                                </Button>
+                                            </Link>
+                                        </div>
+                                    </CardContent>
+                                    <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
+                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                            <Heart size={16} />
+                                            <span>{track.likes_count}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                            <Award size={16} />
+                                            <span>#{track.position}</span>
+                                        </div>
+                                    </CardFooter>
+                                </Card>
+                            ))
+                        ) : (
+                            // Fallback com dados fictícios caso não haja tracks reais
+                            <>
+                                {/* Track Card 1 */}
+                                <Card className="group border-slate-200/60 transition-all duration-300 hover:shadow-lg">
+                                    <CardHeader className="from-sage-100 to-sage-200 relative aspect-square bg-gradient-to-br p-0">
+                                        <Image
+                                            src="/placeholder.svg?height=300&width=300"
+                                            alt="Track artwork"
+                                            width={300}
+                                            height={300}
+                                            className="h-full w-full rounded-t-lg object-cover"
+                                        />
+                                        <Button
+                                            size="icon"
+                                            className="text-sage-600 absolute bottom-4 right-4 rounded-full bg-white/90 opacity-0 shadow-lg transition-opacity hover:bg-white group-hover:opacity-100"
+                                        >
+                                            <Play size={20} className="ml-0.5" />
+                                        </Button>
+                                        <Badge className="absolute right-4 top-4 border-amber-200 bg-amber-100 text-amber-700">
+                                            Trending
+                                        </Badge>
+                                    </CardHeader>
+                                    <CardContent className="pt-6">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-slate-800">
+                                                    Midnight Dreams
+                                                </h3>
+                                                <p className="text-slate-500">
+                                                    Luna Nova
+                                                </p>
+                                                <p className="mt-1 text-xs text-slate-400">
+                                                    Indie Pop • 2024
+                                                </p>
+                                            </div>
+                                            <Button
+                                                size="sm"
+                                                className="bg-sage-600 hover:bg-sage-700 text-white"
+                                            >
+                                                Claim
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                    <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
+                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                            <Heart size={16} />
+                                            <span>New</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                            <Award size={16} />
+                                            <span>Available</span>
+                                        </div>
+                                    </CardFooter>
+                                </Card>
 
-                        {/* Track Card 2 */}
-                        <Card className="group border-slate-200/60 transition-all duration-300 hover:shadow-lg">
-                            <CardHeader className="relative aspect-square bg-gradient-to-br from-blue-100 to-blue-200 p-0">
-                                <Image
-                                    src="/placeholder.svg?height=300&width=300"
-                                    alt="Track artwork"
-                                    width={300}
-                                    height={300}
-                                    className="h-full w-full rounded-t-lg object-cover"
-                                />
-                                <Button
-                                    size="icon"
-                                    className="absolute bottom-4 right-4 rounded-full bg-white/90 text-blue-600 opacity-0 shadow-lg transition-opacity hover:bg-white group-hover:opacity-100"
-                                >
-                                    <Play size={20} className="ml-0.5" />
-                                </Button>
-                                <Badge className="absolute right-4 top-4 border-emerald-200 bg-emerald-100 text-emerald-700">
-                                    Rising
-                                </Badge>
-                            </CardHeader>
-                            <CardContent className="pt-6">
-                                <div className="flex items-start justify-between">
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-slate-800">
-                                            Electric Soul
-                                        </h3>
-                                        <p className="text-slate-500">
-                                            Neon Pulse
-                                        </p>
-                                        <p className="mt-1 text-xs text-slate-400">
-                                            Electronic • 2024
-                                        </p>
-                                    </div>
-                                    <Button
-                                        size="sm"
-                                        className="bg-sage-600 hover:bg-sage-700 text-white"
-                                    >
-                                        Claim
-                                    </Button>
-                                </div>
-                            </CardContent>
-                            <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
-                                <div className="flex items-center gap-2 text-sm text-slate-500">
-                                    <Heart size={16} />
-                                    <span>Fresh</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-slate-500">
-                                    <Award size={16} />
-                                    <span>Available</span>
-                                </div>
-                            </CardFooter>
-                        </Card>
+                                {/* Track Card 2 */}
+                                <Card className="group border-slate-200/60 transition-all duration-300 hover:shadow-lg">
+                                    <CardHeader className="relative aspect-square bg-gradient-to-br from-blue-100 to-blue-200 p-0">
+                                        <Image
+                                            src="/placeholder.svg?height=300&width=300"
+                                            alt="Track artwork"
+                                            width={300}
+                                            height={300}
+                                            className="h-full w-full rounded-t-lg object-cover"
+                                        />
+                                        <Button
+                                            size="icon"
+                                            className="absolute bottom-4 right-4 rounded-full bg-white/90 text-blue-600 opacity-0 shadow-lg transition-opacity hover:bg-white group-hover:opacity-100"
+                                        >
+                                            <Play size={20} className="ml-0.5" />
+                                        </Button>
+                                        <Badge className="absolute right-4 top-4 border-emerald-200 bg-emerald-100 text-emerald-700">
+                                            Rising
+                                        </Badge>
+                                    </CardHeader>
+                                    <CardContent className="pt-6">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-slate-800">
+                                                    Electric Soul
+                                                </h3>
+                                                <p className="text-slate-500">
+                                                    Neon Pulse
+                                                </p>
+                                                <p className="mt-1 text-xs text-slate-400">
+                                                    Electronic • 2024
+                                                </p>
+                                            </div>
+                                            <Button
+                                                size="sm"
+                                                className="bg-sage-600 hover:bg-sage-700 text-white"
+                                            >
+                                                Claim
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                    <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
+                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                            <Heart size={16} />
+                                            <span>Fresh</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                            <Award size={16} />
+                                            <span>Available</span>
+                                        </div>
+                                    </CardFooter>
+                                </Card>
 
-                        {/* Track Card 3 */}
-                        <Card className="group border-slate-200/60 transition-all duration-300 hover:shadow-lg">
-                            <CardHeader className="relative aspect-square bg-gradient-to-br from-rose-100 to-rose-200 p-0">
-                                <Image
-                                    src="/placeholder.svg?height=300&width=300"
-                                    alt="Track artwork"
-                                    width={300}
-                                    height={300}
-                                    className="h-full w-full rounded-t-lg object-cover"
-                                />
-                                <Button
-                                    size="icon"
-                                    className="absolute bottom-4 right-4 rounded-full bg-white/90 text-rose-600 opacity-0 shadow-lg transition-opacity hover:bg-white group-hover:opacity-100"
-                                >
-                                    <Play size={20} className="ml-0.5" />
-                                </Button>
-                                <Badge className="absolute right-4 top-4 border-violet-200 bg-violet-100 text-violet-700">
-                                    Hot
-                                </Badge>
-                            </CardHeader>
-                            <CardContent className="pt-6">
-                                <div className="flex items-start justify-between">
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-slate-800">
-                                            Sunset Boulevard
-                                        </h3>
-                                        <p className="text-slate-500">
-                                            Coastal Waves
-                                        </p>
-                                        <p className="mt-1 text-xs text-slate-400">
-                                            Alternative • 2024
-                                        </p>
-                                    </div>
-                                    <Button
-                                        size="sm"
-                                        className="bg-sage-600 hover:bg-sage-700 text-white"
-                                    >
-                                        Claim
-                                    </Button>
-                                </div>
-                            </CardContent>
-                            <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
-                                <div className="flex items-center gap-2 text-sm text-slate-500">
-                                    <Heart size={16} />
-                                    <span>New</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-slate-500">
-                                    <Award size={16} />
-                                    <span>Available</span>
-                                </div>
-                            </CardFooter>
-                        </Card>
+                                {/* Track Card 3 */}
+                                <Card className="group border-slate-200/60 transition-all duration-300 hover:shadow-lg">
+                                    <CardHeader className="relative aspect-square bg-gradient-to-br from-rose-100 to-rose-200 p-0">
+                                        <Image
+                                            src="/placeholder.svg?height=300&width=300"
+                                            alt="Track artwork"
+                                            width={300}
+                                            height={300}
+                                            className="h-full w-full rounded-t-lg object-cover"
+                                        />
+                                        <Button
+                                            size="icon"
+                                            className="absolute bottom-4 right-4 rounded-full bg-white/90 text-rose-600 opacity-0 shadow-lg transition-opacity hover:bg-white group-hover:opacity-100"
+                                        >
+                                            <Play size={20} className="ml-0.5" />
+                                        </Button>
+                                        <Badge className="absolute right-4 top-4 border-violet-200 bg-violet-100 text-violet-700">
+                                            Hot
+                                        </Badge>
+                                    </CardHeader>
+                                    <CardContent className="pt-6">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <h3 className="text-lg font-semibold text-slate-800">
+                                                    Sunset Boulevard
+                                                </h3>
+                                                <p className="text-slate-500">
+                                                    Coastal Waves
+                                                </p>
+                                                <p className="mt-1 text-xs text-slate-400">
+                                                    Alternative • 2024
+                                                </p>
+                                            </div>
+                                            <Button
+                                                size="sm"
+                                                className="bg-sage-600 hover:bg-sage-700 text-white"
+                                            >
+                                                Claim
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                    <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
+                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                            <Heart size={16} />
+                                            <span>New</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                            <Award size={16} />
+                                            <span>Available</span>
+                                        </div>
+                                    </CardFooter>
+                                </Card>
+                            </>
+                        )}
                     </div>
 
                     <div className="mt-12 text-center">
-                        <Button
-                            variant="outline"
-                            className="border-slate-300 px-8 text-slate-700 hover:bg-slate-50"
-                        >
-                            Explore More Tracks
-                            <ArrowRight className="ml-2" size={16} />
-                        </Button>
+                        <Link href="/feed">
+                            <Button
+                                variant="outline"
+                                className="border-slate-300 px-8 text-slate-700 hover:bg-slate-50"
+                            >
+                                Explorar Mais Tracks
+                                <ArrowRight className="ml-2" size={16} />
+                            </Button>
+                        </Link>
                     </div>
                 </div>
             </section>
@@ -373,38 +450,68 @@ export default async function HomePage() {
                             <Badge className="bg-sage-100 text-sage-700 mb-4">
                                 Featured Track
                             </Badge>
-                            <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-                                Cosmic Waves
-                            </h2>
-                            <h3 className="mb-2 text-xl font-semibold text-slate-300">
-                                by Stellar Dreams
-                            </h3>
-                            <p className="mb-6 leading-relaxed text-slate-300">
-                                This ethereal track combines dreamy synths with
-                                captivating vocals, creating an otherworldly
-                                listening experience. With its unique sound and
-                                growing buzz, it has all the elements to become
-                                the next viral sensation.
-                            </p>
-                            <div className="flex flex-col gap-4 sm:flex-row">
-                                <Button className="bg-white text-slate-800 hover:bg-slate-100">
-                                    <Play size={16} className="mr-2" />
-                                    Listen Now
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    className="border-white text-white hover:bg-white/10"
-                                >
-                                    <Award size={16} className="mr-2" />
-                                    Claim Track
-                                </Button>
-                            </div>
+                            {featuredTrack ? (
+                                <>
+                                    <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+                                        {featuredTrack.track_title}
+                                    </h2>
+                                    <h3 className="mb-2 text-xl font-semibold text-slate-300">
+                                        por {featuredTrack.artist_name}
+                                    </h3>
+                                    <p className="mb-6 leading-relaxed text-slate-300">
+                                        {featuredTrack.claim_message || 
+                                        `Esta track está ganhando destaque na nossa comunidade, com um score de descoberta de ${featuredTrack.discover_rating || 8}/10. Reivindicada como #{featuredTrack.position} por ${featuredTrack.display_name || featuredTrack.username}, esta música tem potencial para se tornar viral.`}
+                                    </p>
+                                    <div className="flex flex-col gap-4 sm:flex-row">
+                                        <Link href={featuredTrack.track_url} target="_blank">
+                                            <Button className="bg-white text-slate-800 hover:bg-slate-100">
+                                                <Play size={16} className="mr-2" />
+                                                Ouvir Agora
+                                            </Button>
+                                        </Link>
+                                        <Link href={`/track/${featuredTrack.track_url?.split('/').pop() || featuredTrack.track_title}`}>
+                                            <Button
+                                                variant="outline"
+                                                className="border-white text-white hover:bg-white/10"
+                                            >
+                                                <Award size={16} className="mr-2" />
+                                                Ver Detalhes
+                                            </Button>
+                                        </Link>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+                                        Cosmic Waves
+                                    </h2>
+                                    <h3 className="mb-2 text-xl font-semibold text-slate-300">
+                                        by Stellar Dreams
+                                    </h3>
+                                    <p className="mb-6 leading-relaxed text-slate-300">
+                                        Esta track etérea combina sintetizadores sonhadores com vocais cativantes, criando uma experiência auditiva de outro mundo. Com seu som único e buzz crescente, tem todos os elementos para se tornar a próxima sensação viral.
+                                    </p>
+                                    <div className="flex flex-col gap-4 sm:flex-row">
+                                        <Button className="bg-white text-slate-800 hover:bg-slate-100">
+                                            <Play size={16} className="mr-2" />
+                                            Ouvir Agora
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className="border-white text-white hover:bg-white/10"
+                                        >
+                                            <Award size={16} className="mr-2" />
+                                            Claim Track
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                         <div className="w-full lg:w-1/2">
                             <div className="relative aspect-square overflow-hidden rounded-2xl shadow-2xl">
                                 <Image
-                                    src="/placeholder.svg?height=500&width=500"
-                                    alt="Featured track artwork"
+                                    src={featuredTrack?.track_thumbnail || "/placeholder.svg?height=500&width=500"}
+                                    alt={featuredTrack ? `Capa de ${featuredTrack.track_title}` : "Featured track artwork"}
                                     width={500}
                                     height={500}
                                     className="h-full w-full object-cover"
@@ -544,19 +651,17 @@ export default async function HomePage() {
                         mainstream hits.
                     </p>
                     <p className="mb-10 text-lg leading-relaxed text-slate-600">
-                        Join a community of music lovers who understand that
-                        great music deserves to be discovered early. Build your
-                        reputation, connect with like-minded listeners, and
-                        prove that you have what it takes to spot the next big
-                        thing.
+                        Junte-se a uma comunidade de amantes da música que entendem que uma boa música merece ser descoberta cedo. Construa sua reputação, conecte-se com ouvintes que compartilham seus gostos, e prove que você tem o que é preciso para identificar a próxima grande novidade.
                     </p>
-                    <Button
-                        size="lg"
-                        className="bg-sage-600 hover:bg-sage-700 px-10 py-4 text-lg text-white shadow-lg"
-                    >
-                        Start Your Journey
-                        <ArrowRight className="ml-2" size={20} />
-                    </Button>
+                    <Link href="/feed">
+                        <Button
+                            size="lg"
+                            className="bg-sage-600 hover:bg-sage-700 px-10 py-4 text-lg text-white shadow-lg"
+                        >
+                            Começar Sua Jornada
+                            <ArrowRight className="ml-2" size={20} />
+                        </Button>
+                    </Link>
                 </div>
             </section>
 
@@ -572,19 +677,21 @@ export default async function HomePage() {
                         before they go viral.
                     </p>
                     <div className="flex flex-col justify-center gap-4 sm:flex-row">
-                        <Button
-                            size="lg"
-                            className="bg-sage-600 hover:bg-sage-700 px-10 py-4 text-lg text-white shadow-lg"
-                        >
-                            Sign Up Now — It&apos;s Free
-                            <ArrowRight className="ml-2" size={20} />
-                        </Button>
+                        <Link href="/register">
+                            <Button
+                                size="lg"
+                                className="bg-sage-600 hover:bg-sage-700 px-10 py-4 text-lg text-white shadow-lg"
+                            >
+                                Registrar Agora — É Grátis
+                                <ArrowRight className="ml-2" size={20} />
+                            </Button>
+                        </Link>
                         <Button
                             size="lg"
                             variant="outline"
                             className="border-slate-300 px-10 py-4 text-lg text-slate-700 hover:bg-white"
                         >
-                            Learn More
+                            Saiba Mais
                         </Button>
                     </div>
                 </div>

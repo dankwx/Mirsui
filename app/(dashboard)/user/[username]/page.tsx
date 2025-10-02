@@ -1,12 +1,9 @@
 // app/user/[username]/page.tsx
 import { notFound } from 'next/navigation'
 import ProfileDetails from '@/components/Profile/ProfileDetails'
-import CardsSection from '@/components/Profile/CardsSection'
-import TabsSection from '@/components/Profile/TabsSection'
-import { fetchArtists } from '@/utils/fetchArtists'
+import SongsList from '@/components/Profile/SongsList'
 import { fetchUserData, fetchAuthData } from '@/utils/profileService'
 import { fetchSongs } from '@/utils/fetchSongs'
-import { fetchChannels } from '@/utils/fetchChannels'
 import { createClient } from '@/utils/supabase/server'
 import type { User, Achievement, Rating } from '@/types/profile'
 
@@ -26,19 +23,15 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
     const isOwnProfile = authData?.user?.id === userData.id
     const currentUserId = authData?.user?.id
 
-    // Fetch all data in parallel
+    // Fetch only songs and profile data
     const [
-        artists,
         songs,
-        channels,
         achievementResult,
         ratingResult,
         followersResult,
         followingResult,
     ] = await Promise.all([
-        fetchArtists(userData.id),
         fetchSongs(userData.id, currentUserId),
-        fetchChannels(userData.id),
         createClient().rpc('get_user_achievements', { user_uuid: userData.id }),
         createClient().rpc('get_user_rating', { user_uuid: userData.id }),
         createClient().rpc('get_user_followers', { user_uuid: userData.id }),
@@ -53,14 +46,6 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
         rating: ratingResult.data || [],
     }
 
-    const counters = {
-        savedSongs: songs.length,
-        savedChannels: channels.length,
-        savedArtists: artists.length,
-        followers: followersResult.data?.length || 0,
-        following: followingResult.data?.length || 0,
-    }
-
     return (
         <div className="px-6 font-sans">
             <ProfileDetails
@@ -70,24 +55,17 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
             />
 
             <div className="py-8">
-                {/* CardsSection agora é server component, props são só dados puros */}
-                <CardsSection
-                    totalSavedSongs={counters.savedSongs}
-                    totalSavedYouTubeChannels={counters.savedChannels}
-                    totalSavedSpotifyArtists={counters.savedArtists}
-                    totalFollowers={counters.followers}
-                    totalFollowing={counters.following}
-                />
+                {/* Header das músicas salvas */}
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-foreground">Saved Songs</h2>
+                    <span className="text-lg text-muted-foreground">
+                        {songs.length} {songs.length === 1 ? 'track' : 'tracks'}
+                    </span>
+                </div>
 
-                <div className="mt-8 w-full">
-                    {/* TabsSection também server component, só recebe dados */}
-                    <TabsSection
-                        artists={artists}
-                        songs={songs}
-                        channels={channels}
-                        canRemove={isOwnProfile}
-                        currentUserId={currentUserId}
-                    />
+                {/* Lista de músicas salvas */}
+                <div className="w-full">
+                    <SongsList songs={songs} canRemove={isOwnProfile} />
                 </div>
             </div>
         </div>

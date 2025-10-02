@@ -32,14 +32,14 @@ import { useRouter } from 'next/navigation'
 type Song = {
     id: string
     track_url: string
-    track_uri: string
+    track_uri: string | null
     track_title: string
     artist_name: string
     album_name: string
     popularity: number
-    discover_rating: number
-    track_thumbnail: string
-    claimedat: string
+    discover_rating: number | null
+    track_thumbnail: string | null
+    claimedat: string | null
     is_favorited: boolean // Favorito do DONO do perfil (público)
     is_user_favorited?: boolean // Favorito do usuário logado (para funcionalidade)
     favorite_count?: number
@@ -113,7 +113,7 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false }) => {
                 <Card key={song.id} className="group relative overflow-hidden">
                     <div className="relative aspect-square">
                         <img
-                            src={song.track_thumbnail}
+                            src={song.track_thumbnail || '/placeholder-album.png'}
                             alt={song.track_title}
                             className="h-full w-full object-cover"
                             style={{ aspectRatio: '1/1', objectFit: 'cover' }}
@@ -210,15 +210,16 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false }) => {
                                     <ClockIcon className="h-5 w-5" />
                                     <span className="text-sm">
                                         Claimed on:{' '}
-                                        {new Date(
-                                            song.claimedat
-                                        ).toLocaleDateString('pt-BR')}
+                                        {song.claimedat 
+                                            ? new Date(song.claimedat).toLocaleDateString('pt-BR')
+                                            : 'Unknown date'
+                                        }
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-center gap-2">
                                     <TrendingUpIcon className="h-5 w-5" />
                                     <span className="text-sm">
-                                        Discover Score: {song.discover_rating}
+                                        Discover Score: {song.discover_rating || 0}
                                     </span>
                                 </div>
                                 <div className="mt-2 text-xs opacity-75">

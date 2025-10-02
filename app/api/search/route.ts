@@ -5,9 +5,7 @@ export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url)
         const query = searchParams.get('q')
-        const type =
-            (searchParams.get('type') as 'track' | 'artist' | 'album') ||
-            'track'
+        const type = searchParams.get('type') || 'track,artist'
         const limit = parseInt(searchParams.get('limit') || '10')
 
         if (!query || query.trim().length === 0) {

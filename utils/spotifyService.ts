@@ -186,7 +186,7 @@ export async function fetchSpotifyTrackInfo(
 // Nova função para buscar no Spotify
 export async function searchSpotify(
     query: string,
-    type: 'track' | 'artist' | 'album' = 'track',
+    type: string = 'track,artist',
     limit: number = 10
 ): Promise<SpotifySearchResponse | null> {
     const accessToken = await getSpotifyAccessToken()
@@ -203,10 +203,9 @@ export async function searchSpotify(
     try {
         // Codifica a query para URL
         const encodedQuery = encodeURIComponent(query.trim())
-        const searchTypes = type === 'track' ? 'track,artist' : type
 
         const response = await fetch(
-            `https://api.spotify.com/v1/search?q=${encodedQuery}&type=${searchTypes}&limit=${limit}&market=BR`,
+            `https://api.spotify.com/v1/search?q=${encodedQuery}&type=${type}&limit=${limit}&market=BR`,
             {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,

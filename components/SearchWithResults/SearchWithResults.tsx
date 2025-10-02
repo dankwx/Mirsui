@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Input } from '../ui/input'
-import { SearchIcon, Music, User, Loader2 } from 'lucide-react'
+import { Button } from '../ui/button'
+import { SearchIcon, Music, User, Loader2, ChevronDown, Filter } from 'lucide-react'
 import Image from 'next/image'
 
 interface SpotifyTrack {
@@ -37,12 +38,17 @@ interface SearchResults {
     }
 }
 
+type SearchFilter = 'all' | 'tracks' | 'artists'
+
 export default function SearchWithResults() {
     const [query, setQuery] = useState('')
     const [results, setResults] = useState<SearchResults | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [showResults, setShowResults] = useState(false)
+    const [searchFilter, setSearchFilter] = useState<SearchFilter>('all')
+    const [showFilterMenu, setShowFilterMenu] = useState(false)
     const searchRef = useRef<HTMLDivElement>(null)
+    const filterRef = useRef<HTMLDivElement>(null)
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
     const router = useRouter()
 
@@ -56,8 +62,13 @@ export default function SearchWithResults() {
 
         setIsLoading(true)
         try {
+            // Ajustar parâmetros de busca baseado no filtro
+            let typeParam = 'track,artist'
+            if (searchFilter === 'tracks') typeParam = 'track'
+            if (searchFilter === 'artists') typeParam = 'artist'
+
             const response = await fetch(
-                `/api/search?q=${encodeURIComponent(searchQuery)}&limit=8`
+                `/api/search?q=${encodeURIComponent(searchQuery)}&limit=8&type=${typeParam}`
             )
 
             if (response.ok) {
@@ -96,7 +107,7 @@ export default function SearchWithResults() {
                 clearTimeout(timeoutRef.current)
             }
         }
-    }, [query])
+    }, [query, searchFilter]) // Adicionado searchFilter como dependência
 
     // Fechar resultados ao clicar fora
     useEffect(() => {
@@ -106,6 +117,12 @@ export default function SearchWithResults() {
                 !searchRef.current.contains(event.target as Node)
             ) {
                 setShowResults(false)
+            }
+            if (
+                filterRef.current &&
+                !filterRef.current.contains(event.target as Node)
+            ) {
+                setShowFilterMenu(false)
             }
         }
 
@@ -132,38 +149,121 @@ export default function SearchWithResults() {
         return `${minutes}:${seconds.toString().padStart(2, '0')}`
     }
 
+    const getFilterLabel = (filter: SearchFilter) => {
+        switch (filter) {
+            case 'all': return 'Tudo'
+            case 'tracks': return 'Músicas'
+            case 'artists': return 'Artistas'
+            default: return 'Tudo'
+        }
+    }
+
+    const getPlaceholderText = (filter: SearchFilter) => {
+        switch (filter) {
+            case 'all': return 'Pesquisar artistas ou músicas...'
+            case 'tracks': return 'Pesquisar músicas...'
+            case 'artists': return 'Pesquisar artistas...'
+            default: return 'Pesquisar artistas ou músicas...'
+        }
+    }
+
     return (
         <div
             ref={searchRef}
-            className="flex w-[500px] items-center align-middle"
+            className="flex w-[500px] items-center"
         >
-            <div className="relative flex w-full max-w-md items-center">
-                <SearchIcon className="absolute left-3 z-10 h-5 w-5 text-muted-foreground" />
-                <Input
-                    type="search"
-                    placeholder="Search a Artist or Track..."
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onFocus={() => results && setShowResults(true)}
-                    className="w-full rounded-lg bg-background py-2 pl-10 pr-10 text-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                {isLoading && (
-                    <Loader2 className="absolute right-3 h-4 w-4 animate-spin text-muted-foreground" />
-                )}
+            <div className="relative flex w-full items-stretch">
+                {/* Botão de filtro */}
+                <div ref={filterRef} className="relative">
+                    <Button
+                        variant="outline" 
+                        onClick={() => setShowFilterMenu(!showFilterMenu)}
+                        className="flex h-10 items-center gap-2 rounded-l-lg rounded-r-none border-r-0 px-3 text-sm hover:bg-gray-50"
+                    >
+                        {searchFilter === 'all' && <Filter className="h-4 w-4" />}
+                        {searchFilter === 'tracks' && <Music className="h-4 w-4" />}
+                        {searchFilter === 'artists' && <User className="h-4 w-4" />}
+                        <span className="hidden sm:inline">{getFilterLabel(searchFilter)}</span>
+                        <ChevronDown className="h-3 w-3" />
+                    </Button>
+
+                    {/* Menu de filtros */}
+                    {showFilterMenu && (
+                        <div className="absolute left-0 top-full z-50 mt-1 w-36 rounded-lg border bg-white shadow-lg">
+                            <div className="py-1">
+                                <button
+                                    onClick={() => {
+                                        setSearchFilter('all')
+                                        setShowFilterMenu(false)
+                                    }}
+                                    className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50 ${
+                                        searchFilter === 'all' ? 'bg-gray-50 font-medium' : ''
+                                    }`}
+                                >
+                                    <Filter className="h-4 w-4" />
+                                    Tudo
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setSearchFilter('tracks')
+                                        setShowFilterMenu(false)
+                                    }}
+                                    className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50 ${
+                                        searchFilter === 'tracks' ? 'bg-gray-50 font-medium' : ''
+                                    }`}
+                                >
+                                    <Music className="h-4 w-4" />
+                                    Músicas
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setSearchFilter('artists')
+                                        setShowFilterMenu(false)
+                                    }}
+                                    className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50 ${
+                                        searchFilter === 'artists' ? 'bg-gray-50 font-medium' : ''
+                                    }`}
+                                >
+                                    <User className="h-4 w-4" />
+                                    Artistas
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Campo de busca */}
+                <div className="relative flex-1">
+                    <SearchIcon className="absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        placeholder={getPlaceholderText(searchFilter)}
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onFocus={() => results && setShowResults(true)}
+                        className="h-10 w-full rounded-l-none rounded-r-lg border-l-0 bg-background pl-10 pr-10 text-sm transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    {isLoading && (
+                        <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+                    )}
+                </div>
 
                 {/* Dropdown de resultados */}
                 {showResults && results && query.trim().length >= 2 && (
-                    <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-96 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
-                        {/* Tracks */}
-                        {results.tracks?.items &&
+                    <div className="absolute left-0 right-0 top-full z-40 mt-1 max-h-96 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
+                        {/* Tracks - só mostra se o filtro permitir */}
+                        {(searchFilter === 'all' || searchFilter === 'tracks') &&
+                            results.tracks?.items &&
                             results.tracks.items.length > 0 && (
                                 <div className="p-2">
-                                    <div className="flex items-center gap-2 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                        <Music className="h-3 w-3" />
-                                        Músicas
-                                    </div>
+                                    {searchFilter === 'all' && (
+                                        <div className="flex items-center gap-2 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                            <Music className="h-3 w-3" />
+                                            Músicas
+                                        </div>
+                                    )}
                                     {results.tracks.items
-                                        .slice(0, 5)
+                                        .slice(0, searchFilter === 'tracks' ? 8 : 5)
                                         .map((track) => (
                                             <div
                                                 key={track.id}
@@ -216,16 +316,19 @@ export default function SearchWithResults() {
                                 </div>
                             )}
 
-                        {/* Artists */}
-                        {results.artists?.items &&
+                        {/* Artists - só mostra se o filtro permitir */}
+                        {(searchFilter === 'all' || searchFilter === 'artists') &&
+                            results.artists?.items &&
                             results.artists.items.length > 0 && (
-                                <div className="border-t border-gray-100 p-2">
-                                    <div className="flex items-center gap-2 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                        <User className="h-3 w-3" />
-                                        Artistas
-                                    </div>
+                                <div className={`p-2 ${searchFilter === 'all' && results.tracks?.items?.length ? 'border-t border-gray-100' : ''}`}>
+                                    {searchFilter === 'all' && (
+                                        <div className="flex items-center gap-2 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                            <User className="h-3 w-3" />
+                                            Artistas
+                                        </div>
+                                    )}
                                     {results.artists.items
-                                        .slice(0, 3)
+                                        .slice(0, searchFilter === 'artists' ? 8 : 3)
                                         .map((artist) => (
                                             <div
                                                 key={artist.id}
@@ -266,11 +369,11 @@ export default function SearchWithResults() {
                             )}
 
                         {/* Nenhum resultado */}
-                        {!results.tracks?.items?.length &&
-                            !results.artists?.items?.length && (
+                        {((searchFilter === 'all' && !results.tracks?.items?.length && !results.artists?.items?.length) ||
+                          (searchFilter === 'tracks' && !results.tracks?.items?.length) ||
+                          (searchFilter === 'artists' && !results.artists?.items?.length)) && (
                                 <div className="p-4 text-center text-sm text-gray-500">
-                                    Nenhum resultado encontrado para &#34{query}
-                                    &#34
+                                    Nenhum resultado encontrado para &#34{query}&#34
                                 </div>
                             )}
                     </div>

@@ -71,14 +71,16 @@ export default function FollowersFollowingSection({
     )
 
     return (
-        <div className="mt-2 flex items-center space-x-4 font-sans">
+        <div className="flex items-center gap-6 text-sm">
             <Dialog>
                 <DialogTrigger asChild>
-                    <button className="cursor-pointer text-sm text-gray-600 hover:text-gray-800">
-                        <span className="font-semibold">
+                    <button className="hover:underline">
+                        <span className="font-semibold text-foreground">
                             {followers.length}
                         </span>{' '}
-                        Seguidores
+                        <span className="text-muted-foreground">
+                            {followers.length === 1 ? 'Seguidor' : 'Seguidores'}
+                        </span>
                     </button>
                 </DialogTrigger>
                 <DialogContent className="max-w-md">
@@ -95,7 +97,7 @@ export default function FollowersFollowingSection({
                                 />
                             ))
                         ) : (
-                            <p className="py-4 text-center text-gray-500">
+                            <p className="py-4 text-center text-muted-foreground">
                                 Nenhum seguidor ainda
                             </p>
                         )}
@@ -105,11 +107,11 @@ export default function FollowersFollowingSection({
 
             <Dialog>
                 <DialogTrigger asChild>
-                    <button className="cursor-pointer text-sm text-gray-600 hover:text-gray-800">
-                        <span className="font-semibold">
+                    <button className="hover:underline">
+                        <span className="font-semibold text-foreground">
                             {following.length}
                         </span>{' '}
-                        Seguindo
+                        <span className="text-muted-foreground">Seguindo</span>
                     </button>
                 </DialogTrigger>
                 <DialogContent className="max-w-md">
@@ -126,7 +128,7 @@ export default function FollowersFollowingSection({
                                 />
                             ))
                         ) : (
-                            <p className="py-4 text-center text-gray-500">
+                            <p className="py-4 text-center text-muted-foreground">
                                 Não segue ninguém ainda
                             </p>
                         )}
@@ -134,7 +136,14 @@ export default function FollowersFollowingSection({
                 </DialogContent>
             </Dialog>
 
-            <Badge variant="secondary">{currentRating} pontos</Badge>
+            <div>
+                <span className="font-semibold text-foreground">
+                    {currentRating}
+                </span>{' '}
+                <span className="text-muted-foreground">
+                    {currentRating === 1 ? 'ponto' : 'pontos'}
+                </span>
+            </div>
         </div>
     )
 }

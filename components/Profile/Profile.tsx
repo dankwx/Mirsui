@@ -2,6 +2,8 @@
 'use client'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from "@/components/ui/button"
+import { Search, Plus } from "lucide-react"
 import UserProfile from './GetUsername'
 import type { User, Achievement, Rating } from '@/types/profile'
 
@@ -34,27 +36,39 @@ export default function Profile({
     const canEditAvatar = isOwnProfile && isLoggedIn
 
     return (
-        <div className="mt-16 pt-4">
-            <div className="flex">
+        <div className="space-y-8">
+            {/* Profile Section */}
+            <div className="flex items-start gap-8">
                 <Avatar
-                    className={`mr-4 h-20 w-20 ${canEditAvatar ? 'cursor-pointer hover:opacity-80' : ''}`}
+                    className={`h-32 w-32 border-4 border-border shadow-lg ${canEditAvatar ? 'cursor-pointer hover:opacity-80' : ''}`}
                     onClick={canEditAvatar ? onAvatarClick : undefined}
                 >
-                    <AvatarImage src={userData.avatar_url || undefined} />
-                    <AvatarFallback>
+                    <AvatarImage src={userData.avatar_url || undefined} className="object-cover" />
+                    <AvatarFallback className="text-2xl">
                         {userData.first_name?.[0] ||
                             userData.username?.[0] ||
                             'U'}
                     </AvatarFallback>
                 </Avatar>
 
-                <UserProfile
-                    userData={userData}
-                    isLoggedIn={isLoggedIn}
-                    isOwnProfile={isOwnProfile}
-                    updateDisplayNameAction={updateDisplayNameAction}
-                    updateDescriptionAction={updateDescriptionAction}
-                />
+                <div className="flex-1">
+                    <UserProfile
+                        userData={userData}
+                        isLoggedIn={isLoggedIn}
+                        isOwnProfile={isOwnProfile}
+                        updateDisplayNameAction={updateDisplayNameAction}
+                        updateDescriptionAction={updateDescriptionAction}
+                    />
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="icon">
+                        <Search className="h-5 w-5" />
+                    </Button>
+                    <Button size="icon" className="bg-accent hover:bg-accent/90">
+                        <Plus className="h-5 w-5" />
+                    </Button>
+                </div>
             </div>
         </div>
     )

@@ -94,7 +94,7 @@ export default function UserProfile({
                     <DialogTrigger asChild>
                         <Button
                             variant="link"
-                            className="m-0 h-fit w-fit p-0 font-sans text-3xl font-bold hover:underline"
+                            className="m-0 h-fit w-fit p-0 text-4xl font-bold text-foreground hover:underline"
                         >
                             {currentDisplayName}
                         </Button>
@@ -120,7 +120,7 @@ export default function UserProfile({
         }
 
         return (
-            <h1 className="font-sans text-3xl font-bold">
+            <h1 className="text-4xl font-bold text-foreground">
                 {currentDisplayName}
             </h1>
         )
@@ -136,9 +136,9 @@ export default function UserProfile({
                     onOpenChange={setOpenDescription}
                 >
                     <DialogTrigger asChild>
-                        <div className="flex cursor-pointer items-center text-gray-600 hover:text-gray-800">
+                        <div className="flex cursor-pointer items-center text-foreground hover:text-muted-foreground transition-colors">
                             <p
-                                className={`font-sans text-sm ${!currentDescription ? 'italic' : ''}`}
+                                className={`text-sm ${!currentDescription ? 'italic text-muted-foreground' : 'text-foreground'}`}
                             >
                                 {displayDescription}
                             </p>
@@ -167,7 +167,7 @@ export default function UserProfile({
 
         return (
             <p
-                className={`font-sans text-sm text-gray-600 ${!currentDescription ? 'italic' : ''}`}
+                className={`text-sm ${!currentDescription ? 'italic text-muted-foreground' : 'text-foreground'}`}
             >
                 {displayDescription}
             </p>
@@ -175,16 +175,16 @@ export default function UserProfile({
     }
 
     return (
-        <div className="flex h-fit flex-col">
-            <div className="flex items-start justify-between">
-                <div className="flex flex-col">
-                    <div className="flex items-center gap-2">
-                        <DisplayNameSection />
-                        <span className="text-gray-600">
-                            @{userData.username}
-                        </span>
-                    </div>
+        <div className="space-y-4">
+            <div>
+                <div className="flex items-center gap-3 mb-2">
+                    <DisplayNameSection />
+                    <span className="text-xl text-muted-foreground">
+                        @{userData.username}
+                    </span>
+                </div>
 
+                <div className="mb-3">
                     <FollowersFollowingSection
                         followers={userData.totalFollowers}
                         following={userData.totalFollowing}
@@ -193,22 +193,24 @@ export default function UserProfile({
                         isLoggedIn={isLoggedIn}
                         currentUserId={userData.id}
                     />
-
-                    <div className="mt-2">
-                        <DescriptionSection />
-                    </div>
                 </div>
 
-                {!isOwnProfile && isLoggedIn && (
+                <div className="mb-4">
+                    <DescriptionSection />
+                </div>
+
+                <UserBadges userAchievments={userData.achievements} />
+            </div>
+
+            {!isOwnProfile && isLoggedIn && (
+                <div className="pt-2">
                     <FollowButton
                         followingId={userData.id}
                         initialIsFollowing={userData.isFollowing || false}
                         type="text"
                     />
-                )}
-            </div>
-
-            <UserBadges userAchievments={userData.achievements} />
+                </div>
+            )}
         </div>
     )
 }

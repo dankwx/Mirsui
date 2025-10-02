@@ -1,4 +1,3 @@
-import { HeadphonesIcon, TrendingUpIcon, UsersIcon } from 'lucide-react'
 import { Badge } from '../ui/badge'
 
 interface Achievments {
@@ -14,41 +13,38 @@ interface AchievmentsSectionProps {
 
 const UserBadges: React.FC<AchievmentsSectionProps> = ({ userAchievments }) => {
     return (
-        <div>
-            <div className="ml-0 mt-2 flex justify-start">
-                {userAchievments.map((achievment) => (
-                    <div key={achievment.achievement_id}>
-                        <Badge
-                            variant={'outline'}
-                            className="mr-2 border-purple-300 bg-purple-100 text-purple-800"
-                        >
-                            <HeadphonesIcon className="mr-2 h-4 w-4" />
-                            <p>{achievment.title}</p>
-                        </Badge>
-                    </div>
-                ))}
+        <div className="flex flex-wrap gap-2">
+            {userAchievments.map((achievment) => (
                 <Badge
-                    variant={'outline'}
-                    className="mr-2 border-purple-300 bg-purple-100 text-purple-800"
+                    key={achievment.achievement_id}
+                    variant="secondary"
+                    className="bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300"
                 >
-                    <HeadphonesIcon className="mr-2 h-4 w-4" />
-                    <p>Audiophile</p>
+                    🏆 {achievment.title}
                 </Badge>
-                <Badge
-                    variant={'outline'}
-                    className="mr-2 border-green-300 bg-green-100 text-green-800"
-                >
-                    <TrendingUpIcon className="mr-2 h-4 w-4" />
-                    <p>Trending Spotter</p>
-                </Badge>
-                <Badge
-                    variant={'outline'}
-                    className="mr-2 border-blue-300 bg-blue-100 text-blue-800"
-                >
-                    <UsersIcon className="mr-2 h-4 w-4" />
-                    <p>Subscriber Magnet</p>
-                </Badge>
-            </div>
+            ))}
+            {userAchievments.length === 0 && (
+                <>
+                    <Badge
+                        variant="secondary"
+                        className="bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300"
+                    >
+                        🎧 Audiophile
+                    </Badge>
+                    <Badge
+                        variant="secondary"
+                        className="bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300"
+                    >
+                        📈 Trending Spotter
+                    </Badge>
+                    <Badge
+                        variant="secondary"
+                        className="bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300"
+                    >
+                        👥 Subscriber Magnet
+                    </Badge>
+                </>
+            )}
         </div>
     )
 }

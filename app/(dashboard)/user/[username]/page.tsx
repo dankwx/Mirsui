@@ -47,7 +47,7 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
     }
 
     return (
-        <div className="px-6 font-sans">
+        <div className="px-6 py-6 font-sans">
             <ProfileDetails
                 userData={profileData}
                 isLoggedIn={isLoggedIn}

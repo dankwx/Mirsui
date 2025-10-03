@@ -65,7 +65,15 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
 
                 {/* Lista de músicas salvas */}
                 <div className="w-full">
-                    <SongsList songs={songs} canRemove={isOwnProfile} />
+                    <SongsList 
+                        songs={songs} 
+                        canRemove={isOwnProfile} 
+                        userData={{
+                            display_name: profileData.display_name || profileData.username,
+                            username: profileData.username,
+                            avatar_url: profileData.avatar_url
+                        }}
+                    />
                 </div>
             </div>
         </div>

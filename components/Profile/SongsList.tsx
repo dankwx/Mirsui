@@ -10,6 +10,7 @@ import {
     MoreVerticalIcon,
     HeartIcon,
     TrashIcon,
+    ImageIcon,
 } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Card, CardContent } from '../ui/card'
@@ -18,6 +19,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
+    DropdownMenuSeparator,
 } from '../ui/dropdown-menu'
 // Importe os componentes de Tooltip
 import {
@@ -28,6 +30,7 @@ import {
 } from '../ui/tooltip' // Ajuste o caminho conforme necessário
 import { removeTrack, toggleFavorite } from './actions' // Ajuste o caminho conforme necessário
 import { useRouter } from 'next/navigation'
+import { useCertificateGeneratorSimple } from '@/hooks/use-certificate-generator-simple'
 
 type Song = {
     id: string
@@ -48,9 +51,14 @@ type Song = {
 type SongsListProps = {
     songs: Song[]
     canRemove?: boolean // Para controlar se o usuário pode remover (ex: se é o próprio perfil)
+    userData?: {
+        display_name: string
+        username: string
+        avatar_url?: string | null
+    }
 }
 
-const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false }) => {
+const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userData }) => {
     const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
         {}
     )
@@ -58,6 +66,7 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false }) => {
         Record<string, boolean>
     >({})
     const router = useRouter()
+    const { generateCertificate, isGenerating } = useCertificateGeneratorSimple()
 
     const handleRemoveTrack = async (trackId: string, trackTitle: string) => {
         // Confirmar antes de remover
@@ -104,6 +113,22 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false }) => {
             alert('Erro inesperado ao alterar favorito')
         } finally {
             setFavoriteStates((prev) => ({ ...prev, [trackId]: false }))
+        }
+    }
+
+    const handleGenerateCertificate = async (song: Song) => {
+        if (!userData) {
+            alert('Dados do usuário não disponíveis')
+            return
+        }
+
+        const result = await generateCertificate(song, userData)
+        
+        if (result.success) {
+            // Mostrar mensagem de sucesso
+            alert(result.message || 'Certificado gerado com sucesso!')
+        } else {
+            alert(result.error || 'Erro ao gerar certificado')
         }
     }
 
@@ -179,6 +204,27 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false }) => {
                                                 'Adicionar aos favoritos'
                                             )}
                                         </DropdownMenuItem>
+                                        
+                                        <DropdownMenuSeparator />
+                                        
+                                        <DropdownMenuItem
+                                            onClick={() => handleGenerateCertificate(song)}
+                                            disabled={isGenerating}
+                                            className="cursor-pointer"
+                                        >
+                                            <ImageIcon className="mr-2 h-4 w-4" />
+                                            {isGenerating ? (
+                                                <span className="flex items-center">
+                                                    <div className="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-gray-600 border-t-transparent" />
+                                                    Gerando discovery card...
+                                                </span>
+                                            ) : (
+                                                'Gerar discovery card'
+                                            )}
+                                        </DropdownMenuItem>
+                                        
+                                        <DropdownMenuSeparator />
+                                        
                                         <DropdownMenuItem
                                             onClick={() =>
                                                 handleRemoveTrack(

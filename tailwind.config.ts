@@ -61,6 +61,18 @@ const config = {
     				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
     				border: 'hsl(var(--sidebar-border))',
     				ring: 'hsl(var(--sidebar-ring))'
+    			},
+    			sage: {
+    				'50': '#f4f6f4',
+    				'100': '#e5e9e5',
+    				'200': '#d1d7d1',
+    				'300': '#b3c0b3',
+    				'400': '#8fa18f',
+    				'500': '#708570',
+    				'600': '#5a6e5a',
+    				'700': '#4a5a4a',
+    				'800': '#3e4a3e',
+    				'900': '#343e34',
     			}
     		},
     		borderRadius: {

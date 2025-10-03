@@ -55,19 +55,19 @@ export default async function HomePage() {
                             href="#how-it-works"
                             className="font-medium text-slate-600 hover:text-slate-800"
                         >
-                            How It Works
+                            Como Funciona
                         </Link>
                         <Link
                             href="#discover"
                             className="font-medium text-slate-600 hover:text-slate-800"
                         >
-                            Discover
+                            Descobrir
                         </Link>
                         <Link
                             href="#about"
                             className="font-medium text-slate-600 hover:text-slate-800"
                         >
-                            About
+                            Sobre
                         </Link>
                     </div>
 
@@ -87,16 +87,16 @@ export default async function HomePage() {
                 <div className="relative z-10 mx-auto max-w-7xl">
                     <div className="mx-auto max-w-4xl text-center">
                         <h1 className="mb-6 text-5xl font-bold leading-tight text-slate-800 md:text-7xl">
-                            Discover Music
+                            Descubra Música
                             <span className="text-sage-600 block">
-                                Before Everyone Else
+                                Antes de Todos
                             </span>
                         </h1>
                         <p className="mx-auto mb-10 max-w-3xl text-xl leading-relaxed text-slate-600 md:text-2xl">
-                            Claim tracks before they go viral and build your
-                            reputation as a true music tastemaker. Spot
-                            tomorrow&apos;s hits before they explode on TikTok
-                            and social media.
+                            Reivindique tracks antes delas viralizarem e construa sua
+                            reputação como um verdadeiro descobridor de talentos musicais. 
+                            Encontre os hits de amanhã antes deles explodirem no TikTok
+                            e redes sociais.
                         </p>
                         <div className="flex flex-col justify-center gap-4 sm:flex-row">
                             <Link href="/feed">
@@ -111,7 +111,7 @@ export default async function HomePage() {
                             <Button
                                 size="lg"
                                 variant="outline"
-                                className="border-slate-300 px-8 py-4 text-lg text-slate-700 hover:bg-slate-50"
+                                className="border-slate-400 px-8 py-4 text-lg text-slate-800 hover:bg-slate-100 hover:border-slate-500"
                             >
                                 Como Funciona
                             </Button>
@@ -140,11 +140,11 @@ export default async function HomePage() {
                                     />
                                 </div>
                                 <h3 className="text-sage-700 mb-3 text-xl font-semibold">
-                                    Early Discovery
+                                    Descoberta Precoce
                                 </h3>
                                 <p className="text-sage-600 leading-relaxed">
-                                    Find tracks before they become mainstream
-                                    and prove your music taste
+                                    Encontre tracks antes delas se tornarem mainstream
+                                    e prove seu gosto musical
                                 </p>
                             </CardContent>
                         </Card>
@@ -157,11 +157,11 @@ export default async function HomePage() {
                                     />
                                 </div>
                                 <h3 className="mb-3 text-xl font-semibold text-blue-700">
-                                    Build Reputation
+                                    Construa Reputação
                                 </h3>
                                 <p className="leading-relaxed text-blue-600">
-                                    Earn recognition as your claimed tracks gain
-                                    popularity and go viral
+                                    Ganhe reconhecimento conforme suas tracks reivindicadas
+                                    ganham popularidade e viralizam
                                 </p>
                             </CardContent>
                         </Card>
@@ -174,11 +174,11 @@ export default async function HomePage() {
                                     />
                                 </div>
                                 <h3 className="mb-3 text-xl font-semibold text-rose-700">
-                                    Curated Selection
+                                    Seleção Curada
                                 </h3>
                                 <p className="leading-relaxed text-rose-600">
-                                    Explore carefully selected emerging tracks
-                                    across all genres
+                                    Explore tracks emergentes cuidadosamente selecionadas
+                                    de todos os gêneros
                                 </p>
                             </CardContent>
                         </Card>
@@ -194,11 +194,11 @@ export default async function HomePage() {
                 <div className="mx-auto max-w-7xl">
                     <div className="mb-12 text-center">
                         <h2 className="mb-4 text-3xl font-bold text-slate-800 md:text-4xl">
-                            Trending Tracks to Claim
+                            Tracks em Destaque para Reivindicar
                         </h2>
                         <p className="mx-auto max-w-2xl text-lg text-slate-600">
-                            These tracks are gaining momentum. Claim them now
-                            before they explode on social media.
+                            Essas tracks estão ganhando momentum. Reivindique-as agora
+                            antes delas explodirem nas redes sociais.
                         </p>
                     </div>
 
@@ -225,7 +225,7 @@ export default async function HomePage() {
                                             index === 1 ? 'border-emerald-200 bg-emerald-100 text-emerald-700' :
                                             'border-violet-200 bg-violet-100 text-violet-700'
                                         }`}>
-                                            {index === 0 ? 'Trending' : index === 1 ? 'Rising' : 'Hot'}
+                                            {index === 0 ? 'Em Alta' : index === 1 ? 'Crescendo' : 'Popular'}
                                         </Badge>
                                     </CardHeader>
                                     <CardContent className="pt-6">
@@ -283,14 +283,14 @@ export default async function HomePage() {
                                             <Play size={20} className="ml-0.5" />
                                         </Button>
                                         <Badge className="absolute right-4 top-4 border-amber-200 bg-amber-100 text-amber-700">
-                                            Trending
+                                            Em Alta
                                         </Badge>
                                     </CardHeader>
                                     <CardContent className="pt-6">
                                         <div className="flex items-start justify-between">
                                             <div>
                                                 <h3 className="text-lg font-semibold text-slate-800">
-                                                    Midnight Dreams
+                                                    Sonhos da Meia-Noite
                                                 </h3>
                                                 <p className="text-slate-500">
                                                     Luna Nova
@@ -303,18 +303,18 @@ export default async function HomePage() {
                                                 size="sm"
                                                 className="bg-sage-600 hover:bg-sage-700 text-white"
                                             >
-                                                Claim
+                                                Reivindicar
                                             </Button>
                                         </div>
                                     </CardContent>
                                     <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
                                         <div className="flex items-center gap-2 text-sm text-slate-500">
                                             <Heart size={16} />
-                                            <span>New</span>
+                                            <span>Nova</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-slate-500">
                                             <Award size={16} />
-                                            <span>Available</span>
+                                            <span>Disponível</span>
                                         </div>
                                     </CardFooter>
                                 </Card>
@@ -336,38 +336,38 @@ export default async function HomePage() {
                                             <Play size={20} className="ml-0.5" />
                                         </Button>
                                         <Badge className="absolute right-4 top-4 border-emerald-200 bg-emerald-100 text-emerald-700">
-                                            Rising
+                                            Crescendo
                                         </Badge>
                                     </CardHeader>
                                     <CardContent className="pt-6">
                                         <div className="flex items-start justify-between">
                                             <div>
                                                 <h3 className="text-lg font-semibold text-slate-800">
-                                                    Electric Soul
+                                                    Alma Elétrica
                                                 </h3>
                                                 <p className="text-slate-500">
                                                     Neon Pulse
                                                 </p>
                                                 <p className="mt-1 text-xs text-slate-400">
-                                                    Electronic • 2024
+                                                    Eletrônica • 2024
                                                 </p>
                                             </div>
                                             <Button
                                                 size="sm"
                                                 className="bg-sage-600 hover:bg-sage-700 text-white"
                                             >
-                                                Claim
+                                                Reivindicar
                                             </Button>
                                         </div>
                                     </CardContent>
                                     <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
                                         <div className="flex items-center gap-2 text-sm text-slate-500">
                                             <Heart size={16} />
-                                            <span>Fresh</span>
+                                            <span>Fresca</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-slate-500">
                                             <Award size={16} />
-                                            <span>Available</span>
+                                            <span>Disponível</span>
                                         </div>
                                     </CardFooter>
                                 </Card>
@@ -389,38 +389,38 @@ export default async function HomePage() {
                                             <Play size={20} className="ml-0.5" />
                                         </Button>
                                         <Badge className="absolute right-4 top-4 border-violet-200 bg-violet-100 text-violet-700">
-                                            Hot
+                                            Popular
                                         </Badge>
                                     </CardHeader>
                                     <CardContent className="pt-6">
                                         <div className="flex items-start justify-between">
                                             <div>
                                                 <h3 className="text-lg font-semibold text-slate-800">
-                                                    Sunset Boulevard
+                                                    Boulevard do Pôr do Sol
                                                 </h3>
                                                 <p className="text-slate-500">
                                                     Coastal Waves
                                                 </p>
                                                 <p className="mt-1 text-xs text-slate-400">
-                                                    Alternative • 2024
+                                                    Alternativo • 2024
                                                 </p>
                                             </div>
                                             <Button
                                                 size="sm"
                                                 className="bg-sage-600 hover:bg-sage-700 text-white"
                                             >
-                                                Claim
+                                                Reivindicar
                                             </Button>
                                         </div>
                                     </CardContent>
                                     <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
                                         <div className="flex items-center gap-2 text-sm text-slate-500">
                                             <Heart size={16} />
-                                            <span>New</span>
+                                            <span>Nova</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-slate-500">
                                             <Award size={16} />
-                                            <span>Available</span>
+                                            <span>Disponível</span>
                                         </div>
                                     </CardFooter>
                                 </Card>
@@ -432,7 +432,7 @@ export default async function HomePage() {
                         <Link href="/feed">
                             <Button
                                 variant="outline"
-                                className="border-slate-300 px-8 text-slate-700 hover:bg-slate-50"
+                                className="border-slate-400 px-8 text-slate-800 hover:bg-slate-100 hover:border-slate-500"
                             >
                                 Explorar Mais Tracks
                                 <ArrowRight className="ml-2" size={16} />
@@ -448,7 +448,7 @@ export default async function HomePage() {
                     <div className="flex flex-col items-center gap-12 lg:flex-row">
                         <div className="w-full lg:w-1/2">
                             <Badge className="bg-sage-100 text-sage-700 mb-4">
-                                Featured Track
+                                Track em Destaque
                             </Badge>
                             {featuredTrack ? (
                                 <>
@@ -483,10 +483,10 @@ export default async function HomePage() {
                             ) : (
                                 <>
                                     <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-                                        Cosmic Waves
+                                        Ondas Cósmicas
                                     </h2>
                                     <h3 className="mb-2 text-xl font-semibold text-slate-300">
-                                        by Stellar Dreams
+                                        por Stellar Dreams
                                     </h3>
                                     <p className="mb-6 leading-relaxed text-slate-300">
                                         Esta track etérea combina sintetizadores sonhadores com vocais cativantes, criando uma experiência auditiva de outro mundo. Com seu som único e buzz crescente, tem todos os elementos para se tornar a próxima sensação viral.
@@ -501,7 +501,7 @@ export default async function HomePage() {
                                             className="border-white text-white hover:bg-white/10"
                                         >
                                             <Award size={16} className="mr-2" />
-                                            Claim Track
+                                            Reivindicar Track
                                         </Button>
                                     </div>
                                 </>
@@ -566,12 +566,12 @@ export default async function HomePage() {
                 <div className="mx-auto max-w-7xl">
                     <div className="mb-16 text-center">
                         <h2 className="mb-4 text-3xl font-bold text-slate-800 md:text-4xl">
-                            How Sound Sage Works
+                            Como o Sound Sage Funciona
                         </h2>
                         <p className="mx-auto max-w-3xl text-xl leading-relaxed text-slate-600">
-                            Build your reputation as a music tastemaker in three
-                            simple steps. Discover tomorrow&apos;s hits before
-                            they explode on social media.
+                            Construa sua reputação como um descobridor de talentos musicais em três
+                            passos simples. Descubra os hits de amanhã antes
+                            deles explodirem nas redes sociais.
                         </p>
                     </div>
 
@@ -585,12 +585,12 @@ export default async function HomePage() {
                                     />
                                 </div>
                                 <h3 className="mb-4 text-xl font-semibold text-slate-800">
-                                    1. Discover
+                                    1. Descubra
                                 </h3>
                                 <p className="leading-relaxed text-slate-600">
-                                    Browse through our curated selection of
-                                    emerging tracks from various genres and
-                                    discover hidden gems before anyone else
+                                    Navegue por nossa seleção curada de
+                                    tracks emergentes de vários gêneros e
+                                    descubra joias escondidas antes de qualquer outra pessoa
                                 </p>
                             </CardContent>
                         </Card>
@@ -604,12 +604,12 @@ export default async function HomePage() {
                                     />
                                 </div>
                                 <h3 className="mb-4 text-xl font-semibold text-slate-800">
-                                    2. Claim
+                                    2. Reivindique
                                 </h3>
                                 <p className="leading-relaxed text-slate-600">
-                                    Claim tracks you believe will become popular
-                                    before they go viral on TikTok, Instagram,
-                                    or other social platforms
+                                    Reivindique tracks que você acredita que se tornarão populares
+                                    antes delas viralizarem no TikTok, Instagram,
+                                    ou outras plataformas sociais
                                 </p>
                             </CardContent>
                         </Card>
@@ -623,12 +623,12 @@ export default async function HomePage() {
                                     />
                                 </div>
                                 <h3 className="mb-4 text-xl font-semibold text-slate-800">
-                                    3. Earn Recognition
+                                    3. Ganhe Reconhecimento
                                 </h3>
                                 <p className="leading-relaxed text-slate-600">
-                                    Build your reputation as tracks you claimed
-                                    become popular and earn badges for your
-                                    exceptional music discovery skills
+                                    Construa sua reputação conforme as tracks que você reivindicou
+                                    se tornam populares e ganhe emblemas por suas
+                                    habilidades excepcionais de descoberta musical
                                 </p>
                             </CardContent>
                         </Card>
@@ -640,15 +640,15 @@ export default async function HomePage() {
             <section id="about" className="px-4 py-16">
                 <div className="mx-auto max-w-4xl text-center">
                     <h2 className="mb-6 text-3xl font-bold text-slate-800 md:text-4xl">
-                        The Future of Music Discovery
+                        O Futuro da Descoberta Musical
                     </h2>
                     <p className="mb-8 text-xl leading-relaxed text-slate-600">
-                        Sound Sage is more than just a music platform—it&apos;s
-                        a community for true music enthusiasts who have an ear
-                        for what&apos;s next. Whether you&apos;re into indie
-                        pop, electronic, hip-hop, or alternative, our platform
-                        helps you discover and claim tracks before they become
-                        mainstream hits.
+                        O Sound Sage é mais do que apenas uma plataforma musical—é
+                        uma comunidade para verdadeiros entusiastas da música que têm ouvido
+                        apurado para o que vem por aí. Seja você fã de indie
+                        pop, eletrônica, hip-hop ou alternativo, nossa plataforma
+                        ajuda você a descobrir e reivindicar tracks antes delas se tornarem
+                        hits mainstream.
                     </p>
                     <p className="mb-10 text-lg leading-relaxed text-slate-600">
                         Junte-se a uma comunidade de amantes da música que entendem que uma boa música merece ser descoberta cedo. Construa sua reputação, conecte-se com ouvintes que compartilham seus gostos, e prove que você tem o que é preciso para identificar a próxima grande novidade.
@@ -669,12 +669,12 @@ export default async function HomePage() {
             <section className="from-sage-50 bg-gradient-to-br to-blue-50 px-4 py-20">
                 <div className="mx-auto max-w-4xl text-center">
                     <h2 className="mb-6 text-3xl font-bold text-slate-800 md:text-4xl">
-                        Ready to Discover Tomorrow&apos;s Hits Today?
+                        Pronto para Descobrir os Hits de Amanhã Hoje?
                     </h2>
                     <p className="mb-10 text-xl leading-relaxed text-slate-600">
-                        Join the music discovery revolution. Start building your
-                        reputation as a tastemaker and prove you can spot hits
-                        before they go viral.
+                        Junte-se à revolução da descoberta musical. Comece a construir sua
+                        reputação como um descobridor de talentos e prove que você consegue identificar hits
+                        antes deles viralizarem.
                     </p>
                     <div className="flex flex-col justify-center gap-4 sm:flex-row">
                         <Link href="/register">
@@ -689,7 +689,7 @@ export default async function HomePage() {
                         <Button
                             size="lg"
                             variant="outline"
-                            className="border-slate-300 px-10 py-4 text-lg text-slate-700 hover:bg-white"
+                            className="border-slate-400 px-10 py-4 text-lg text-slate-800 hover:bg-slate-100 hover:border-slate-500"
                         >
                             Saiba Mais
                         </Button>

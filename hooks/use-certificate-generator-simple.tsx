@@ -60,20 +60,20 @@ export const useCertificateGeneratorSimple = () => {
             ctx.textBaseline = 'top'
 
             // Header - Logo
-            ctx.font = 'bold 40px Arial, sans-serif' // Mantendo fonte aumentada
+            ctx.font = 'bold 48px Arial, sans-serif' // Aumentado 20% de 40px para 48px
             ctx.fillStyle = '#10b981'
             ctx.fillText('SOUNDSAGE', 42, 42) // Voltando posições originais
 
             // Subtítulo
-            ctx.font = '14px Arial, sans-serif' // Mantendo fonte aumentada
+            ctx.font = '20.4px Arial, sans-serif' // Aumentado 20% de 17px para 20.4px
             ctx.fillStyle = '#ffffff'
             ctx.globalAlpha = 0.8
-            ctx.fillText('Music Discovery Platform', 42, 84) // Voltando posições
+            ctx.fillText('Music Discovery Certificate', 42, 91) // Voltando posição original
             ctx.globalAlpha = 1
 
             // Data no canto superior direito
             ctx.textAlign = 'right'
-            ctx.font = '12px Arial, sans-serif' // Mantendo fonte aumentada
+            ctx.font = '16.8px Arial, sans-serif' // Aumentado 20% de 14px para 16.8px
             ctx.fillStyle = '#ffffff'
             ctx.globalAlpha = 0.7
             ctx.fillText('Early Adopter', 798, 42) // Voltando para 840-42
@@ -86,21 +86,21 @@ export const useCertificateGeneratorSimple = () => {
 
             // Se não há thumbnail, desenhar ícone musical
             if (!song.track_thumbnail) {
-                ctx.font = 'bold 50px Arial, sans-serif' // Mantendo fonte aumentada
+                ctx.font = 'bold 60px Arial, sans-serif' // Aumentado 20% de 50px para 60px
                 ctx.fillStyle = '#4ecdc4'
                 ctx.textAlign = 'center'
                 ctx.textBaseline = 'middle'
                 ctx.fillText('♪', 140, 224) // Voltando para centro original (42+196/2, 126+196/2)
             }
 
-            // Badge "DISCOVERED" - voltando posição original
+            // Badge "DISCOVERED" - reposicionado para não sobrepor
             ctx.fillStyle = '#10b981'
-            ctx.fillRect(210, 133, 84, 21) // Voltando tamanho original
-            ctx.font = 'bold 10px Arial, sans-serif' // Mantendo fonte um pouco aumentada
+            ctx.fillRect(190, 280, 90, 24) // Movido para baixo e aumentado um pouco
+            ctx.font = 'bold 12px Arial, sans-serif' // Aumentado 20% de 10px para 12px
             ctx.fillStyle = '#ffffff'
             ctx.textAlign = 'center'
             ctx.textBaseline = 'middle'
-            ctx.fillText('🎵 DISCOVERED', 252, 143.5) // Voltando posição original
+            ctx.fillText('🎵 DISCOVERED', 235, 292) // Reposicionado
 
             // Informações da música
             ctx.textAlign = 'left'
@@ -113,7 +113,7 @@ export const useCertificateGeneratorSimple = () => {
             // Inicial do usuário
             ctx.fillStyle = '#10b981'
             ctx.fillRect(287, 133, 28, 28) // Voltando tamanho original
-            ctx.font = 'bold 16px Arial, sans-serif' // Mantendo fonte aumentada
+            ctx.font = 'bold 19.2px Arial, sans-serif' // Aumentado 20% de 16px para 19.2px
             ctx.fillStyle = '#ffffff'
             ctx.textAlign = 'center'
             ctx.textBaseline = 'middle'
@@ -122,29 +122,29 @@ export const useCertificateGeneratorSimple = () => {
             // Nome do usuário - usando username
             ctx.textAlign = 'left'
             ctx.textBaseline = 'top'
-            ctx.font = 'bold 13px Arial, sans-serif' // Mantendo fonte aumentada
+            ctx.font = 'bold 15.6px Arial, sans-serif' // Aumentado 20% de 13px para 15.6px
             ctx.fillStyle = '#ffffff'
             ctx.fillText(`@${userData.username}`, 322, 134) // Voltando posição
             
-            ctx.font = '10px Arial, sans-serif' // Mantendo fonte aumentada
+            ctx.font = '12px Arial, sans-serif' // Aumentado 20% de 10px para 12px
             ctx.globalAlpha = 0.8
             ctx.fillText('Music Discoverer', 322, 148) // Voltando posição
             ctx.globalAlpha = 1
 
             // Título da música
-            ctx.font = 'bold 28px Arial, sans-serif' // Mantendo fonte aumentada
+            ctx.font = 'bold 33.6px Arial, sans-serif' // Aumentado 20% de 28px para 33.6px
             ctx.fillStyle = '#ffffff'
             const titleText = song.track_title.length > 30 ? song.track_title.substring(0, 30) + '...' : song.track_title
             ctx.fillText(titleText, 280, 189) // Voltando posição original
 
             // Artista
-            ctx.font = '16px Arial, sans-serif' // Mantendo fonte aumentada
+            ctx.font = '19.2px Arial, sans-serif' // Aumentado 20% de 16px para 19.2px
             ctx.globalAlpha = 0.9
             ctx.fillText(`by ${song.artist_name}`, 280, 224) // Voltando posição original
             ctx.globalAlpha = 1
 
             // Álbum
-            ctx.font = 'italic 13px Arial, sans-serif' // Mantendo fonte aumentada
+            ctx.font = 'italic 15.6px Arial, sans-serif' // Aumentado 20% de 13px para 15.6px
             ctx.globalAlpha = 0.7
             ctx.fillText(song.album_name, 280, 248) // Voltando posição original
             ctx.globalAlpha = 1
@@ -155,13 +155,13 @@ export const useCertificateGeneratorSimple = () => {
                 ctx.fillStyle = 'rgba(255,255,255,0.1)'
                 ctx.fillRect(280, statsY, 126, 56) // Voltando tamanho original
                 
-                ctx.font = 'bold 10px Arial, sans-serif' // Mantendo fonte aumentada
+                ctx.font = 'bold 12px Arial, sans-serif' // Aumentado 20% de 10px para 12px
                 ctx.fillStyle = '#ffffff'
                 ctx.globalAlpha = 0.8
                 ctx.fillText('DISCOVERY SCORE', 287, statsY + 7) // Voltando posição
                 ctx.globalAlpha = 1
                 
-                ctx.font = 'bold 20px Arial, sans-serif' // Mantendo fonte aumentada
+                ctx.font = 'bold 24px Arial, sans-serif' // Aumentado 20% de 20px para 24px
                 ctx.fillStyle = '#10b981'
                 ctx.fillText(song.discover_rating.toString(), 287, statsY + 25) // Voltando posição
                 
@@ -172,13 +172,13 @@ export const useCertificateGeneratorSimple = () => {
                 ctx.fillStyle = 'rgba(255,255,255,0.1)'
                 ctx.fillRect(420, 280, 126, 56) // Voltando posição original
                 
-                ctx.font = 'bold 10px Arial, sans-serif' // Mantendo fonte aumentada
+                ctx.font = 'bold 12px Arial, sans-serif' // Aumentado 20% de 10px para 12px
                 ctx.fillStyle = '#ffffff'
                 ctx.globalAlpha = 0.8
                 ctx.fillText('POPULARITY', 427, 287) // Voltando posição
                 ctx.globalAlpha = 1
                 
-                ctx.font = 'bold 20px Arial, sans-serif' // Mantendo fonte aumentada
+                ctx.font = 'bold 24px Arial, sans-serif' // Aumentado 20% de 20px para 24px
                 ctx.fillStyle = '#06d6a0'
                 ctx.fillText(`${song.popularity}%`, 427, 305) // Voltando posição
             }
@@ -189,7 +189,7 @@ export const useCertificateGeneratorSimple = () => {
             
             ctx.fillStyle = '#ff6b6b'
             ctx.fillRect(280, 364, 175, 28) // Voltando tamanho original
-            ctx.font = 'bold 12px Arial, sans-serif' // Mantendo fonte aumentada
+            ctx.font = 'bold 14.4px Arial, sans-serif' // Aumentado 20% de 12px para 14.4px
             ctx.fillStyle = '#ffffff'
             ctx.textAlign = 'center'
             ctx.textBaseline = 'middle'
@@ -198,7 +198,7 @@ export const useCertificateGeneratorSimple = () => {
             // Footer - voltando posições originais
             ctx.textAlign = 'left'
             ctx.textBaseline = 'top'
-            ctx.font = '10px Arial, sans-serif' // Mantendo fonte aumentada
+            ctx.font = '12px Arial, sans-serif' // Aumentado 20% de 10px para 12px
             ctx.fillStyle = '#ffffff'
             ctx.globalAlpha = 0.6
             ctx.fillText('Generated by SoundSage', 42, 504) // Voltando posição

@@ -3,17 +3,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Music, Play } from 'lucide-react'
 import { extractSpotifyIdFromUri } from '@/lib/spotifyUri'
+import { formatDuration, formatReleaseDate } from '@/lib/formatters'
 
 interface ArtistTopTracksProps {
     topTracks: any[]
-    formatDuration: (ms: number) => string
-    formatReleaseDate: (dateString: string) => string
 }
 
 export default function ArtistTopTracks({
     topTracks,
-    formatDuration,
-    formatReleaseDate,
 }: ArtistTopTracksProps) {
     if (!topTracks.length) return null
 

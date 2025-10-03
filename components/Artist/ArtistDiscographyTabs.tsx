@@ -4,21 +4,18 @@ import { Disc, Music, Award } from 'lucide-react'
 import AlbumExternalLinkButton from '@/components/AlbumExternalLinkButton'
 import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
+import { formatReleaseDate, getAlbumTypeLabel } from '@/lib/formatters'
 
 interface ArtistDiscographyTabsProps {
     albums: any[]
     singles: any[]
     compilations: any[]
-    formatReleaseDate: (dateString: string) => string
-    getAlbumTypeLabel: (type: string) => string
 }
 
 export default function ArtistDiscographyTabs({
     albums,
     singles,
     compilations,
-    formatReleaseDate,
-    getAlbumTypeLabel,
 }: ArtistDiscographyTabsProps) {
     return (
         <Card>

@@ -9,6 +9,7 @@ import {
     SpotifyAlbum,
     SpotifyTrack,
 } from '@/utils/spotifyService'
+import { formatDuration, formatReleaseDate, getAlbumTypeLabel } from '@/lib/formatters'
 
 import ArtistHeroSection from '@/components/Artist/ArtistHeroSection'
 import ArtistStatsGrid from '@/components/Artist/ArtistStatsGrid'
@@ -17,33 +18,8 @@ import ArtistDiscographyTabs from '@/components/Artist/ArtistDiscographyTabs'
 import ArtistRecentFollowers from '@/components/Artist/ArtistRecentFollowers'
 import ArtistTopFans from '@/components/Artist/ArtistTopFans'
 import ArtistDetailsCard from '@/components/Artist/ArtistDetailsCard'
-
-// Helper function to format duration
-function formatDuration(ms: number): string {
-    const minutes = Math.floor(ms / 60000)
-    const seconds = Math.floor((ms % 60000) / 1000)
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`
-}
-
-// Helper function to format release date
-function formatReleaseDate(dateString: string): string {
-    const date = new Date(dateString)
-    return date.getFullYear().toString()
-}
-
-// Helper function to get album type in Portuguese
-function getAlbumTypeLabel(type: string): string {
-    switch (type) {
-        case 'album':
-            return 'Álbum'
-        case 'single':
-            return 'Single'
-        case 'compilation':
-            return 'Coletânea'
-        default:
-            return type
-    }
-}
+import ArtistAllTracksSimple from '@/components/Artist/ArtistAllTracksSimple'
+import ArtistTrackStats from '@/components/Artist/ArtistTrackStats'
 
 export default async function ArtistDetailsPage({
     params,
@@ -134,16 +110,25 @@ export default async function ArtistDetailsPage({
                     {/* Top Tracks */}
                     <ArtistTopTracks
                         topTracks={topTracks}
-                        formatDuration={formatDuration}
-                        formatReleaseDate={formatReleaseDate}
                     />
+                    
+                    {/* Track Statistics */}
+                    <ArtistTrackStats
+                        topTracks={topTracks}
+                        albums={artistAlbums}
+                    />
+                    
+                    {/* All Tracks with Advanced View */}
+                    <ArtistAllTracksSimple
+                        topTracks={topTracks}
+                        albums={artistAlbums}
+                    />
+                    
                     {/* Albums, EPs and Singles Tabs */}
                     <ArtistDiscographyTabs
                         albums={albums}
                         singles={singles}
                         compilations={compilations}
-                        formatReleaseDate={formatReleaseDate}
-                        getAlbumTypeLabel={getAlbumTypeLabel}
                     />
                 </div>
 

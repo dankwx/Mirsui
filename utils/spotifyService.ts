@@ -392,3 +392,57 @@ export async function fetchSpotifyArtistTopTracks(
         return null
     }
 }
+
+// Nova função para buscar tracks de um álbum específico
+export async function fetchSpotifyAlbumTracks(
+    albumId: string,
+    limit: number = 50
+): Promise<SpotifyTrack[] | null> {
+    const accessToken = await getSpotifyAccessToken()
+
+    if (!accessToken) {
+        console.error('Token do Spotify não disponível.')
+        return null
+    }
+
+    try {
+        const response = await fetch(
+            `https://api.spotify.com/v1/albums/${albumId}/tracks?limit=${limit}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+                next: { revalidate: 86400 },
+            }
+        )
+
+        if (!response.ok) {
+            const errorText = await response.text()
+            console.error(
+                `Falha ao buscar tracks do álbum ${albumId}:`,
+                response.status,
+                errorText
+            )
+            if (
+                response.status === 401 &&
+                errorText.includes('The access token expired')
+            ) {
+                console.warn(
+                    'Token do Spotify expirou. Forçando renovação na próxima requisição.'
+                )
+                cachedSpotifyAccessToken = null
+                cachedTokenExpiryTime = null
+            }
+            return null
+        }
+
+        const data = await response.json()
+        return data.items || []
+    } catch (error) {
+        console.error(
+            `Erro ao buscar tracks do álbum ${albumId}:`,
+            error
+        )
+        return null
+    }
+}

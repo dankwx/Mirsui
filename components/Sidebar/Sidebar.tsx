@@ -27,24 +27,9 @@ const navigationItems = [
     },
     { title: 'My Library', url: '/library', icon: Library },
     {
-        title: 'Claim Channel',
-        url: '/claimchannel',
-        icon: Tv,
-    },
-    {
-        title: 'Claim Video',
-        url: '/claimvideo',
-        icon: Tv,
-    },
-    {
         title: 'Claim Track',
         url: '/claimtrack',
         icon: Disc,
-    },
-    {
-        title: 'Claim Artist',
-        url: '/claimartist',
-        icon: Mic,
     },
 ]
 

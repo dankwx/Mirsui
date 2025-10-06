@@ -154,7 +154,7 @@ export default function FeedContent({ initialPosts }: FeedContentProps) {
                                                                 {post.discover_rating && (
                                                                     <div className="flex items-center gap-1">
                                                                         <Sparkles className="h-4 w-4" />
-                                                                        <span>{post.discover_rating}/10 descoberta</span>
+                                                                        <span>{post.discover_rating}</span>
                                                                     </div>
                                                                 )}
                                                             </div>

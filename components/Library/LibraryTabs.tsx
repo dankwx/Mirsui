@@ -18,40 +18,183 @@ import {
     Globe,
     Clock
 } from 'lucide-react'
+import CreatePlaylistDialog from './CreatePlaylistDialog'
+import PlaylistMenu from './PlaylistMenu'
+import TrackMenu from './TrackMenu'
+import AddMusicDialog from './AddMusicDialog'
+import { createPlaylist, updatePlaylist, deletePlaylist, removeTrackFromPlaylist, fetchPlaylistTracks } from '@/utils/libraryService.client'
+import { useRouter } from 'next/navigation'
+import { useToast } from '@/components/ui/use-toast'
 
 interface PlaylistTrack {
     id: string
     track_title: string
     artist_name: string
     album_name: string
-    track_thumbnail: string
+    track_thumbnail: string | null
     track_url: string
-    popularity: number
-    discover_rating: number
-    duration: string
+    duration: string | null
+    track_position?: number
+    added_at?: string
 }
 
 interface Playlist {
     id: string
     name: string
-    description: string
+    description: string | null
     track_count: number
-    thumbnail: string
     created_at: string
-    is_public: boolean
-    tracks: PlaylistTrack[]
+    updated_at?: string
+    tracks?: PlaylistTrack[]
 }
 
 interface LibraryTabsProps {
     playlists: Playlist[]
+    userId?: string
 }
 
-const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists }) => {
+const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, userId }) => {
     const [activeTab, setActiveTab] = useState('playlists')
     const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null)
+    const [playlists, setPlaylists] = useState<Playlist[]>(initialPlaylists)
+    const [isLoading, setIsLoading] = useState(false)
+    const [addMusicDialogOpen, setAddMusicDialogOpen] = useState(false)
+    
+    const router = useRouter()
+    const { toast } = useToast()
+
+    // Função para criar playlist
+    const handleCreatePlaylist = async (name: string, description: string) => {
+        if (!userId) return
+        
+        setIsLoading(true)
+        try {
+            const newPlaylist = await createPlaylist(userId, name, description)
+            if (newPlaylist) {
+                setPlaylists(prev => [newPlaylist, ...prev])
+                router.refresh() // Atualiza a página para refletir mudanças
+            }
+        } catch (error) {
+            throw error // Re-throw para o componente tratar
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    // Função para atualizar playlist
+    const handleUpdatePlaylist = async (playlistId: string, name: string, description: string) => {
+        setIsLoading(true)
+        try {
+            const success = await updatePlaylist(playlistId, { name, description })
+            if (success) {
+                setPlaylists(prev => prev.map(p => 
+                    p.id === playlistId 
+                        ? { ...p, name, description }
+                        : p
+                ))
+                
+                // Atualizar playlist selecionada se for a mesma
+                if (selectedPlaylist?.id === playlistId) {
+                    setSelectedPlaylist(prev => prev ? { ...prev, name, description } : null)
+                }
+                
+                router.refresh()
+            }
+        } catch (error) {
+            throw error
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    // Função para deletar playlist
+    const handleDeletePlaylist = async (playlistId: string) => {
+        setIsLoading(true)
+        try {
+            const success = await deletePlaylist(playlistId)
+            if (success) {
+                setPlaylists(prev => prev.filter(p => p.id !== playlistId))
+                
+                // Se a playlist deletada estava selecionada, voltar para a aba de playlists
+                if (selectedPlaylist?.id === playlistId) {
+                    setSelectedPlaylist(null)
+                    setActiveTab('playlists')
+                }
+                
+                router.refresh()
+            }
+        } catch (error) {
+            throw error
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    // Função para remover track da playlist
+    const handleRemoveTrack = async (trackId: string) => {
+        if (!selectedPlaylist) return
+        
+        setIsLoading(true)
+        try {
+            const success = await removeTrackFromPlaylist(trackId)
+            if (success) {
+                // Atualizar o estado local da playlist selecionada
+                const updatedTracks = (selectedPlaylist.tracks || []).filter(t => t.id !== trackId)
+                const updatedPlaylist = {
+                    ...selectedPlaylist,
+                    tracks: updatedTracks,
+                    track_count: updatedTracks.length
+                }
+                setSelectedPlaylist(updatedPlaylist)
+                
+                // Atualizar também na lista de playlists
+                setPlaylists(prev => prev.map(p => 
+                    p.id === selectedPlaylist.id 
+                        ? { ...p, track_count: updatedTracks.length }
+                        : p
+                ))
+            }
+        } catch (error) {
+            throw error
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    // Função chamada quando uma música é adicionada
+    const handleTrackAdded = async () => {
+        if (!selectedPlaylist) return
+        
+        try {
+            // Buscar os tracks atualizados da playlist
+            const updatedTracks = await fetchPlaylistTracks(selectedPlaylist.id)
+            
+            // Atualizar a playlist selecionada com os novos tracks
+            const updatedPlaylist = {
+                ...selectedPlaylist,
+                tracks: updatedTracks,
+                track_count: updatedTracks.length
+            }
+            
+            setSelectedPlaylist(updatedPlaylist)
+            
+            // Atualizar também na lista de playlists
+            setPlaylists(prev => prev.map(p => 
+                p.id === selectedPlaylist.id 
+                    ? { ...p, track_count: updatedTracks.length }
+                    : p
+            ))
+            
+        } catch (error) {
+            console.error('Error updating playlist data:', error)
+            // Se falhar, fazer refresh como fallback
+            router.refresh()
+        }
+    }
 
     return (
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-2">
                 <TabsTrigger value="playlists">My Playlists</TabsTrigger>
                 <TabsTrigger value="details">Playlist Details</TabsTrigger>
@@ -68,10 +211,10 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists }) => {
                         <Badge variant="secondary">
                             {playlists.length} playlists
                         </Badge>
-                        <Button size="sm">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Create Playlist
-                        </Button>
+                        <CreatePlaylistDialog 
+                            onCreatePlaylist={handleCreatePlaylist}
+                            isLoading={isLoading}
+                        />
                     </div>
                 </div>
 
@@ -100,12 +243,15 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists }) => {
                                         <div className="flex-1 min-w-0">
                                             <h4 className="font-semibold text-lg truncate">{playlist.name}</h4>
                                             <p className="text-sm text-muted-foreground line-clamp-2">
-                                                {playlist.description}
+                                                {playlist.description || 'No description'}
                                             </p>
                                         </div>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <MoreVertical className="h-4 w-4" />
-                                        </Button>
+                                        <PlaylistMenu 
+                                            playlist={playlist}
+                                            onUpdate={handleUpdatePlaylist}
+                                            onDelete={handleDeletePlaylist}
+                                            variant="card"
+                                        />
                                     </div>
                                     
                                     <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -114,17 +260,6 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists }) => {
                                             {playlist.track_count} tracks
                                         </span>
                                         <div className="flex items-center gap-2">
-                                            {playlist.is_public ? (
-                                                <Badge variant="outline" className="text-xs">
-                                                    <Globe className="h-3 w-3 mr-1" />
-                                                    Public
-                                                </Badge>
-                                            ) : (
-                                                <Badge variant="outline" className="text-xs">
-                                                    <Lock className="h-3 w-3 mr-1" />
-                                                    Private
-                                                </Badge>
-                                            )}
                                         </div>
                                     </div>
                                     
@@ -174,7 +309,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists }) => {
                             <div className="flex-1">
                                 <Badge variant="outline" className="mb-2">Playlist</Badge>
                                 <h1 className="text-4xl font-bold mb-2">{selectedPlaylist.name}</h1>
-                                <p className="text-muted-foreground text-lg mb-4">{selectedPlaylist.description}</p>
+                                <p className="text-muted-foreground text-lg mb-4">{selectedPlaylist.description || 'No description'}</p>
                                 
                                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                                     <span className="flex items-center gap-1">
@@ -184,19 +319,6 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists }) => {
                                     <span>•</span>
                                     <span>{selectedPlaylist.track_count} tracks</span>
                                     <span>•</span>
-                                    <span className="flex items-center gap-1">
-                                        {selectedPlaylist.is_public ? (
-                                            <>
-                                                <Globe className="h-4 w-4" />
-                                                Public
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Lock className="h-4 w-4" />
-                                                Private
-                                            </>
-                                        )}
-                                    </span>
                                 </div>
                                 
                                 <div className="flex items-center gap-2 mt-4">
@@ -204,13 +326,19 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists }) => {
                                         <Play className="h-4 w-4 mr-2" />
                                         Play All
                                     </Button>
-                                    <Button variant="outline">
+                                    <Button 
+                                        variant="outline"
+                                        onClick={() => setAddMusicDialogOpen(true)}
+                                    >
                                         <Plus className="h-4 w-4 mr-2" />
                                         Add Songs
                                     </Button>
-                                    <Button variant="ghost" size="icon">
-                                        <MoreVertical className="h-4 w-4" />
-                                    </Button>
+                                    <PlaylistMenu 
+                                        playlist={selectedPlaylist}
+                                        onUpdate={handleUpdatePlaylist}
+                                        onDelete={handleDeletePlaylist}
+                                        variant="details"
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -227,7 +355,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists }) => {
                                 <div className="col-span-1"></div>
                             </div>
                             
-                            {selectedPlaylist.tracks.map((track, index) => (
+                            {(selectedPlaylist.tracks || []).map((track, index) => (
                                 <div 
                                     key={track.id} 
                                     className="grid grid-cols-12 gap-4 px-4 py-3 rounded-lg hover:bg-muted/50 transition-colors group"
@@ -241,7 +369,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists }) => {
                                     
                                     <div className="col-span-6 flex items-center gap-3">
                                         <img
-                                            src={track.track_thumbnail}
+                                            src={track.track_thumbnail || '/placeholder-album.svg'}
                                             alt={track.track_title}
                                             className="h-12 w-12 rounded object-cover"
                                         />
@@ -256,13 +384,14 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists }) => {
                                     </div>
                                     
                                     <div className="col-span-1 flex items-center">
-                                        <span className="text-sm text-muted-foreground">{track.duration}</span>
+                                        <span className="text-sm text-muted-foreground">{track.duration || '--:--'}</span>
                                     </div>
                                     
                                     <div className="col-span-1 flex items-center">
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100">
-                                            <MoreVertical className="h-4 w-4" />
-                                        </Button>
+                                        <TrackMenu 
+                                            track={track}
+                                            onRemove={handleRemoveTrack}
+                                        />
                                     </div>
                                 </div>
                             ))}
@@ -285,7 +414,19 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists }) => {
                     </div>
                 )}
             </TabsContent>
-        </Tabs>
+            </Tabs>
+
+            {/* Dialog para adicionar músicas */}
+            {selectedPlaylist && (
+                <AddMusicDialog
+                    open={addMusicDialogOpen}
+                    onOpenChange={setAddMusicDialogOpen}
+                    playlistId={selectedPlaylist.id}
+                    playlistName={selectedPlaylist.name}
+                    onTrackAdded={handleTrackAdded}
+                />
+            )}
+        </>
     )
 }
 

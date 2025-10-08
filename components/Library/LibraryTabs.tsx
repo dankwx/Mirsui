@@ -53,9 +53,10 @@ interface Playlist {
 interface LibraryTabsProps {
     playlists: Playlist[]
     userId?: string
+    isOwnLibrary?: boolean
 }
 
-const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, userId }) => {
+const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, userId, isOwnLibrary = true }) => {
     const [activeTab, setActiveTab] = useState('playlists')
     const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null)
     const [playlists, setPlaylists] = useState<Playlist[]>(initialPlaylists)
@@ -276,10 +277,12 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                         <Badge variant="secondary">
                             {playlists.length} playlists
                         </Badge>
-                        <CreatePlaylistDialog 
-                            onCreatePlaylist={handleCreatePlaylist}
-                            isLoading={isLoading}
-                        />
+                        {isOwnLibrary && (
+                            <CreatePlaylistDialog 
+                                onCreatePlaylist={handleCreatePlaylist}
+                                isLoading={isLoading}
+                            />
+                        )}
                     </div>
                 </div>
 
@@ -348,12 +351,14 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                                                 {playlist.description || 'No description'}
                                             </p>
                                         </div>
-                                        <PlaylistMenu 
-                                            playlist={playlist}
-                                            onUpdate={handleUpdatePlaylist}
-                                            onDelete={handleDeletePlaylist}
-                                            variant="card"
-                                        />
+                                        {isOwnLibrary && (
+                                            <PlaylistMenu 
+                                                playlist={playlist}
+                                                onUpdate={handleUpdatePlaylist}
+                                                onDelete={handleDeletePlaylist}
+                                                variant="card"
+                                            />
+                                        )}
                                     </div>
                                     
                                     <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -375,19 +380,21 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                     ))}
                     
                     {/* Create new playlist card */}
-                    <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-dashed border-2 border-muted-foreground/30 hover:border-primary">
-                        <CardContent className="p-0">
-                            <div className="aspect-square flex items-center justify-center rounded-t-lg bg-muted/30">
-                                <Plus className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                            </div>
-                            <div className="p-6 text-center">
-                                <h4 className="font-semibold text-lg mb-2">Create New Playlist</h4>
-                                <p className="text-sm text-muted-foreground">
-                                    Start curating your next musical journey
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    {isOwnLibrary && (
+                        <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-dashed border-2 border-muted-foreground/30 hover:border-primary">
+                            <CardContent className="p-0">
+                                <div className="aspect-square flex items-center justify-center rounded-t-lg bg-muted/30">
+                                    <Plus className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                                </div>
+                                <div className="p-6 text-center">
+                                    <h4 className="font-semibold text-lg mb-2">Create New Playlist</h4>
+                                    <p className="text-sm text-muted-foreground">
+                                        Start curating your next musical journey
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
             </TabsContent>
 
@@ -436,20 +443,24 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                                         <Play className="h-4 w-4 mr-2" />
                                         Play All
                                     </Button>
-                                    <Button 
-                                        variant="outline"
-                                        onClick={() => setAddMusicDialogOpen(true)}
-                                    >
-                                        <Plus className="h-4 w-4 mr-2" />
-                                        Add Songs
-                                    </Button>
-                                    <PlaylistMenu 
-                                        playlist={selectedPlaylist}
-                                        onUpdate={handleUpdatePlaylist}
-                                        onDelete={handleDeletePlaylist}
-                                        onChangeThumbnail={handleThumbnailClick}
-                                        variant="details"
-                                    />
+                                    {isOwnLibrary && (
+                                        <>
+                                            <Button 
+                                                variant="outline"
+                                                onClick={() => setAddMusicDialogOpen(true)}
+                                            >
+                                                <Plus className="h-4 w-4 mr-2" />
+                                                Add Songs
+                                            </Button>
+                                            <PlaylistMenu 
+                                                playlist={selectedPlaylist}
+                                                onUpdate={handleUpdatePlaylist}
+                                                onDelete={handleDeletePlaylist}
+                                                onChangeThumbnail={handleThumbnailClick}
+                                                variant="details"
+                                            />
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -499,10 +510,12 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                                     </div>
                                     
                                     <div className="col-span-1 flex items-center">
-                                        <TrackMenu 
-                                            track={track}
-                                            onRemove={handleRemoveTrack}
-                                        />
+                                        {isOwnLibrary && (
+                                            <TrackMenu 
+                                                track={track}
+                                                onRemove={handleRemoveTrack}
+                                            />
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -528,7 +541,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
             </Tabs>
 
             {/* Dialog para adicionar músicas */}
-            {selectedPlaylist && (
+            {selectedPlaylist && isOwnLibrary && (
                 <AddMusicDialog
                     open={addMusicDialogOpen}
                     onOpenChange={setAddMusicDialogOpen}
@@ -539,7 +552,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
             )}
 
             {/* Dialog para upload de thumbnail */}
-            {playlistForThumbnail && (
+            {playlistForThumbnail && isOwnLibrary && (
                 <PlaylistThumbnailUpload
                     playlistId={playlistForThumbnail.id}
                     playlistName={playlistForThumbnail.name}

@@ -22,9 +22,10 @@ interface LibraryHeaderProps {
         discoveryScore: number
         totalDiscoveries: number
     }
+    isOwnLibrary?: boolean
 }
 
-const LibraryHeader: React.FC<LibraryHeaderProps> = ({ userData, stats }) => {
+const LibraryHeader: React.FC<LibraryHeaderProps> = ({ userData, stats, isOwnLibrary = true }) => {
     const displayName = userData?.display_name || userData?.username || 'Music Lover'
     
     return (

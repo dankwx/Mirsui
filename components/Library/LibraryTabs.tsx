@@ -22,7 +22,8 @@ import CreatePlaylistDialog from './CreatePlaylistDialog'
 import PlaylistMenu from './PlaylistMenu'
 import TrackMenu from './TrackMenu'
 import AddMusicDialog from './AddMusicDialog'
-import { createPlaylist, updatePlaylist, deletePlaylist, removeTrackFromPlaylist, fetchPlaylistTracks } from '@/utils/libraryService.client'
+import PlaylistThumbnailUpload from './PlaylistThumbnailUpload'
+import { createPlaylist, updatePlaylist, deletePlaylist, removeTrackFromPlaylist, fetchPlaylistTracks, uploadPlaylistThumbnail } from '@/utils/libraryService.client'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -42,6 +43,7 @@ interface Playlist {
     id: string
     name: string
     description: string | null
+    thumbnail_url: string | null
     track_count: number
     created_at: string
     updated_at?: string
@@ -59,19 +61,34 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
     const [playlists, setPlaylists] = useState<Playlist[]>(initialPlaylists)
     const [isLoading, setIsLoading] = useState(false)
     const [addMusicDialogOpen, setAddMusicDialogOpen] = useState(false)
+    const [thumbnailUploadOpen, setThumbnailUploadOpen] = useState(false)
+    const [playlistForThumbnail, setPlaylistForThumbnail] = useState<Playlist | null>(null)
     
     const router = useRouter()
     const { toast } = useToast()
 
     // Função para criar playlist
-    const handleCreatePlaylist = async (name: string, description: string) => {
+    const handleCreatePlaylist = async (name: string, description: string, thumbnail?: File) => {
         if (!userId) return
         
         setIsLoading(true)
         try {
             const newPlaylist = await createPlaylist(userId, name, description)
             if (newPlaylist) {
-                setPlaylists(prev => [newPlaylist, ...prev])
+                let playlistWithThumbnail = newPlaylist
+                
+                // Se há thumbnail, fazer upload
+                if (thumbnail) {
+                    const uploadResult = await uploadPlaylistThumbnail(newPlaylist.id, thumbnail)
+                    if (uploadResult.success && uploadResult.thumbnailUrl) {
+                        playlistWithThumbnail = {
+                            ...newPlaylist,
+                            thumbnail_url: uploadResult.thumbnailUrl
+                        }
+                    }
+                }
+                
+                setPlaylists(prev => [playlistWithThumbnail, ...prev])
                 router.refresh() // Atualiza a página para refletir mudanças
             }
         } catch (error) {
@@ -192,6 +209,45 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
         }
     }
 
+    // Função para abrir o modal de thumbnail
+    const handleThumbnailClick = (playlist: Playlist) => {
+        // Criar uma cópia independente da playlist para o modal
+        // Isso evita interferência com o estado da playlist selecionada
+        const playlistCopy = {
+            id: playlist.id,
+            name: playlist.name,
+            description: playlist.description,
+            thumbnail_url: playlist.thumbnail_url,
+            created_at: playlist.created_at,
+            updated_at: playlist.updated_at || playlist.created_at,
+            track_count: playlist.track_count
+        }
+        
+        setPlaylistForThumbnail(playlistCopy)
+        setThumbnailUploadOpen(true)
+    }
+
+    // Função chamada quando thumbnail é atualizada com sucesso
+    const handleThumbnailSuccess = (thumbnailUrl: string) => {
+        if (!playlistForThumbnail) return
+        
+        // Atualizar a playlist na lista principal
+        setPlaylists(prev => prev.map(p => 
+            p.id === playlistForThumbnail.id 
+                ? { ...p, thumbnail_url: thumbnailUrl }
+                : p
+        ))
+        
+        // Se é a playlist selecionada, atualizar também SEM afetar as tracks
+        if (selectedPlaylist?.id === playlistForThumbnail.id) {
+            setSelectedPlaylist(prev => prev ? { ...prev, thumbnail_url: thumbnailUrl } : null)
+        }
+        
+        // Fechar modal
+        setThumbnailUploadOpen(false)
+        setPlaylistForThumbnail(null)
+    }
+
     return (
         <>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -227,8 +283,21 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                               }}>
                             <CardContent className="p-0">
                                 <div className="relative aspect-square bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 rounded-t-lg flex items-center justify-center overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                                    <Music className="h-16 w-16 text-white opacity-90 z-10" />
+                                    {playlist.thumbnail_url ? (
+                                        <>
+                                            <img 
+                                                src={playlist.thumbnail_url} 
+                                                alt={playlist.name}
+                                                className="absolute inset-0 w-full h-full object-cover"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                            <Music className="h-16 w-16 text-white opacity-90 z-10" />
+                                        </>
+                                    )}
                                     
                                     {/* Play button overlay */}
                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-20">
@@ -295,8 +364,16 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                     <>
                         <div className="flex items-start gap-6">
                             <div className="relative">
-                                <div className="w-48 h-48 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 rounded-lg flex items-center justify-center">
-                                    <Music className="h-16 w-16 text-white opacity-90" />
+                                <div className="w-48 h-48 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 rounded-lg flex items-center justify-center overflow-hidden">
+                                    {selectedPlaylist.thumbnail_url ? (
+                                        <img 
+                                            src={selectedPlaylist.thumbnail_url} 
+                                            alt={selectedPlaylist.name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <Music className="h-16 w-16 text-white opacity-90" />
+                                    )}
                                 </div>
                                 <Button 
                                     size="icon" 
@@ -337,6 +414,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                                         playlist={selectedPlaylist}
                                         onUpdate={handleUpdatePlaylist}
                                         onDelete={handleDeletePlaylist}
+                                        onChangeThumbnail={handleThumbnailClick}
                                         variant="details"
                                     />
                                 </div>
@@ -424,6 +502,21 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                     playlistId={selectedPlaylist.id}
                     playlistName={selectedPlaylist.name}
                     onTrackAdded={handleTrackAdded}
+                />
+            )}
+
+            {/* Dialog para upload de thumbnail */}
+            {playlistForThumbnail && (
+                <PlaylistThumbnailUpload
+                    playlistId={playlistForThumbnail.id}
+                    playlistName={playlistForThumbnail.name}
+                    currentThumbnail={playlistForThumbnail.thumbnail_url}
+                    isOpen={thumbnailUploadOpen}
+                    onClose={() => {
+                        setThumbnailUploadOpen(false)
+                        setPlaylistForThumbnail(null)
+                    }}
+                    onSuccess={handleThumbnailSuccess}
                 />
             )}
         </>

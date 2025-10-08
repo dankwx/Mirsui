@@ -6,6 +6,7 @@ CREATE TABLE public.playlists (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
+    thumbnail_url TEXT,
     user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -116,6 +117,7 @@ RETURNS TABLE (
     id UUID,
     name VARCHAR(255),
     description TEXT,
+    thumbnail_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE,
     updated_at TIMESTAMP WITH TIME ZONE,
     track_count INTEGER
@@ -126,6 +128,7 @@ BEGIN
         p.id,
         p.name,
         p.description,
+        p.thumbnail_url,
         p.created_at,
         p.updated_at,
         COALESCE(

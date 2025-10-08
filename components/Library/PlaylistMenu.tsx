@@ -30,24 +30,29 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { MoreVertical, Edit, Trash2 } from 'lucide-react'
+import { MoreVertical, Edit, Trash2, ImageIcon } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
 
 interface Playlist {
     id: string
     name: string
     description: string | null
+    thumbnail_url: string | null
     track_count: number
+    created_at: string
+    updated_at?: string
+    tracks?: any[]
 }
 
 interface PlaylistMenuProps {
     playlist: Playlist
     onUpdate: (id: string, name: string, description: string) => Promise<void>
     onDelete: (id: string) => Promise<void>
+    onChangeThumbnail?: (playlist: Playlist) => void
     variant?: 'card' | 'details' // Nova prop para controlar o estilo
 }
 
-export default function PlaylistMenu({ playlist, onUpdate, onDelete, variant = 'card' }: PlaylistMenuProps) {
+export default function PlaylistMenu({ playlist, onUpdate, onDelete, onChangeThumbnail, variant = 'card' }: PlaylistMenuProps) {
     const [editDialogOpen, setEditDialogOpen] = useState(false)
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
@@ -138,6 +143,15 @@ export default function PlaylistMenu({ playlist, onUpdate, onDelete, variant = '
                         <Edit className="h-4 w-4 mr-2" />
                         Edit Playlist
                     </DropdownMenuItem>
+                    {onChangeThumbnail && variant === 'details' && (
+                        <DropdownMenuItem onClick={(e) => {
+                            e.stopPropagation()
+                            onChangeThumbnail(playlist)
+                        }}>
+                            <ImageIcon className="h-4 w-4 mr-2" />
+                            Change Thumbnail
+                        </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                         onClick={(e) => {

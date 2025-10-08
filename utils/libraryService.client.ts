@@ -17,6 +17,7 @@ export interface Playlist {
     id: string
     name: string
     description: string | null
+    thumbnail_url: string | null
     created_at: string
     updated_at: string
     track_count: number
@@ -37,7 +38,7 @@ export async function createPlaylist(userId: string, name: string, description?:
                 description,
                 user_id: userId
             })
-            .select('id, name, description, created_at, updated_at')
+            .select('id, name, description, thumbnail_url, created_at, updated_at')
             .single()
 
         if (error) {
@@ -47,6 +48,7 @@ export async function createPlaylist(userId: string, name: string, description?:
 
         return {
             ...data,
+            thumbnail_url: data.thumbnail_url || null,
             track_count: 0,
             tracks: []
         }
@@ -201,5 +203,53 @@ export async function addTrackToPlaylist(
     } catch (error) {
         console.error('Error in addTrackToPlaylist:', error)
         return false
+    }
+}
+
+/**
+ * Upload de thumbnail para playlist
+ */
+export async function uploadPlaylistThumbnail(
+    playlistId: string,
+    file: File
+): Promise<{ success: boolean; thumbnailUrl?: string; error?: string }> {
+    const supabase = createClient()
+    
+    try {
+        // Upload do arquivo para o storage
+        const filePath = `playlists/${playlistId}/thumbnail`
+        
+        const { error: uploadError } = await supabase.storage
+            .from('playlist-thumbnails')
+            .upload(filePath, file, {
+                cacheControl: '300',
+                upsert: true,
+            })
+
+        if (uploadError) {
+            console.error('Error uploading thumbnail:', uploadError)
+            return { success: false, error: 'Failed to upload image' }
+        }
+
+        // Obter URL pública da imagem
+        const { data: { publicUrl } } = supabase.storage
+            .from('playlist-thumbnails')
+            .getPublicUrl(filePath)
+
+        // Atualizar a playlist com a nova URL
+        const { error: updateError } = await supabase
+            .from('playlists')
+            .update({ thumbnail_url: publicUrl })
+            .eq('id', playlistId)
+
+        if (updateError) {
+            console.error('Error updating playlist thumbnail:', updateError)
+            return { success: false, error: 'Failed to update playlist' }
+        }
+
+        return { success: true, thumbnailUrl: publicUrl }
+    } catch (error) {
+        console.error('Error in uploadPlaylistThumbnail:', error)
+        return { success: false, error: 'Unexpected error occurred' }
     }
 }

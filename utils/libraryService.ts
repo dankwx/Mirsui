@@ -17,6 +17,7 @@ export interface Playlist {
     id: string
     name: string
     description: string | null
+    thumbnail_url: string | null
     created_at: string
     updated_at: string
     track_count: number
@@ -159,7 +160,7 @@ export async function createPlaylist(userId: string, name: string, description?:
                 description,
                 user_id: userId
             })
-            .select('id, name, description, created_at, updated_at')
+            .select('id, name, description, thumbnail_url, created_at, updated_at')
             .single()
 
         if (error) {
@@ -169,6 +170,7 @@ export async function createPlaylist(userId: string, name: string, description?:
 
         return {
             ...data,
+            thumbnail_url: data.thumbnail_url || null,
             track_count: 0,
             tracks: []
         }

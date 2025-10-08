@@ -63,6 +63,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
     const [addMusicDialogOpen, setAddMusicDialogOpen] = useState(false)
     const [thumbnailUploadOpen, setThumbnailUploadOpen] = useState(false)
     const [playlistForThumbnail, setPlaylistForThumbnail] = useState<Playlist | null>(null)
+    const [createPlaylistOpen, setCreatePlaylistOpen] = useState(false)
     
     const router = useRouter()
     const { toast } = useToast()
@@ -373,7 +374,10 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                     
                     {/* Create new playlist card */}
                     {isOwnLibrary && (
-                        <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-dashed border-2 border-muted-foreground/30 hover:border-primary">
+                        <Card 
+                            className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-dashed border-2 border-muted-foreground/30 hover:border-primary"
+                            onClick={() => setCreatePlaylistOpen(true)}
+                        >
                             <CardContent className="p-0">
                                 <div className="aspect-[4/3] flex items-center justify-center rounded-t-lg bg-muted/30">
                                     <Plus className="h-12 w-12 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -541,6 +545,17 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                         setPlaylistForThumbnail(null)
                     }}
                     onSuccess={handleThumbnailSuccess}
+                />
+            )}
+
+            {/* Dialog para criar playlist */}
+            {isOwnLibrary && (
+                <CreatePlaylistDialog
+                    open={createPlaylistOpen}
+                    onOpenChange={setCreatePlaylistOpen}
+                    onCreatePlaylist={handleCreatePlaylist}
+                    isLoading={isLoading}
+                    hideButton={true}
                 />
             )}
         </>

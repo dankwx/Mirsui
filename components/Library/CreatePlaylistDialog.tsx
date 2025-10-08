@@ -20,19 +20,29 @@ import { useToast } from '@/components/ui/use-toast'
 interface CreatePlaylistDialogProps {
     onCreatePlaylist: (name: string, description: string, thumbnail?: File) => Promise<void>
     isLoading?: boolean
+    open?: boolean
+    onOpenChange?: (open: boolean) => void
+    hideButton?: boolean
 }
 
 export default function CreatePlaylistDialog({ 
     onCreatePlaylist, 
-    isLoading = false 
+    isLoading = false,
+    open: externalOpen,
+    onOpenChange: externalOnOpenChange,
+    hideButton = false
 }: CreatePlaylistDialogProps) {
-    const [open, setOpen] = useState(false)
+    const [internalOpen, setInternalOpen] = useState(false)
     const [name, setName] = useState('')
     const [description, setDescription] = useState('')
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
     
     const { toast } = useToast()
+
+    // Use external state if provided, otherwise use internal state
+    const open = externalOpen !== undefined ? externalOpen : internalOpen
+    const setOpen = externalOnOpenChange || setInternalOpen
 
     const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -109,12 +119,14 @@ export default function CreatePlaylistDialog({
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Playlist
-                </Button>
-            </DialogTrigger>
+            {!hideButton && (
+                <DialogTrigger asChild>
+                    <Button size="sm">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Playlist
+                    </Button>
+                </DialogTrigger>
+            )}
             <DialogContent className="sm:max-w-[425px]">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>

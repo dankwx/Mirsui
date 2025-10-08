@@ -167,7 +167,11 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                 // Atualizar também na lista de playlists
                 setPlaylists(prev => prev.map(p => 
                     p.id === selectedPlaylist.id 
-                        ? { ...p, track_count: updatedTracks.length }
+                        ? { 
+                            ...p, 
+                            track_count: updatedTracks.length,
+                            tracks: updatedTracks
+                          }
                         : p
                 ))
             }
@@ -195,10 +199,15 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
             
             setSelectedPlaylist(updatedPlaylist)
             
-            // Atualizar também na lista de playlists
+            // Atualizar também na lista de playlists para que os cards mostrem o count correto
             setPlaylists(prev => prev.map(p => 
                 p.id === selectedPlaylist.id 
-                    ? { ...p, track_count: updatedTracks.length }
+                    ? { 
+                        ...p, 
+                        track_count: updatedTracks.length,
+                        // Manter as tracks atualizadas também na lista para futuras navegações
+                        tracks: updatedTracks
+                      }
                     : p
             ))
             
@@ -277,9 +286,33 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {playlists.map((playlist) => (
                         <Card key={playlist.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
-                              onClick={() => {
-                                  setSelectedPlaylist(playlist)
-                                  setActiveTab('details')
+                              onClick={async () => {
+                                  // Se é a mesma playlist que já está selecionada e ela tem tracks,
+                                  // apenas navegar sem recarregar
+                                  if (selectedPlaylist?.id === playlist.id && selectedPlaylist.tracks) {
+                                      setActiveTab('details')
+                                      return
+                                  }
+                                  
+                                  // Para uma nova playlist ou playlist sem tracks carregadas,
+                                  // carregar as tracks mais recentes
+                                  setIsLoading(true)
+                                  try {
+                                      const tracks = await fetchPlaylistTracks(playlist.id)
+                                      const playlistWithTracks = {
+                                          ...playlist,
+                                          tracks: tracks
+                                      }
+                                      setSelectedPlaylist(playlistWithTracks)
+                                      setActiveTab('details')
+                                  } catch (error) {
+                                      console.error('Error loading playlist tracks:', error)
+                                      // Fallback: usar playlist sem tracks
+                                      setSelectedPlaylist({...playlist, tracks: []})
+                                      setActiveTab('details')
+                                  } finally {
+                                      setIsLoading(false)
+                                  }
                               }}>
                             <CardContent className="p-0">
                                 <div className="relative aspect-square bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 rounded-t-lg flex items-center justify-center overflow-hidden">

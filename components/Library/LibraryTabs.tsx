@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { 
     Music, 
-    Play, 
     Plus, 
     Search,
     MoreVertical,
@@ -286,7 +285,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                     </div>
                 </div>
 
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {playlists.map((playlist) => (
                         <Card key={playlist.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
                               onClick={async () => {
@@ -318,7 +317,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                                   }
                               }}>
                             <CardContent className="p-0">
-                                <div className="relative aspect-square bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 rounded-t-lg flex items-center justify-center overflow-hidden">
+                                <div className="relative aspect-[4/3] bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 rounded-t-lg flex items-center justify-center overflow-hidden">
                                     {playlist.thumbnail_url ? (
                                         <>
                                             <img 
@@ -331,23 +330,16 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                                     ) : (
                                         <>
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                                            <Music className="h-16 w-16 text-white opacity-90 z-10" />
+                                            <Music className="h-12 w-12 text-white opacity-90 z-10" />
                                         </>
                                     )}
-                                    
-                                    {/* Play button overlay */}
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-20">
-                                        <Button size="icon" className="h-12 w-12 rounded-full bg-white/90 text-black hover:bg-white">
-                                            <Play className="h-6 w-6" />
-                                        </Button>
-                                    </div>
                                 </div>
                                 
-                                <div className="p-6">
-                                    <div className="flex items-start justify-between mb-3">
+                                <div className="p-4">
+                                    <div className="flex items-start justify-between mb-2">
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="font-semibold text-lg truncate">{playlist.name}</h4>
-                                            <p className="text-sm text-muted-foreground line-clamp-2">
+                                            <h4 className="font-semibold text-base truncate">{playlist.name}</h4>
+                                            <p className="text-xs text-muted-foreground line-clamp-2">
                                                 {playlist.description || 'No description'}
                                             </p>
                                         </div>
@@ -361,7 +353,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                                         )}
                                     </div>
                                     
-                                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
                                         <span className="flex items-center gap-1">
                                             <Music className="h-3 w-3" />
                                             {playlist.track_count} tracks
@@ -370,9 +362,9 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                                         </div>
                                     </div>
                                     
-                                    <div className="mt-3 text-xs text-muted-foreground flex items-center gap-1">
+                                    <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
                                         <Calendar className="h-3 w-3" />
-                                        Created {new Date(playlist.created_at).toLocaleDateString()}
+                                        Created {new Date(playlist.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                                     </div>
                                 </div>
                             </CardContent>
@@ -383,12 +375,12 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                     {isOwnLibrary && (
                         <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-dashed border-2 border-muted-foreground/30 hover:border-primary">
                             <CardContent className="p-0">
-                                <div className="aspect-square flex items-center justify-center rounded-t-lg bg-muted/30">
-                                    <Plus className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <div className="aspect-[4/3] flex items-center justify-center rounded-t-lg bg-muted/30">
+                                    <Plus className="h-12 w-12 text-muted-foreground group-hover:text-primary transition-colors" />
                                 </div>
-                                <div className="p-6 text-center">
-                                    <h4 className="font-semibold text-lg mb-2">Create New Playlist</h4>
-                                    <p className="text-sm text-muted-foreground">
+                                <div className="p-4 text-center">
+                                    <h4 className="font-semibold text-base mb-1">Create New Playlist</h4>
+                                    <p className="text-xs text-muted-foreground">
                                         Start curating your next musical journey
                                     </p>
                                 </div>
@@ -415,12 +407,6 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                                         <Music className="h-16 w-16 text-white opacity-90" />
                                     )}
                                 </div>
-                                <Button 
-                                    size="icon" 
-                                    className="absolute bottom-4 right-4 h-12 w-12 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg"
-                                >
-                                    <Play className="h-6 w-6" />
-                                </Button>
                             </div>
                             
                             <div className="flex-1">
@@ -438,12 +424,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                                     <span>•</span>
                                 </div>
                                 
-                                <div className="flex items-center gap-2 mt-4">
-                                    <Button>
-                                        <Play className="h-4 w-4 mr-2" />
-                                        Play All
-                                    </Button>
-                                    {isOwnLibrary && (
+                                <div className="flex items-center gap-2 mt-4">{isOwnLibrary && (
                                         <>
                                             <Button 
                                                 variant="outline"
@@ -483,10 +464,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                                     className="grid grid-cols-12 gap-4 px-4 py-3 rounded-lg hover:bg-muted/50 transition-colors group"
                                 >
                                     <div className="col-span-1 flex items-center">
-                                        <span className="text-muted-foreground group-hover:hidden">{index + 1}</span>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 hidden group-hover:flex">
-                                            <Play className="h-4 w-4" />
-                                        </Button>
+                                        <span className="text-muted-foreground">{index + 1}</span>
                                     </div>
                                     
                                     <div className="col-span-6 flex items-center gap-3">

@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
 
 import { createClient } from '@/utils/supabase/server'
 
@@ -49,14 +48,8 @@ export async function login(formData: FormData) {
         return { error: error.message }
     }
 
-    // Obter o caminho atual
-    const headersList = headers()
-    const referer = headersList.get('referer') || '/'
-    const currentPath = new URL(referer).pathname
-
-    // Revalidar o caminho atual
-    revalidatePath(currentPath)
-    return { success: true }
+    revalidatePath('/', 'layout')
+    redirect('/')
 }
 
 export async function signup(formData: FormData) {
@@ -65,6 +58,17 @@ export async function signup(formData: FormData) {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
     const username = formData.get('username') as string
+
+    // Verificar se o username já existe
+    const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username)
+        .single()
+
+    if (existingUser) {
+        return { error: 'Nome de usuário já está em uso' }
+    }
 
     // Gerar um display name aleatório
     const displayName = generateRandomDisplayName()
@@ -91,12 +95,6 @@ export async function signup(formData: FormData) {
         return { error: error.message }
     }
 
-    // Obter o caminho atual
-    const headersList = headers()
-    const referer = headersList.get('referer') || '/'
-    const currentPath = new URL(referer).pathname
-
-    // Revalidar o caminho atual
-    revalidatePath(currentPath)
-    return { success: true }
+    revalidatePath('/', 'layout')
+    redirect('/')
 }

@@ -110,7 +110,7 @@ export default function TrackMenu({ track, onRemove }: TrackMenuProps) {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Remove Track</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to remove "{track.track_title}" by {track.artist_name} from this playlist?
+                            Are you sure you want to remove &quot;{track.track_title}&quot; by {track.artist_name} from this playlist?
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

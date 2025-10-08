@@ -221,7 +221,7 @@ export default function PlaylistMenu({ playlist, onUpdate, onDelete, onChangeThu
                     <AlertDialogHeader>
                         <AlertDialogTitle>Delete Playlist</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to delete "{playlist.name}"? This action cannot be undone.
+                            Are you sure you want to delete &quot;{playlist.name}&quot;? This action cannot be undone.
                             {playlist.track_count > 0 && (
                                 <span className="block mt-2 font-medium text-destructive">
                                     This will permanently delete {playlist.track_count} track{playlist.track_count !== 1 ? 's' : ''}.

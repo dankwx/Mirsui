@@ -125,7 +125,7 @@ export default function PlaylistThumbnailUpload({
                 <DialogHeader>
                     <DialogTitle>Alterar Thumbnail da Playlist</DialogTitle>
                     <DialogDescription>
-                        Faça upload de uma imagem para a playlist "{playlistName}"
+                        Faça upload de uma imagem para a playlist &quot;{playlistName}&quot;
                     </DialogDescription>
                 </DialogHeader>
 

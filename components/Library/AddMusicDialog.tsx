@@ -177,7 +177,7 @@ export default function AddMusicDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[600px] max-h-[80vh] flex flex-col">
                 <DialogHeader>
-                    <DialogTitle>Add Songs to "{playlistName}"</DialogTitle>
+                    <DialogTitle>Add Songs to &quot;{playlistName}&quot;</DialogTitle>
                     <DialogDescription>
                         Search for songs on Spotify and add them to your playlist.
                     </DialogDescription>
@@ -270,7 +270,7 @@ export default function AddMusicDialog({
                     ) : query.trim().length >= 2 && !isLoading ? (
                         <div className="text-center py-8 text-muted-foreground">
                             <Music className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                            <p>No songs found for "{query}"</p>
+                            <p>No songs found for &quot;{query}&quot;</p>
                         </div>
                     ) : query.trim().length < 2 ? (
                         <div className="text-center py-8 text-muted-foreground">

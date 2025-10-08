@@ -2,7 +2,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Music, Home, Library, Tv, Disc, Mic } from 'lucide-react'
+import { Music, Home, Library, Disc, Lamp } from 'lucide-react'
 
 // Tipo para o perfil do usuário
 interface UserProfile {
@@ -26,6 +26,9 @@ const navigationItems = [
         icon: Home,
     },
     { title: 'My Library', url: '/library', icon: Library },
+    {
+        title: 'Discover', url: '/discover', icon: Lamp
+    },
     {
         title: 'Claim Track',
         url: '/claimtrack',

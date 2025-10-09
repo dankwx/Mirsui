@@ -14,7 +14,6 @@ import {
     Award,
     Target
 } from 'lucide-react'
-import GetLatestClaimsWithLoading from '@/components/GetLatestClaims/GetLatestClaimsWithLoading'
 import DiscoveryStatsWithLoading from '@/components/DiscoveryStats/DiscoveryStatsWithLoading'
 import PostInteractions from '@/components/PostInteractions/PostInteractions'
 import { FeedSkeleton } from '@/components/ui/feed-skeleton'
@@ -220,14 +219,6 @@ export default function FeedContent({ initialPosts }: FeedContentProps) {
                                     </Card>
                                 )}
                             </div>
-                        </div>
-                    </div>
-
-                    {/* Right Sidebar */}
-                    <div className="lg:col-span-1">
-                        <div className="space-y-6">
-                            {/* Latest Claims */}
-                            <GetLatestClaimsWithLoading />
                         </div>
                     </div>
                 </div>

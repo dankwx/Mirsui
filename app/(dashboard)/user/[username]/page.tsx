@@ -1,6 +1,6 @@
 // app/user/[username]/page.tsx
 import { notFound } from 'next/navigation'
-import ProfileDetails from '@/components/Profile/ProfileDetails'
+import ProfilePageComponent from '@/components/Profile/ProfilePage'
 import SongsList from '@/components/Profile/SongsList'
 import { fetchUserData, fetchAuthData } from '@/utils/profileService'
 import { fetchSongs } from '@/utils/fetchSongs'
@@ -48,7 +48,7 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
 
     return (
         <div className="px-6 py-6 font-sans">
-            <ProfileDetails
+            <ProfilePageComponent
                 userData={profileData}
                 isLoggedIn={isLoggedIn}
                 isOwnProfile={isOwnProfile}

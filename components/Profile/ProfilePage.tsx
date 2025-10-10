@@ -1,11 +1,9 @@
-// ===================================
-// components/Profile/GetUsername.tsx
-// ===================================
-
+// components/Profile/ProfilePage.tsx
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from "@/components/ui/button"
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -15,13 +13,15 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import { PencilIcon } from 'lucide-react'
+import { Search, Plus, PencilIcon } from "lucide-react"
+import ModalChangeAvatar from '../ModalChangeAvatar/ModalChangeAvatar'
 import UserBadges from './UserBadges'
 import FollowersFollowingSection from './UserFollowers'
 import FollowButton from './FollowButton'
+import { updateDisplayName, updateDescription } from './actions'
 import type { User, Achievement, Rating } from '@/types/profile'
 
-interface UserProfileProps {
+interface ProfilePageProps {
     userData: User & {
         totalFollowers: User[]
         totalFollowing: User[]
@@ -30,21 +30,14 @@ interface UserProfileProps {
     }
     isLoggedIn: boolean
     isOwnProfile: boolean
-    updateDisplayNameAction?: (
-        formData: FormData
-    ) => Promise<{ success: boolean; newDisplayName?: string }>
-    updateDescriptionAction?: (
-        formData: FormData
-    ) => Promise<{ success: boolean; newDescription?: string | null }>
 }
 
-export default function UserProfile({
+export default function ProfilePage({
     userData,
     isLoggedIn,
     isOwnProfile,
-    updateDisplayNameAction,
-    updateDescriptionAction,
-}: UserProfileProps) {
+}: ProfilePageProps) {
+    const [showAvatarModal, setShowAvatarModal] = useState(false)
     const [openDisplayName, setOpenDisplayName] = useState(false)
     const [openDescription, setOpenDescription] = useState(false)
     const [currentDisplayName, setCurrentDisplayName] = useState(
@@ -55,12 +48,19 @@ export default function UserProfile({
     )
 
     const canEdit = isOwnProfile && isLoggedIn
+    const canEditAvatar = isOwnProfile && isLoggedIn
+
+    const handleAvatarClick = () => {
+        if (canEditAvatar) {
+            setShowAvatarModal(true)
+        }
+    }
 
     const handleDisplayNameSubmit = async (formData: FormData) => {
-        if (!updateDisplayNameAction) return
+        if (!canEdit) return
 
         try {
-            const result = await updateDisplayNameAction(formData)
+            const result = await updateDisplayName(formData)
             if (result.success && result.newDisplayName) {
                 setCurrentDisplayName(result.newDisplayName)
                 setOpenDisplayName(false)
@@ -71,10 +71,10 @@ export default function UserProfile({
     }
 
     const handleDescriptionSubmit = async (formData: FormData) => {
-        if (!updateDescriptionAction) return
+        if (!canEdit) return
 
         try {
-            const result = await updateDescriptionAction(formData)
+            const result = await updateDescription(formData)
             if (result.success) {
                 setCurrentDescription(result.newDescription || null)
                 setOpenDescription(false)
@@ -87,10 +87,7 @@ export default function UserProfile({
     const DisplayNameSection = () => {
         if (canEdit) {
             return (
-                <Dialog
-                    open={openDisplayName}
-                    onOpenChange={setOpenDisplayName}
-                >
+                <Dialog open={openDisplayName} onOpenChange={setOpenDisplayName}>
                     <DialogTrigger asChild>
                         <Button
                             variant="link"
@@ -131,10 +128,7 @@ export default function UserProfile({
 
         if (canEdit) {
             return (
-                <Dialog
-                    open={openDescription}
-                    onOpenChange={setOpenDescription}
-                >
+                <Dialog open={openDescription} onOpenChange={setOpenDescription}>
                     <DialogTrigger asChild>
                         <div className="flex cursor-pointer items-center text-foreground hover:text-muted-foreground transition-colors">
                             <p
@@ -175,41 +169,76 @@ export default function UserProfile({
     }
 
     return (
-        <div className="space-y-4">
-            <div>
-                <div className="flex items-center gap-3 mb-2">
-                    <DisplayNameSection />
-                    <span className="text-xl text-muted-foreground">
-                        @{userData.username}
-                    </span>
+        <div className="space-y-8">
+            {/* Profile Section */}
+            <div className="flex items-start gap-8">
+                <Avatar
+                    className={`h-32 w-32 border-4 border-border shadow-lg ${canEditAvatar ? 'cursor-pointer hover:opacity-80' : ''}`}
+                    onClick={canEditAvatar ? handleAvatarClick : undefined}
+                >
+                    <AvatarImage src={userData.avatar_url || undefined} className="object-cover" />
+                    <AvatarFallback className="text-2xl">
+                        {userData.first_name?.[0] ||
+                            userData.username?.[0] ||
+                            'U'}
+                    </AvatarFallback>
+                </Avatar>
+
+                <div className="flex-1 space-y-4">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <DisplayNameSection />
+                            <span className="text-xl text-muted-foreground">
+                                @{userData.username}
+                            </span>
+                        </div>
+
+                        <div className="mb-3">
+                            <FollowersFollowingSection
+                                followers={userData.totalFollowers}
+                                following={userData.totalFollowing}
+                                rating={userData.rating}
+                                isOwnProfile={isOwnProfile}
+                                isLoggedIn={isLoggedIn}
+                                currentUserId={userData.id}
+                            />
+                        </div>
+
+                        <div className="mb-4">
+                            <DescriptionSection />
+                        </div>
+
+                        <UserBadges userAchievments={userData.achievements} />
+                    </div>
+
+                    {!isOwnProfile && isLoggedIn && (
+                        <div className="pt-2">
+                            <FollowButton
+                                followingId={userData.id}
+                                initialIsFollowing={userData.isFollowing || false}
+                                type="text"
+                            />
+                        </div>
+                    )}
                 </div>
 
-                <div className="mb-3">
-                    <FollowersFollowingSection
-                        followers={userData.totalFollowers}
-                        following={userData.totalFollowing}
-                        rating={userData.rating}
-                        isOwnProfile={isOwnProfile}
-                        isLoggedIn={isLoggedIn}
-                        currentUserId={userData.id}
-                    />
+                <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="icon">
+                        <Search className="h-5 w-5" />
+                    </Button>
+                    <Button size="icon" className="bg-accent hover:bg-accent/90">
+                        <Plus className="h-5 w-5" />
+                    </Button>
                 </div>
-
-                <div className="mb-4">
-                    <DescriptionSection />
-                </div>
-
-                <UserBadges userAchievments={userData.achievements} />
             </div>
 
-            {!isOwnProfile && isLoggedIn && (
-                <div className="pt-2">
-                    <FollowButton
-                        followingId={userData.id}
-                        initialIsFollowing={userData.isFollowing || false}
-                        type="text"
-                    />
-                </div>
+            {showAvatarModal && (
+                <ModalChangeAvatar
+                    username={userData.username}
+                    id={userData.id}
+                    avatar_url={userData.avatar_url}
+                    onAvatarClick={setShowAvatarModal}
+                />
             )}
         </div>
     )

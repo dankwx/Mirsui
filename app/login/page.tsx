@@ -141,7 +141,7 @@ export default function LoginPage() {
                                     <p className="text-sm text-center text-gray-600">
                                         Não tem uma conta?{' '}
                                         <span className="text-purple-600 cursor-pointer">
-                                            Clique em "Registrar" acima
+                                            Clique em &quot;Registrar&quot; acima
                                         </span>
                                     </p>
                                 </CardFooter>
@@ -209,7 +209,7 @@ export default function LoginPage() {
                                     <p className="text-sm text-center text-gray-600">
                                         Já tem uma conta?{' '}
                                         <span className="text-purple-600 cursor-pointer">
-                                            Clique em "Entrar" acima
+                                            Clique em &quot;Entrar&quot; acima
                                         </span>
                                     </p>
                                 </CardFooter>

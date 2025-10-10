@@ -1,6 +1,4 @@
-'use client'
-
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -14,9 +12,8 @@ import {
     Award,
     Target
 } from 'lucide-react'
-import DiscoveryStatsWithLoading from '@/components/DiscoveryStats/DiscoveryStatsWithLoading'
 import PostInteractions from '@/components/PostInteractions/PostInteractions'
-import { FeedSkeleton } from '@/components/ui/feed-skeleton'
+import FeedSidebar from './FeedSidebar'
 import { FeedPostWithInteractions } from '@/utils/socialInteractionsService'
 import { getUserBadge, isUserVerified } from '@/utils/feedHelpers'
 import Link from 'next/link'
@@ -25,24 +22,8 @@ interface FeedContentProps {
     initialPosts: (FeedPostWithInteractions & { isLiked: boolean })[]
 }
 
+// Server Component otimizado para feed
 export default function FeedContent({ initialPosts }: FeedContentProps) {
-    const [posts, setPosts] = useState<(FeedPostWithInteractions & { isLiked: boolean })[]>([])
-    const [isLoading, setIsLoading] = useState(true)
-
-    useEffect(() => {
-        // Simular um pequeno delay para mostrar o skeleton
-        const timer = setTimeout(() => {
-            setPosts(initialPosts)
-            setIsLoading(false)
-        }, 500) // Aumentei um pouco para que seja visível, mas não muito longo
-
-        return () => clearTimeout(timer)
-    }, [initialPosts])
-
-    if (isLoading) {
-        return <FeedSkeleton />
-    }
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
             <div className="container mx-auto px-4 py-8">
@@ -50,8 +31,7 @@ export default function FeedContent({ initialPosts }: FeedContentProps) {
                     {/* Left Sidebar */}
                     <div className="lg:col-span-1">
                         <div className="space-y-6">
-                            {/* Discovery Stats */}
-                            <DiscoveryStatsWithLoading />
+                            <FeedSidebar />
                         </div>
                     </div>
 
@@ -70,8 +50,8 @@ export default function FeedContent({ initialPosts }: FeedContentProps) {
 
                             {/* Posts */}
                             <div className="space-y-6">
-                                {posts.length > 0 ? (
-                                    posts.map((post) => (
+                                {initialPosts.length > 0 ? (
+                                    initialPosts.map((post) => (
                                         <Card key={post.id} className="hover:shadow-lg transition-shadow duration-300 border-0 shadow-md">
                                             <CardContent className="p-6">
                                                 {/* Header do Post */}

@@ -34,105 +34,109 @@ export interface FeedPostWithInteractions {
   comments_count: number
 }
 
-// Buscar posts do feed com contadores de interações (SERVER ONLY)
+// Buscar posts do feed com contadores de interações (SERVER ONLY) - Versão Otimizada
 export async function getFeedPostsWithInteractions(
   limit: number = 20,
   offset: number = 0
 ): Promise<FeedPostWithInteractions[]> {
   const supabase = createClient()
   
-  // Query mais eficiente usando agregação SQL
-  const { data, error } = await supabase
-    .from('tracks')
-    .select(`
-      id,
-      track_url,
-      track_title,
-      artist_name,
-      album_name,
-      popularity,
-      track_thumbnail,
-      user_id,
-      position,
-      claimedat,
-      track_uri,
-      discover_rating,
-      claim_message,
-      youtube_url,
-      profiles:user_id!inner (
-        username,
-        display_name,
-        avatar_url
-      )
-    `)
-    .not('claimedat', 'is', null)
-    .order('claimedat', { ascending: false })
-    .range(offset, offset + limit - 1)
-  
-  if (error) {
-    console.error('Erro ao buscar posts do feed:', error)
-    return []
-  }
-
-  if (!data || data.length === 0) {
-    return []
-  }
-
-  // Buscar contadores de likes e comentários em uma única query cada
-  const trackIds = data.map((track: any) => track.id)
-  
-  // Buscar todos os likes de uma vez
-  const { data: likesCount } = await supabase
-    .from('track_likes')
-    .select('track_id')
-    .in('track_id', trackIds)
-
-  // Buscar todos os comentários de uma vez
-  const { data: commentsCount } = await supabase
-    .from('track_comments')
-    .select('track_id')
-    .in('track_id', trackIds)
-
-  // Contar likes por track
-  const likesCountByTrack = (likesCount || []).reduce((acc: Record<number, number>, like: any) => {
-    acc[like.track_id] = (acc[like.track_id] || 0) + 1
-    return acc
-  }, {})
-
-  // Contar comentários por track
-  const commentsCountByTrack = (commentsCount || []).reduce((acc: Record<number, number>, comment: any) => {
-    acc[comment.track_id] = (acc[comment.track_id] || 0) + 1
-    return acc
-  }, {})
-
-  // Processar dados finais
-  const tracksWithInteractions = data.map((track: any) => {
-    const profile = track.profiles
-
-    return {
-      id: track.id,
-      track_url: track.track_url,
-      track_title: track.track_title,
-      artist_name: track.artist_name,
-      album_name: track.album_name,
-      popularity: track.popularity,
-      track_thumbnail: track.track_thumbnail,
-      user_id: track.user_id,
-      position: track.position,
-      claimedat: track.claimedat,
-      track_uri: track.track_uri,
-      discover_rating: track.discover_rating,
-      claim_message: track.claim_message,
-      youtube_url: track.youtube_url,
-      username: profile?.username || '',
-      display_name: profile?.display_name || null,
-      avatar_url: profile?.avatar_url || null,
-      likes_count: likesCountByTrack[track.id] || 0,
-      comments_count: commentsCountByTrack[track.id] || 0
+  try {
+    // Query mais eficiente usando agregação SQL
+    const { data, error } = await supabase
+      .from('tracks')
+      .select(`
+        id,
+        track_url,
+        track_title,
+        artist_name,
+        album_name,
+        popularity,
+        track_thumbnail,
+        user_id,
+        position,
+        claimedat,
+        track_uri,
+        discover_rating,
+        claim_message,
+        youtube_url,
+        profiles:user_id!inner (
+          username,
+          display_name,
+          avatar_url
+        )
+      `)
+      .not('claimedat', 'is', null)
+      .order('claimedat', { ascending: false })
+      .range(offset, offset + limit - 1)
+    
+    if (error) {
+      console.error('Erro ao buscar posts do feed:', error)
+      return []
     }
-  })
 
-  return tracksWithInteractions
+    if (!data || data.length === 0) {
+      return []
+    }
+
+    // Buscar contadores de likes e comentários em paralelo para melhor performance
+    const trackIds = data.map((track: any) => track.id)
+    
+    const [likesResult, commentsResult] = await Promise.all([
+      supabase
+        .from('track_likes')
+        .select('track_id')
+        .in('track_id', trackIds),
+      supabase
+        .from('track_comments')
+        .select('track_id')
+        .in('track_id', trackIds)
+    ])
+
+    // Contar likes por track
+    const likesCountByTrack = (likesResult.data || []).reduce((acc: Record<number, number>, like: any) => {
+      acc[like.track_id] = (acc[like.track_id] || 0) + 1
+      return acc
+    }, {})
+
+    // Contar comentários por track
+    const commentsCountByTrack = (commentsResult.data || []).reduce((acc: Record<number, number>, comment: any) => {
+      acc[comment.track_id] = (acc[comment.track_id] || 0) + 1
+      return acc
+    }, {})
+
+    // Processar dados finais
+    const tracksWithInteractions = data.map((track: any) => {
+      const profile = track.profiles
+
+      return {
+        id: track.id,
+        track_url: track.track_url,
+        track_title: track.track_title,
+        artist_name: track.artist_name,
+        album_name: track.album_name,
+        popularity: track.popularity,
+        track_thumbnail: track.track_thumbnail,
+        user_id: track.user_id,
+        position: track.position,
+        claimedat: track.claimedat,
+        track_uri: track.track_uri,
+        discover_rating: track.discover_rating,
+        claim_message: track.claim_message,
+        youtube_url: track.youtube_url,
+        username: profile?.username || '',
+        display_name: profile?.display_name || null,
+        avatar_url: profile?.avatar_url || null,
+        likes_count: likesCountByTrack[track.id] || 0,
+        comments_count: commentsCountByTrack[track.id] || 0
+      }
+    })
+
+    return tracksWithInteractions
+  } catch (error) {
+    console.error('Erro crítico ao buscar feed:', error)
+    return []
+  }
 }
 
 // Verificar se usuário curtiu um post (SERVER ONLY)
@@ -155,6 +159,32 @@ export async function checkUserLikedTrack(
   }
   
   return !!data
+}
+
+// Verificar quais posts o usuário curtiu (otimizado para múltiplos posts)
+export async function checkUserLikedTracks(
+  trackIds: number[],
+  userId: string
+): Promise<Set<number>> {
+  const supabase = createClient()
+  
+  if (trackIds.length === 0) {
+    return new Set()
+  }
+  
+  const { data, error } = await supabase
+    .from('track_likes')
+    .select('track_id')
+    .eq('user_id', userId)
+    .in('track_id', trackIds)
+  
+  if (error) {
+    console.error('Erro ao buscar likes do usuário:', error)
+    return new Set()
+  }
+  
+  // Retornar Set com os IDs dos tracks que o usuário curtiu
+  return new Set((data || []).map((like: any) => like.track_id))
 }
 
 // Buscar comentários de um post (SERVER ONLY)

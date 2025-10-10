@@ -16,6 +16,7 @@ import {
     Youtube,
     AlertCircle,
 } from 'lucide-react'
+import { trackExternalLink, event } from '@/lib/gtag'
 
 interface TrackPreviewProps {
     trackId: string
@@ -236,6 +237,14 @@ export default function TrackPreview({
                             href={previewData.spotifyUrl}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={() => {
+                                trackExternalLink(previewData.spotifyUrl, 'Spotify')
+                                event({
+                                    action: 'external_link_click',
+                                    category: 'music',
+                                    label: `Spotify - ${previewData.artistName} - ${previewData.trackName}`
+                                })
+                            }}
                         >
                             <Music className="mr-2 h-4 w-4" />
                             Abrir no Spotify
@@ -248,6 +257,14 @@ export default function TrackPreview({
                                 href={previewData.youtubeUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                onClick={() => {
+                                    trackExternalLink(previewData.youtubeUrl, 'YouTube')
+                                    event({
+                                        action: 'external_link_click',
+                                        category: 'music',
+                                        label: `YouTube - ${previewData.artistName} - ${previewData.trackName}`
+                                    })
+                                }}
                             >
                                 <Youtube className="mr-2 h-4 w-4" />
                                 Ver no YouTube

@@ -7,6 +7,7 @@ import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Heart, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
+import { trackClaimTrack, event } from '@/lib/gtag'
 
 interface ClaimButtonProps {
     trackUri: string
@@ -46,6 +47,13 @@ export default function ClaimButton({
                 await supabase.auth.getUser()
 
             if (authError || !userData.user) {
+                // Rastrear tentativa de claim sem login
+                event({
+                    action: 'claim_attempt_unauthenticated',
+                    category: 'engagement',
+                    label: `${artistName} - ${trackTitle}`
+                })
+                
                 toast({
                     title: 'Erro de autenticação',
                     description:
@@ -124,6 +132,17 @@ export default function ClaimButton({
             if (insertError) {
                 throw insertError
             }
+
+            // Rastrear o claim no Google Analytics
+            trackClaimTrack(trackTitle, artistName)
+            
+            // Rastrear evento adicional com posição e popularidade
+            event({
+                action: 'claim_success',
+                category: 'engagement',
+                label: `${artistName} - ${trackTitle}`,
+                value: nextPosition
+            })
 
             setIsClaimed(true)
             setClaimPosition(nextPosition)

@@ -6,6 +6,30 @@
 <br/>
 Discover before the world does.
 
+## Setup
+
+### Google Analytics Setup
+
+1. Crie uma conta no [Google Analytics](https://analytics.google.com/)
+2. Crie uma nova propriedade para seu site
+3. Copie o ID de rastreamento (formato: G-XXXXXXXXXX)
+4. Adicione o ID no arquivo `.env.local`:
+
+```bash
+NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+```
+
+5. O Google Analytics já está configurado automaticamente no projeto!
+
+### Eventos personalizados disponíveis:
+
+- `trackMusicPlay(trackName, artistName)` - Rastreia reprodução de música
+- `trackClaimTrack(trackName, artistName)` - Rastreia claims de tracks
+- `trackSearch(searchTerm, resultsCount)` - Rastreia pesquisas
+- `trackExternalLink(url, platform)` - Rastreia cliques em links externos
+
+Veja exemplos de uso em `examples/analytics-usage.tsx`
+
 ## To-do
 
 -   [x] User Description section for profile

@@ -33,6 +33,7 @@
     "dotenv": "^16.5.0",
     "framer-motion": "^12.16.0",
     "googleapis": "^140.0.1",
+    "gtag": "^1.0.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.3",
     "lucide-react": "^0.396.0",

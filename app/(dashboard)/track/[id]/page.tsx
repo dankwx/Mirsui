@@ -9,6 +9,7 @@ import TrackClaimsMessages from '@/components/TrackClaimsMessages/TrackClaimsMes
 import TrackClaimers from '@/components/TrackClaimers.tsx/TrackClaimers'
 import TrackPreview from '@/components/TrackPreview/TrackPreview'
 import HipsterTimeline from '@/components/HipsterTimeline/HipsterTimeline'
+import type { Metadata } from 'next'
 
 // UI Components from shadcn/ui
 import Image from 'next/image'
@@ -34,6 +35,27 @@ import {
 
 import Header from '@/components/Header/Header'
 import Sidebar from '@/components/Sidebar/Sidebar'
+
+export async function generateMetadata({
+    params,
+}: {
+    params: { id: string }
+}): Promise<Metadata> {
+    const trackInfo = await fetchSpotifyTrackInfo(params.id)
+    
+    if (trackInfo) {
+        const artistNames = trackInfo.artists?.map((artist) => artist.name).join(', ') || 'Artista Desconhecido'
+        return {
+            title: `${trackInfo.name} - ${artistNames} | SoundSage`,
+            description: `Descubra quem ouviu "${trackInfo.name}" de ${artistNames} antes que ficasse popular. Veja estatísticas e reivindique sua descoberta no SoundSage.`,
+        }
+    }
+    
+    return {
+        title: 'Música - SoundSage',
+        description: 'Descubra informações sobre esta música no SoundSage.',
+    }
+}
 
 export default async function TrackDetailsPage({
     params,

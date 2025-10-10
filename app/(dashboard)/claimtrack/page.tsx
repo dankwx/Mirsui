@@ -1,4 +1,5 @@
 import type React from 'react'
+import type { Metadata } from 'next'
 
 import { Search, Music, Clock, Play, TrendingUp } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -9,6 +10,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import RecentActivity from '@/components/RecentActivity/RecentActivity'
 import SearchWithResults from '@/components/SearchWithResults/SearchWithResults'
 import TrendingPage from '@/components/TrendingTracks/TrendingTracks'
+
+export const metadata: Metadata = {
+    title: 'Reivindicar Músicas - SoundSage',
+    description: 'Descubra novas músicas e reivindique tracks antes que se tornem virais.',
+}
 
 export default function ClaimTracksPage() {
     return (

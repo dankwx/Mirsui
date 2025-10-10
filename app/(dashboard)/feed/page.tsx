@@ -3,6 +3,12 @@ import { getFeedPostsWithInteractions, checkUserLikedTracks } from '@/utils/soci
 import { createClient } from '@/utils/supabase/server'
 import FeedContent from '@/components/FeedContent/FeedContent'
 import { FeedSkeleton } from '@/components/ui/feed-skeleton'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'Feed - SoundSage',
+    description: 'Veja as últimas descobertas musicais da comunidade SoundSage.',
+}
 
 // Componente separado para buscar dados - permite melhor controle do Suspense
 async function FeedData() {

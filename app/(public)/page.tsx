@@ -19,6 +19,12 @@ import GetAuth from '@/components/GetAuth/GetAuth'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { getTrendingTracks, getFeaturedTrack } from '@/utils/homepageService'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'SoundSage - Descubra música antes que ela exploda',
+    description: 'Reivindique suas músicas favoritas e prove que você ouviu antes que ficassem populares. Descubra novos talentos e construa sua credibilidade musical.',
+}
 
 export default async function HomePage() {
     const supabase = createClient()

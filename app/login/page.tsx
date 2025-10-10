@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Music } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
@@ -19,6 +20,11 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
     const router = useRouter()
+
+    // Definir título da página
+    useEffect(() => {
+        document.title = 'Login - SoundSage'
+    }, [])
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()

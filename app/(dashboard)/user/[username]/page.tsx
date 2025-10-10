@@ -6,9 +6,32 @@ import { fetchUserData, fetchAuthData } from '@/utils/profileService'
 import { fetchSongs } from '@/utils/fetchSongs'
 import { createClient } from '@/utils/supabase/server'
 import type { User, Achievement, Rating } from '@/types/profile'
+import type { Metadata } from 'next'
 
 interface ProfilePageParams {
     params: { username: string }
+}
+
+export async function generateMetadata({
+    params,
+}: {
+    params: { username: string }
+}): Promise<Metadata> {
+    const { userData, error } = await fetchUserData(params.username)
+    
+    if (error || !userData) {
+        return {
+            title: 'Usuário não encontrado - SoundSage',
+            description: 'Este perfil não foi encontrado no SoundSage.',
+        }
+    }
+
+    const displayName = userData.display_name || userData.username || 'Usuário'
+    
+    return {
+        title: `${displayName} (@${userData.username}) | SoundSage`,
+        description: `Veja o perfil de ${displayName} no SoundSage. Descubra suas descobertas musicais e credibilidade hipster.`,
+    }
 }
 
 export default async function ProfilePage({ params }: ProfilePageParams) {

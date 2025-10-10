@@ -9,9 +9,32 @@ import {
     fetchUserPlaylistsWithTracks, 
     calculateLibraryStats 
 } from '@/utils/libraryService'
+import type { Metadata } from 'next'
 
 interface LibraryPageParams {
     params: { username: string }
+}
+
+export async function generateMetadata({
+    params,
+}: {
+    params: { username: string }
+}): Promise<Metadata> {
+    const { userData, error } = await fetchUserData(params.username)
+    
+    if (error || !userData) {
+        return {
+            title: 'Biblioteca não encontrada - SoundSage',
+            description: 'Esta biblioteca não foi encontrada no SoundSage.',
+        }
+    }
+
+    const displayName = userData.display_name || userData.username || 'Usuário'
+    
+    return {
+        title: `Biblioteca de ${displayName} | SoundSage`,
+        description: `Explore a biblioteca musical de ${displayName}. Veja suas descobertas, playlists e estatísticas musicais.`,
+    }
 }
 
 export default async function LibraryPage({ params }: LibraryPageParams) {

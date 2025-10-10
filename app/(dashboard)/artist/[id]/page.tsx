@@ -10,6 +10,7 @@ import {
     SpotifyTrack,
 } from '@/utils/spotifyService'
 import { formatDuration, formatReleaseDate, getAlbumTypeLabel } from '@/lib/formatters'
+import type { Metadata } from 'next'
 
 import ArtistHeroSection from '@/components/Artist/ArtistHeroSection'
 import ArtistStatsGrid from '@/components/Artist/ArtistStatsGrid'
@@ -20,6 +21,30 @@ import ArtistTopFans from '@/components/Artist/ArtistTopFans'
 import ArtistDetailsCard from '@/components/Artist/ArtistDetailsCard'
 import ArtistAllTracksSimple from '@/components/Artist/ArtistAllTracksSimple'
 import ArtistTrackStats from '@/components/Artist/ArtistTrackStats'
+
+export async function generateMetadata({
+    params,
+}: {
+    params: { id: string }
+}): Promise<Metadata> {
+    const artistInfo = await fetchSpotifyArtistInfo(params.id)
+    
+    if (artistInfo) {
+        const followerCount = artistInfo.followers?.total ? 
+            new Intl.NumberFormat('pt-BR', { notation: 'compact' }).format(artistInfo.followers.total) 
+            : ''
+        
+        return {
+            title: `${artistInfo.name} | SoundSage`,
+            description: `Descubra ${artistInfo.name} no SoundSage${followerCount ? ` - ${followerCount} seguidores` : ''}. Veja quem descobriu suas músicas primeiro e explore sua discografia completa.`,
+        }
+    }
+    
+    return {
+        title: 'Artista - SoundSage',
+        description: 'Descubra informações sobre este artista no SoundSage.',
+    }
+}
 
 export default async function ArtistDetailsPage({
     params,

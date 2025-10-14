@@ -1,0 +1,245 @@
+// app/api/predictions/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/utils/supabase/server'
+
+export async function POST(request: NextRequest) {
+    try {
+        const { trackId, trackData, predictedViralDate, pointsBet, predictionConfidence, targetPopularity } = await request.json()
+
+        // Validações básicas
+        if (!trackId || !trackData || !predictedViralDate || !pointsBet || !predictionConfidence || !targetPopularity) {
+            return NextResponse.json(
+                { message: 'Todos os campos são obrigatórios' },
+                { status: 400 }
+            )
+        }
+
+        // Validar data
+        const predictionDate = new Date(predictedViralDate)
+        const today = new Date()
+        const maxDate = new Date(today.getTime() + (365 * 24 * 60 * 60 * 1000)) // 1 ano
+
+        if (predictionDate <= today) {
+            return NextResponse.json(
+                { message: 'A data da previsão deve ser no futuro' },
+                { status: 400 }
+            )
+        }
+
+        if (predictionDate > maxDate) {
+            return NextResponse.json(
+                { message: 'A data não pode ser mais de 1 ano no futuro' },
+                { status: 400 }
+            )
+        }
+
+        // Validar pontos
+        if (pointsBet < 10 || pointsBet > 1000) {
+            return NextResponse.json(
+                { message: 'Pontos devem estar entre 10 e 1000' },
+                { status: 400 }
+            )
+        }
+
+        // Validar confiança
+        if (predictionConfidence < 1 || predictionConfidence > 100) {
+            return NextResponse.json(
+                { message: 'Confiança deve estar entre 1% e 100%' },
+                { status: 400 }
+            )
+        }
+
+        // Validar popularidade alvo
+        if (targetPopularity < 1 || targetPopularity > 100) {
+            return NextResponse.json(
+                { message: 'Popularidade alvo deve estar entre 1 e 100' },
+                { status: 400 }
+            )
+        }
+
+        const supabase = createClient()
+
+        // Verificar se o usuário está autenticado
+        const { data: authData, error: authError } = await supabase.auth.getUser()
+        
+        if (authError || !authData?.user) {
+            return NextResponse.json(
+                { message: 'Usuário não autenticado' },
+                { status: 401 }
+            )
+        }
+
+        const userId = authData.user.id
+
+        // Verificar se a música já existe na tabela tracks
+        let existingTrack = await supabase
+            .from('tracks')
+            .select('id')
+            .eq('track_uri', trackData.track_uri)
+            .single()
+
+        let trackDbId: number
+
+        if (existingTrack.data) {
+            // Música já existe
+            trackDbId = existingTrack.data.id
+        } else {
+            // Criar nova entrada na tabela tracks
+            const { data: newTrack, error: trackError } = await supabase
+                .from('tracks')
+                .insert({
+                    track_url: `https://open.spotify.com/track/${trackId}`,
+                    track_title: trackData.track_title,
+                    artist_name: trackData.artist_name,
+                    album_name: trackData.album_name,
+                    popularity: trackData.popularity,
+                    track_thumbnail: trackData.track_thumbnail,
+                    user_id: userId,
+                    position: 0, // Position 0 para tracks usadas apenas em previsões
+                    track_uri: trackData.track_uri
+                })
+                .select('id')
+                .single()
+
+            if (trackError) {
+                console.error('Erro ao criar track:', trackError)
+                return NextResponse.json(
+                    { message: 'Erro ao salvar música no banco de dados' },
+                    { status: 500 }
+                )
+            }
+
+            trackDbId = newTrack.id
+        }
+
+        // Verificar se já existe uma previsão para esta música pelo usuário
+        const { data: existingPrediction } = await supabase
+            .from('music_predictions')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('track_id', trackDbId)
+            .single()
+
+        if (existingPrediction) {
+            return NextResponse.json(
+                { message: 'Você já fez uma previsão para esta música' },
+                { status: 400 }
+            )
+        }
+
+        // Verificar se o usuário tem pontos suficientes
+        const { data: userPoints } = await supabase
+            .rpc('get_user_points', { user_uuid: userId })
+
+        if (!userPoints || userPoints < pointsBet) {
+            return NextResponse.json(
+                { message: `Pontos insuficientes. Você tem ${userPoints || 0} pontos, mas precisa de ${pointsBet}.` },
+                { status: 400 }
+            )
+        }
+
+        // Criar a previsão
+        const { data: prediction, error: predictionError } = await supabase
+            .from('music_predictions')
+            .insert({
+                user_id: userId,
+                track_id: trackDbId,
+                predicted_viral_date: predictedViralDate,
+                points_bet: pointsBet,
+                prediction_confidence: predictionConfidence,
+                target_popularity: targetPopularity,
+                status: 'pending'
+            })
+            .select('*')
+            .single()
+
+        if (predictionError) {
+            console.error('Erro ao criar previsão:', predictionError)
+            return NextResponse.json(
+                { message: 'Erro ao criar previsão' },
+                { status: 500 }
+            )
+        }
+
+        // Debitar pontos do usuário
+        const { data: debitResult } = await supabase
+            .rpc('debit_user_points', {
+                user_uuid: userId,
+                points_amount: pointsBet,
+                transaction_description: `Previsão para "${trackData.track_title}" - ${trackData.artist_name}`,
+                prediction_id: prediction.id
+            })
+
+        if (!debitResult) {
+            // Se falhou o débito, deletar a previsão criada
+            await supabase
+                .from('music_predictions')
+                .delete()
+                .eq('id', prediction.id)
+
+            return NextResponse.json(
+                { message: 'Erro ao debitar pontos. Tente novamente.' },
+                { status: 500 }
+            )
+        }
+
+        return NextResponse.json({
+            message: 'Previsão criada com sucesso!',
+            prediction
+        })
+
+    } catch (error) {
+        console.error('Erro na API de previsões:', error)
+        return NextResponse.json(
+            { message: 'Erro interno do servidor' },
+            { status: 500 }
+        )
+    }
+}
+
+export async function GET(request: NextRequest) {
+    try {
+        const { searchParams } = new URL(request.url)
+        const userId = searchParams.get('userId')
+
+        if (!userId) {
+            return NextResponse.json(
+                { message: 'ID do usuário é obrigatório' },
+                { status: 400 }
+            )
+        }
+
+        const supabase = createClient()
+
+        // Verificar se o usuário está autenticado
+        const { data: authData, error: authError } = await supabase.auth.getUser()
+        
+        if (authError || !authData?.user) {
+            return NextResponse.json(
+                { message: 'Usuário não autenticado' },
+                { status: 401 }
+            )
+        }
+
+        // Buscar previsões do usuário
+        const { data: predictions, error } = await supabase
+            .rpc('get_user_predictions', { user_uuid: userId })
+
+        if (error) {
+            console.error('Erro ao buscar previsões:', error)
+            return NextResponse.json(
+                { message: 'Erro ao buscar previsões' },
+                { status: 500 }
+            )
+        }
+
+        return NextResponse.json({ predictions: predictions || [] })
+
+    } catch (error) {
+        console.error('Erro na API de previsões GET:', error)
+        return NextResponse.json(
+            { message: 'Erro interno do servidor' },
+            { status: 500 }
+        )
+    }
+}

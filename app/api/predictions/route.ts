@@ -71,45 +71,44 @@ export async function POST(request: NextRequest) {
 
         const userId = authData.user.id
 
-        // Verificar se a música já existe na tabela tracks
-        let existingTrack = await supabase
-            .from('tracks')
+        // Verificar se a música já existe na tabela prediction_tracks
+        let existingPredictionTrack = await supabase
+            .from('prediction_tracks')
             .select('id')
-            .eq('track_uri', trackData.track_uri)
+            .eq('spotify_id', trackId)
             .single()
 
-        let trackDbId: number
+        let predictionTrackId: number
 
-        if (existingTrack.data) {
-            // Música já existe
-            trackDbId = existingTrack.data.id
+        if (existingPredictionTrack.data) {
+            // Música já existe na tabela prediction_tracks
+            predictionTrackId = existingPredictionTrack.data.id
         } else {
-            // Criar nova entrada na tabela tracks
-            const { data: newTrack, error: trackError } = await supabase
-                .from('tracks')
+            // Criar nova entrada na tabela prediction_tracks
+            const { data: newPredictionTrack, error: predictionTrackError } = await supabase
+                .from('prediction_tracks')
                 .insert({
+                    spotify_id: trackId,
                     track_url: `https://open.spotify.com/track/${trackId}`,
                     track_title: trackData.track_title,
                     artist_name: trackData.artist_name,
                     album_name: trackData.album_name,
                     popularity: trackData.popularity,
                     track_thumbnail: trackData.track_thumbnail,
-                    user_id: userId,
-                    position: 0, // Position 0 para tracks usadas apenas em previsões
                     track_uri: trackData.track_uri
                 })
                 .select('id')
                 .single()
 
-            if (trackError) {
-                console.error('Erro ao criar track:', trackError)
+            if (predictionTrackError) {
+                console.error('Erro ao criar prediction track:', predictionTrackError)
                 return NextResponse.json(
                     { message: 'Erro ao salvar música no banco de dados' },
                     { status: 500 }
                 )
             }
 
-            trackDbId = newTrack.id
+            predictionTrackId = newPredictionTrack.id
         }
 
         // Verificar se já existe uma previsão para esta música pelo usuário
@@ -117,7 +116,7 @@ export async function POST(request: NextRequest) {
             .from('music_predictions')
             .select('id')
             .eq('user_id', userId)
-            .eq('track_id', trackDbId)
+            .eq('prediction_track_id', predictionTrackId)
             .single()
 
         if (existingPrediction) {
@@ -143,7 +142,7 @@ export async function POST(request: NextRequest) {
             .from('music_predictions')
             .insert({
                 user_id: userId,
-                track_id: trackDbId,
+                prediction_track_id: predictionTrackId,
                 predicted_viral_date: predictedViralDate,
                 points_bet: pointsBet,
                 prediction_confidence: predictionConfidence,

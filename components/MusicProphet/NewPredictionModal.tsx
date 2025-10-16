@@ -1,7 +1,7 @@
 // components/MusicProphet/NewPredictionModal.tsx
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -71,10 +71,12 @@ export default function NewPredictionModal({
         }
     }
 
-    // Buscar pontos quando abrir o modal
-    if (isOpen && userPoints === null && !loadingPoints) {
-        fetchUserPoints()
-    }
+    // Buscar pontos quando abrir o modal (apenas uma vez)
+    React.useEffect(() => {
+        if (isOpen && userPoints === null && !loadingPoints) {
+            fetchUserPoints()
+        }
+    }, [isOpen])
 
     const resetForm = () => {
         setSelectedTrack(null)

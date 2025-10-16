@@ -1,7 +1,7 @@
 // components/MusicProphet/MusicProphetComponent.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,7 @@ import { Sparkles, TrendingUp, Target, Clock, Award, Coins } from 'lucide-react'
 import PredictionCard from './PredictionCard'
 import ProphetStats from './ProphetStats'
 import NewPredictionModal from './NewPredictionModal'
+import { toast } from 'sonner'
 
 interface UserData {
     id: string
@@ -60,7 +61,72 @@ export default function MusicProphetComponent({
     isOwnProfile
 }: MusicProphetComponentProps) {
     const [showNewPredictionModal, setShowNewPredictionModal] = useState(false)
-    const [filter, setFilter] = useState<'all' | 'pending' | 'won' | 'lost' | 'expired'>('all')
+    const [filter, setFilter] = useState<'all' | 'pending' | 'correct' | 'incorrect' | 'expired'>('all')
+    const [isProcessingExpired, setIsProcessingExpired] = useState(false)
+
+    // Processar previsões expiradas quando o componente carrega
+    useEffect(() => {
+        if (isOwnProfile) {
+            processExpiredPredictions()
+        }
+    }, [isOwnProfile])
+
+    const processExpiredPredictions = async () => {
+        try {
+            console.log('🔍 Iniciando processamento de previsões expiradas...')
+            setIsProcessingExpired(true)
+            
+            const response = await fetch('/api/predictions/process-expired', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+
+            console.log('📡 Response status:', response.status)
+
+            if (response.ok) {
+                const data = await response.json()
+                console.log('📊 Dados recebidos:', data)
+                
+                if (data.count > 0) {
+                    console.log(`✅ ${data.count} previsão(ões) processada(s)!`)
+                    toast.success(`${data.count} previsão(ões) processada(s)!`)
+                    
+                    // Mostrar notificações para cada previsão processada
+                    data.processed.forEach((prediction: any) => {
+                        console.log('🎯 Processando previsão:', prediction)
+                        if (prediction.new_status === 'correct') {
+                            toast.success(
+                                `🎉 Acertou! "${prediction.track_title}" - +${prediction.points_gained} pontos!`,
+                                { duration: 5000 }
+                            )
+                        } else if (prediction.points_returned > 0) {
+                            toast.info(
+                                `📈 Chegou perto! "${prediction.track_title}" - +${prediction.points_returned} pontos`,
+                                { duration: 4000 }
+                            )
+                        }
+                    })
+                    
+                    // Recarregar a página após 2 segundos para mostrar as atualizações
+                    setTimeout(() => {
+                        window.location.reload()
+                    }, 2000)
+                } else {
+                    console.log('ℹ️ Nenhuma previsão expirada para processar')
+                }
+            } else {
+                console.error('❌ Erro na resposta:', response.status, response.statusText)
+                const errorData = await response.json()
+                console.error('❌ Dados do erro:', errorData)
+            }
+        } catch (error) {
+            console.error('💥 Erro ao processar previsões expiradas:', error)
+        } finally {
+            setIsProcessingExpired(false)
+        }
+    }
 
     const handlePredictionCreated = () => {
         // Recarregar a página para mostrar a nova previsão
@@ -74,8 +140,8 @@ export default function MusicProphetComponent({
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'won': return 'bg-green-100 text-green-800 border-green-200'
-            case 'lost': return 'bg-red-100 text-red-800 border-red-200'
+            case 'correct': return 'bg-green-100 text-green-800 border-green-200'
+            case 'incorrect': return 'bg-red-100 text-red-800 border-red-200'
             case 'pending': return 'bg-blue-100 text-blue-800 border-blue-200'
             case 'expired': return 'bg-gray-100 text-gray-800 border-gray-200'
             default: return 'bg-gray-100 text-gray-800 border-gray-200'
@@ -84,8 +150,8 @@ export default function MusicProphetComponent({
 
     const getStatusText = (status: string) => {
         switch (status) {
-            case 'won': return 'Acertou!'
-            case 'lost': return 'Errou'
+            case 'correct': return 'Acertou!'
+            case 'incorrect': return 'Errou'
             case 'pending': return 'Pendente'
             case 'expired': return 'Expirou'
             default: return status
@@ -141,18 +207,18 @@ export default function MusicProphetComponent({
                     Pendentes ({predictions.filter(p => p.status === 'pending').length})
                 </Button>
                 <Button
-                    variant={filter === 'won' ? 'default' : 'outline'}
+                    variant={filter === 'correct' ? 'default' : 'outline'}
                     size="sm"
-                    onClick={() => setFilter('won')}
+                    onClick={() => setFilter('correct')}
                 >
-                    Acertos ({predictions.filter(p => p.status === 'won').length})
+                    Acertos ({predictions.filter(p => p.status === 'correct').length})
                 </Button>
                 <Button
-                    variant={filter === 'lost' ? 'default' : 'outline'}
+                    variant={filter === 'incorrect' ? 'default' : 'outline'}
                     size="sm"
-                    onClick={() => setFilter('lost')}
+                    onClick={() => setFilter('incorrect')}
                 >
-                    Erros ({predictions.filter(p => p.status === 'lost').length})
+                    Erros ({predictions.filter(p => p.status === 'incorrect').length})
                 </Button>
                 <Button
                     variant={filter === 'expired' ? 'default' : 'outline'}

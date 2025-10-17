@@ -1,6 +1,6 @@
 'use client'
 import { createClient } from '@/utils/supabase/client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 export interface UserTrack {
     track_url: string
@@ -24,12 +24,7 @@ export default function ClaimTrack() {
 
     const supabase = createClient()
 
-    useEffect(() => {
-        fetchUserInfo()
-        getSpotifyToken()
-    }, [])
-
-    const fetchUserInfo = async () => {
+    const fetchUserInfo = useCallback(async () => {
         try {
             const { data, error } = await supabase.auth.getUser()
             const username = data.user?.user_metadata?.sub
@@ -46,9 +41,9 @@ export default function ClaimTrack() {
         } finally {
             setIsAuthChecked(true)
         }
-    }
+    }, [supabase])
 
-    const getSpotifyToken = async () => {
+    const getSpotifyToken = useCallback(async () => {
         const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID
         const clientSecret = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET
 
@@ -63,7 +58,12 @@ export default function ClaimTrack() {
 
         const data = await response.json()
         setAccessToken(data.access_token)
-    }
+    }, [])
+
+    useEffect(() => {
+        fetchUserInfo()
+        getSpotifyToken()
+    }, [fetchUserInfo, getSpotifyToken])
 
     const handleClaimTrack = async () => {
         if (!loggedUser) {

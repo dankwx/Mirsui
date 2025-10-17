@@ -1,7 +1,7 @@
 // components/MusicProphet/NewPredictionModal.tsx
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -47,10 +47,8 @@ export default function NewPredictionModal({
     const [userPoints, setUserPoints] = useState<number | null>(null)
     const [loadingPoints, setLoadingPoints] = useState(false)
 
-    if (!isOpen) return null
-
     // Buscar pontos do usuário quando o modal abrir
-    const fetchUserPoints = async () => {
+    const fetchUserPoints = useCallback(async () => {
         if (!userId || loadingPoints) return
         
         setLoadingPoints(true)
@@ -69,14 +67,16 @@ export default function NewPredictionModal({
         } finally {
             setLoadingPoints(false)
         }
-    }
+    }, [userId, loadingPoints, pointsBet])
 
     // Buscar pontos quando abrir o modal (apenas uma vez)
     React.useEffect(() => {
         if (isOpen && userPoints === null && !loadingPoints) {
             fetchUserPoints()
         }
-    }, [isOpen])
+    }, [isOpen, userPoints, loadingPoints, fetchUserPoints])
+
+    if (!isOpen) return null
 
     const resetForm = () => {
         setSelectedTrack(null)
@@ -109,12 +109,16 @@ export default function NewPredictionModal({
     }
 
     const handleSubmit = async () => {
+        console.log('🎯 handleSubmit chamado!', { selectedTrack, predictedDate, pointsBet, userPoints, userId })
+        
         if (!selectedTrack) {
+            console.log('❌ Erro: Nenhuma música selecionada')
             toast.error('Selecione uma música para fazer a previsão')
             return
         }
 
         if (!predictedDate) {
+            console.log('❌ Erro: Nenhuma data selecionada')
             toast.error('Selecione uma data para sua previsão')
             return
         }
@@ -123,47 +127,61 @@ export default function NewPredictionModal({
         const today = new Date()
         const maxDate = new Date(today.getTime() + (365 * 24 * 60 * 60 * 1000)) // 1 ano
 
+        console.log('📅 Validando datas:', { selectedDate, today, maxDate })
+
         if (selectedDate <= today) {
+            console.log('❌ Erro: Data no passado')
             toast.error('A data deve ser no futuro')
             return
         }
 
         if (selectedDate > maxDate) {
+            console.log('❌ Erro: Data muito distante')
             toast.error('A data não pode ser mais de 1 ano no futuro')
             return
         }
 
         if (pointsBet[0] > (userPoints || 0)) {
+            console.log('❌ Erro: Pontos insuficientes')
             toast.error(`Você não tem pontos suficientes. Saldo atual: ${userPoints || 0} pontos`)
             return
         }
 
+        console.log('✅ Todas as validações passaram, iniciando requisição...')
         setIsLoading(true)
 
         try {
+            const requestBody = {
+                trackId: selectedTrack.id,
+                trackData: {
+                    track_title: selectedTrack.name,
+                    artist_name: selectedTrack.artists[0]?.name || 'Unknown',
+                    album_name: selectedTrack.album.name,
+                    popularity: selectedTrack.popularity,
+                    track_thumbnail: selectedTrack.album.images[0]?.url || null,
+                    track_uri: selectedTrack.uri
+                },
+                predictedViralDate: predictedDate,
+                pointsBet: pointsBet[0],
+                predictionConfidence: confidence[0],
+                targetPopularity: targetPopularity[0]
+            }
+            
+            console.log('📤 Enviando requisição para /api/predictions:', requestBody)
+            
             const response = await fetch('/api/predictions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    trackId: selectedTrack.id,
-                    trackData: {
-                        track_title: selectedTrack.name,
-                        artist_name: selectedTrack.artists[0]?.name || 'Unknown',
-                        album_name: selectedTrack.album.name,
-                        popularity: selectedTrack.popularity,
-                        track_thumbnail: selectedTrack.album.images[0]?.url || null,
-                        track_uri: selectedTrack.uri
-                    },
-                    predictedViralDate: predictedDate,
-                    pointsBet: pointsBet[0],
-                    predictionConfidence: confidence[0],
-                    targetPopularity: targetPopularity[0]
-                })
+                body: JSON.stringify(requestBody)
             })
 
+            console.log('📥 Resposta recebida:', { status: response.status, statusText: response.statusText })
+
             if (response.ok) {
+                const result = await response.json()
+                console.log('✅ Sucesso:', result)
                 toast.success('Previsão criada com sucesso! 🔮')
                 handleClose()
                 if (onPredictionCreated) {
@@ -171,10 +189,11 @@ export default function NewPredictionModal({
                 }
             } else {
                 const error = await response.json()
+                console.log('❌ Erro na resposta:', error)
                 toast.error(error.message || 'Erro ao criar previsão')
             }
         } catch (error) {
-            console.error('Erro ao criar previsão:', error)
+            console.error('💥 Erro ao criar previsão:', error)
             toast.error('Erro ao criar previsão')
         } finally {
             setIsLoading(false)
@@ -346,7 +365,10 @@ export default function NewPredictionModal({
                             Cancelar
                         </Button>
                         <Button 
-                            onClick={handleSubmit}
+                            onClick={() => {
+                                console.log('🖱️ Botão "Fazer Previsão" clicado!')
+                                handleSubmit()
+                            }}
                             disabled={!selectedTrack || !predictedDate || isLoading}
                             className="min-w-[120px]"
                         >

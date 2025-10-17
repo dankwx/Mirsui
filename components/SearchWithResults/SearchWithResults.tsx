@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
@@ -53,7 +53,7 @@ export default function SearchWithResults() {
     const router = useRouter()
 
     // Função para buscar no Spotify
-    const searchSpotify = async (searchQuery: string) => {
+    const searchSpotify = useCallback(async (searchQuery: string) => {
         if (searchQuery.trim().length < 2) {
             setResults(null)
             setShowResults(false)
@@ -85,7 +85,7 @@ export default function SearchWithResults() {
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [searchFilter])
 
     // Debounce da busca
     useEffect(() => {
@@ -107,7 +107,7 @@ export default function SearchWithResults() {
                 clearTimeout(timeoutRef.current)
             }
         }
-    }, [query, searchFilter]) // Adicionado searchFilter como dependência
+    }, [query, searchFilter, searchSpotify]) // Adicionado searchSpotify como dependência
 
     // Fechar resultados ao clicar fora
     useEffect(() => {

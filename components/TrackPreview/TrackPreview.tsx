@@ -1,7 +1,7 @@
 // components/TrackPreview/TrackPreview.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -47,7 +47,7 @@ export default function TrackPreview({
     const [isMuted, setIsMuted] = useState(false)
 
     // Função para buscar dados do preview
-    const fetchPreviewData = async () => {
+    const fetchPreviewData = useCallback(async () => {
         if (!trackId) return
 
         setLoading(true)
@@ -126,12 +126,12 @@ export default function TrackPreview({
         } finally {
             setLoading(false)
         }
-    }
+    }, [trackId])
 
     // Effect para buscar dados quando o componente monta ou trackId muda
     useEffect(() => {
         fetchPreviewData()
-    }, [trackId])
+    }, [fetchPreviewData])
 
     // Função para extrair video ID do YouTube
     const getYouTubeVideoId = (url: string): string | null => {

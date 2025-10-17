@@ -3,11 +3,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 
 export async function POST(request: NextRequest) {
+    console.log('🎯 API /api/predictions POST chamada')
     try {
-        const { trackId, trackData, predictedViralDate, pointsBet, predictionConfidence, targetPopularity } = await request.json()
+        const requestData = await request.json()
+        console.log('📥 Dados recebidos na API:', requestData)
+        
+        const { trackId, trackData, predictedViralDate, pointsBet, predictionConfidence, targetPopularity } = requestData
 
         // Validações básicas
         if (!trackId || !trackData || !predictedViralDate || !pointsBet || !predictionConfidence || !targetPopularity) {
+            console.log('❌ Campos obrigatórios faltando:', { trackId: !!trackId, trackData: !!trackData, predictedViralDate: !!predictedViralDate, pointsBet: !!pointsBet, predictionConfidence: !!predictionConfidence, targetPopularity: !!targetPopularity })
             return NextResponse.json(
                 { message: 'Todos os campos são obrigatórios' },
                 { status: 400 }
@@ -59,10 +64,19 @@ export async function POST(request: NextRequest) {
 
         const supabase = createClient()
 
+        console.log('🔐 Verificando autenticação...')
         // Verificar se o usuário está autenticado
         const { data: authData, error: authError } = await supabase.auth.getUser()
         
+        console.log('👤 Resultado da autenticação:', { 
+            hasAuthData: !!authData, 
+            hasUser: !!authData?.user, 
+            authError: authError?.message,
+            userId: authData?.user?.id 
+        })
+        
         if (authError || !authData?.user) {
+            console.log('❌ Usuário não autenticado')
             return NextResponse.json(
                 { message: 'Usuário não autenticado' },
                 { status: 401 }
@@ -70,6 +84,7 @@ export async function POST(request: NextRequest) {
         }
 
         const userId = authData.user.id
+        console.log('✅ Usuário autenticado:', userId)
 
         // Verificar se a música já existe na tabela prediction_tracks
         let existingPredictionTrack = await supabase

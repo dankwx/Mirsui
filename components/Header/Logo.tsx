@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import GetAuth from '../GetAuth/GetAuth'
 import { Input } from '../ui/input'
@@ -10,7 +10,7 @@ export default function Logo() {
     const [showText, setShowText] = useState(true)
     const [lastScrollY, setLastScrollY] = useState(0)
 
-    const controlNavbar = () => {
+    const controlNavbar = useCallback(() => {
         if (typeof window !== 'undefined') {
             if (window.scrollY > lastScrollY) {
                 // if scroll down hide the navbar
@@ -23,7 +23,7 @@ export default function Logo() {
             // remember current page location to use in the next move
             setLastScrollY(window.scrollY)
         }
-    }
+    }, [lastScrollY])
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -34,7 +34,7 @@ export default function Logo() {
                 window.removeEventListener('scroll', controlNavbar)
             }
         }
-    }, [lastScrollY])
+    }, [controlNavbar])
 
     return (
         <div className="flex items-center justify-center align-middle">

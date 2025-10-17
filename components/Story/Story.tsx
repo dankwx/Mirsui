@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -130,14 +130,14 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, initialStoryIndex = 
 
     const currentStory = stories[currentStoryIndex]
 
-    const nextStory = () => {
+    const nextStory = useCallback(() => {
         if (currentStoryIndex < stories.length - 1) {
             setCurrentStoryIndex(currentStoryIndex + 1)
             setProgress(0)
         } else {
             onClose()
         }
-    }
+    }, [currentStoryIndex, stories.length, onClose])
 
     const prevStory = () => {
         if (currentStoryIndex > 0) {
@@ -180,7 +180,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({ stories, initialStoryIndex = 
         }, 50) // 5 seconds total (100 * 50ms)
 
         return () => clearInterval(timer)
-    }, [isPlaying, isOpen, currentStoryIndex])
+    }, [isPlaying, isOpen, nextStory])
 
     if (!currentStory) return null
 

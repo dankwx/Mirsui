@@ -20,6 +20,8 @@ interface Prediction {
     created_at: string
     days_until_prediction: number
     is_expired: boolean
+    partial_return?: boolean
+    final_popularity?: number
 }
 
 interface PredictionCardProps {
@@ -118,6 +120,13 @@ export default function PredictionCard({
                                 <Badge className={getStatusColor(prediction.status)}>
                                     {getStatusText(prediction.status)}
                                 </Badge>
+                                
+                                {/* Badge de retorno parcial */}
+                                {prediction.status === 'Errou' && prediction.partial_return && (
+                                    <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300">
+                                        <span className="text-xs">Retorno Parcial</span>
+                                    </Badge>
+                                )}
                                 
                                 <div className="flex items-center gap-1 text-sm">
                                     <Coins className="h-4 w-4 text-yellow-600" />

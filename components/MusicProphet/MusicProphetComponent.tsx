@@ -1,7 +1,7 @@
 // components/MusicProphet/MusicProphetComponent.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -66,6 +66,7 @@ export default function MusicProphetComponent({
 
     // Processar previsões expiradas quando o componente carrega
     useEffect(() => {
+        console.log('🚀 useEffect executado:', { isOwnProfile })
         if (isOwnProfile) {
             processExpiredPredictions()
         }
@@ -140,7 +141,9 @@ export default function MusicProphetComponent({
 
     const getStatusColor = (status: string) => {
         switch (status) {
+            case 'won': return 'bg-green-100 text-green-800 border-green-200'
             case 'correct': return 'bg-green-100 text-green-800 border-green-200'
+            case 'Errou': return 'bg-red-100 text-red-800 border-red-200'
             case 'incorrect': return 'bg-red-100 text-red-800 border-red-200'
             case 'pending': return 'bg-blue-100 text-blue-800 border-blue-200'
             case 'expired': return 'bg-gray-100 text-gray-800 border-gray-200'
@@ -150,7 +153,9 @@ export default function MusicProphetComponent({
 
     const getStatusText = (status: string) => {
         switch (status) {
+            case 'won': return 'Acertou!'
             case 'correct': return 'Acertou!'
+            case 'Errou': return 'Errou'
             case 'incorrect': return 'Errou'
             case 'pending': return 'Pendente'
             case 'expired': return 'Expirou'

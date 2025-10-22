@@ -21,9 +21,9 @@ export async function POST(request: NextRequest) {
         console.log('✅ API: Usuário autenticado:', authData.user.id)
 
         // Executar função para processar previsões expiradas
-        console.log('📊 API: Executando process_expired_predictions_fixed...')
+        console.log('📊 API: Executando process_expired_predictions...')
         const { data: processedPredictions, error } = await supabase
-            .rpc('process_expired_predictions_fixed')
+            .rpc('process_expired_predictions')
 
         if (error) {
             console.error('❌ API: Erro ao processar previsões expiradas:', error)

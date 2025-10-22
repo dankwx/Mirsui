@@ -56,6 +56,16 @@ export default async function ProphetPage({ params }: ProphetPageParams) {
     }
 
     try {
+        // Primeiro, processar previsões expiradas automaticamente
+        try {
+            await supabase.rpc('process_expired_predictions')
+            console.log('Previsões expiradas processadas com sucesso')
+        } catch (processError) {
+            console.warn('Aviso ao processar previsões expiradas:', processError)
+            // Continuar mesmo se houver erro no processamento
+        }
+
+        // Agora buscar as previsões atualizadas
         const { data: predictionsData, error: predictionsError } = await supabase
             .rpc('get_user_predictions', { user_uuid: userData.id })
 

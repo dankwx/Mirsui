@@ -35,16 +35,16 @@ export default function Header({ userProfile }: HeaderProps) {
         return 'U'
     }
     return (
-        <header className="border-b border-border bg-background px-4 py-3">
+        <header className="sticky top-0 z-50 border-b border-white/20 bg-white/70 backdrop-blur-2xl px-6 py-4 shadow-lg shadow-black/5">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <SearchWithResults />
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                     {/* Você pode usar userProfile aqui também se quiser customizar o GetAuth */}
                     {userProfile && (
-                        <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg">
+                        <div className="group flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white/60 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 cursor-pointer ring-2 ring-white/50 hover:ring-purple-500/50">
                             {userProfile?.avatar_url ? (
                                 <img
                                     src={userProfile.avatar_url}
@@ -52,7 +52,7 @@ export default function Header({ userProfile }: HeaderProps) {
                                     className="h-full w-full object-cover"
                                 />
                             ) : (
-                                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-500 text-xs font-semibold text-white">
+                                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-500 text-xs font-bold text-white">
                                     {getInitials(
                                         userProfile?.display_name,
                                         userProfile?.email

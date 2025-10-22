@@ -40,17 +40,17 @@ export default async function HomePage() {
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
             {/* Navigation */}
-            <nav className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/80 px-4 py-4 backdrop-blur-md">
+            <nav className="sticky top-0 z-50 border-b border-white/20 bg-white/70 px-4 py-4 backdrop-blur-xl shadow-lg shadow-black/5">
                 <div className="mx-auto flex max-w-7xl items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg shadow-purple-500/30">
                             <Music className="h-4 w-4 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold text-slate-800">
+                            <h1 className="text-xl font-bold text-slate-900">
                                 Sound Sage
                             </h1>
-                            <p className="text-xs text-slate-500">
+                            <p className="text-xs text-slate-600">
                                 Music Discovery
                             </p>
                         </div>
@@ -59,19 +59,19 @@ export default async function HomePage() {
                     <div className="hidden items-center gap-6 md:flex">
                         <Link
                             href="#how-it-works"
-                            className="font-medium text-slate-600 hover:text-slate-800"
+                            className="font-medium text-slate-700 hover:text-slate-900 transition-colors"
                         >
                             Como Funciona
                         </Link>
                         <Link
                             href="#discover"
-                            className="font-medium text-slate-600 hover:text-slate-800"
+                            className="font-medium text-slate-700 hover:text-slate-900 transition-colors"
                         >
                             Descobrir
                         </Link>
                         <Link
                             href="#about"
-                            className="font-medium text-slate-600 hover:text-slate-800"
+                            className="font-medium text-slate-700 hover:text-slate-900 transition-colors"
                         >
                             Sobre
                         </Link>
@@ -80,7 +80,7 @@ export default async function HomePage() {
                     <div className="flex items-center gap-3">
                         <GetAuth />
                         <Link href="/feed">
-                            <Button className="bg-sage-600 hover:bg-sage-700 text-white shadow-sm">
+                            <Button className="bg-gradient-to-r from-sage-600 to-sage-700 hover:from-sage-700 hover:to-sage-800 text-white shadow-lg shadow-sage-600/30">
                                 Começar
                             </Button>
                         </Link>
@@ -108,7 +108,7 @@ export default async function HomePage() {
                             <Link href="/feed">
                                 <Button
                                     size="lg"
-                                    className="bg-sage-600 hover:bg-sage-700 px-8 py-4 text-lg text-white shadow-lg"
+                                    className="bg-gradient-to-r from-sage-600 to-sage-700 hover:from-sage-700 hover:to-sage-800 px-8 py-4 text-lg text-white shadow-2xl shadow-sage-600/40 hover:shadow-3xl hover:shadow-sage-600/60 transition-all duration-300"
                                 >
                                     Começar a Descobrir
                                     <ArrowRight className="ml-2" size={20} />
@@ -117,7 +117,7 @@ export default async function HomePage() {
                             <Button
                                 size="lg"
                                 variant="outline"
-                                className="border-slate-400 px-8 py-4 text-lg text-slate-800 hover:bg-slate-100 hover:border-slate-500"
+                                className="border-white/40 bg-white/30 backdrop-blur-xl px-8 py-4 text-lg text-slate-800 hover:bg-white/50 shadow-lg hover:shadow-xl transition-all duration-300"
                             >
                                 Como Funciona
                             </Button>
@@ -137,52 +137,52 @@ export default async function HomePage() {
             <section className="px-4 py-16">
                 <div className="mx-auto max-w-7xl">
                     <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-                        <Card className="from-sage-50 to-sage-100 border-sage-200/50 bg-gradient-to-br shadow-sm">
+                        <Card className="border-white/40 bg-gradient-to-br from-sage-500/10 via-white/60 to-sage-400/10 backdrop-blur-xl shadow-xl shadow-sage-500/10 hover:shadow-2xl hover:shadow-sage-500/20 transition-all duration-300">
                             <CardContent className="pt-8 text-center">
-                                <div className="bg-sage-200 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
+                                <div className="bg-gradient-to-br from-sage-500/20 to-sage-600/20 backdrop-blur-md mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-sage-400/30 shadow-lg">
                                     <Clock
-                                        className="text-sage-600"
+                                        className="text-sage-700"
                                         size={32}
                                     />
                                 </div>
-                                <h3 className="text-sage-700 mb-3 text-xl font-semibold">
+                                <h3 className="text-sage-900 mb-3 text-xl font-semibold">
                                     Descoberta Precoce
                                 </h3>
-                                <p className="text-sage-600 leading-relaxed">
+                                <p className="text-slate-700 leading-relaxed">
                                     Encontre tracks antes delas se tornarem mainstream
                                     e prove seu gosto musical
                                 </p>
                             </CardContent>
                         </Card>
-                        <Card className="border-blue-200/50 bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm">
+                        <Card className="border-white/40 bg-gradient-to-br from-blue-500/10 via-white/60 to-blue-400/10 backdrop-blur-xl shadow-xl shadow-blue-500/10 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300">
                             <CardContent className="pt-8 text-center">
-                                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-200">
+                                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-md border border-blue-400/30 shadow-lg">
                                     <Target
-                                        className="text-blue-600"
+                                        className="text-blue-700"
                                         size={32}
                                     />
                                 </div>
-                                <h3 className="mb-3 text-xl font-semibold text-blue-700">
+                                <h3 className="mb-3 text-xl font-semibold text-blue-900">
                                     Construa Reputação
                                 </h3>
-                                <p className="leading-relaxed text-blue-600">
+                                <p className="leading-relaxed text-slate-700">
                                     Ganhe reconhecimento conforme suas tracks reivindicadas
                                     ganham popularidade e viralizam
                                 </p>
                             </CardContent>
                         </Card>
-                        <Card className="border-rose-200/50 bg-gradient-to-br from-rose-50 to-rose-100 shadow-sm">
+                        <Card className="border-white/40 bg-gradient-to-br from-rose-500/10 via-white/60 to-rose-400/10 backdrop-blur-xl shadow-xl shadow-rose-500/10 hover:shadow-2xl hover:shadow-rose-500/20 transition-all duration-300">
                             <CardContent className="pt-8 text-center">
-                                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-200">
+                                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500/20 to-rose-600/20 backdrop-blur-md border border-rose-400/30 shadow-lg">
                                     <Music
-                                        className="text-rose-600"
+                                        className="text-rose-700"
                                         size={32}
                                     />
                                 </div>
-                                <h3 className="mb-3 text-xl font-semibold text-rose-700">
+                                <h3 className="mb-3 text-xl font-semibold text-rose-900">
                                     Seleção Curada
                                 </h3>
-                                <p className="leading-relaxed text-rose-600">
+                                <p className="leading-relaxed text-slate-700">
                                     Explore tracks emergentes cuidadosamente selecionadas
                                     de todos os gêneros
                                 </p>
@@ -195,14 +195,15 @@ export default async function HomePage() {
             {/* Trending Section */}
             <section
                 id="discover"
-                className="bg-gradient-to-b from-slate-50/50 to-white px-4 py-16"
+                className="relative overflow-hidden bg-gradient-to-b from-slate-50/50 to-white px-4 py-16"
             >
-                <div className="mx-auto max-w-7xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-sage-100/30 via-transparent to-blue-100/30"></div>
+                <div className="mx-auto max-w-7xl relative z-10">
                     <div className="mb-12 text-center">
-                        <h2 className="mb-4 text-3xl font-bold text-slate-800 md:text-4xl">
+                        <h2 className="mb-4 text-3xl font-bold text-slate-900 md:text-4xl">
                             Tracks em Destaque para Reivindicar
                         </h2>
-                        <p className="mx-auto max-w-2xl text-lg text-slate-600">
+                        <p className="mx-auto max-w-2xl text-lg text-slate-700">
                             Essas tracks estão ganhando momentum. Reivindique-as agora
                             antes delas explodirem nas redes sociais.
                         </p>
@@ -211,7 +212,7 @@ export default async function HomePage() {
                     <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                         {trendingTracks.length > 0 ? (
                             trendingTracks.map((track, index) => (
-                                <Card key={track.id} className="group border-slate-200/60 transition-all duration-300 hover:shadow-lg">
+                                <Card key={track.id} className="group border-white/60 bg-white/50 backdrop-blur-xl transition-all duration-300 hover:shadow-2xl hover:bg-white/70 hover:scale-[1.02]">
                                     <CardHeader className="relative aspect-square bg-gradient-to-br from-sage-100 to-sage-200 p-0">
                                         <Image
                                             src={track.track_thumbnail || "/placeholder.svg?height=300&width=300"}
@@ -222,47 +223,47 @@ export default async function HomePage() {
                                         />
                                         <Button
                                             size="icon"
-                                            className="text-sage-600 absolute bottom-4 right-4 rounded-full bg-white/90 opacity-0 shadow-lg transition-opacity hover:bg-white group-hover:opacity-100"
+                                            className="text-sage-700 absolute bottom-4 right-4 rounded-full bg-white/95 backdrop-blur-md opacity-0 shadow-xl transition-all duration-300 hover:bg-white hover:scale-110 group-hover:opacity-100"
                                         >
                                             <Play size={20} className="ml-0.5" />
                                         </Button>
-                                        <Badge className={`absolute right-4 top-4 ${
-                                            index === 0 ? 'border-amber-200 bg-amber-100 text-amber-700' :
-                                            index === 1 ? 'border-emerald-200 bg-emerald-100 text-emerald-700' :
-                                            'border-violet-200 bg-violet-100 text-violet-700'
+                                        <Badge className={`absolute right-4 top-4 backdrop-blur-md shadow-lg ${
+                                            index === 0 ? 'border-amber-300/50 bg-amber-200/80 text-amber-800' :
+                                            index === 1 ? 'border-emerald-300/50 bg-emerald-200/80 text-emerald-800' :
+                                            'border-violet-300/50 bg-violet-200/80 text-violet-800'
                                         }`}>
                                             {index === 0 ? 'Em Alta' : index === 1 ? 'Crescendo' : 'Popular'}
                                         </Badge>
                                     </CardHeader>
-                                    <CardContent className="pt-6">
+                                    <CardContent className="pt-6 bg-gradient-to-b from-white/80 to-white/60 backdrop-blur-sm">
                                         <div className="flex items-start justify-between">
                                             <div>
-                                                <h3 className="text-lg font-semibold text-slate-800">
+                                                <h3 className="text-lg font-semibold text-slate-900">
                                                     {track.track_title}
                                                 </h3>
-                                                <p className="text-slate-500">
+                                                <p className="text-slate-600">
                                                     {track.artist_name}
                                                 </p>
-                                                <p className="mt-1 text-xs text-slate-400">
+                                                <p className="mt-1 text-xs text-slate-500">
                                                     {track.genre} • {track.year}
                                                 </p>
                                             </div>
                                             <Link href={`/track/${track.track_url?.split('/').pop() || track.track_title}`}>
                                                 <Button
                                                     size="sm"
-                                                    className="bg-sage-600 hover:bg-sage-700 text-white"
+                                                    className="bg-gradient-to-r from-sage-600 to-sage-700 hover:from-sage-700 hover:to-sage-800 text-white shadow-lg shadow-sage-600/30"
                                                 >
                                                     Ver Track
                                                 </Button>
                                             </Link>
                                         </div>
                                     </CardContent>
-                                    <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
-                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                    <CardFooter className="flex justify-between border-t border-white/50 bg-white/40 backdrop-blur-sm pt-4">
+                                        <div className="flex items-center gap-2 text-sm text-slate-600">
                                             <Heart size={16} />
                                             <span>{track.likes_count}</span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                        <div className="flex items-center gap-2 text-sm text-slate-600">
                                             <Award size={16} />
                                             <span>#{track.position}</span>
                                         </div>
@@ -273,7 +274,7 @@ export default async function HomePage() {
                             // Fallback com dados fictícios caso não haja tracks reais
                             <>
                                 {/* Track Card 1 */}
-                                <Card className="group border-slate-200/60 transition-all duration-300 hover:shadow-lg">
+                                <Card className="group border-white/60 bg-white/50 backdrop-blur-xl transition-all duration-300 hover:shadow-2xl hover:bg-white/70 hover:scale-[1.02]">
                                     <CardHeader className="from-sage-100 to-sage-200 relative aspect-square bg-gradient-to-br p-0">
                                         <Image
                                             src="/placeholder.svg?height=300&width=300"
@@ -284,41 +285,41 @@ export default async function HomePage() {
                                         />
                                         <Button
                                             size="icon"
-                                            className="text-sage-600 absolute bottom-4 right-4 rounded-full bg-white/90 opacity-0 shadow-lg transition-opacity hover:bg-white group-hover:opacity-100"
+                                            className="text-sage-700 absolute bottom-4 right-4 rounded-full bg-white/95 backdrop-blur-md opacity-0 shadow-xl transition-all duration-300 hover:bg-white hover:scale-110 group-hover:opacity-100"
                                         >
                                             <Play size={20} className="ml-0.5" />
                                         </Button>
-                                        <Badge className="absolute right-4 top-4 border-amber-200 bg-amber-100 text-amber-700">
+                                        <Badge className="absolute right-4 top-4 border-amber-300/50 bg-amber-200/80 backdrop-blur-md text-amber-800 shadow-lg">
                                             Em Alta
                                         </Badge>
                                     </CardHeader>
-                                    <CardContent className="pt-6">
+                                    <CardContent className="pt-6 bg-gradient-to-b from-white/80 to-white/60 backdrop-blur-sm">
                                         <div className="flex items-start justify-between">
                                             <div>
-                                                <h3 className="text-lg font-semibold text-slate-800">
+                                                <h3 className="text-lg font-semibold text-slate-900">
                                                     Sonhos da Meia-Noite
                                                 </h3>
-                                                <p className="text-slate-500">
+                                                <p className="text-slate-600">
                                                     Luna Nova
                                                 </p>
-                                                <p className="mt-1 text-xs text-slate-400">
+                                                <p className="mt-1 text-xs text-slate-500">
                                                     Indie Pop • 2024
                                                 </p>
                                             </div>
                                             <Button
                                                 size="sm"
-                                                className="bg-sage-600 hover:bg-sage-700 text-white"
+                                                className="bg-gradient-to-r from-sage-600 to-sage-700 hover:from-sage-700 hover:to-sage-800 text-white shadow-lg shadow-sage-600/30"
                                             >
                                                 Reivindicar
                                             </Button>
                                         </div>
                                     </CardContent>
-                                    <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
-                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                    <CardFooter className="flex justify-between border-t border-white/50 bg-white/40 backdrop-blur-sm pt-4">
+                                        <div className="flex items-center gap-2 text-sm text-slate-600">
                                             <Heart size={16} />
                                             <span>Nova</span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                        <div className="flex items-center gap-2 text-sm text-slate-600">
                                             <Award size={16} />
                                             <span>Disponível</span>
                                         </div>
@@ -326,7 +327,7 @@ export default async function HomePage() {
                                 </Card>
 
                                 {/* Track Card 2 */}
-                                <Card className="group border-slate-200/60 transition-all duration-300 hover:shadow-lg">
+                                <Card className="group border-white/60 bg-white/50 backdrop-blur-xl transition-all duration-300 hover:shadow-2xl hover:bg-white/70 hover:scale-[1.02]">
                                     <CardHeader className="relative aspect-square bg-gradient-to-br from-blue-100 to-blue-200 p-0">
                                         <Image
                                             src="/placeholder.svg?height=300&width=300"
@@ -337,41 +338,41 @@ export default async function HomePage() {
                                         />
                                         <Button
                                             size="icon"
-                                            className="absolute bottom-4 right-4 rounded-full bg-white/90 text-blue-600 opacity-0 shadow-lg transition-opacity hover:bg-white group-hover:opacity-100"
+                                            className="absolute bottom-4 right-4 rounded-full bg-white/95 backdrop-blur-md text-blue-700 opacity-0 shadow-xl transition-all duration-300 hover:bg-white hover:scale-110 group-hover:opacity-100"
                                         >
                                             <Play size={20} className="ml-0.5" />
                                         </Button>
-                                        <Badge className="absolute right-4 top-4 border-emerald-200 bg-emerald-100 text-emerald-700">
+                                        <Badge className="absolute right-4 top-4 border-emerald-300/50 bg-emerald-200/80 backdrop-blur-md text-emerald-800 shadow-lg">
                                             Crescendo
                                         </Badge>
                                     </CardHeader>
-                                    <CardContent className="pt-6">
+                                    <CardContent className="pt-6 bg-gradient-to-b from-white/80 to-white/60 backdrop-blur-sm">
                                         <div className="flex items-start justify-between">
                                             <div>
-                                                <h3 className="text-lg font-semibold text-slate-800">
+                                                <h3 className="text-lg font-semibold text-slate-900">
                                                     Alma Elétrica
                                                 </h3>
-                                                <p className="text-slate-500">
+                                                <p className="text-slate-600">
                                                     Neon Pulse
                                                 </p>
-                                                <p className="mt-1 text-xs text-slate-400">
+                                                <p className="mt-1 text-xs text-slate-500">
                                                     Eletrônica • 2024
                                                 </p>
                                             </div>
                                             <Button
                                                 size="sm"
-                                                className="bg-sage-600 hover:bg-sage-700 text-white"
+                                                className="bg-gradient-to-r from-sage-600 to-sage-700 hover:from-sage-700 hover:to-sage-800 text-white shadow-lg shadow-sage-600/30"
                                             >
                                                 Reivindicar
                                             </Button>
                                         </div>
                                     </CardContent>
-                                    <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
-                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                    <CardFooter className="flex justify-between border-t border-white/50 bg-white/40 backdrop-blur-sm pt-4">
+                                        <div className="flex items-center gap-2 text-sm text-slate-600">
                                             <Heart size={16} />
                                             <span>Fresca</span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                        <div className="flex items-center gap-2 text-sm text-slate-600">
                                             <Award size={16} />
                                             <span>Disponível</span>
                                         </div>
@@ -379,7 +380,7 @@ export default async function HomePage() {
                                 </Card>
 
                                 {/* Track Card 3 */}
-                                <Card className="group border-slate-200/60 transition-all duration-300 hover:shadow-lg">
+                                <Card className="group border-white/60 bg-white/50 backdrop-blur-xl transition-all duration-300 hover:shadow-2xl hover:bg-white/70 hover:scale-[1.02]">
                                     <CardHeader className="relative aspect-square bg-gradient-to-br from-rose-100 to-rose-200 p-0">
                                         <Image
                                             src="/placeholder.svg?height=300&width=300"
@@ -390,41 +391,41 @@ export default async function HomePage() {
                                         />
                                         <Button
                                             size="icon"
-                                            className="absolute bottom-4 right-4 rounded-full bg-white/90 text-rose-600 opacity-0 shadow-lg transition-opacity hover:bg-white group-hover:opacity-100"
+                                            className="absolute bottom-4 right-4 rounded-full bg-white/95 backdrop-blur-md text-rose-700 opacity-0 shadow-xl transition-all duration-300 hover:bg-white hover:scale-110 group-hover:opacity-100"
                                         >
                                             <Play size={20} className="ml-0.5" />
                                         </Button>
-                                        <Badge className="absolute right-4 top-4 border-violet-200 bg-violet-100 text-violet-700">
+                                        <Badge className="absolute right-4 top-4 border-violet-300/50 bg-violet-200/80 backdrop-blur-md text-violet-800 shadow-lg">
                                             Popular
                                         </Badge>
                                     </CardHeader>
-                                    <CardContent className="pt-6">
+                                    <CardContent className="pt-6 bg-gradient-to-b from-white/80 to-white/60 backdrop-blur-sm">
                                         <div className="flex items-start justify-between">
                                             <div>
-                                                <h3 className="text-lg font-semibold text-slate-800">
+                                                <h3 className="text-lg font-semibold text-slate-900">
                                                     Boulevard do Pôr do Sol
                                                 </h3>
-                                                <p className="text-slate-500">
+                                                <p className="text-slate-600">
                                                     Coastal Waves
                                                 </p>
-                                                <p className="mt-1 text-xs text-slate-400">
+                                                <p className="mt-1 text-xs text-slate-500">
                                                     Alternativo • 2024
                                                 </p>
                                             </div>
                                             <Button
                                                 size="sm"
-                                                className="bg-sage-600 hover:bg-sage-700 text-white"
+                                                className="bg-gradient-to-r from-sage-600 to-sage-700 hover:from-sage-700 hover:to-sage-800 text-white shadow-lg shadow-sage-600/30"
                                             >
                                                 Reivindicar
                                             </Button>
                                         </div>
                                     </CardContent>
-                                    <CardFooter className="flex justify-between border-t border-slate-100 pt-4">
-                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                    <CardFooter className="flex justify-between border-t border-white/50 bg-white/40 backdrop-blur-sm pt-4">
+                                        <div className="flex items-center gap-2 text-sm text-slate-600">
                                             <Heart size={16} />
                                             <span>Nova</span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                        <div className="flex items-center gap-2 text-sm text-slate-600">
                                             <Award size={16} />
                                             <span>Disponível</span>
                                         </div>
@@ -438,7 +439,7 @@ export default async function HomePage() {
                         <Link href="/feed">
                             <Button
                                 variant="outline"
-                                className="border-slate-400 px-8 text-slate-800 hover:bg-slate-100 hover:border-slate-500"
+                                className="border-white/50 bg-white/40 backdrop-blur-xl px-8 text-slate-800 hover:bg-white/60 shadow-lg hover:shadow-xl transition-all duration-300"
                             >
                                 Explorar Mais Tracks
                                 <ArrowRight className="ml-2" size={16} />
@@ -582,18 +583,18 @@ export default async function HomePage() {
                     </div>
 
                     <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
-                        <Card className="border-slate-200/60 text-center transition-shadow hover:shadow-md">
+                        <Card className="border-white/40 bg-white/40 backdrop-blur-2xl text-center transition-all duration-300 hover:shadow-2xl hover:shadow-sage-500/20 hover:bg-white/60">
                             <CardContent className="pt-10">
-                                <div className="from-sage-100 to-sage-200 mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br">
+                                <div className="from-sage-500/30 to-sage-600/30 mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br backdrop-blur-md border border-sage-400/40 shadow-xl">
                                     <Headphones
-                                        className="text-sage-600"
+                                        className="text-sage-700"
                                         size={40}
                                     />
                                 </div>
-                                <h3 className="mb-4 text-xl font-semibold text-slate-800">
+                                <h3 className="mb-4 text-xl font-semibold text-slate-900">
                                     1. Descubra
                                 </h3>
-                                <p className="leading-relaxed text-slate-600">
+                                <p className="leading-relaxed text-slate-700">
                                     Navegue por nossa seleção curada de
                                     tracks emergentes de vários gêneros e
                                     descubra joias escondidas antes de qualquer outra pessoa
@@ -601,18 +602,18 @@ export default async function HomePage() {
                             </CardContent>
                         </Card>
 
-                        <Card className="border-slate-200/60 text-center transition-shadow hover:shadow-md">
+                        <Card className="border-white/40 bg-white/40 backdrop-blur-2xl text-center transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 hover:bg-white/60">
                             <CardContent className="pt-10">
-                                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200">
+                                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500/30 to-blue-600/30 backdrop-blur-md border border-blue-400/40 shadow-xl">
                                     <Award
-                                        className="text-blue-600"
+                                        className="text-blue-700"
                                         size={40}
                                     />
                                 </div>
-                                <h3 className="mb-4 text-xl font-semibold text-slate-800">
+                                <h3 className="mb-4 text-xl font-semibold text-slate-900">
                                     2. Reivindique
                                 </h3>
-                                <p className="leading-relaxed text-slate-600">
+                                <p className="leading-relaxed text-slate-700">
                                     Reivindique tracks que você acredita que se tornarão populares
                                     antes delas viralizarem no TikTok, Instagram,
                                     ou outras plataformas sociais
@@ -620,18 +621,18 @@ export default async function HomePage() {
                             </CardContent>
                         </Card>
 
-                        <Card className="border-slate-200/60 text-center transition-shadow hover:shadow-md">
+                        <Card className="border-white/40 bg-white/40 backdrop-blur-2xl text-center transition-all duration-300 hover:shadow-2xl hover:shadow-rose-500/20 hover:bg-white/60">
                             <CardContent className="pt-10">
-                                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-100 to-rose-200">
+                                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-rose-500/30 to-rose-600/30 backdrop-blur-md border border-rose-400/40 shadow-xl">
                                     <TrendingUp
-                                        className="text-rose-600"
+                                        className="text-rose-700"
                                         size={40}
                                     />
                                 </div>
-                                <h3 className="mb-4 text-xl font-semibold text-slate-800">
+                                <h3 className="mb-4 text-xl font-semibold text-slate-900">
                                     3. Ganhe Reconhecimento
                                 </h3>
-                                <p className="leading-relaxed text-slate-600">
+                                <p className="leading-relaxed text-slate-700">
                                     Construa sua reputação conforme as tracks que você reivindicou
                                     se tornam populares e ganhe emblemas por suas
                                     habilidades excepcionais de descoberta musical
@@ -643,41 +644,45 @@ export default async function HomePage() {
             </section>
 
             {/* About Section */}
-            <section id="about" className="px-4 py-16">
-                <div className="mx-auto max-w-4xl text-center">
-                    <h2 className="mb-6 text-3xl font-bold text-slate-800 md:text-4xl">
-                        O Futuro da Descoberta Musical
-                    </h2>
-                    <p className="mb-8 text-xl leading-relaxed text-slate-600">
-                        O Sound Sage é mais do que apenas uma plataforma musical—é
-                        uma comunidade para verdadeiros entusiastas da música que têm ouvido
-                        apurado para o que vem por aí. Seja você fã de indie
-                        pop, eletrônica, hip-hop ou alternativo, nossa plataforma
-                        ajuda você a descobrir e reivindicar tracks antes delas se tornarem
-                        hits mainstream.
-                    </p>
-                    <p className="mb-10 text-lg leading-relaxed text-slate-600">
-                        Junte-se a uma comunidade de amantes da música que entendem que uma boa música merece ser descoberta cedo. Construa sua reputação, conecte-se com ouvintes que compartilham seus gostos, e prove que você tem o que é preciso para identificar a próxima grande novidade.
-                    </p>
-                    <Link href="/feed">
-                        <Button
-                            size="lg"
-                            className="bg-sage-600 hover:bg-sage-700 px-10 py-4 text-lg text-white shadow-lg"
-                        >
-                            Começar Sua Jornada
-                            <ArrowRight className="ml-2" size={20} />
-                        </Button>
-                    </Link>
+            <section id="about" className="relative overflow-hidden px-4 py-16">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-100/40 via-transparent to-pink-100/40"></div>
+                <div className="mx-auto max-w-4xl text-center relative z-10">
+                    <div className="bg-white/60 backdrop-blur-2xl rounded-3xl p-12 border border-white/60 shadow-2xl">
+                        <h2 className="mb-6 text-3xl font-bold text-slate-900 md:text-4xl">
+                            O Futuro da Descoberta Musical
+                        </h2>
+                        <p className="mb-8 text-xl leading-relaxed text-slate-700">
+                            O Sound Sage é mais do que apenas uma plataforma musical—é
+                            uma comunidade para verdadeiros entusiastas da música que têm ouvido
+                            apurado para o que vem por aí. Seja você fã de indie
+                            pop, eletrônica, hip-hop ou alternativo, nossa plataforma
+                            ajuda você a descobrir e reivindicar tracks antes delas se tornarem
+                            hits mainstream.
+                        </p>
+                        <p className="mb-10 text-lg leading-relaxed text-slate-700">
+                            Junte-se a uma comunidade de amantes da música que entendem que uma boa música merece ser descoberta cedo. Construa sua reputação, conecte-se com ouvintes que compartilham seus gostos, e prove que você tem o que é preciso para identificar a próxima grande novidade.
+                        </p>
+                        <Link href="/feed">
+                            <Button
+                                size="lg"
+                                className="bg-gradient-to-r from-sage-600 to-sage-700 hover:from-sage-700 hover:to-sage-800 px-10 py-4 text-lg text-white shadow-2xl shadow-sage-600/40 hover:shadow-3xl hover:shadow-sage-600/60 transition-all duration-300"
+                            >
+                                Começar Sua Jornada
+                                <ArrowRight className="ml-2" size={20} />
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
             </section>
 
             {/* CTA Section */}
-            <section className="from-sage-50 bg-gradient-to-br to-blue-50 px-4 py-20">
-                <div className="mx-auto max-w-4xl text-center">
-                    <h2 className="mb-6 text-3xl font-bold text-slate-800 md:text-4xl">
+            <section className="from-sage-500/20 via-blue-500/20 to-purple-500/20 bg-gradient-to-br px-4 py-20 relative overflow-hidden">
+                <div className="absolute inset-0 bg-white/60 backdrop-blur-3xl"></div>
+                <div className="mx-auto max-w-4xl text-center relative z-10">
+                    <h2 className="mb-6 text-3xl font-bold text-slate-900 md:text-4xl">
                         Pronto para Descobrir os Hits de Amanhã Hoje?
                     </h2>
-                    <p className="mb-10 text-xl leading-relaxed text-slate-600">
+                    <p className="mb-10 text-xl leading-relaxed text-slate-700">
                         Junte-se à revolução da descoberta musical. Comece a construir sua
                         reputação como um descobridor de talentos e prove que você consegue identificar hits
                         antes deles viralizarem.
@@ -686,7 +691,7 @@ export default async function HomePage() {
                         <Link href="/register">
                             <Button
                                 size="lg"
-                                className="bg-sage-600 hover:bg-sage-700 px-10 py-4 text-lg text-white shadow-lg"
+                                className="bg-gradient-to-r from-sage-600 to-sage-700 hover:from-sage-700 hover:to-sage-800 px-10 py-4 text-lg text-white shadow-2xl shadow-sage-600/40 hover:shadow-3xl hover:shadow-sage-600/60 transition-all duration-300"
                             >
                                 Registrar Agora — É Grátis
                                 <ArrowRight className="ml-2" size={20} />
@@ -695,7 +700,7 @@ export default async function HomePage() {
                         <Button
                             size="lg"
                             variant="outline"
-                            className="border-slate-400 px-10 py-4 text-lg text-slate-800 hover:bg-slate-100 hover:border-slate-500"
+                            className="border-white/50 bg-white/40 backdrop-blur-xl px-10 py-4 text-lg text-slate-800 hover:bg-white/60 shadow-lg hover:shadow-xl transition-all duration-300"
                         >
                             Saiba Mais
                         </Button>

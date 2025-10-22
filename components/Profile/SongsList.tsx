@@ -133,9 +133,9 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
     }
 
     return (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-6">
             {songs.map((song) => (
-                <Card key={song.id} className="group relative overflow-hidden">
+                <Card key={song.id} className="group relative overflow-hidden border-white/60 bg-white/50 backdrop-blur-xl hover:bg-white/70 hover:shadow-2xl hover:scale-[1.03] transition-all duration-300">
                     <div className="relative aspect-square">
                         <img
                             src={song.track_thumbnail || '/placeholder-album.png'}
@@ -150,12 +150,12 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <Badge className="animate-pulse-once bg-red-500/90 text-white shadow-md">
+                                            <Badge className="animate-pulse-once bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/50 backdrop-blur-md border-white/30">
                                                 <HeartIcon className="mr-1 h-4 w-4 fill-current" />
                                                 Favorite
                                             </Badge>
                                         </TooltipTrigger>
-                                        <TooltipContent>
+                                        <TooltipContent className="bg-white/90 backdrop-blur-xl border-white/60">
                                             <p>This user loves this track!!</p>
                                         </TooltipContent>
                                     </Tooltip>
@@ -171,14 +171,14 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 rounded-full bg-white/80 text-gray-700 opacity-0 shadow-md transition-all duration-300 hover:bg-white hover:text-gray-900 group-hover:opacity-100"
+                                            className="h-8 w-8 rounded-full bg-white/90 backdrop-blur-xl text-gray-700 opacity-0 shadow-lg transition-all duration-300 hover:bg-white hover:text-gray-900 hover:scale-110 group-hover:opacity-100 border border-white/50"
                                         >
                                             <MoreVerticalIcon className="h-4 w-4" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent
                                         align="end"
-                                        className="w-48"
+                                        className="w-48 bg-white/90 backdrop-blur-xl border-white/60"
                                     >
                                         <DropdownMenuItem
                                             onClick={() =>
@@ -250,11 +250,11 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                             </div>
                         )}
 
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/70 p-4 opacity-0 transition-opacity hover:opacity-100">
+                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-black/80 via-purple-900/70 to-black/80 backdrop-blur-sm p-4 opacity-0 transition-all duration-300 group-hover:opacity-100">
                             <div className="space-y-2 text-center text-white">
                                 <div className="flex items-center justify-center gap-2">
                                     <ClockIcon className="h-5 w-5" />
-                                    <span className="text-sm">
+                                    <span className="text-sm font-medium">
                                         Claimed on:{' '}
                                         {song.claimedat 
                                             ? new Date(song.claimedat).toLocaleDateString('pt-BR')
@@ -264,11 +264,11 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                                 </div>
                                 <div className="flex items-center justify-center gap-2">
                                     <TrendingUpIcon className="h-5 w-5" />
-                                    <span className="text-sm">
+                                    <span className="text-sm font-medium">
                                         Discover Score: {song.discover_rating || 0}
                                     </span>
                                 </div>
-                                <div className="mt-2 text-xs opacity-75">
+                                <div className="mt-2 text-xs opacity-90 bg-white/10 backdrop-blur-md rounded-full px-3 py-1">
                                     {song.popularity > 80
                                         ? '🔥 Hot track! Trending worldwide'
                                         : song.popularity > 50
@@ -278,26 +278,26 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                             </div>
                         </div>
                     </div>
-                    <CardContent className="p-4">
-                        <h3 className="truncate font-semibold">
+                    <CardContent className="p-4 bg-gradient-to-b from-white/80 to-white/60 backdrop-blur-sm">
+                        <h3 className="truncate font-semibold text-slate-900">
                             {song.track_title}
                         </h3>
-                        <p className="truncate text-sm text-muted-foreground">
+                        <p className="truncate text-sm text-slate-600">
                             {song.artist_name}
                         </p>
                         <div className="mt-2 flex flex-wrap gap-2">
                             <Badge
                                 variant="secondary"
-                                className="bg-green-100 text-green-800"
+                                className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-200/50 shadow-sm"
                             >
-                                <CircleIcon className="mr-1 h-3 w-3 -translate-x-1 animate-pulse fill-green-300 text-green-300" />
+                                <CircleIcon className="mr-1 h-3 w-3 -translate-x-1 animate-pulse fill-green-400 text-green-400" />
                                 Listened before it went viral
                             </Badge>
                             <Badge
                                 variant="secondary"
-                                className="bg-orange-100 text-orange-800"
+                                className="bg-gradient-to-r from-orange-100 to-amber-100 text-orange-800 border-orange-200/50 shadow-sm"
                             >
-                                <StarIcon className="mr-1 h-3 w-3 -translate-x-1 animate-pulse fill-orange-300 text-orange-300" />
+                                <StarIcon className="mr-1 h-3 w-3 -translate-x-1 animate-pulse fill-orange-400 text-orange-400" />
                                 Rare find
                             </Badge>
                         </div>

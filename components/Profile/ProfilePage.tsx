@@ -91,14 +91,14 @@ export default function ProfilePage({
                     <DialogTrigger asChild>
                         <Button
                             variant="link"
-                            className="m-0 h-fit w-fit p-0 text-4xl font-bold text-foreground hover:underline"
+                            className="m-0 h-fit w-fit p-0 text-4xl font-bold text-slate-900 hover:text-purple-700 hover:underline transition-colors"
                         >
                             {currentDisplayName}
                         </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="bg-white/90 backdrop-blur-2xl border-white/60">
                         <DialogHeader>
-                            <DialogTitle>Change Display Name</DialogTitle>
+                            <DialogTitle className="text-slate-900">Change Display Name</DialogTitle>
                         </DialogHeader>
                         <form action={handleDisplayNameSubmit}>
                             <Input
@@ -106,8 +106,9 @@ export default function ProfilePage({
                                 placeholder="New display name"
                                 defaultValue={currentDisplayName}
                                 required
+                                className="bg-white/60 backdrop-blur-xl border-white/60"
                             />
-                            <Button type="submit" className="mt-4">
+                            <Button type="submit" className="mt-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg">
                                 Update Display Name
                             </Button>
                         </form>
@@ -117,7 +118,7 @@ export default function ProfilePage({
         }
 
         return (
-            <h1 className="text-4xl font-bold text-foreground">
+            <h1 className="text-4xl font-bold text-slate-900">
                 {currentDisplayName}
             </h1>
         )
@@ -130,18 +131,18 @@ export default function ProfilePage({
             return (
                 <Dialog open={openDescription} onOpenChange={setOpenDescription}>
                     <DialogTrigger asChild>
-                        <div className="flex cursor-pointer items-center text-foreground hover:text-muted-foreground transition-colors">
+                        <div className="flex cursor-pointer items-center text-slate-700 hover:text-purple-700 transition-colors">
                             <p
-                                className={`text-sm ${!currentDescription ? 'italic text-muted-foreground' : 'text-foreground'}`}
+                                className={`text-sm ${!currentDescription ? 'italic text-slate-500' : 'text-slate-700'}`}
                             >
                                 {displayDescription}
                             </p>
                             <PencilIcon size={16} className="ml-2" />
                         </div>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="bg-white/90 backdrop-blur-2xl border-white/60">
                         <DialogHeader>
-                            <DialogTitle>Change Description</DialogTitle>
+                            <DialogTitle className="text-slate-900">Change Description</DialogTitle>
                         </DialogHeader>
                         <form action={handleDescriptionSubmit}>
                             <Textarea
@@ -149,8 +150,9 @@ export default function ProfilePage({
                                 placeholder="Write a description about yourself..."
                                 defaultValue={currentDescription || ''}
                                 rows={4}
+                                className="bg-white/60 backdrop-blur-xl border-white/60"
                             />
-                            <Button type="submit" className="mt-4">
+                            <Button type="submit" className="mt-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg">
                                 Update Description
                             </Button>
                         </form>
@@ -161,7 +163,7 @@ export default function ProfilePage({
 
         return (
             <p
-                className={`text-sm ${!currentDescription ? 'italic text-muted-foreground' : 'text-foreground'}`}
+                className={`text-sm ${!currentDescription ? 'italic text-slate-500' : 'text-slate-700'}`}
             >
                 {displayDescription}
             </p>
@@ -171,13 +173,13 @@ export default function ProfilePage({
     return (
         <div className="space-y-8">
             {/* Profile Section */}
-            <div className="flex items-start gap-8">
+            <div className="flex items-start gap-8 bg-white/60 backdrop-blur-2xl rounded-3xl p-8 border border-white/60 shadow-2xl">
                 <Avatar
-                    className={`h-32 w-32 border-4 border-border shadow-lg ${canEditAvatar ? 'cursor-pointer hover:opacity-80' : ''}`}
+                    className={`h-32 w-32 border-4 border-white/80 shadow-2xl ring-4 ring-purple-500/20 ${canEditAvatar ? 'cursor-pointer hover:scale-105 hover:ring-purple-500/40 transition-all duration-300' : ''}`}
                     onClick={canEditAvatar ? handleAvatarClick : undefined}
                 >
                     <AvatarImage src={userData.avatar_url || undefined} className="object-cover" />
-                    <AvatarFallback className="text-2xl">
+                    <AvatarFallback className="text-2xl bg-gradient-to-br from-purple-500 to-pink-500 text-white">
                         {userData.first_name?.[0] ||
                             userData.username?.[0] ||
                             'U'}
@@ -188,7 +190,7 @@ export default function ProfilePage({
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                             <DisplayNameSection />
-                            <span className="text-xl text-muted-foreground">
+                            <span className="text-xl text-slate-600 font-medium">
                                 @{userData.username}
                             </span>
                         </div>
@@ -223,10 +225,10 @@ export default function ProfilePage({
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" className="hover:bg-white/60 hover:backdrop-blur-xl transition-all duration-300">
                         <Search className="h-5 w-5" />
                     </Button>
-                    <Button size="icon" className="bg-accent hover:bg-accent/90">
+                    <Button size="icon" className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300">
                         <Plus className="h-5 w-5" />
                     </Button>
                 </div>

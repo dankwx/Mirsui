@@ -261,20 +261,20 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
     return (
         <>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-2">
-                <TabsTrigger value="playlists">My Playlists</TabsTrigger>
-                <TabsTrigger value="details">Playlist Details</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-2 bg-white/60 backdrop-blur-xl border border-white/60 shadow-lg">
+                <TabsTrigger value="playlists" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white">My Playlists</TabsTrigger>
+                <TabsTrigger value="details" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white">Playlist Details</TabsTrigger>
             </TabsList>
 
             {/* Playlists Tab */}
             <TabsContent value="playlists" className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between bg-white/60 backdrop-blur-xl rounded-2xl p-6 border border-white/60 shadow-xl">
                     <div>
-                        <h3 className="text-2xl font-bold">My Playlists</h3>
-                        <p className="text-muted-foreground">Organize your musical discoveries</p>
+                        <h3 className="text-2xl font-bold text-slate-900">My Playlists</h3>
+                        <p className="text-slate-600">Organize your musical discoveries</p>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Badge variant="secondary">
+                        <Badge variant="secondary" className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 border-purple-200/50 shadow-md">
                             {playlists.length} playlists
                         </Badge>
                         {isOwnLibrary && (
@@ -288,7 +288,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
 
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {playlists.map((playlist) => (
-                        <Card key={playlist.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
+                        <Card key={playlist.id} className="group hover:shadow-2xl hover:scale-[1.03] transition-all duration-300 cursor-pointer bg-white/50 backdrop-blur-xl border-white/60"
                               onClick={async () => {
                                   // Se é a mesma playlist que já está selecionada e ela tem tracks,
                                   // apenas navegar sem recarregar
@@ -339,8 +339,8 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                                 <div className="p-4">
                                     <div className="flex items-start justify-between mb-2">
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="font-semibold text-base truncate">{playlist.name}</h4>
-                                            <p className="text-xs text-muted-foreground line-clamp-2">
+                                            <h4 className="font-semibold text-base truncate text-slate-900">{playlist.name}</h4>
+                                            <p className="text-xs text-slate-600 line-clamp-2">
                                                 {playlist.description || 'No description'}
                                             </p>
                                         </div>
@@ -354,8 +354,8 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                                         )}
                                     </div>
                                     
-                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                        <span className="flex items-center gap-1">
+                                    <div className="flex items-center justify-between text-xs text-slate-600">
+                                        <span className="flex items-center gap-1 bg-white/60 backdrop-blur-md px-2 py-1 rounded-full">
                                             <Music className="h-3 w-3" />
                                             {playlist.track_count} tracks
                                         </span>
@@ -363,7 +363,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                                         </div>
                                     </div>
                                     
-                                    <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
+                                    <div className="mt-2 text-xs text-slate-500 flex items-center gap-1">
                                         <Calendar className="h-3 w-3" />
                                         Created {new Date(playlist.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                                     </div>
@@ -375,16 +375,16 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                     {/* Create new playlist card */}
                     {isOwnLibrary && (
                         <Card 
-                            className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-dashed border-2 border-muted-foreground/30 hover:border-primary"
+                            className="group hover:shadow-2xl hover:scale-[1.03] transition-all duration-300 cursor-pointer border-dashed border-2 border-purple-300/50 hover:border-purple-500 bg-white/40 backdrop-blur-xl"
                             onClick={() => setCreatePlaylistOpen(true)}
                         >
                             <CardContent className="p-0">
-                                <div className="aspect-[4/3] flex items-center justify-center rounded-t-lg bg-muted/30">
-                                    <Plus className="h-12 w-12 text-muted-foreground group-hover:text-primary transition-colors" />
+                                <div className="aspect-[4/3] flex items-center justify-center rounded-t-lg bg-gradient-to-br from-purple-100/50 to-pink-100/50">
+                                    <Plus className="h-12 w-12 text-purple-500 group-hover:text-purple-700 group-hover:scale-110 transition-all duration-300" />
                                 </div>
                                 <div className="p-4 text-center">
-                                    <h4 className="font-semibold text-base mb-1">Create New Playlist</h4>
-                                    <p className="text-xs text-muted-foreground">
+                                    <h4 className="font-semibold text-base mb-1 text-slate-900">Create New Playlist</h4>
+                                    <p className="text-xs text-slate-600">
                                         Start curating your next musical journey
                                     </p>
                                 </div>
@@ -398,9 +398,9 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
             <TabsContent value="details" className="space-y-6">
                 {selectedPlaylist ? (
                     <>
-                        <div className="flex items-start gap-6">
+                        <div className="flex items-start gap-6 bg-white/60 backdrop-blur-2xl rounded-3xl p-8 border border-white/60 shadow-2xl">
                             <div className="relative">
-                                <div className="w-48 h-48 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 rounded-lg flex items-center justify-center overflow-hidden">
+                                <div className="w-48 h-48 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 rounded-2xl flex items-center justify-center overflow-hidden shadow-2xl ring-4 ring-white/50">
                                     {selectedPlaylist.thumbnail_url ? (
                                         <img 
                                             src={selectedPlaylist.thumbnail_url} 
@@ -414,11 +414,11 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                             </div>
                             
                             <div className="flex-1">
-                                <Badge variant="outline" className="mb-2">Playlist</Badge>
-                                <h1 className="text-4xl font-bold mb-2">{selectedPlaylist.name}</h1>
-                                <p className="text-muted-foreground text-lg mb-4">{selectedPlaylist.description || 'No description'}</p>
+                                <Badge variant="outline" className="mb-2 bg-white/60 backdrop-blur-md border-white/60">Playlist</Badge>
+                                <h1 className="text-4xl font-bold mb-2 text-slate-900">{selectedPlaylist.name}</h1>
+                                <p className="text-slate-600 text-lg mb-4">{selectedPlaylist.description || 'No description'}</p>
                                 
-                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-4 text-sm text-slate-600">
                                     <span className="flex items-center gap-1">
                                         <Users className="h-4 w-4" />
                                         You
@@ -433,6 +433,7 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                                             <Button 
                                                 variant="outline"
                                                 onClick={() => setAddMusicDialogOpen(true)}
+                                                className="bg-white/60 backdrop-blur-xl border-white/60 hover:bg-white/80 shadow-lg"
                                             >
                                                 <Plus className="h-4 w-4 mr-2" />
                                                 Add Songs
@@ -451,8 +452,8 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                         </div>
 
                         {/* Tracks list */}
-                        <div className="space-y-2">
-                            <div className="grid grid-cols-12 gap-4 px-4 py-2 text-sm text-muted-foreground border-b">
+                        <div className="space-y-2 bg-white/50 backdrop-blur-xl rounded-2xl p-6 border border-white/60 shadow-xl">
+                            <div className="grid grid-cols-12 gap-4 px-4 py-2 text-sm text-slate-600 border-b border-white/60">
                                 <div className="col-span-1">#</div>
                                 <div className="col-span-6">Title</div>
                                 <div className="col-span-3">Album</div>
@@ -465,30 +466,30 @@ const LibraryTabs: React.FC<LibraryTabsProps> = ({ playlists: initialPlaylists, 
                             {(selectedPlaylist.tracks || []).map((track, index) => (
                                 <div 
                                     key={track.id} 
-                                    className="grid grid-cols-12 gap-4 px-4 py-3 rounded-lg hover:bg-muted/50 transition-colors group"
+                                    className="grid grid-cols-12 gap-4 px-4 py-3 rounded-xl hover:bg-white/60 hover:backdrop-blur-xl transition-all duration-300 group"
                                 >
                                     <div className="col-span-1 flex items-center">
-                                        <span className="text-muted-foreground">{index + 1}</span>
+                                        <span className="text-slate-600 font-medium">{index + 1}</span>
                                     </div>
                                     
                                     <div className="col-span-6 flex items-center gap-3">
                                         <img
                                             src={track.track_thumbnail || '/placeholder-album.svg'}
                                             alt={track.track_title}
-                                            className="h-12 w-12 rounded object-cover"
+                                            className="h-12 w-12 rounded-lg object-cover shadow-md ring-2 ring-white/50"
                                         />
                                         <div className="min-w-0">
-                                            <p className="font-medium truncate">{track.track_title}</p>
-                                            <p className="text-sm text-muted-foreground truncate">{track.artist_name}</p>
+                                            <p className="font-medium truncate text-slate-900">{track.track_title}</p>
+                                            <p className="text-sm text-slate-600 truncate">{track.artist_name}</p>
                                         </div>
                                     </div>
                                     
                                     <div className="col-span-3 flex items-center">
-                                        <span className="text-sm text-muted-foreground truncate">{track.album_name}</span>
+                                        <span className="text-sm text-slate-600 truncate">{track.album_name}</span>
                                     </div>
                                     
                                     <div className="col-span-1 flex items-center">
-                                        <span className="text-sm text-muted-foreground">{track.duration || '--:--'}</span>
+                                        <span className="text-sm text-slate-600">{track.duration || '--:--'}</span>
                                     </div>
                                     
                                     <div className="col-span-1 flex items-center">

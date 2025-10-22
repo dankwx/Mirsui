@@ -70,11 +70,11 @@ export default function PredictionCard({
     }
 
     return (
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden bg-white/50 backdrop-blur-xl border-white/60 shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-300">
             <CardContent className="p-0">
                 <div className="flex">
                     {/* Thumbnail da música */}
-                    <div className="w-24 h-24 flex-shrink-0 relative">
+                    <div className="w-24 h-24 flex-shrink-0 relative ring-2 ring-white/50">
                         {prediction.track_thumbnail ? (
                             <Image
                                 src={prediction.track_thumbnail}
@@ -90,26 +90,26 @@ export default function PredictionCard({
                     </div>
 
                     {/* Conteúdo da previsão */}
-                    <div className="flex-1 p-4">
+                    <div className="flex-1 p-4 bg-gradient-to-r from-white/80 to-white/60 backdrop-blur-sm">
                         <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-foreground truncate">
+                                <h3 className="font-semibold text-slate-900 truncate">
                                     {prediction.track_title}
                                 </h3>
-                                <p className="text-muted-foreground text-sm truncate">
+                                <p className="text-slate-600 text-sm truncate">
                                     {prediction.artist_name}
                                 </p>
                                 
-                                <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
-                                    <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-4 mt-3 text-sm text-slate-600">
+                                    <div className="flex items-center gap-1 bg-white/60 backdrop-blur-md px-2 py-1 rounded-full">
                                         <TrendingUp className="h-4 w-4" />
                                         <span>Pop: {prediction.current_popularity}</span>
                                     </div>
-                                    <div className="flex items-center gap-1">
+                                    <div className="flex items-center gap-1 bg-white/60 backdrop-blur-md px-2 py-1 rounded-full">
                                         <Target className="h-4 w-4" />
                                         <span>Meta: {prediction.target_popularity}</span>
                                     </div>
-                                    <div className="flex items-center gap-1">
+                                    <div className="flex items-center gap-1 bg-white/60 backdrop-blur-md px-2 py-1 rounded-full">
                                         <Calendar className="h-4 w-4" />
                                         <span>{formatDate(prediction.predicted_viral_date)}</span>
                                     </div>
@@ -117,24 +117,24 @@ export default function PredictionCard({
                             </div>
 
                             <div className="flex flex-col items-end gap-2 ml-4">
-                                <Badge className={getStatusColor(prediction.status)}>
+                                <Badge className={`${getStatusColor(prediction.status)} backdrop-blur-md shadow-md`}>
                                     {getStatusText(prediction.status)}
                                 </Badge>
                                 
                                 {/* Badge de retorno parcial */}
                                 {prediction.status === 'Errou' && prediction.partial_return && (
-                                    <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300">
+                                    <Badge variant="outline" className="bg-yellow-100/80 backdrop-blur-md text-yellow-700 border-yellow-300/50 shadow-md">
                                         <span className="text-xs">Retorno Parcial</span>
                                     </Badge>
                                 )}
                                 
-                                <div className="flex items-center gap-1 text-sm">
-                                    <Coins className="h-4 w-4 text-yellow-600" />
-                                    <span>{prediction.points_bet} pts</span>
+                                <div className="flex items-center gap-1 text-sm bg-gradient-to-r from-yellow-100/80 to-amber-100/80 backdrop-blur-md px-2 py-1 rounded-full shadow-sm">
+                                    <Coins className="h-4 w-4 text-yellow-700" />
+                                    <span className="text-yellow-900 font-medium">{prediction.points_bet} pts</span>
                                 </div>
 
                                 {prediction.status !== 'pending' && (
-                                    <div className={`text-sm font-medium ${getPointsColor(prediction.points_gained)}`}>
+                                    <div className={`text-sm font-bold ${getPointsColor(prediction.points_gained)} bg-white/60 backdrop-blur-md px-3 py-1 rounded-full shadow-md`}>
                                         {formatPoints(prediction.points_gained)} pts
                                     </div>
                                 )}
@@ -142,10 +142,10 @@ export default function PredictionCard({
                         </div>
 
                         {/* Informações adicionais */}
-                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                <span>
-                                    Confiança: <span className={getConfidenceColor(prediction.prediction_confidence)}>
+                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/60">
+                            <div className="flex items-center gap-4 text-xs text-slate-600">
+                                <span className="bg-white/60 backdrop-blur-md px-2 py-1 rounded-full">
+                                    Confiança: <span className={`font-semibold ${getConfidenceColor(prediction.prediction_confidence)}`}>
                                         {prediction.prediction_confidence}%
                                     </span>
                                 </span>
@@ -155,9 +155,9 @@ export default function PredictionCard({
                             </div>
 
                             {prediction.status === 'pending' && (
-                                <div className="flex items-center gap-1 text-xs">
+                                <div className="flex items-center gap-1 text-xs bg-white/60 backdrop-blur-md px-2 py-1 rounded-full">
                                     <Clock className="h-3 w-3" />
-                                    <span className={prediction.is_expired ? 'text-red-600' : 'text-muted-foreground'}>
+                                    <span className={prediction.is_expired ? 'text-red-600 font-semibold' : 'text-slate-600'}>
                                         {getDaysText(prediction.days_until_prediction, prediction.status)}
                                     </span>
                                 </div>

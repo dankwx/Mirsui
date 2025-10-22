@@ -166,15 +166,17 @@ export default function MusicProphetComponent({
     return (
         <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between bg-white/60 backdrop-blur-2xl rounded-3xl p-8 border border-white/60 shadow-2xl">
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                        <Sparkles className="h-8 w-8 text-purple-600" />
+                    <div className="flex items-center gap-3">
+                        <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-md shadow-lg">
+                            <Sparkles className="h-8 w-8 text-purple-600" />
+                        </div>
                         <div>
-                            <h1 className="text-3xl font-bold text-foreground">
+                            <h1 className="text-3xl font-bold text-slate-900">
                                 Music Prophet
                             </h1>
-                            <p className="text-muted-foreground">
+                            <p className="text-slate-600">
                                 {isOwnProfile ? 'Suas previsões musicais' : `Previsões de ${userData.display_name || userData.username}`}
                             </p>
                         </div>
@@ -184,7 +186,7 @@ export default function MusicProphetComponent({
                 {isOwnProfile && (
                     <Button 
                         onClick={() => setShowNewPredictionModal(true)}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300"
                     >
                         <Target className="h-4 w-4" />
                         Nova Previsão
@@ -196,11 +198,12 @@ export default function MusicProphetComponent({
             <ProphetStats stats={prophetStats} />
 
             {/* Filters */}
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap bg-white/50 backdrop-blur-xl rounded-2xl p-4 border border-white/60 shadow-lg">
                 <Button
                     variant={filter === 'all' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setFilter('all')}
+                    className={filter === 'all' ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-md' : 'bg-white/60 backdrop-blur-md hover:bg-white/80 border-white/60'}
                 >
                     Todas ({predictions.length})
                 </Button>
@@ -208,6 +211,7 @@ export default function MusicProphetComponent({
                     variant={filter === 'pending' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setFilter('pending')}
+                    className={filter === 'pending' ? 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-md' : 'bg-white/60 backdrop-blur-md hover:bg-white/80 border-white/60'}
                 >
                     Pendentes ({predictions.filter(p => p.status === 'pending').length})
                 </Button>
@@ -215,6 +219,7 @@ export default function MusicProphetComponent({
                     variant={filter === 'correct' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setFilter('correct')}
+                    className={filter === 'correct' ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-md' : 'bg-white/60 backdrop-blur-md hover:bg-white/80 border-white/60'}
                 >
                     Acertos ({predictions.filter(p => p.status === 'correct').length})
                 </Button>
@@ -222,6 +227,7 @@ export default function MusicProphetComponent({
                     variant={filter === 'incorrect' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setFilter('incorrect')}
+                    className={filter === 'incorrect' ? 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 shadow-md' : 'bg-white/60 backdrop-blur-md hover:bg-white/80 border-white/60'}
                 >
                     Erros ({predictions.filter(p => p.status === 'incorrect').length})
                 </Button>
@@ -229,6 +235,7 @@ export default function MusicProphetComponent({
                     variant={filter === 'expired' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setFilter('expired')}
+                    className={filter === 'expired' ? 'bg-gradient-to-r from-gray-500 to-slate-500 hover:from-gray-600 hover:to-slate-600 shadow-md' : 'bg-white/60 backdrop-blur-md hover:bg-white/80 border-white/60'}
                 >
                     Expiradas ({predictions.filter(p => p.status === 'expired').length})
                 </Button>
@@ -246,13 +253,15 @@ export default function MusicProphetComponent({
                         />
                     ))
                 ) : (
-                    <Card>
+                    <Card className="bg-white/60 backdrop-blur-2xl border-white/60 shadow-xl">
                         <CardContent className="flex flex-col items-center justify-center py-12">
-                            <Sparkles className="h-12 w-12 text-muted-foreground mb-4" />
-                            <h3 className="text-lg font-semibold text-foreground mb-2">
+                            <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-md mb-4">
+                                <Sparkles className="h-12 w-12 text-purple-600" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-slate-900 mb-2">
                                 {filter === 'all' ? 'Nenhuma previsão ainda' : `Nenhuma previsão ${getStatusText(filter).toLowerCase()}`}
                             </h3>
-                            <p className="text-muted-foreground text-center max-w-md">
+                            <p className="text-slate-600 text-center max-w-md">
                                 {isOwnProfile && filter === 'all' 
                                     ? 'Comece fazendo sua primeira previsão sobre uma música que vai viralizar!'
                                     : `Não há previsões ${filter === 'all' ? '' : getStatusText(filter).toLowerCase()} para mostrar.`
@@ -261,7 +270,7 @@ export default function MusicProphetComponent({
                             {isOwnProfile && filter === 'all' && (
                                 <Button 
                                     onClick={() => setShowNewPredictionModal(true)}
-                                    className="mt-4"
+                                    className="mt-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg"
                                 >
                                     Fazer Primeira Previsão
                                 </Button>

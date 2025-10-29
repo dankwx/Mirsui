@@ -9,8 +9,6 @@ import {
     Headphones,
     Award,
     Play,
-    Heart,
-    MessageSquare,
     Share2,
     ArrowRight,
 } from 'lucide-react'
@@ -260,8 +258,8 @@ export default async function HomePage() {
                                     </CardContent>
                                     <CardFooter className="flex justify-between border-t border-white/50 bg-white/40 backdrop-blur-sm pt-4">
                                         <div className="flex items-center gap-2 text-sm text-slate-600">
-                                            <Heart size={16} />
-                                            <span>{track.likes_count}</span>
+                                            <TrendingUp size={16} />
+                                            <span>{track.total_claims} claims</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-slate-600">
                                             <Award size={16} />
@@ -316,8 +314,8 @@ export default async function HomePage() {
                                     </CardContent>
                                     <CardFooter className="flex justify-between border-t border-white/50 bg-white/40 backdrop-blur-sm pt-4">
                                         <div className="flex items-center gap-2 text-sm text-slate-600">
-                                            <Heart size={16} />
-                                            <span>Nova</span>
+                                            <TrendingUp size={16} />
+                                            <span>Disponível</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-slate-600">
                                             <Award size={16} />
@@ -369,8 +367,8 @@ export default async function HomePage() {
                                     </CardContent>
                                     <CardFooter className="flex justify-between border-t border-white/50 bg-white/40 backdrop-blur-sm pt-4">
                                         <div className="flex items-center gap-2 text-sm text-slate-600">
-                                            <Heart size={16} />
-                                            <span>Fresca</span>
+                                            <TrendingUp size={16} />
+                                            <span>Disponível</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-slate-600">
                                             <Award size={16} />
@@ -422,8 +420,8 @@ export default async function HomePage() {
                                     </CardContent>
                                     <CardFooter className="flex justify-between border-t border-white/50 bg-white/40 backdrop-blur-sm pt-4">
                                         <div className="flex items-center gap-2 text-sm text-slate-600">
-                                            <Heart size={16} />
-                                            <span>Nova</span>
+                                            <TrendingUp size={16} />
+                                            <span>Disponível</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-slate-600">
                                             <Award size={16} />
@@ -466,21 +464,11 @@ export default async function HomePage() {
                                         por {featuredTrack.artist_name}
                                     </h3>
                                     <p className="mb-6 leading-relaxed text-slate-300">
-                                        {featuredTrack.claim_message || 
-                                        `Esta track está ganhando destaque na nossa comunidade, com um score de descoberta de ${featuredTrack.discover_rating || 8}/10. Reivindicada como #{featuredTrack.position} por ${featuredTrack.display_name || featuredTrack.username}, esta música tem potencial para se tornar viral.`}
+                                        Esta track está ganhando destaque na nossa comunidade e tem potencial para se tornar viral. Descubra esta música antes que ela exploda nas redes sociais e construa sua reputação como um verdadeiro descobridor de talentos musicais.
                                     </p>
                                     <div className="flex flex-col gap-4 sm:flex-row">
-                                        <Link href={featuredTrack.track_url} target="_blank">
-                                            <Button className="bg-white text-slate-800 hover:bg-slate-100">
-                                                <Play size={16} className="mr-2" />
-                                                Ouvir Agora
-                                            </Button>
-                                        </Link>
                                         <Link href={`/track/${featuredTrack.track_url?.split('/').pop() || featuredTrack.track_title}`}>
-                                            <Button
-                                                variant="outline"
-                                                className="border-white text-white hover:bg-white/10"
-                                            >
+                                            <Button className="bg-white text-slate-800 hover:bg-slate-100 shadow-lg">
                                                 <Award size={16} className="mr-2" />
                                                 Ver Detalhes
                                             </Button>
@@ -499,14 +487,7 @@ export default async function HomePage() {
                                         Esta track etérea combina sintetizadores sonhadores com vocais cativantes, criando uma experiência auditiva de outro mundo. Com seu som único e buzz crescente, tem todos os elementos para se tornar a próxima sensação viral.
                                     </p>
                                     <div className="flex flex-col gap-4 sm:flex-row">
-                                        <Button className="bg-white text-slate-800 hover:bg-slate-100">
-                                            <Play size={16} className="mr-2" />
-                                            Ouvir Agora
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            className="border-white text-white hover:bg-white/10"
-                                        >
+                                        <Button className="bg-white text-slate-800 hover:bg-slate-100 shadow-lg">
                                             <Award size={16} className="mr-2" />
                                             Reivindicar Track
                                         </Button>
@@ -523,42 +504,6 @@ export default async function HomePage() {
                                     height={500}
                                     className="h-full w-full object-cover"
                                 />
-                                <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/60 via-transparent to-transparent p-8">
-                                    <div className="flex items-center gap-4">
-                                        <Button
-                                            size="icon"
-                                            className="rounded-full bg-white/90 text-slate-800 shadow-lg hover:bg-white"
-                                        >
-                                            <Play
-                                                size={24}
-                                                className="ml-0.5"
-                                            />
-                                        </Button>
-                                        <div className="flex gap-3">
-                                            <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                className="rounded-full text-white hover:bg-white/20"
-                                            >
-                                                <Heart size={20} />
-                                            </Button>
-                                            <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                className="rounded-full text-white hover:bg-white/20"
-                                            >
-                                                <MessageSquare size={20} />
-                                            </Button>
-                                            <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                className="rounded-full text-white hover:bg-white/20"
-                                            >
-                                                <Share2 size={20} />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>

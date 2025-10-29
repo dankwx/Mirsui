@@ -28,7 +28,7 @@ export interface FeaturedTrack extends TrendingTrack {
 export async function getTrendingTracks(limit: number = 6): Promise<TrendingTrack[]> {
   const supabase = createClient()
   
-  // Buscar tracks mais populares e recentes
+  // Buscar tracks mais populares e recentes (sem duplicatas)
   const { data, error } = await supabase
     .from('tracks')
     .select(`
@@ -47,16 +47,28 @@ export async function getTrendingTracks(limit: number = 6): Promise<TrendingTrac
     .not('track_thumbnail', 'is', null)
     .order('popularity', { ascending: false })
     .order('claimedat', { ascending: false })
-    .limit(limit)
+    .limit(limit * 3) // Buscar mais para garantir variedade após deduplicação
 
   if (error) {
     console.error('Erro ao buscar tracks trending:', error)
     return []
   }
 
+  // Remover duplicatas mantendo a primeira ocorrência (mais popular/recente)
+  const uniqueTracks = new Map<string, typeof data[0]>()
+  data?.forEach(track => {
+    const key = `${track.track_title.toLowerCase()}-${track.artist_name.toLowerCase()}`
+    if (!uniqueTracks.has(key)) {
+      uniqueTracks.set(key, track)
+    }
+  })
+
+  // Limitar ao número solicitado após deduplicação
+  const deduplicatedData = Array.from(uniqueTracks.values()).slice(0, limit)
+
   // Para cada track, contar likes, comments e total de claims
   const tracksWithStats = await Promise.all(
-    (data || []).map(async (track) => {
+    deduplicatedData.map(async (track) => {
       // Contar likes
       const { count: likesCount } = await supabase
         .from('track_likes')

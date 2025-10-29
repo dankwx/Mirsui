@@ -20,7 +20,7 @@ import { getTrendingTracks, getFeaturedTrack } from '@/utils/homepageService'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'SoundSage - Descubra música antes que ela exploda',
+    title: 'Mirsui - Descubra música antes que ela exploda',
     description: 'Reivindique suas músicas favoritas e prove que você ouviu antes que ficassem populares. Descubra novos talentos e construa sua credibilidade musical.',
 }
 

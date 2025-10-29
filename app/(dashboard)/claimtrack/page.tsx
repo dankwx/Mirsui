@@ -12,7 +12,7 @@ import SearchWithResults from '@/components/SearchWithResults/SearchWithResults'
 import TrendingPage from '@/components/TrendingTracks/TrendingTracks'
 
 export const metadata: Metadata = {
-    title: 'Reivindicar Músicas - SoundSage',
+    title: 'Reivindicar Músicas - Mirsui',
     description: 'Descubra novas músicas e reivindique tracks antes que se tornem virais.',
 }
 

@@ -23,7 +23,7 @@ export default function LoginPage() {
 
     // Definir título da página
     useEffect(() => {
-        document.title = 'Login - SoundSage'
+        document.title = 'Login - Mirsui'
     }, [])
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -85,7 +85,7 @@ export default function LoginPage() {
                 <div className="text-center mb-8">
                     <div className="flex justify-center items-center gap-2 mb-4">
                         <Music className="h-8 w-8 text-purple-600" />
-                        <h1 className="text-3xl font-bold text-gray-900">SoundSage</h1>
+                        <h1 className="text-3xl font-bold text-gray-900">Mirsui</h1>
                     </div>
                     <p className="text-gray-600">Descubra e compartilhe sua música favorita</p>
                 </div>
@@ -158,7 +158,7 @@ export default function LoginPage() {
                             <CardHeader>
                                 <CardTitle>Criar conta</CardTitle>
                                 <CardDescription>
-                                    Junte-se à comunidade SoundSage
+                                    Junte-se à comunidade Mirsui
                                 </CardDescription>
                             </CardHeader>
                             <form onSubmit={handleSignup}>

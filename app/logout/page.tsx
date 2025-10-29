@@ -6,7 +6,7 @@ import { useEffect } from 'react'
 export default function Deslog() {
     // Definir título da página
     useEffect(() => {
-        document.title = 'Logout - SoundSage'
+        document.title = 'Logout - Mirsui'
     }, [])
 
     return (

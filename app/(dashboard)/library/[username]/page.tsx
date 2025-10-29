@@ -24,15 +24,15 @@ export async function generateMetadata({
     
     if (error || !userData) {
         return {
-            title: 'Biblioteca não encontrada - SoundSage',
-            description: 'Esta biblioteca não foi encontrada no SoundSage.',
+            title: 'Biblioteca não encontrada - Mirsui',
+            description: 'Esta biblioteca não foi encontrada no Mirsui.',
         }
     }
 
     const displayName = userData.display_name || userData.username || 'Usuário'
     
     return {
-        title: `Biblioteca de ${displayName} | SoundSage`,
+        title: `Biblioteca de ${displayName} | Mirsui`,
         description: `Explore a biblioteca musical de ${displayName}. Veja suas descobertas, playlists e estatísticas musicais.`,
     }
 }

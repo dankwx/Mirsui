@@ -21,16 +21,16 @@ export async function generateMetadata({
     
     if (error || !userData) {
         return {
-            title: 'Usuário não encontrado - SoundSage',
-            description: 'Este perfil não foi encontrado no SoundSage.',
+            title: 'Usuário não encontrado - Mirsui',
+            description: 'Este perfil não foi encontrado no Mirsui.',
         }
     }
 
     const displayName = userData.display_name || userData.username || 'Usuário'
     
     return {
-        title: `${displayName} (@${userData.username}) | SoundSage`,
-        description: `Veja o perfil de ${displayName} no SoundSage. Descubra suas descobertas musicais e credibilidade hipster.`,
+        title: `${displayName} (@${userData.username}) | Mirsui`,
+        description: `Veja o perfil de ${displayName} no Mirsui. Descubra suas descobertas musicais e credibilidade hipster.`,
     }
 }
 

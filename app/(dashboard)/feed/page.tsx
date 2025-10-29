@@ -6,8 +6,8 @@ import { FeedSkeleton } from '@/components/ui/feed-skeleton'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Feed - SoundSage',
-    description: 'Veja as últimas descobertas musicais da comunidade SoundSage.',
+    title: 'Feed - Mirsui',
+    description: 'Veja as últimas descobertas musicais da comunidade Mirsui.',
 }
 
 // Componente separado para buscar dados - permite melhor controle do Suspense

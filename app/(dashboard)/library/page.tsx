@@ -4,8 +4,8 @@ import { fetchAuthData } from '@/utils/profileService'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Minha Biblioteca - SoundSage',
-    description: 'Acesse sua biblioteca musical pessoal no SoundSage.',
+    title: 'Minha Biblioteca - Mirsui',
+    description: 'Acesse sua biblioteca musical pessoal no Mirsui.',
 }
 
 export default async function LibraryRedirectPage() {

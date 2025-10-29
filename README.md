@@ -1,6 +1,6 @@
 <br/>
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/0e672797-24cc-4cf5-a1c5-c11bd98ec109" alt="SoundSage">
+  <img src="https://github.com/user-attachments/assets/0e672797-24cc-4cf5-a1c5-c11bd98ec109" alt="Mirsui">
 </div>
 
 <br/>

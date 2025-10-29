@@ -41,7 +41,7 @@ export default function FeedContent({ initialPosts }: FeedContentProps) {
                             {/* Header */}
                             <div className="text-center py-6">
                                 <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                                    🎵 SoundSage Feed
+                                    🎵 Mirsui Feed
                                 </h1>
                                 <p className="text-gray-600">
                                     Descobertas musicais da comunidade em tempo real

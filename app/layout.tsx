@@ -10,9 +10,9 @@ import AnalyticsProvider from '@/components/AnalyticsProvider/AnalyticsProvider'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-    title: 'SoundSage',
+    title: 'Mirsui',
     description:
-        'Claim your music and prove that you litened to it before it got popular',
+        'Claim your music, bet virals',
 }
 
 export default function RootLayout({

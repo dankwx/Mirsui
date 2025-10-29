@@ -46,14 +46,14 @@ export async function generateMetadata({
     if (trackInfo) {
         const artistNames = trackInfo.artists?.map((artist) => artist.name).join(', ') || 'Artista Desconhecido'
         return {
-            title: `${trackInfo.name} - ${artistNames} | SoundSage`,
-            description: `Descubra quem ouviu "${trackInfo.name}" de ${artistNames} antes que ficasse popular. Veja estatísticas e reivindique sua descoberta no SoundSage.`,
+            title: `${trackInfo.name} - ${artistNames} | Mirsui`,
+            description: `Descubra quem ouviu "${trackInfo.name}" de ${artistNames} antes que ficasse popular. Veja estatísticas e reivindique sua descoberta no Mirsui.`,
         }
     }
     
     return {
-        title: 'Música - SoundSage',
-        description: 'Descubra informações sobre esta música no SoundSage.',
+        title: 'Música - Mirsui',
+        description: 'Descubra informações sobre esta música no Mirsui.',
     }
 }
 

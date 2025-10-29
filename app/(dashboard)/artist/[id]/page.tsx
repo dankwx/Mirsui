@@ -35,14 +35,14 @@ export async function generateMetadata({
             : ''
         
         return {
-            title: `${artistInfo.name} | SoundSage`,
-            description: `Descubra ${artistInfo.name} no SoundSage${followerCount ? ` - ${followerCount} seguidores` : ''}. Veja quem descobriu suas músicas primeiro e explore sua discografia completa.`,
+            title: `${artistInfo.name} | Mirsui`,
+            description: `Descubra ${artistInfo.name} no Mirsui${followerCount ? ` - ${followerCount} seguidores` : ''}. Veja quem descobriu suas músicas primeiro e explore sua discografia completa.`,
         }
     }
     
     return {
-        title: 'Artista - SoundSage',
-        description: 'Descubra informações sobre este artista no SoundSage.',
+        title: 'Artista - Mirsui',
+        description: 'Descubra informações sobre este artista no Mirsui.',
     }
 }
 

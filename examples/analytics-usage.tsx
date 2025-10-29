@@ -1,5 +1,5 @@
 // examples/analytics-usage.tsx
-// Exemplos de como usar o Google Analytics no SoundSage
+// Exemplos de como usar o Google Analytics no Mirsui
 
 import { 
   trackMusicPlay, 

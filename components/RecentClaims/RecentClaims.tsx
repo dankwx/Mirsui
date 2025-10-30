@@ -14,7 +14,7 @@ export default function RecentClaims({ claims }: RecentClaimsProps) {
             <Card className="border-border bg-card">
                 <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
-                        <Music className="h-5 w-5 text-[#4a9d6f]" />
+                        <Music className="h-5 w-5 text-purple-600" />
                         Reivindicações Recentes
                     </CardTitle>
                 </CardHeader>
@@ -31,7 +31,7 @@ export default function RecentClaims({ claims }: RecentClaimsProps) {
         <Card className="border-border bg-card sticky top-8">
             <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                    <Music className="h-5 w-5 text-[#4a9d6f]" />
+                    <Music className="h-5 w-5 text-purple-600" />
                     Reivindicações Recentes
                 </CardTitle>
             </CardHeader>
@@ -41,7 +41,7 @@ export default function RecentClaims({ claims }: RecentClaimsProps) {
                         <Link
                             key={claim.id}
                             href={`/track/${claim.track_url?.split('/').pop() || claim.track_title}`}
-                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#4a9d6f]/10 transition-colors group"
+                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-purple-600/10 transition-colors group"
                         >
                             {claim.track_thumbnail && (
                                 <img
@@ -51,7 +51,7 @@ export default function RecentClaims({ claims }: RecentClaimsProps) {
                                 />
                             )}
                             <div className="flex-1 min-w-0">
-                                <h4 className="text-sm font-medium text-foreground truncate group-hover:text-[#4a9d6f] transition-colors">
+                                <h4 className="text-sm font-medium text-foreground truncate group-hover:text-purple-600 transition-colors">
                                     {claim.track_title}
                                 </h4>
                                 <p className="text-xs text-muted-foreground truncate">

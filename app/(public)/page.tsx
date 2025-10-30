@@ -41,7 +41,7 @@ export default async function HomePage() {
             <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white/70 px-4 py-4 backdrop-blur-xl shadow-lg">
                 <div className="mx-auto flex max-w-7xl items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#4a9d6f] to-[#3d8a5f] shadow-lg shadow-[#4a9d6f]/30">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-purple-700 shadow-lg shadow-purple-600/30">
                             <Music className="h-4 w-4 text-white" />
                         </div>
                         <div>
@@ -78,7 +78,7 @@ export default async function HomePage() {
                     <div className="flex items-center gap-3">
                         <GetAuth />
                         <Link href="/feed">
-                            <Button className="bg-[#4a9d6f] hover:bg-[#3d8a5f] text-white shadow-lg shadow-[#4a9d6f]/30">
+                            <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-600/30">
                                 Entrar
                             </Button>
                         </Link>
@@ -92,7 +92,7 @@ export default async function HomePage() {
                     <div className="mx-auto max-w-4xl text-center">
                         <h1 className="mb-6 text-5xl font-bold leading-tight text-gray-900 md:text-7xl">
                             Você ouviu primeiro.
-                            <span className="text-[#4a9d6f] block">
+                            <span className="text-purple-600 block">
                                 E tem como provar.
                             </span>
                         </h1>
@@ -104,7 +104,7 @@ export default async function HomePage() {
                             <Link href="/feed">
                                 <Button
                                     size="lg"
-                                    className="bg-[#4a9d6f] hover:bg-[#3d8a5f] px-8 py-4 text-lg text-white shadow-2xl shadow-[#4a9d6f]/40 hover:shadow-3xl hover:shadow-[#4a9d6f]/60 transition-all duration-300"
+                                    className="bg-purple-600 hover:bg-purple-700 px-8 py-4 text-lg text-white shadow-2xl shadow-purple-600/40 hover:shadow-3xl hover:shadow-purple-600/60 transition-all duration-300"
                                 >
                                     Explorar músicas
                                     <ArrowRight className="ml-2" size={20} />
@@ -114,7 +114,7 @@ export default async function HomePage() {
                                 <Button
                                     size="lg"
                                     variant="outline"
-                                    className="border-[#4a9d6f] bg-white/50 backdrop-blur-xl px-8 py-4 text-lg text-gray-900 hover:bg-[#4a9d6f]/10 hover:border-[#3d8a5f] hover:text-[#3d8a5f] shadow-lg hover:shadow-xl transition-all duration-300"
+                                    className="border-purple-600 bg-white/50 backdrop-blur-xl px-8 py-4 text-lg text-gray-900 hover:bg-purple-600/10 hover:border-purple-700 hover:text-purple-700 shadow-lg hover:shadow-xl transition-all duration-300"
                                 >
                                     Como funciona
                                 </Button>
@@ -125,9 +125,9 @@ export default async function HomePage() {
 
                 {/* Background Elements */}
                 <div className="absolute inset-0 overflow-hidden opacity-40">
-                    <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-gradient-to-br from-[#4a9d6f]/20 to-blue-500/20 blur-3xl"></div>
-                    <div className="absolute -left-32 top-1/2 h-96 w-96 rounded-full bg-gradient-to-br from-orange-500/20 to-red-500/20 blur-3xl"></div>
-                    <div className="absolute bottom-0 right-1/4 h-96 w-96 rounded-full bg-gradient-to-br from-purple-500/20 to-[#4a9d6f]/20 blur-3xl"></div>
+                    <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-gradient-to-br from-purple-600/20 to-purple-400/20 blur-3xl"></div>
+                    <div className="absolute -left-32 top-1/2 h-96 w-96 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl"></div>
+                    <div className="absolute bottom-0 right-1/4 h-96 w-96 rounded-full bg-gradient-to-br from-purple-700/20 to-purple-500/20 blur-3xl"></div>
                 </div>
             </section>
 
@@ -135,11 +135,11 @@ export default async function HomePage() {
             <section className="px-4 py-16">
                 <div className="mx-auto max-w-7xl">
                     <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-                        <Card className="border-gray-200 bg-gradient-to-br from-[#4a9d6f]/10 via-white/60 to-[#4a9d6f]/5 backdrop-blur-xl shadow-xl shadow-[#4a9d6f]/10 hover:shadow-2xl hover:shadow-[#4a9d6f]/20 transition-all duration-300">
+                        <Card className="border-gray-200 bg-gradient-to-br from-purple-600/10 via-white/60 to-purple-600/5 backdrop-blur-xl shadow-xl shadow-purple-600/10 hover:shadow-2xl hover:shadow-purple-600/20 transition-all duration-300">
                             <CardContent className="pt-8 text-center">
-                                <div className="bg-gradient-to-br from-[#4a9d6f]/20 to-[#3d8a5f]/20 backdrop-blur-md mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-[#4a9d6f]/30 shadow-lg">
+                                <div className="bg-gradient-to-br from-purple-600/20 to-purple-700/20 backdrop-blur-md mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-purple-600/30 shadow-lg">
                                     <Clock
-                                        className="text-[#4a9d6f]"
+                                        className="text-purple-600"
                                         size={32}
                                     />
                                 </div>
@@ -195,7 +195,7 @@ export default async function HomePage() {
                 id="discover"
                 className="relative overflow-hidden bg-gradient-to-b from-gray-100/50 to-white px-4 py-16"
             >
-                <div className="absolute inset-0 bg-gradient-to-br from-[#4a9d6f]/10 via-transparent to-blue-500/10"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 via-transparent to-purple-400/10"></div>
                 <div className="mx-auto max-w-7xl relative z-10">
                     <div className="mb-12 text-center">
                         <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
@@ -248,7 +248,7 @@ export default async function HomePage() {
                                             <Link href={`/track/${track.track_url?.split('/').pop() || track.track_title}`}>
                                                 <Button
                                                     size="sm"
-                                                    className="bg-gradient-to-r from-[#4a9d6f] to-[#3d8a5f] hover:from-[#3d8a5f] hover:to-[#367a52] text-white shadow-lg shadow-[#4a9d6f]/30"
+                                                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg shadow-purple-600/30"
                                                 >
                                                     Ver Track
                                                 </Button>
@@ -305,7 +305,7 @@ export default async function HomePage() {
                                             </div>
                                             <Button
                                                 size="sm"
-                                                className="bg-gradient-to-r from-[#4a9d6f] to-[#3d8a5f] hover:from-[#3d8a5f] hover:to-[#367a52] text-white shadow-lg shadow-[#4a9d6f]/30"
+                                                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg shadow-purple-600/30"
                                             >
                                                 Reivindicar
                                             </Button>
@@ -358,7 +358,7 @@ export default async function HomePage() {
                                             </div>
                                             <Button
                                                 size="sm"
-                                                className="bg-gradient-to-r from-[#4a9d6f] to-[#3d8a5f] hover:from-[#3d8a5f] hover:to-[#367a52] text-white shadow-lg shadow-[#4a9d6f]/30"
+                                                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg shadow-purple-600/30"
                                             >
                                                 Reivindicar
                                             </Button>
@@ -411,7 +411,7 @@ export default async function HomePage() {
                                             </div>
                                             <Button
                                                 size="sm"
-                                                className="bg-gradient-to-r from-[#4a9d6f] to-[#3d8a5f] hover:from-[#3d8a5f] hover:to-[#367a52] text-white shadow-lg shadow-[#4a9d6f]/30"
+                                                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg shadow-purple-600/30"
                                             >
                                                 Reivindicar
                                             </Button>
@@ -436,7 +436,7 @@ export default async function HomePage() {
                         <Link href="/feed">
                             <Button
                                 variant="outline"
-                                className="border-[#4a9d6f] bg-white/40 backdrop-blur-xl px-8 text-gray-900 hover:bg-[#4a9d6f]/10 hover:border-[#3d8a5f] hover:text-[#3d8a5f] shadow-lg hover:shadow-xl transition-all duration-300"
+                                className="border-purple-600 bg-white/40 backdrop-blur-xl px-8 text-gray-900 hover:bg-purple-600/10 hover:border-purple-700 hover:text-purple-700 shadow-lg hover:shadow-xl transition-all duration-300"
                             >
                                 Ver mais
                                 <ArrowRight className="ml-2" size={16} />
@@ -526,11 +526,11 @@ export default async function HomePage() {
                     </div>
 
                     <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
-                        <Card className="border-white/40 bg-white/40 backdrop-blur-2xl text-center transition-all duration-300 hover:shadow-2xl hover:shadow-[#4a9d6f]/20 hover:bg-white/60">
+                        <Card className="border-white/40 bg-white/40 backdrop-blur-2xl text-center transition-all duration-300 hover:shadow-2xl hover:shadow-purple-600/20 hover:bg-white/60">
                             <CardContent className="pt-10">
-                                <div className="from-[#4a9d6f]/30 to-[#3d8a5f]/30 mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br backdrop-blur-md border border-[#4a9d6f]/40 shadow-xl">
+                                <div className="from-purple-600/30 to-purple-700/30 mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br backdrop-blur-md border border-purple-600/40 shadow-xl">
                                     <Headphones
-                                        className="text-[#4a9d6f]"
+                                        className="text-purple-600"
                                         size={40}
                                     />
                                 </div>
@@ -603,7 +603,7 @@ export default async function HomePage() {
                         <Link href="/feed">
                             <Button
                                 size="lg"
-                                className="bg-gradient-to-r from-[#4a9d6f] to-[#3d8a5f] hover:from-[#3d8a5f] hover:to-[#367a52] px-10 py-4 text-lg text-white shadow-2xl shadow-[#4a9d6f]/40 hover:shadow-3xl hover:shadow-[#4a9d6f]/60 transition-all duration-300"
+                                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-10 py-4 text-lg text-white shadow-2xl shadow-purple-600/40 hover:shadow-3xl hover:shadow-purple-600/60 transition-all duration-300"
                             >
                                 Começar
                                 <ArrowRight className="ml-2" size={20} />
@@ -614,7 +614,7 @@ export default async function HomePage() {
             </section>
 
             {/* CTA Section */}
-            <section className="from-[#4a9d6f]/20 via-blue-500/20 to-purple-500/20 bg-gradient-to-br px-4 py-20 relative overflow-hidden">
+            <section className="from-purple-600/20 via-purple-500/20 to-purple-700/20 bg-gradient-to-br px-4 py-20 relative overflow-hidden">
                 <div className="absolute inset-0 bg-white/60 backdrop-blur-3xl"></div>
                 <div className="mx-auto max-w-4xl text-center relative z-10">
                     <h2 className="mb-6 text-3xl font-bold text-slate-900 md:text-4xl">
@@ -628,7 +628,7 @@ export default async function HomePage() {
                         <Link href="/register">
                             <Button
                                 size="lg"
-                                className="bg-gradient-to-r from-[#4a9d6f] to-[#3d8a5f] hover:from-[#3d8a5f] hover:to-[#367a52] px-10 py-4 text-lg text-white shadow-2xl shadow-[#4a9d6f]/40 hover:shadow-3xl hover:shadow-[#4a9d6f]/60 transition-all duration-300"
+                                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-10 py-4 text-lg text-white shadow-2xl shadow-purple-600/40 hover:shadow-3xl hover:shadow-purple-600/60 transition-all duration-300"
                             >
                                 Entrar grátis
                                 <ArrowRight className="ml-2" size={20} />
@@ -637,7 +637,7 @@ export default async function HomePage() {
                         <Button
                             size="lg"
                             variant="outline"
-                            className="border-[#4a9d6f] bg-white/40 backdrop-blur-xl px-10 py-4 text-lg text-gray-900 hover:bg-[#4a9d6f]/10 hover:border-[#3d8a5f] hover:text-[#3d8a5f] shadow-lg hover:shadow-xl transition-all duration-300"
+                            className="border-purple-600 bg-white/40 backdrop-blur-xl px-10 py-4 text-lg text-gray-900 hover:bg-purple-600/10 hover:border-purple-700 hover:text-purple-700 shadow-lg hover:shadow-xl transition-all duration-300"
                         >
                             Saber mais
                         </Button>

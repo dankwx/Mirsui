@@ -16,25 +16,25 @@
       --popover: 0 0% 100%;
       --popover-foreground: 222.2 84% 4.9%;
 
-      /* Primary - Sage Green (cor principal do Mirsui) */
-      --primary: 142 30% 45%;  /* sage-600 equivalente */
+      /* Primary - Purple (cor principal roxo) */
+      --primary: 270 60% 55%;  /* roxo médio */
       --primary-foreground: 0 0% 100%;
-      --primary-hover: 142 35% 40%; /* sage-700 equivalente */
+      --primary-hover: 270 65% 50%; /* roxo mais escuro ao hover */
 
-      /* Secondary - Slate/Gray neutro */
-      --secondary: 215 20% 65%;  /* slate-500 equivalente */
+      /* Secondary - Light Purple (roxo claro para secundário) */
+      --secondary: 280 50% 70%;  /* roxinho claro */
       --secondary-foreground: 0 0% 100%;
-      --secondary-hover: 215 25% 55%; /* slate-600 equivalente */
+      --secondary-hover: 280 55% 65%; /* um pouco mais escuro ao hover */
 
-      /* Accent - Purple (para destaque, badges, interações) */
-      --accent: 270 60% 60%;  /* purple-500 */
+      /* Accent - Deep Purple (roxo mais escuro para destaque) */
+      --accent: 265 70% 45%;  /* roxo escuro/intenso */
       --accent-foreground: 0 0% 100%;
-      --accent-hover: 270 65% 50%; /* purple-600 */
+      --accent-hover: 265 75% 40%; /* ainda mais escuro ao hover */
 
-      /* Tertiary - Blue (para informações secundárias) */
-      --tertiary: 217 91% 60%;  /* blue-500 */
+      /* Tertiary - Lavender (lavanda/roxo azulado) */
+      --tertiary: 250 60% 65%;  /* lavanda */
       --tertiary-foreground: 0 0% 100%;
-      --tertiary-hover: 217 91% 50%; /* blue-600 */
+      --tertiary-hover: 250 65% 60%; /* lavanda mais intensa */
 
       /* Success - Green */
       --success: 142 76% 36%;
@@ -55,19 +55,19 @@
       /* Border & Input */
       --border: 214.3 31.8% 91.4%;
       --input: 214.3 31.8% 91.4%;
-      --ring: 142 30% 45%;
+      --ring: 270 60% 55%;
 
       --radius: 0.5rem;
 
       /* Sidebar */
       --sidebar-background: 0 0% 98%;
       --sidebar-foreground: 240 5.3% 26.1%;
-      --sidebar-primary: 142 30% 45%;
+      --sidebar-primary: 270 60% 55%;
       --sidebar-primary-foreground: 0 0% 98%;
-      --sidebar-accent: 240 4.8% 95.9%;
+      --sidebar-accent: 280 40% 95%;
       --sidebar-accent-foreground: 240 5.9% 10%;
       --sidebar-border: 220 13% 91%;
-      --sidebar-ring: 142 30% 45%;
+      --sidebar-ring: 270 60% 55%;
     }
 
     .dark {
@@ -83,25 +83,25 @@
       --popover: 222.2 84% 4.9%;
       --popover-foreground: 210 40% 98%;
 
-      /* Primary - Sage Green (ajustado para dark) */
-      --primary: 142 35% 55%;  /* sage mais claro no dark */
+      /* Primary - Purple (roxo mais claro no dark) */
+      --primary: 270 65% 65%;  /* roxo claro para dark mode */
       --primary-foreground: 222.2 47.4% 11.2%;
-      --primary-hover: 142 40% 60%; /* ainda mais claro ao hover */
+      --primary-hover: 270 70% 70%; /* ainda mais claro ao hover */
 
-      /* Secondary - Slate/Gray neutro */
-      --secondary: 217.2 32.6% 17.5%;
-      --secondary-foreground: 210 40% 98%;
-      --secondary-hover: 217.2 32.6% 25%; 
+      /* Secondary - Light Purple (roxinho claro) */
+      --secondary: 280 55% 75%;
+      --secondary-foreground: 222.2 47.4% 11.2%;
+      --secondary-hover: 280 60% 80%; 
 
-      /* Accent - Purple */
-      --accent: 270 60% 65%;  /* purple mais claro no dark */
+      /* Accent - Deep Purple (roxo intenso) */
+      --accent: 265 75% 60%;  /* roxo escuro mais claro no dark */
       --accent-foreground: 222.2 47.4% 11.2%;
-      --accent-hover: 270 65% 70%;
+      --accent-hover: 265 80% 65%;
 
-      /* Tertiary - Blue */
-      --tertiary: 217 91% 65%;
+      /* Tertiary - Lavender (lavanda clara) */
+      --tertiary: 250 65% 70%;
       --tertiary-foreground: 222.2 47.4% 11.2%;
-      --tertiary-hover: 217 91% 70%;
+      --tertiary-hover: 250 70% 75%;
 
       /* Success - Green */
       --success: 142 76% 45%;
@@ -122,17 +122,17 @@
       /* Border & Input */
       --border: 217.2 32.6% 17.5%;
       --input: 217.2 32.6% 17.5%;
-      --ring: 142 35% 55%;
+      --ring: 270 65% 65%;
 
       /* Sidebar */
       --sidebar-background: 240 5.9% 10%;
       --sidebar-foreground: 240 4.8% 95.9%;
-      --sidebar-primary: 142 35% 55%;
+      --sidebar-primary: 270 65% 65%;
       --sidebar-primary-foreground: 0 0% 100%;
-      --sidebar-accent: 240 3.7% 15.9%;
+      --sidebar-accent: 270 30% 20%;
       --sidebar-accent-foreground: 240 4.8% 95.9%;
       --sidebar-border: 240 3.7% 15.9%;
-      --sidebar-ring: 142 35% 55%;
+      --sidebar-ring: 270 65% 65%;
     }
   }
 

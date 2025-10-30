@@ -54,7 +54,7 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                                         {post.avatar_url ? (
                                                             <AvatarImage src={post.avatar_url} alt={post.username} />
                                                         ) : null}
-                                                        <AvatarFallback className="text-lg bg-[#4a9d6f]/10 text-[#4a9d6f]">
+                                                        <AvatarFallback className="text-lg bg-purple-600/10 text-purple-600">
                                                             {(post.display_name || post.username || 'U').charAt(0).toUpperCase()}
                                                         </AvatarFallback>
                                                     </Avatar>
@@ -78,7 +78,7 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center gap-1 mt-1">
-                                                            <Target className="h-4 w-4 text-[#4a9d6f]" />
+                                                            <Target className="h-4 w-4 text-purple-600" />
                                                             <span className="text-muted-foreground text-sm">
                                                                 reivindicou uma música
                                                             </span>
@@ -152,7 +152,7 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                                         </Badge>
                                                     )}
                                                     {post.position <= 10 && (
-                                                        <Badge variant="outline" className="text-xs bg-[#4a9d6f]/10 text-[#4a9d6f] border-[#4a9d6f]/30">
+                                                        <Badge variant="outline" className="text-xs bg-purple-600/10 text-purple-600 border-purple-600/30">
                                                             early-bird
                                                         </Badge>
                                                     )}
@@ -184,7 +184,7 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                                 Seja o primeiro a reivindicar uma música e aparecer no feed!
                                             </p>
                                             <Link href="/claimtrack">
-                                                <Button className="gap-2 bg-[#4a9d6f] hover:bg-[#3d8a5f] text-white">
+                                                <Button className="gap-2 bg-purple-600 hover:bg-purple-700 text-white">
                                                     <Plus className="h-4 w-4" />
                                                     Reivindicar Música
                                                 </Button>

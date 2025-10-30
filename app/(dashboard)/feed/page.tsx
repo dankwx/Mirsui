@@ -3,6 +3,7 @@ import { getFeedPostsWithInteractions, checkUserLikedTracks } from '@/utils/soci
 import { createClient } from '@/utils/supabase/server'
 import FeedContent from '@/components/FeedContent/FeedContent'
 import { FeedSkeleton } from '@/components/ui/feed-skeleton'
+import { getRecentClaims } from '@/utils/recentClaimsService'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -14,11 +15,14 @@ export const metadata: Metadata = {
 async function FeedData() {
     const supabase = createClient()
     
-    // Buscar posts do feed primeiro (rápido)
-    const feedPosts = await getFeedPostsWithInteractions(20, 0)
+    // Buscar posts do feed e reivindicações recentes em paralelo
+    const [feedPosts, recentClaims] = await Promise.all([
+        getFeedPostsWithInteractions(20, 0),
+        getRecentClaims(4) // Buscar apenas 4 músicas únicas
+    ])
     
     if (feedPosts.length === 0) {
-        return <FeedContent initialPosts={[]} />
+        return <FeedContent initialPosts={[]} recentClaims={recentClaims} />
     }
     
     // Só buscar dados do usuário se houver posts
@@ -39,7 +43,7 @@ async function FeedData() {
         isLiked: userLikes.has(post.id)
     }))
 
-    return <FeedContent initialPosts={postsWithLikes} />
+    return <FeedContent initialPosts={postsWithLikes} recentClaims={recentClaims} />
 }
 
 export default function FeedPage() {

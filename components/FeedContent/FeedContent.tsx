@@ -16,19 +16,22 @@ import PostInteractions from '@/components/PostInteractions/PostInteractions'
 import { FeedPostWithInteractions } from '@/utils/socialInteractionsService'
 import { getUserBadge, isUserVerified } from '@/utils/feedHelpers'
 import Link from 'next/link'
+import RecentClaims from '@/components/RecentClaims/RecentClaims'
+import { RecentClaim } from '@/utils/recentClaimsService'
 
 interface FeedContentProps {
     initialPosts: (FeedPostWithInteractions & { isLiked: boolean })[]
+    recentClaims: RecentClaim[]
 }
 
 // Server Component otimizado para feed
-export default function FeedContent({ initialPosts }: FeedContentProps) {
+export default function FeedContent({ initialPosts, recentClaims }: FeedContentProps) {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+        <div className="min-h-screen bg-gray-50">
             <div className="container mx-auto px-4 py-8">
-                <div className="max-w-3xl mx-auto">
-                    {/* Main Feed */}
-                    <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-7xl mx-auto">
+                    {/* Main Feed - 8 colunas em telas grandes */}
+                    <div className="lg:col-span-8 space-y-6">
                             {/* Header */}
                             <div className="text-center py-6">
                                 <h1 className="text-3xl font-bold text-gray-800 mb-2">
@@ -43,7 +46,7 @@ export default function FeedContent({ initialPosts }: FeedContentProps) {
                             <div className="space-y-6">
                                 {initialPosts.length > 0 ? (
                                     initialPosts.map((post) => (
-                                        <Card key={post.id} className="hover:shadow-lg transition-shadow duration-300 border-0 shadow-md">
+                                        <Card key={post.id} className="hover:shadow-lg transition-shadow duration-300 border border-gray-200 bg-white">
                                             <CardContent className="p-6">
                                                 {/* Header do Post */}
                                                 <div className="flex items-start gap-3 mb-4">
@@ -84,7 +87,7 @@ export default function FeedContent({ initialPosts }: FeedContentProps) {
                                                 </div>
 
                                                 {/* Conteúdo da música */}
-                                                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 mb-4">
+                                                <div className="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-100">
                                                     <div className="flex items-center gap-4">
                                                         {post.track_thumbnail && (
                                                             <img
@@ -144,17 +147,17 @@ export default function FeedContent({ initialPosts }: FeedContentProps) {
                                                 {/* Tags */}
                                                 <div className="flex gap-2 mb-4">
                                                     {post.position === 1 && (
-                                                        <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200">
+                                                        <Badge variant="outline" className="text-xs bg-orange-100 text-orange-700 border-orange-300">
                                                             primeiro-claim
                                                         </Badge>
                                                     )}
                                                     {post.position <= 10 && (
-                                                        <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+                                                        <Badge variant="outline" className="text-xs bg-purple-100 text-purple-700 border-purple-300">
                                                             early-bird
                                                         </Badge>
                                                     )}
                                                     {post.discover_rating && post.discover_rating > 8 && (
-                                                        <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                                        <Badge variant="outline" className="text-xs bg-teal-100 text-teal-700 border-teal-300">
                                                             high-potential
                                                         </Badge>
                                                     )}
@@ -190,6 +193,11 @@ export default function FeedContent({ initialPosts }: FeedContentProps) {
                                     </Card>
                                 )}
                             </div>
+                    </div>
+
+                    {/* Sidebar - Reivindicações Recentes - 4 colunas em telas grandes */}
+                    <div className="lg:col-span-4">
+                        <RecentClaims claims={recentClaims} />
                     </div>
                 </div>
             </div>

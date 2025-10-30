@@ -62,32 +62,32 @@ export default function Sidebar({ userProfile }: SidebarProps) {
     }
 
     return (
-        <aside className="h-screen w-64 border-r border-white/20 bg-white/70 backdrop-blur-2xl shadow-xl shadow-black/5">
+        <aside className="h-screen w-64 border-r border-border bg-background/70 backdrop-blur-2xl shadow-xl">
             <div className="flex flex-col h-full">
                 <div className="p-6">
                     <Link href="/" className="flex items-center gap-2 group">
-                        <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:shadow-purple-500/50 transition-all duration-300 group-hover:scale-110">
-                            <Music className="h-5 w-5 text-white" />
+                        <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center shadow-lg shadow-accent/30 group-hover:shadow-accent/50 transition-all duration-300 group-hover:scale-110">
+                            <Music className="h-5 w-5 text-accent-foreground" />
                         </div>
                         <div>
-                            <span className="text-xl font-bold text-slate-900 group-hover:text-purple-700 transition-colors">Mirsui</span>
-                            <p className="text-xs text-slate-600">Music Discovery</p>
+                            <span className="text-xl font-bold text-foreground group-hover:text-accent transition-colors">Mirsui</span>
+                            <p className="text-xs text-muted-foreground">Music Discovery</p>
                         </div>
                     </Link>
                 </div>
 
                 <nav className="flex-1 px-3">
                     <div className="space-y-1">
-                        <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Navigation</p>
+                        <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Navigation</p>
                         {navigationItems.map((item) => {
                             const Icon = item.icon
                             return (
                                 <Link
                                     key={item.title}
                                     href={item.url}
-                                    className="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-700 hover:bg-white/60 hover:backdrop-blur-xl hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 hover:text-purple-700 hover:scale-[1.02]"
+                                    className="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-foreground hover:bg-card/60 hover:backdrop-blur-xl hover:shadow-lg hover:shadow-accent/10 transition-all duration-300 hover:text-accent hover:scale-[1.02]"
                                 >
-                                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 group-hover:from-purple-100 group-hover:to-pink-100 transition-all duration-300 group-hover:shadow-md">
+                                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-muted to-muted/80 group-hover:from-accent/20 group-hover:to-accent-hover/20 transition-all duration-300 group-hover:shadow-md">
                                         <Icon className="h-4 w-4" />
                                     </div>
                                     <span className="font-medium">{item.title}</span>
@@ -97,16 +97,16 @@ export default function Sidebar({ userProfile }: SidebarProps) {
                     </div>
                 </nav>
 
-                <div className="p-4 border-t border-white/30 bg-gradient-to-br from-white/50 to-white/30 backdrop-blur-xl">
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-white/60 backdrop-blur-md shadow-lg hover:shadow-xl hover:bg-white/80 transition-all duration-300 cursor-pointer group">
+                <div className="p-4 border-t border-border bg-gradient-to-br from-card/50 to-card/30 backdrop-blur-xl">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-card/60 backdrop-blur-md shadow-lg hover:shadow-xl hover:bg-card/80 transition-all duration-300 cursor-pointer group">
                         {userProfile?.avatar_url ? (
                             <img
                                 src={userProfile.avatar_url}
                                 alt="User avatar"
-                                className="h-10 w-10 rounded-full object-cover ring-2 ring-white/50 group-hover:ring-purple-500/50 transition-all duration-300"
+                                className="h-10 w-10 rounded-full object-cover ring-2 ring-border group-hover:ring-accent/50 transition-all duration-300"
                             />
                         ) : (
-                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-semibold shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all duration-300 group-hover:scale-110">
+                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-tertiary to-tertiary-hover flex items-center justify-center text-tertiary-foreground font-semibold shadow-lg shadow-tertiary/30 group-hover:shadow-tertiary/50 transition-all duration-300 group-hover:scale-110">
                                 {getInitials(
                                     userProfile?.display_name,
                                     userProfile?.email
@@ -114,12 +114,12 @@ export default function Sidebar({ userProfile }: SidebarProps) {
                             </div>
                         )}
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-slate-900 truncate">
+                            <p className="text-sm font-semibold text-foreground truncate">
                                 {userProfile?.display_name ||
                                     userProfile?.username ||
                                     'User'}
                             </p>
-                            <p className="text-xs text-slate-600 truncate">
+                            <p className="text-xs text-muted-foreground truncate">
                                 {userProfile?.email || 'Not logged in'}
                             </p>
                         </div>

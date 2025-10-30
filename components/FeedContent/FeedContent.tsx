@@ -27,17 +27,17 @@ interface FeedContentProps {
 // Server Component otimizado para feed
 export default function FeedContent({ initialPosts, recentClaims }: FeedContentProps) {
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-muted">
             <div className="container mx-auto px-4 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-7xl mx-auto">
                     {/* Main Feed - 8 colunas em telas grandes */}
                     <div className="lg:col-span-8 space-y-6">
                             {/* Header */}
                             <div className="text-center py-6">
-                                <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                                <h1 className="text-3xl font-bold text-foreground mb-2">
                                     🎵 Mirsui Feed
                                 </h1>
-                                <p className="text-gray-600">
+                                <p className="text-muted-foreground">
                                     Descobertas musicais da comunidade em tempo real
                                 </p>
                             </div>
@@ -46,7 +46,7 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                             <div className="space-y-6">
                                 {initialPosts.length > 0 ? (
                                     initialPosts.map((post) => (
-                                        <Card key={post.id} className="hover:shadow-lg transition-shadow duration-300 border border-gray-200 bg-white">
+                                        <Card key={post.id} className="hover:shadow-lg transition-shadow duration-300 border-border bg-card">
                                             <CardContent className="p-6">
                                                 {/* Header do Post */}
                                                 <div className="flex items-start gap-3 mb-4">
@@ -54,7 +54,7 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                                         {post.avatar_url ? (
                                                             <AvatarImage src={post.avatar_url} alt={post.username} />
                                                         ) : null}
-                                                        <AvatarFallback className="text-lg bg-purple-100">
+                                                        <AvatarFallback className="text-lg bg-accent/10 text-accent">
                                                             {(post.display_name || post.username || 'U').charAt(0).toUpperCase()}
                                                         </AvatarFallback>
                                                     </Avatar>
@@ -62,24 +62,24 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                                         <div className="flex items-center gap-2">
                                                             <Link 
                                                                 href={`/user/${post.username}`}
-                                                                className="font-semibold hover:underline"
+                                                                className="font-semibold hover:underline text-foreground"
                                                             >
                                                                 {post.display_name || post.username}
                                                             </Link>
                                                             {isUserVerified(post.position) && (
-                                                                <Crown className="h-4 w-4 text-yellow-500" />
+                                                                <Crown className="h-4 w-4 text-warning" />
                                                             )}
                                                             <Badge variant="secondary" className="text-xs">
                                                                 {getUserBadge(post.position, post.discover_rating || undefined)}
                                                             </Badge>
-                                                            <span className="text-gray-500">•</span>
-                                                            <span className="text-gray-500 text-sm">
+                                                            <span className="text-muted-foreground">•</span>
+                                                            <span className="text-muted-foreground text-sm">
                                                                 {post.claimedat ? new Date(post.claimedat).toLocaleDateString('pt-BR') : 'Data não disponível'}
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center gap-1 mt-1">
-                                                            <Target className="h-4 w-4 text-purple-500" />
-                                                            <span className="text-gray-600 text-sm">
+                                                            <Target className="h-4 w-4 text-accent" />
+                                                            <span className="text-muted-foreground text-sm">
                                                                 reivindicou uma música
                                                             </span>
                                                         </div>
@@ -87,7 +87,7 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                                 </div>
 
                                                 {/* Conteúdo da música */}
-                                                <div className="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-100">
+                                                <div className="bg-muted rounded-xl p-4 mb-4 border border-border">
                                                     <div className="flex items-center gap-4">
                                                         {post.track_thumbnail && (
                                                             <img
@@ -97,7 +97,7 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                                             />
                                                         )}
                                                         <div className="flex-1">
-                                                            <h3 className="font-semibold text-lg">
+                                                            <h3 className="font-semibold text-lg text-foreground">
                                                                 <Link 
                                                                     href={`/track/${post.track_url?.split('/').pop() || post.track_title}`}
                                                                     className="hover:underline"
@@ -105,15 +105,15 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                                                     {post.track_title}
                                                                 </Link>
                                                             </h3>
-                                                            <p className="text-gray-600">
+                                                            <p className="text-muted-foreground">
                                                                 {post.artist_name}
                                                             </p>
                                                             {post.album_name && (
-                                                                <p className="text-gray-500 text-sm">
+                                                                <p className="text-muted-foreground text-sm">
                                                                     {post.album_name}
                                                                 </p>
                                                             )}
-                                                            <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                                                            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                                                                 <div className="flex items-center gap-1">
                                                                     <Award className="h-4 w-4" />
                                                                     <span>#{post.position}</span>
@@ -138,7 +138,7 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                                 {/* Mensagem do usuário */}
                                                 {post.claim_message && (
                                                     <div className="mb-4">
-                                                        <p className="text-gray-700 italic">
+                                                        <p className="text-foreground italic">
                                                             &quot;{post.claim_message}&quot;
                                                         </p>
                                                     </div>
@@ -147,17 +147,17 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                                 {/* Tags */}
                                                 <div className="flex gap-2 mb-4">
                                                     {post.position === 1 && (
-                                                        <Badge variant="outline" className="text-xs bg-orange-100 text-orange-700 border-orange-300">
+                                                        <Badge variant="outline" className="text-xs bg-warning/10 text-warning border-warning/30">
                                                             primeiro-claim
                                                         </Badge>
                                                     )}
                                                     {post.position <= 10 && (
-                                                        <Badge variant="outline" className="text-xs bg-purple-100 text-purple-700 border-purple-300">
+                                                        <Badge variant="outline" className="text-xs bg-accent/10 text-accent border-accent/30">
                                                             early-bird
                                                         </Badge>
                                                     )}
                                                     {post.discover_rating && post.discover_rating > 8 && (
-                                                        <Badge variant="outline" className="text-xs bg-teal-100 text-teal-700 border-teal-300">
+                                                        <Badge variant="outline" className="text-xs bg-success/10 text-success border-success/30">
                                                             high-potential
                                                         </Badge>
                                                     )}
@@ -176,15 +176,15 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                 ) : (
                                     <Card className="text-center py-12">
                                         <CardContent>
-                                            <Music className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                                            <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                                            <Music className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                                            <h3 className="text-lg font-semibold text-foreground mb-2">
                                                 Nenhuma atividade ainda
                                             </h3>
-                                            <p className="text-gray-500 mb-4">
+                                            <p className="text-muted-foreground mb-4">
                                                 Seja o primeiro a reivindicar uma música e aparecer no feed!
                                             </p>
                                             <Link href="/claimtrack">
-                                                <Button className="gap-2">
+                                                <Button className="gap-2 bg-primary hover:bg-primary-hover text-primary-foreground">
                                                     <Plus className="h-4 w-4" />
                                                     Reivindicar Música
                                                 </Button>

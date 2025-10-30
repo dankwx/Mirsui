@@ -4,89 +4,135 @@
 
   @layer base {
     :root {
+      /* Background & Foreground */
       --background: 0 0% 100%;
       --foreground: 222.2 84% 4.9%;
 
+      /* Card */
       --card: 0 0% 100%;
       --card-foreground: 222.2 84% 4.9%;
 
+      /* Popover */
       --popover: 0 0% 100%;
       --popover-foreground: 222.2 84% 4.9%;
 
-      --primary: 222.2 47.4% 11.2%;
-      --primary-foreground: 210 40% 98%;
+      /* Primary - Sage Green (cor principal do Mirsui) */
+      --primary: 142 30% 45%;  /* sage-600 equivalente */
+      --primary-foreground: 0 0% 100%;
+      --primary-hover: 142 35% 40%; /* sage-700 equivalente */
 
-      --secondary: 210 40% 96.1%;
-      --secondary-foreground: 222.2 47.4% 11.2%;
+      /* Secondary - Slate/Gray neutro */
+      --secondary: 215 20% 65%;  /* slate-500 equivalente */
+      --secondary-foreground: 0 0% 100%;
+      --secondary-hover: 215 25% 55%; /* slate-600 equivalente */
 
+      /* Accent - Purple (para destaque, badges, interações) */
+      --accent: 270 60% 60%;  /* purple-500 */
+      --accent-foreground: 0 0% 100%;
+      --accent-hover: 270 65% 50%; /* purple-600 */
+
+      /* Tertiary - Blue (para informações secundárias) */
+      --tertiary: 217 91% 60%;  /* blue-500 */
+      --tertiary-foreground: 0 0% 100%;
+      --tertiary-hover: 217 91% 50%; /* blue-600 */
+
+      /* Success - Green */
+      --success: 142 76% 36%;
+      --success-foreground: 0 0% 100%;
+
+      /* Warning - Orange/Yellow */
+      --warning: 25 95% 53%;
+      --warning-foreground: 0 0% 100%;
+
+      /* Destructive - Red */
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 0 0% 100%;
+
+      /* Muted */
       --muted: 210 40% 96.1%;
       --muted-foreground: 215.4 16.3% 46.9%;
 
-      --accent: 210 40% 96.1%;
-      --accent-foreground: 222.2 47.4% 11.2%;
-
-      --destructive: 0 84.2% 60.2%;
-      --destructive-foreground: 210 40% 98%;
-
+      /* Border & Input */
       --border: 214.3 31.8% 91.4%;
       --input: 214.3 31.8% 91.4%;
-      --ring: 222.2 84% 4.9%;
+      --ring: 142 30% 45%;
 
       --radius: 0.5rem;
 
+      /* Sidebar */
       --sidebar-background: 0 0% 98%;
-
       --sidebar-foreground: 240 5.3% 26.1%;
-
-      --sidebar-primary: 240 5.9% 10%;
-
+      --sidebar-primary: 142 30% 45%;
       --sidebar-primary-foreground: 0 0% 98%;
-
       --sidebar-accent: 240 4.8% 95.9%;
-
       --sidebar-accent-foreground: 240 5.9% 10%;
-
       --sidebar-border: 220 13% 91%;
-
-      --sidebar-ring: 217.2 91.2% 59.8%;
+      --sidebar-ring: 142 30% 45%;
     }
 
     .dark {
+      /* Background & Foreground */
       --background: 222.2 84% 4.9%;
       --foreground: 210 40% 98%;
 
+      /* Card */
       --card: 222.2 84% 4.9%;
       --card-foreground: 210 40% 98%;
 
+      /* Popover */
       --popover: 222.2 84% 4.9%;
       --popover-foreground: 210 40% 98%;
 
-      --primary: 210 40% 98%;
+      /* Primary - Sage Green (ajustado para dark) */
+      --primary: 142 35% 55%;  /* sage mais claro no dark */
       --primary-foreground: 222.2 47.4% 11.2%;
+      --primary-hover: 142 40% 60%; /* ainda mais claro ao hover */
 
+      /* Secondary - Slate/Gray neutro */
       --secondary: 217.2 32.6% 17.5%;
       --secondary-foreground: 210 40% 98%;
+      --secondary-hover: 217.2 32.6% 25%; 
 
-      --muted: 217.2 32.6% 17.5%;
-      --muted-foreground: 215 20.2% 65.1%;
+      /* Accent - Purple */
+      --accent: 270 60% 65%;  /* purple mais claro no dark */
+      --accent-foreground: 222.2 47.4% 11.2%;
+      --accent-hover: 270 65% 70%;
 
-      --accent: 217.2 32.6% 17.5%;
-      --accent-foreground: 210 40% 98%;
+      /* Tertiary - Blue */
+      --tertiary: 217 91% 65%;
+      --tertiary-foreground: 222.2 47.4% 11.2%;
+      --tertiary-hover: 217 91% 70%;
 
+      /* Success - Green */
+      --success: 142 76% 45%;
+      --success-foreground: 0 0% 100%;
+
+      /* Warning - Orange/Yellow */
+      --warning: 25 95% 60%;
+      --warning-foreground: 222.2 47.4% 11.2%;
+
+      /* Destructive - Red */
       --destructive: 0 62.8% 30.6%;
       --destructive-foreground: 210 40% 98%;
 
+      /* Muted */
+      --muted: 217.2 32.6% 17.5%;
+      --muted-foreground: 215 20.2% 65.1%;
+
+      /* Border & Input */
       --border: 217.2 32.6% 17.5%;
       --input: 217.2 32.6% 17.5%;
-      --ring: 212.7 26.8% 83.9%;
+      --ring: 142 35% 55%;
+
+      /* Sidebar */
       --sidebar-background: 240 5.9% 10%;
       --sidebar-foreground: 240 4.8% 95.9%;
-      --sidebar-primary: 224.3 76.3% 48%;
+      --sidebar-primary: 142 35% 55%;
       --sidebar-primary-foreground: 0 0% 100%;
       --sidebar-accent: 240 3.7% 15.9%;
       --sidebar-accent-foreground: 240 4.8% 95.9%;
       --sidebar-border: 240 3.7% 15.9%;
-      --sidebar-ring: 217.2 91.2% 59.8%;
+      --sidebar-ring: 142 35% 55%;
     }
   }
 

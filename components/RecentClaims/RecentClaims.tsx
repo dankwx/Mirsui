@@ -11,15 +11,15 @@ interface RecentClaimsProps {
 export default function RecentClaims({ claims }: RecentClaimsProps) {
     if (claims.length === 0) {
         return (
-            <Card className="border border-gray-200 bg-white">
+            <Card className="border-border bg-card">
                 <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
-                        <Music className="h-5 w-5 text-purple-500" />
+                        <Music className="h-5 w-5 text-accent" />
                         Reivindicações Recentes
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-sm text-gray-500 text-center py-4">
+                    <p className="text-sm text-muted-foreground text-center py-4">
                         Nenhuma reivindicação ainda
                     </p>
                 </CardContent>
@@ -28,10 +28,10 @@ export default function RecentClaims({ claims }: RecentClaimsProps) {
     }
 
     return (
-        <Card className="border border-gray-200 bg-white sticky top-8">
+        <Card className="border-border bg-card sticky top-8">
             <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                    <Music className="h-5 w-5 text-purple-500" />
+                    <Music className="h-5 w-5 text-accent" />
                     Reivindicações Recentes
                 </CardTitle>
             </CardHeader>
@@ -41,7 +41,7 @@ export default function RecentClaims({ claims }: RecentClaimsProps) {
                         <Link
                             key={claim.id}
                             href={`/track/${claim.track_url?.split('/').pop() || claim.track_title}`}
-                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-purple-50 transition-colors group"
+                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent/10 transition-colors group"
                         >
                             {claim.track_thumbnail && (
                                 <img
@@ -51,10 +51,10 @@ export default function RecentClaims({ claims }: RecentClaimsProps) {
                                 />
                             )}
                             <div className="flex-1 min-w-0">
-                                <h4 className="text-sm font-medium text-gray-900 truncate group-hover:text-purple-700 transition-colors">
+                                <h4 className="text-sm font-medium text-foreground truncate group-hover:text-accent transition-colors">
                                     {claim.track_title}
                                 </h4>
-                                <p className="text-xs text-gray-600 truncate">
+                                <p className="text-xs text-muted-foreground truncate">
                                     {claim.artist_name}
                                 </p>
                             </div>

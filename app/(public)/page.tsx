@@ -46,7 +46,7 @@ export default async function HomePage() {
                         </div>
                         <div>
                             <h1 className="text-xl font-bold text-slate-900">
-                                Mirsui
+                                mirsui
                             </h1>
                             <p className="text-xs text-slate-600">
                                 Music Discovery
@@ -54,7 +54,7 @@ export default async function HomePage() {
                         </div>
                     </div>
 
-                    <div className="mx-auto max-w-7xl">
+                    <div className="mx-auto max-w-7xl flex gap-6">
                         <Link
                             href="#how-it-works"
                             className="font-medium text-slate-700 hover:text-slate-900 transition-colors"

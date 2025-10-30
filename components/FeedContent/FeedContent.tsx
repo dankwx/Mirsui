@@ -13,7 +13,6 @@ import {
     Target
 } from 'lucide-react'
 import PostInteractions from '@/components/PostInteractions/PostInteractions'
-import FeedSidebar from './FeedSidebar'
 import { FeedPostWithInteractions } from '@/utils/socialInteractionsService'
 import { getUserBadge, isUserVerified } from '@/utils/feedHelpers'
 import Link from 'next/link'
@@ -27,17 +26,9 @@ export default function FeedContent({ initialPosts }: FeedContentProps) {
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
             <div className="container mx-auto px-4 py-8">
-                <div className="grid gap-8 lg:grid-cols-4">
-                    {/* Left Sidebar */}
-                    <div className="lg:col-span-1">
-                        <div className="space-y-6">
-                            <FeedSidebar />
-                        </div>
-                    </div>
-
+                <div className="max-w-3xl mx-auto">
                     {/* Main Feed */}
-                    <div className="lg:col-span-2">
-                        <div className="space-y-6">
+                    <div className="space-y-6">
                             {/* Header */}
                             <div className="text-center py-6">
                                 <h1 className="text-3xl font-bold text-gray-800 mb-2">
@@ -199,7 +190,6 @@ export default function FeedContent({ initialPosts }: FeedContentProps) {
                                     </Card>
                                 )}
                             </div>
-                        </div>
                     </div>
                 </div>
             </div>

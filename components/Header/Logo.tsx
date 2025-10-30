@@ -56,7 +56,7 @@ export default function Logo() {
                 className={`text-center align-middle transition-opacity duration-300 ${showText ? 'opacity-100' : 'opacity-0'}`}
                 href="/"
             >
-                sound sage
+                mirsui
             </Link>
         </div>
     )

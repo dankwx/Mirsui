@@ -13,7 +13,7 @@ export default function Footer() {
                             </div>
                             <div>
                                 <h1 className="text-xl font-bold text-slate-800">
-                                    Sound Sage
+                                    Mirsui
                                 </h1>
                                 <p className="text-sm text-slate-500">
                                     Music Discovery Platform
@@ -94,7 +94,7 @@ export default function Footer() {
 
                 <div className="flex flex-col items-center justify-between border-t border-slate-200 pt-8 md:flex-row">
                     <p className="text-sm text-slate-500">
-                        © 2025 Sound Sage. All rights reserved.
+                        © 2025 Mirsui. All rights reserved.
                     </p>
                     <div className="mt-4 flex gap-6 md:mt-0">
                         <Link

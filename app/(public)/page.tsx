@@ -20,8 +20,8 @@ import { getTrendingTracks, getFeaturedTrack } from '@/utils/homepageService'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Mirsui - Descubra música antes que ela exploda',
-    description: 'Reivindique suas músicas favoritas e prove que você ouviu antes que ficassem populares. Descubra novos talentos e construa sua credibilidade musical.',
+    title: 'Mirsui - Você ouviu primeiro',
+    description: 'Salve suas músicas favoritas antes delas bombarem. Mostre que você tem ouvido pra música boa.',
 }
 
 export default async function HomePage() {
@@ -46,7 +46,7 @@ export default async function HomePage() {
                         </div>
                         <div>
                             <h1 className="text-xl font-bold text-slate-900">
-                                Sound Sage
+                                Mirsui
                             </h1>
                             <p className="text-xs text-slate-600">
                                 Music Discovery
@@ -54,18 +54,18 @@ export default async function HomePage() {
                         </div>
                     </div>
 
-                    <div className="hidden items-center gap-6 md:flex">
+                    <div className="mx-auto max-w-7xl">
                         <Link
                             href="#how-it-works"
                             className="font-medium text-slate-700 hover:text-slate-900 transition-colors"
                         >
-                            Como Funciona
+                            Como funciona
                         </Link>
                         <Link
                             href="#discover"
                             className="font-medium text-slate-700 hover:text-slate-900 transition-colors"
                         >
-                            Descobrir
+                            Explorar
                         </Link>
                         <Link
                             href="#about"
@@ -79,7 +79,7 @@ export default async function HomePage() {
                         <GetAuth />
                         <Link href="/feed">
                             <Button className="bg-gradient-to-r from-sage-600 to-sage-700 hover:from-sage-700 hover:to-sage-800 text-white shadow-lg shadow-sage-600/30">
-                                Começar
+                                Entrar
                             </Button>
                         </Link>
                     </div>
@@ -91,16 +91,14 @@ export default async function HomePage() {
                 <div className="relative z-10 mx-auto max-w-7xl">
                     <div className="mx-auto max-w-4xl text-center">
                         <h1 className="mb-6 text-5xl font-bold leading-tight text-slate-800 md:text-7xl">
-                            Descubra Música
+                            Você ouviu primeiro.
                             <span className="text-sage-600 block">
-                                Antes de Todos
+                                E tem como provar.
                             </span>
                         </h1>
                         <p className="mx-auto mb-10 max-w-3xl text-xl leading-relaxed text-slate-600 md:text-2xl">
-                            Reivindique tracks antes delas viralizarem e construa sua
-                            reputação como um verdadeiro descobridor de talentos musicais. 
-                            Encontre os hits de amanhã antes deles explodirem no TikTok
-                            e redes sociais.
+                            Salve suas músicas favoritas antes delas bombarem.
+                            Quando todo mundo descobrir, você já vai ter seu registro.
                         </p>
                         <div className="flex flex-col justify-center gap-4 sm:flex-row">
                             <Link href="/feed">
@@ -108,7 +106,7 @@ export default async function HomePage() {
                                     size="lg"
                                     className="bg-gradient-to-r from-sage-600 to-sage-700 hover:from-sage-700 hover:to-sage-800 px-8 py-4 text-lg text-white shadow-2xl shadow-sage-600/40 hover:shadow-3xl hover:shadow-sage-600/60 transition-all duration-300"
                                 >
-                                    Começar a Descobrir
+                                    Explorar músicas
                                     <ArrowRight className="ml-2" size={20} />
                                 </Button>
                             </Link>
@@ -117,7 +115,7 @@ export default async function HomePage() {
                                 variant="outline"
                                 className="border-white/40 bg-white/30 backdrop-blur-xl px-8 py-4 text-lg text-slate-800 hover:bg-white/50 shadow-lg hover:shadow-xl transition-all duration-300"
                             >
-                                Como Funciona
+                                Como funciona
                             </Button>
                         </div>
                     </div>
@@ -144,11 +142,11 @@ export default async function HomePage() {
                                     />
                                 </div>
                                 <h3 className="text-sage-900 mb-3 text-xl font-semibold">
-                                    Descoberta Precoce
+                                    Você ouviu primeiro
                                 </h3>
                                 <p className="text-slate-700 leading-relaxed">
-                                    Encontre tracks antes delas se tornarem mainstream
-                                    e prove seu gosto musical
+                                    Descubra sons novos antes de virarem hype.
+                                    Seu gosto, registrado.
                                 </p>
                             </CardContent>
                         </Card>
@@ -161,11 +159,11 @@ export default async function HomePage() {
                                     />
                                 </div>
                                 <h3 className="mb-3 text-xl font-semibold text-blue-900">
-                                    Construa Reputação
+                                    Mostre seu ouvido
                                 </h3>
                                 <p className="leading-relaxed text-slate-700">
-                                    Ganhe reconhecimento conforme suas tracks reivindicadas
-                                    ganham popularidade e viralizam
+                                    Quanto mais suas músicas bombam,
+                                    mais você prova que sabe escolher
                                 </p>
                             </CardContent>
                         </Card>
@@ -178,11 +176,11 @@ export default async function HomePage() {
                                     />
                                 </div>
                                 <h3 className="mb-3 text-xl font-semibold text-rose-900">
-                                    Seleção Curada
+                                    Música de verdade
                                 </h3>
                                 <p className="leading-relaxed text-slate-700">
-                                    Explore tracks emergentes cuidadosamente selecionadas
-                                    de todos os gêneros
+                                    Sons que você não vai achar em qualquer playlist.
+                                    Todos os gêneros.
                                 </p>
                             </CardContent>
                         </Card>
@@ -199,11 +197,10 @@ export default async function HomePage() {
                 <div className="mx-auto max-w-7xl relative z-10">
                     <div className="mb-12 text-center">
                         <h2 className="mb-4 text-3xl font-bold text-slate-900 md:text-4xl">
-                            Tracks em Destaque para Reivindicar
+                            Músicas pra você salvar agora
                         </h2>
                         <p className="mx-auto max-w-2xl text-lg text-slate-700">
-                            Essas tracks estão ganhando momentum. Reivindique-as agora
-                            antes delas explodirem nas redes sociais.
+                            Essas estão começando a crescer. Salva antes que fique mainstream.
                         </p>
                     </div>
 
@@ -439,7 +436,7 @@ export default async function HomePage() {
                                 variant="outline"
                                 className="border-white/50 bg-white/40 backdrop-blur-xl px-8 text-slate-800 hover:bg-white/60 shadow-lg hover:shadow-xl transition-all duration-300"
                             >
-                                Explorar Mais Tracks
+                                Ver mais
                                 <ArrowRight className="ml-2" size={16} />
                             </Button>
                         </Link>
@@ -461,10 +458,11 @@ export default async function HomePage() {
                                         {featuredTrack.track_title}
                                     </h2>
                                     <h3 className="mb-2 text-xl font-semibold text-slate-300">
-                                        por {featuredTrack.artist_name}
+                                        {featuredTrack.artist_name}
                                     </h3>
                                     <p className="mb-6 leading-relaxed text-slate-300">
-                                        Esta track está ganhando destaque na nossa comunidade e tem potencial para se tornar viral. Descubra esta música antes que ela exploda nas redes sociais e construa sua reputação como um verdadeiro descobridor de talentos musicais.
+                                        A galera tá começando a pegar essa. Tem aquela vibe que pode viralizar
+                                        do nada. Vale a pena salvar antes que todo mundo descubra.
                                     </p>
                                     <div className="flex flex-col gap-4 sm:flex-row">
                                         <Link href={`/track/${featuredTrack.track_url?.split('/').pop() || featuredTrack.track_title}`}>
@@ -518,12 +516,10 @@ export default async function HomePage() {
                 <div className="mx-auto max-w-7xl">
                     <div className="mb-16 text-center">
                         <h2 className="mb-4 text-3xl font-bold text-slate-800 md:text-4xl">
-                            Como o Sound Sage Funciona
+                            Como funciona
                         </h2>
                         <p className="mx-auto max-w-3xl text-xl leading-relaxed text-slate-600">
-                            Construa sua reputação como um descobridor de talentos musicais em três
-                            passos simples. Descubra os hits de amanhã antes
-                            deles explodirem nas redes sociais.
+                            É simples. Você descobre, salva e comprova.
                         </p>
                     </div>
 
@@ -537,12 +533,11 @@ export default async function HomePage() {
                                     />
                                 </div>
                                 <h3 className="mb-4 text-xl font-semibold text-slate-900">
-                                    1. Descubra
+                                    1. Escuta
                                 </h3>
                                 <p className="leading-relaxed text-slate-700">
-                                    Navegue por nossa seleção curada de
-                                    tracks emergentes de vários gêneros e
-                                    descubra joias escondidas antes de qualquer outra pessoa
+                                    Explora as músicas. Acha aquela que você sente
+                                    que vai bombar. Confia no seu ouvido.
                                 </p>
                             </CardContent>
                         </Card>
@@ -556,12 +551,11 @@ export default async function HomePage() {
                                     />
                                 </div>
                                 <h3 className="mb-4 text-xl font-semibold text-slate-900">
-                                    2. Reivindique
+                                    2. Salva
                                 </h3>
                                 <p className="leading-relaxed text-slate-700">
-                                    Reivindique tracks que você acredita que se tornarão populares
-                                    antes delas viralizarem no TikTok, Instagram,
-                                    ou outras plataformas sociais
+                                    Clica em claim. Simples assim.
+                                    Agora ficou registrado que você tava aqui primeiro.
                                 </p>
                             </CardContent>
                         </Card>
@@ -575,12 +569,11 @@ export default async function HomePage() {
                                     />
                                 </div>
                                 <h3 className="mb-4 text-xl font-semibold text-slate-900">
-                                    3. Ganhe Reconhecimento
+                                    3. Comprova
                                 </h3>
                                 <p className="leading-relaxed text-slate-700">
-                                    Construa sua reputação conforme as tracks que você reivindicou
-                                    se tornam populares e ganhe emblemas por suas
-                                    habilidades excepcionais de descoberta musical
+                                    Quando a música explodir, todo mundo vai saber:
+                                    você ouviu primeiro.
                                 </p>
                             </CardContent>
                         </Card>
@@ -594,25 +587,23 @@ export default async function HomePage() {
                 <div className="mx-auto max-w-4xl text-center relative z-10">
                     <div className="bg-white/60 backdrop-blur-2xl rounded-3xl p-12 border border-white/60 shadow-2xl">
                         <h2 className="mb-6 text-3xl font-bold text-slate-900 md:text-4xl">
-                            O Futuro da Descoberta Musical
+                            Pra quem tem ouvido
                         </h2>
                         <p className="mb-8 text-xl leading-relaxed text-slate-700">
-                            O Sound Sage é mais do que apenas uma plataforma musical—é
-                            uma comunidade para verdadeiros entusiastas da música que têm ouvido
-                            apurado para o que vem por aí. Seja você fã de indie
-                            pop, eletrônica, hip-hop ou alternativo, nossa plataforma
-                            ajuda você a descobrir e reivindicar tracks antes delas se tornarem
-                            hits mainstream.
+                            Mirsui é pra quem realmente ouve música. Não é playlist do Spotify,
+                            não é algoritmo. É você explorando, descobrindo e salvando
+                            o que ninguém ainda prestou atenção.
                         </p>
                         <p className="mb-10 text-lg leading-relaxed text-slate-700">
-                            Junte-se a uma comunidade de amantes da música que entendem que uma boa música merece ser descoberta cedo. Construa sua reputação, conecte-se com ouvintes que compartilham seus gostos, e prove que você tem o que é preciso para identificar a próxima grande novidade.
+                            Indie, eletrônica, rap, whatever. Se você sente que uma música vai bombar,
+                            você salva. E quando ela explodir, você tem a prova que tava lá desde o início.
                         </p>
                         <Link href="/feed">
                             <Button
                                 size="lg"
                                 className="bg-gradient-to-r from-sage-600 to-sage-700 hover:from-sage-700 hover:to-sage-800 px-10 py-4 text-lg text-white shadow-2xl shadow-sage-600/40 hover:shadow-3xl hover:shadow-sage-600/60 transition-all duration-300"
                             >
-                                Começar Sua Jornada
+                                Começar
                                 <ArrowRight className="ml-2" size={20} />
                             </Button>
                         </Link>
@@ -625,12 +616,11 @@ export default async function HomePage() {
                 <div className="absolute inset-0 bg-white/60 backdrop-blur-3xl"></div>
                 <div className="mx-auto max-w-4xl text-center relative z-10">
                     <h2 className="mb-6 text-3xl font-bold text-slate-900 md:text-4xl">
-                        Pronto para Descobrir os Hits de Amanhã Hoje?
+                        Bora descobrir música?
                     </h2>
                     <p className="mb-10 text-xl leading-relaxed text-slate-700">
-                        Junte-se à revolução da descoberta musical. Comece a construir sua
-                        reputação como um descobridor de talentos e prove que você consegue identificar hits
-                        antes deles viralizarem.
+                        Entre, explore e salve suas descobertas.
+                        Mostre que você tem ouvido pra música boa.
                     </p>
                     <div className="flex flex-col justify-center gap-4 sm:flex-row">
                         <Link href="/register">
@@ -638,7 +628,7 @@ export default async function HomePage() {
                                 size="lg"
                                 className="bg-gradient-to-r from-sage-600 to-sage-700 hover:from-sage-700 hover:to-sage-800 px-10 py-4 text-lg text-white shadow-2xl shadow-sage-600/40 hover:shadow-3xl hover:shadow-sage-600/60 transition-all duration-300"
                             >
-                                Registrar Agora — É Grátis
+                                Entrar grátis
                                 <ArrowRight className="ml-2" size={20} />
                             </Button>
                         </Link>
@@ -647,7 +637,7 @@ export default async function HomePage() {
                             variant="outline"
                             className="border-white/50 bg-white/40 backdrop-blur-xl px-10 py-4 text-lg text-slate-800 hover:bg-white/60 shadow-lg hover:shadow-xl transition-all duration-300"
                         >
-                            Saiba Mais
+                            Saber mais
                         </Button>
                     </div>
                 </div>

@@ -70,7 +70,7 @@ export default function Sidebar({ userProfile }: SidebarProps) {
                             <Music className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                            <span className="text-xl font-bold text-slate-900 group-hover:text-purple-700 transition-colors">Sound Sage</span>
+                            <span className="text-xl font-bold text-slate-900 group-hover:text-purple-700 transition-colors">Mirsui</span>
                             <p className="text-xs text-slate-600">Music Discovery</p>
                         </div>
                     </Link>

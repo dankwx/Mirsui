@@ -56,7 +56,7 @@ export default async function HomePage() {
 
                     <div className="mx-auto max-w-7xl flex gap-6">
                         <Link
-                            href="#how-it-works"
+                            href="/how-it-works"
                             className="font-medium text-slate-700 hover:text-slate-900 transition-colors"
                         >
                             Como funciona
@@ -110,13 +110,15 @@ export default async function HomePage() {
                                     <ArrowRight className="ml-2" size={20} />
                                 </Button>
                             </Link>
-                            <Button
-                                size="lg"
-                                variant="outline"
-                                className="border-white/40 bg-white/30 backdrop-blur-xl px-8 py-4 text-lg text-slate-800 hover:bg-white/50 shadow-lg hover:shadow-xl transition-all duration-300"
-                            >
-                                Como funciona
-                            </Button>
+                            <Link href="/how-it-works">
+                                <Button
+                                    size="lg"
+                                    variant="outline"
+                                    className="border-white/40 bg-white/30 backdrop-blur-xl px-8 py-4 text-lg text-slate-800 hover:bg-white/50 shadow-lg hover:shadow-xl transition-all duration-300"
+                                >
+                                    Como funciona
+                                </Button>
+                            </Link>
                         </div>
                     </div>
                 </div>

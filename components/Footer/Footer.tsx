@@ -33,25 +33,25 @@ export default function Footer() {
                         </h3>
                         <div className="space-y-2">
                             <Link
-                                href="#"
+                                href="/how-it-works"
                                 className="block text-slate-600 hover:text-slate-800"
                             >
                                 How It Works
                             </Link>
                             <Link
-                                href="#"
+                                href="/feed"
                                 className="block text-slate-600 hover:text-slate-800"
                             >
                                 Discover
                             </Link>
                             <Link
-                                href="#"
+                                href="/#about"
                                 className="block text-slate-600 hover:text-slate-800"
                             >
                                 About
                             </Link>
                             <Link
-                                href="#"
+                                href="/how-it-works"
                                 className="block text-slate-600 hover:text-slate-800"
                             >
                                 Features

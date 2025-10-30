@@ -66,11 +66,11 @@ export default function Sidebar({ userProfile }: SidebarProps) {
             <div className="flex flex-col h-full">
                 <div className="p-6">
                     <Link href="/" className="flex items-center gap-2 group">
-                        <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center shadow-lg shadow-accent/30 group-hover:shadow-accent/50 transition-all duration-300 group-hover:scale-110">
-                            <Music className="h-5 w-5 text-accent-foreground" />
+                        <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-[#4a9d6f] to-[#3d8a5f] flex items-center justify-center shadow-lg shadow-[#4a9d6f]/30 group-hover:shadow-[#4a9d6f]/50 transition-all duration-300 group-hover:scale-110">
+                            <Music className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                            <span className="text-xl font-bold text-foreground group-hover:text-accent transition-colors">Mirsui</span>
+                            <span className="text-xl font-bold text-foreground group-hover:text-[#4a9d6f] transition-colors">Mirsui</span>
                             <p className="text-xs text-muted-foreground">Music Discovery</p>
                         </div>
                     </Link>
@@ -85,9 +85,9 @@ export default function Sidebar({ userProfile }: SidebarProps) {
                                 <Link
                                     key={item.title}
                                     href={item.url}
-                                    className="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-foreground hover:bg-card/60 hover:backdrop-blur-xl hover:shadow-lg hover:shadow-accent/10 transition-all duration-300 hover:text-accent hover:scale-[1.02]"
+                                    className="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-foreground hover:bg-card/60 hover:backdrop-blur-xl hover:shadow-lg hover:shadow-[#4a9d6f]/10 transition-all duration-300 hover:text-[#4a9d6f] hover:scale-[1.02]"
                                 >
-                                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-muted to-muted/80 group-hover:from-accent/20 group-hover:to-accent-hover/20 transition-all duration-300 group-hover:shadow-md">
+                                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-muted to-muted/80 group-hover:from-[#4a9d6f]/20 group-hover:to-[#3d8a5f]/20 transition-all duration-300 group-hover:shadow-md">
                                         <Icon className="h-4 w-4" />
                                     </div>
                                     <span className="font-medium">{item.title}</span>

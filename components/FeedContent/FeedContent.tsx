@@ -54,7 +54,7 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                                         {post.avatar_url ? (
                                                             <AvatarImage src={post.avatar_url} alt={post.username} />
                                                         ) : null}
-                                                        <AvatarFallback className="text-lg bg-accent/10 text-accent">
+                                                        <AvatarFallback className="text-lg bg-[#4a9d6f]/10 text-[#4a9d6f]">
                                                             {(post.display_name || post.username || 'U').charAt(0).toUpperCase()}
                                                         </AvatarFallback>
                                                     </Avatar>
@@ -67,7 +67,7 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                                                 {post.display_name || post.username}
                                                             </Link>
                                                             {isUserVerified(post.position) && (
-                                                                <Crown className="h-4 w-4 text-warning" />
+                                                                <Crown className="h-4 w-4 text-amber-500" />
                                                             )}
                                                             <Badge variant="secondary" className="text-xs">
                                                                 {getUserBadge(post.position, post.discover_rating || undefined)}
@@ -78,7 +78,7 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center gap-1 mt-1">
-                                                            <Target className="h-4 w-4 text-accent" />
+                                                            <Target className="h-4 w-4 text-[#4a9d6f]" />
                                                             <span className="text-muted-foreground text-sm">
                                                                 reivindicou uma música
                                                             </span>
@@ -147,12 +147,12 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                                 {/* Tags */}
                                                 <div className="flex gap-2 mb-4">
                                                     {post.position === 1 && (
-                                                        <Badge variant="outline" className="text-xs bg-warning/10 text-warning border-warning/30">
+                                                        <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/30">
                                                             primeiro-claim
                                                         </Badge>
                                                     )}
                                                     {post.position <= 10 && (
-                                                        <Badge variant="outline" className="text-xs bg-accent/10 text-accent border-accent/30">
+                                                        <Badge variant="outline" className="text-xs bg-[#4a9d6f]/10 text-[#4a9d6f] border-[#4a9d6f]/30">
                                                             early-bird
                                                         </Badge>
                                                     )}
@@ -184,7 +184,7 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                                 Seja o primeiro a reivindicar uma música e aparecer no feed!
                                             </p>
                                             <Link href="/claimtrack">
-                                                <Button className="gap-2 bg-primary hover:bg-primary-hover text-primary-foreground">
+                                                <Button className="gap-2 bg-[#4a9d6f] hover:bg-[#3d8a5f] text-white">
                                                     <Plus className="h-4 w-4" />
                                                     Reivindicar Música
                                                 </Button>

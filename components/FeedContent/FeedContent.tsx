@@ -35,7 +35,7 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                             {/* Header */}
                             <div className="text-center py-6">
                                 <h1 className="text-3xl font-bold text-foreground mb-2">
-                                    🎵 Mirsui Feed
+                                    Mirsui Feed
                                 </h1>
                                 <p className="text-muted-foreground">
                                     Descobertas musicais da comunidade em tempo real

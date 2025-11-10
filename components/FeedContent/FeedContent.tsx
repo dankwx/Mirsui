@@ -26,176 +26,182 @@ interface FeedContentProps {
 
 // Server Component otimizado para feed
 export default function FeedContent({ initialPosts, recentClaims }: FeedContentProps) {
-    return (
-        <div className="min-h-screen bg-muted">
-            <div className="container mx-auto px-4 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-7xl mx-auto">
-                    {/* Main Feed - 8 colunas em telas grandes */}
-                    <div className="lg:col-span-8 space-y-6">
-                            {/* Header */}
-                            <div className="text-center py-6">
-                                <h1 className="text-3xl font-bold text-foreground mb-2">
-                                    Mirsui Feed
-                                </h1>
-                                <p className="text-muted-foreground">
-                                    Descobertas musicais da comunidade em tempo real
-                                </p>
-                            </div>
+    const totalPosts = initialPosts.length
 
-                            {/* Posts */}
-                            <div className="space-y-6">
-                                {initialPosts.length > 0 ? (
-                                    initialPosts.map((post) => (
-                                        <Card key={post.id} className="hover:shadow-lg transition-shadow duration-300 border-border bg-card">
-                                            <CardContent className="p-6">
-                                                {/* Header do Post */}
-                                                <div className="flex items-start gap-3 mb-4">
-                                                    <Avatar className="h-12 w-12">
-                                                        {post.avatar_url ? (
-                                                            <AvatarImage src={post.avatar_url} alt={post.username} />
-                                                        ) : null}
-                                                        <AvatarFallback className="text-lg bg-purple-600/10 text-purple-600">
-                                                            {(post.display_name || post.username || 'U').charAt(0).toUpperCase()}
-                                                        </AvatarFallback>
-                                                    </Avatar>
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <Link 
-                                                                href={`/user/${post.username}`}
-                                                                className="font-semibold hover:underline text-foreground"
-                                                            >
-                                                                {post.display_name || post.username}
-                                                            </Link>
-                                                            {isUserVerified(post.position) && (
-                                                                <Crown className="h-4 w-4 text-amber-500" />
-                                                            )}
-                                                            <Badge variant="secondary" className="text-xs">
-                                                                {getUserBadge(post.position, post.discover_rating || undefined)}
-                                                            </Badge>
-                                                            <span className="text-muted-foreground">•</span>
-                                                            <span className="text-muted-foreground text-sm">
-                                                                {post.claimedat ? new Date(post.claimedat).toLocaleDateString('pt-BR') : 'Data não disponível'}
-                                                            </span>
+    const formatClaimDate = (claimedat?: string | null) => {
+        if (!claimedat) return 'Data não disponível'
+        try {
+            return new Intl.DateTimeFormat('pt-BR', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+            }).format(new Date(claimedat))
+        } catch {
+            return 'Data não disponível'
+        }
+    }
+
+    return (
+        <div className="min-h-screen bg-gradient-to-b from-background via-muted/40 to-background">
+            <div className="container mx-auto max-w-7xl px-4 py-12 pb-16 lg:px-6">
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+                    <div className="lg:col-span-8 space-y-6">
+                        <div className="flex items-center justify-between px-1">
+                            <h2 className="text-2xl font-semibold text-foreground">Linha do tempo</h2>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Music className="h-4 w-4" />
+                                <span>{totalPosts > 0 ? `${totalPosts}` : '0'}</span>
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            {initialPosts.length > 0 ? (
+                                initialPosts.map((post) => (
+                                    <Card
+                                        key={post.id}
+                                        className="border border-border/70 bg-card/95 shadow-xl shadow-black/5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl"
+                                    >
+                                        <CardContent className="p-0">
+                                            <div className="flex flex-col gap-6 p-6">
+                                                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                                    <div className="flex items-start gap-4">
+                                                        <Avatar className="h-12 w-12">
+                                                            {post.avatar_url ? (
+                                                                <AvatarImage src={post.avatar_url} alt={post.username} />
+                                                            ) : null}
+                                                            <AvatarFallback className="text-lg bg-purple-600/10 text-purple-600">
+                                                                {(post.display_name || post.username || 'U').charAt(0).toUpperCase()}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+                                                        <div>
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                <Link
+                                                                    href={`/user/${post.username}`}
+                                                                    className="font-semibold text-foreground transition-colors hover:text-purple-600"
+                                                                >
+                                                                    {post.display_name || post.username}
+                                                                </Link>
+                                                                {isUserVerified(post.position) && (
+                                                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-1 text-xs font-semibold text-amber-600">
+                                                                        <Crown className="h-3 w-3" />
+                                                                        Curador destaque
+                                                                    </span>
+                                                                )}
+                                                                <Badge variant="secondary" className="text-xs">
+                                                                    {getUserBadge(post.position, post.discover_rating || undefined)}
+                                                                </Badge>
+                                                            </div>
+                                                            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                                                                <Target className="h-3.5 w-3.5 text-purple-600" />
+                                                                <span>reivindicou uma faixa</span>
+                                                                <span className="text-muted-foreground/60">•</span>
+                                                                <span>{formatClaimDate(post.claimedat)}</span>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex items-center gap-1 mt-1">
-                                                            <Target className="h-4 w-4 text-purple-600" />
-                                                            <span className="text-muted-foreground text-sm">
-                                                                reivindicou uma música
-                                                            </span>
-                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                                                        <Award className="h-3.5 w-3.5" />
+                                                        #{post.position ?? '—'}
                                                     </div>
                                                 </div>
 
-                                                {/* Conteúdo da música */}
-                                                <div className="bg-muted rounded-xl p-4 mb-4 border border-border">
-                                                    <div className="flex items-center gap-4">
+                                                <div className="rounded-2xl border border-border/70 bg-muted/40 p-4">
+                                                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
                                                         {post.track_thumbnail && (
                                                             <img
                                                                 src={post.track_thumbnail}
                                                                 alt={`Capa de ${post.track_title}`}
-                                                                className="h-16 w-16 rounded-lg shadow-md"
+                                                                className="h-20 w-20 rounded-xl object-cover shadow-md"
                                                             />
                                                         )}
-                                                        <div className="flex-1">
-                                                            <h3 className="font-semibold text-lg text-foreground">
-                                                                <Link 
+                                                        <div className="flex-1 space-y-2">
+                                                            <div>
+                                                                <Link
                                                                     href={`/track/${post.track_url?.split('/').pop() || post.track_title}`}
-                                                                    className="hover:underline"
+                                                                    className="text-xl font-semibold text-foreground transition-colors hover:text-purple-600"
                                                                 >
                                                                     {post.track_title}
                                                                 </Link>
-                                                            </h3>
-                                                            <p className="text-muted-foreground">
-                                                                {post.artist_name}
-                                                            </p>
-                                                            {post.album_name && (
-                                                                <p className="text-muted-foreground text-sm">
-                                                                    {post.album_name}
-                                                                </p>
-                                                            )}
-                                                            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                                                                <div className="flex items-center gap-1">
-                                                                    <Award className="h-4 w-4" />
-                                                                    <span>#{post.position}</span>
-                                                                </div>
-                                                                {post.popularity && (
-                                                                    <div className="flex items-center gap-1">
-                                                                        <TrendingUp className="h-4 w-4" />
-                                                                        <span>{post.popularity}% popularidade</span>
-                                                                    </div>
+                                                                <p className="text-sm text-muted-foreground">{post.artist_name}</p>
+                                                                {post.album_name && (
+                                                                    <p className="text-xs uppercase tracking-widest text-muted-foreground/70">
+                                                                        {post.album_name}
+                                                                    </p>
                                                                 )}
-                                                                {post.discover_rating && (
-                                                                    <div className="flex items-center gap-1">
+                                                            </div>
+                                                            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                                                                {typeof post.popularity === 'number' && (
+                                                                    <span className="inline-flex items-center gap-1">
+                                                                        <TrendingUp className="h-4 w-4" />
+                                                                        {post.popularity}% popularidade
+                                                                    </span>
+                                                                )}
+                                                                {typeof post.discover_rating === 'number' && (
+                                                                    <span className="inline-flex items-center gap-1">
                                                                         <Sparkles className="h-4 w-4" />
-                                                                        <span>{post.discover_rating}</span>
-                                                                    </div>
+                                                                        {post.discover_rating}
+                                                                    </span>
                                                                 )}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                {/* Mensagem do usuário */}
                                                 {post.claim_message && (
-                                                    <div className="mb-4">
-                                                        <p className="text-foreground italic">
-                                                            &quot;{post.claim_message}&quot;
-                                                        </p>
+                                                    <div className="rounded-2xl bg-card/80 px-5 py-4 text-sm italic text-muted-foreground">
+                                                        &quot;{post.claim_message}&quot;
                                                     </div>
                                                 )}
 
-                                                {/* Tags */}
-                                                <div className="flex gap-2 mb-4">
+                                                <div className="flex flex-wrap gap-2">
                                                     {post.position === 1 && (
-                                                        <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/30">
+                                                        <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-xs text-amber-600">
                                                             primeiro-claim
                                                         </Badge>
                                                     )}
-                                                    {post.position <= 10 && (
-                                                        <Badge variant="outline" className="text-xs bg-purple-600/10 text-purple-600 border-purple-600/30">
+                                                    {typeof post.position === 'number' && post.position <= 10 && (
+                                                        <Badge variant="outline" className="border-purple-500/40 bg-purple-600/10 text-xs text-purple-600">
                                                             early-bird
                                                         </Badge>
                                                     )}
-                                                    {post.discover_rating && post.discover_rating > 8 && (
-                                                        <Badge variant="outline" className="text-xs bg-success/10 text-success border-success/30">
+                                                    {typeof post.discover_rating === 'number' && post.discover_rating >= 8 && (
+                                                        <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-xs text-emerald-600">
                                                             high-potential
                                                         </Badge>
                                                     )}
                                                 </div>
-
-                                                {/* Interações sociais */}
-                                                <PostInteractions 
+                                            </div>
+                                            <div className="border-t border-border/70 bg-card/80 px-6 py-4">
+                                                <PostInteractions
                                                     trackId={post.id}
                                                     initialLikesCount={post.likes_count}
                                                     initialCommentsCount={post.comments_count}
                                                     initialIsLiked={post.isLiked}
                                                 />
-                                            </CardContent>
-                                        </Card>
-                                    ))
-                                ) : (
-                                    <Card className="text-center py-12">
-                                        <CardContent>
-                                            <Music className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                                            <h3 className="text-lg font-semibold text-foreground mb-2">
-                                                Nenhuma atividade ainda
-                                            </h3>
-                                            <p className="text-muted-foreground mb-4">
-                                                Seja o primeiro a reivindicar uma música e aparecer no feed!
-                                            </p>
-                                            <Link href="/claimtrack">
-                                                <Button className="gap-2 bg-purple-600 hover:bg-purple-700 text-white">
-                                                    <Plus className="h-4 w-4" />
-                                                    Reivindicar Música
-                                                </Button>
-                                            </Link>
+                                            </div>
                                         </CardContent>
                                     </Card>
-                                )}
-                            </div>
+                                ))
+                            ) : (
+                                <Card className="border border-border/70 bg-card/90 py-12 text-center shadow-lg">
+                                    <CardContent>
+                                        <Music className="mb-4 h-12 w-12 mx-auto text-muted-foreground" />
+                                        <h3 className="mb-2 text-lg font-semibold text-foreground">Nenhuma atividade ainda</h3>
+                                        <p className="mb-6 text-sm text-muted-foreground">
+                                            Seja o primeiro a reivindicar uma música e aparecer no feed!
+                                        </p>
+                                        <Button asChild size="lg" className="gap-2 bg-purple-600 text-white hover:bg-purple-700">
+                                            <Link href="/claimtrack">
+                                                <Plus className="h-4 w-4" />
+                                                Reivindicar música
+                                            </Link>
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Sidebar - Reivindicações Recentes - 4 colunas em telas grandes */}
                     <div className="lg:col-span-4">
                         <RecentClaims claims={recentClaims} />
                     </div>

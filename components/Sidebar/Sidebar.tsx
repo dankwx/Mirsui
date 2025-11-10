@@ -2,7 +2,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Music, Home, Library, Disc, Lamp, Sparkles } from 'lucide-react'
+import { Home, Library, Disc, Lamp, Music, Sparkles } from 'lucide-react'
 
 // Tipo para o perfil do usuário
 interface UserProfile {
@@ -65,13 +65,20 @@ export default function Sidebar({ userProfile }: SidebarProps) {
         <aside className="h-screen w-64 border-r border-border bg-background/70 backdrop-blur-2xl shadow-xl">
             <div className="flex flex-col h-full">
                 <div className="p-6">
-                    <Link href="/" className="flex items-center gap-2 group">
-                        <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-purple-600 to-purple-700 flex items-center justify-center shadow-lg shadow-purple-600/30 group-hover:shadow-purple-600/50 transition-all duration-300 group-hover:scale-110">
-                            <Music className="h-5 w-5 text-white" />
+                    <Link
+                        href="/"
+                        className="flex items-center gap-3 group transition-all duration-300"
+                    >
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 shadow-lg shadow-purple-600/40 transition-all duration-300 group-hover:shadow-purple-600/60 group-hover:scale-110">
+                            <Music className="h-6 w-6 text-white" />
                         </div>
-                        <div>
-                            <span className="text-xl font-bold text-foreground group-hover:text-purple-600 transition-colors">Mirsui</span>
-                            <p className="text-xs text-muted-foreground">Music Discovery</p>
+                        <div className="flex flex-col">
+                            <span className="text-xl font-bold tracking-tight text-foreground transition-colors duration-300 group-hover:text-purple-600">
+                                Mirsui
+                            </span>
+                            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                                Music Discovery
+                            </p>
                         </div>
                     </Link>
                 </div>

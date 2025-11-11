@@ -54,7 +54,7 @@ export default function MusicSearchForPrediction({
         setIsLoading(true)
         try {
             const response = await fetch(
-                `/api/search?q=${encodeURIComponent(searchQuery)}&limit=6&type=track`
+                `/api/search?q=${encodeURIComponent(searchQuery)}&limit=10&type=track`
             )
 
             if (response.ok) {
@@ -200,7 +200,7 @@ export default function MusicSearchForPrediction({
 
                     {/* Resultados da Busca */}
                     {showResults && results?.tracks?.items && (
-                        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border rounded-lg shadow-lg max-h-80 overflow-y-auto">
+                        <div className="mt-3 bg-white border rounded-lg shadow-lg max-h-96 overflow-y-auto">
                             {results.tracks.items.length > 0 ? (
                                 <div className="p-2">
                                     <div className="text-xs font-medium text-muted-foreground mb-2 px-2">

@@ -216,7 +216,7 @@ export default function NewPredictionModal({
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <Card className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                     <CardTitle className="text-xl font-semibold flex items-center gap-2">
                         <Target className="h-5 w-5 text-purple-600" />
@@ -237,7 +237,7 @@ export default function NewPredictionModal({
                         <X className="h-4 w-4" />
                     </Button>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 flex-1 overflow-y-auto">
                     {/* Busca de Música */}
                     <div className="space-y-2">
                         <Label className="text-sm font-medium">Escolha a Música</Label>

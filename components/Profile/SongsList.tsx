@@ -132,10 +132,24 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
         }
     }
 
+    if (!songs.length) {
+        return (
+            <div className="rounded-[28px] border border-dashed border-white/12 bg-white/[0.03] px-8 py-14 text-center text-white/55">
+                <p className="text-sm uppercase tracking-[0.35em]">Nenhuma faixa salva ainda</p>
+                <p className="mt-3 text-base text-white/45">
+                    Capture descobertas para construir a sua galeria sonora.
+                </p>
+            </div>
+        )
+    }
+
     return (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-6">
+        <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {songs.map((song) => (
-                <Card key={song.id} className="group relative overflow-hidden border-white/60 bg-white/50 backdrop-blur-xl hover:bg-white/70 hover:shadow-2xl hover:scale-[1.03] transition-all duration-300">
+                <Card
+                    key={song.id}
+                    className="group relative overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.05] shadow-[0_20px_50px_rgba(8,4,20,0.4)] transition hover:border-white/20 hover:bg-white/[0.08]"
+                >
                     <div className="relative aspect-square">
                         <img
                             src={song.track_thumbnail || '/placeholder-album.png'}
@@ -150,12 +164,12 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <Badge className="animate-pulse-once bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/50 backdrop-blur-md border-white/30">
+                                            <Badge className="animate-pulse-once border border-transparent bg-gradient-to-r from-rose-500/90 to-pink-500/90 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.35em] text-white shadow-[0_18px_45px_rgba(244,114,182,0.45)]">
                                                 <HeartIcon className="mr-1 h-4 w-4 fill-current" />
                                                 Favorite
                                             </Badge>
                                         </TooltipTrigger>
-                                        <TooltipContent className="bg-white/90 backdrop-blur-xl border-white/60">
+                                        <TooltipContent className="border border-white/10 bg-[#05030f]/95 text-white shadow-[0_18px_45px_rgba(8,4,20,0.6)]">
                                             <p>This user loves this track!!</p>
                                         </TooltipContent>
                                     </Tooltip>
@@ -171,14 +185,14 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 rounded-full bg-white/90 backdrop-blur-xl text-gray-700 opacity-0 shadow-lg transition-all duration-300 hover:bg-white hover:text-gray-900 hover:scale-110 group-hover:opacity-100 border border-white/50"
+                                            className="h-9 w-9 rounded-full border border-white/10 bg-[#05030f]/70 text-white opacity-0 transition hover:border-white/20 hover:bg-[#05030f]/90 group-hover:opacity-100"
                                         >
                                             <MoreVerticalIcon className="h-4 w-4" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent
                                         align="end"
-                                        className="w-48 bg-white/90 backdrop-blur-xl border-white/60"
+                                        className="w-52 border border-white/10 bg-[#05030f]/95 text-white shadow-[0_18px_45px_rgba(8,4,20,0.65)]"
                                     >
                                         <DropdownMenuItem
                                             onClick={() =>
@@ -194,8 +208,8 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                                                 className={`mr-2 h-4 w-4 ${song.is_favorited ? 'fill-current text-red-500' : ''}`}
                                             />
                                             {favoriteStates[song.id] ? (
-                                                <span className="flex items-center">
-                                                    <div className="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-gray-600 border-t-transparent" />
+                                                <span className="flex items-center text-white/70">
+                                                    <div className="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-white/50 border-t-transparent" />
                                                     Processando...
                                                 </span>
                                             ) : song.is_favorited ? (
@@ -214,8 +228,8 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                                         >
                                             <ImageIcon className="mr-2 h-4 w-4" />
                                             {isGenerating ? (
-                                                <span className="flex items-center">
-                                                    <div className="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-gray-600 border-t-transparent" />
+                                                <span className="flex items-center text-white/70">
+                                                    <div className="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-white/50 border-t-transparent" />
                                                     Gerando discovery card...
                                                 </span>
                                             ) : (
@@ -250,7 +264,7 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                             </div>
                         )}
 
-                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-black/80 via-purple-900/70 to-black/80 backdrop-blur-sm p-4 opacity-0 transition-all duration-300 group-hover:opacity-100">
+                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#05030f]/90 via-purple-900/70 to-[#05030f]/90 p-5 opacity-0 backdrop-blur-sm transition-all duration-300 group-hover:opacity-100">
                             <div className="space-y-2 text-center text-white">
                                 <div className="flex items-center justify-center gap-2">
                                     <ClockIcon className="h-5 w-5" />
@@ -268,9 +282,9 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                                         Discover Score: {song.discover_rating || 0}
                                     </span>
                                 </div>
-                                <div className="mt-2 text-xs opacity-90 bg-white/10 backdrop-blur-md rounded-full px-3 py-1">
+                                <div className="mt-3 inline-flex rounded-full border border-white/10 bg-white/[0.08] px-4 py-1 text-xs uppercase tracking-[0.35em] text-white/75">
                                     {song.popularity > 80
-                                        ? '🔥 Hot track! Trending worldwide'
+                                        ? '🔥 Hot track!'
                                         : song.popularity > 50
                                           ? '🚀 Gaining momentum'
                                           : '🌱 Underground gem'}
@@ -278,24 +292,24 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                             </div>
                         </div>
                     </div>
-                    <CardContent className="p-4 bg-gradient-to-b from-white/80 to-white/60 backdrop-blur-sm">
-                        <h3 className="truncate font-semibold text-slate-900">
+                    <CardContent className="space-y-3 bg-transparent p-6">
+                        <h3 className="truncate text-lg font-semibold tracking-tight text-white">
                             {song.track_title}
                         </h3>
-                        <p className="truncate text-sm text-slate-600">
+                        <p className="truncate text-sm text-white/60">
                             {song.artist_name}
                         </p>
-                        <div className="mt-2 flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.35em] text-white/60">
                             <Badge
-                                variant="secondary"
-                                className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-200/50 shadow-sm"
+                                variant="outline"
+                                className="border border-emerald-400/40 bg-emerald-500/10 text-emerald-200"
                             >
                                 <CircleIcon className="mr-1 h-3 w-3 -translate-x-1 animate-pulse fill-green-400 text-green-400" />
                                 Listened before it went viral
                             </Badge>
                             <Badge
-                                variant="secondary"
-                                className="bg-gradient-to-r from-orange-100 to-amber-100 text-orange-800 border-orange-200/50 shadow-sm"
+                                variant="outline"
+                                className="border border-orange-400/40 bg-orange-500/10 text-orange-200"
                             >
                                 <StarIcon className="mr-1 h-3 w-3 -translate-x-1 animate-pulse fill-orange-400 text-orange-400" />
                                 Rare find

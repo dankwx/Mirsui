@@ -1,6 +1,5 @@
 // components/MusicProphet/ProphetStats.tsx
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { TrendingUp, Target, Award, Coins, Activity, Percent } from 'lucide-react'
+import { TrendingUp, Target, Coins, Percent } from 'lucide-react'
 
 interface ProphetStatsProps {
     stats: {
@@ -14,129 +13,62 @@ interface ProphetStatsProps {
 }
 
 export default function ProphetStats({ stats }: ProphetStatsProps) {
-    const formatNumber = (num: number) => {
-        return new Intl.NumberFormat('pt-BR').format(num)
-    }
+    const formatNumber = (num: number) => new Intl.NumberFormat('pt-BR').format(num)
+    const formatPercentage = (num: number) => `${num.toFixed(1)}%`
 
-    const formatPercentage = (num: number) => {
-        return `${num.toFixed(1)}%`
-    }
+    const netLabel = stats.netPoints > 0 ? `+${formatNumber(stats.netPoints)} pts` : `${formatNumber(stats.netPoints)} pts`
 
-    const getNetPointsColor = (points: number) => {
-        if (points > 0) return 'text-green-600'
-        if (points < 0) return 'text-red-600'
-        return 'text-gray-600'
-    }
+    const items = [
+        {
+            title: 'Taxa de acerto',
+            value: formatPercentage(stats.accuracy || 0),
+            description: `${formatNumber(stats.correctPredictions)} de ${formatNumber(stats.totalPredictions)} apostas renderam hype`,
+            icon: Percent,
+            glow: 'from-emerald-400/25'
+        },
+        {
+            title: 'Saldo líquido',
+            value: netLabel,
+            description: `${formatNumber(stats.totalPointsGained)} ganhos • ${formatNumber(stats.totalPointsBet)} apostados`,
+            icon: TrendingUp,
+            glow: stats.netPoints >= 0 ? 'from-purple-400/25' : 'from-rose-400/25'
+        },
+        {
+            title: 'Pontos ganhos',
+            value: `${formatNumber(stats.totalPointsGained)} pts`,
+            description: 'Recompensas acumuladas quando o palpite virou realidade',
+            icon: Coins,
+            glow: 'from-amber-400/25'
+        },
+        {
+            title: 'Apostas certeiras',
+            value: `${formatNumber(stats.correctPredictions)} hits`,
+            description: `${formatNumber(stats.totalPredictions)} profecias registradas até agora`,
+            icon: Target,
+            glow: 'from-sky-400/25'
+        }
+    ]
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-            <Card className="bg-gradient-to-br from-blue-500/10 via-white/60 to-blue-400/10 backdrop-blur-xl border-white/60 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-                <CardContent className="p-4">
-                    <div className="flex items-center gap-2">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-md">
-                            <Activity className="h-4 w-4 text-blue-700" />
+        <section className="rounded-[28px] border border-white/10 bg-white/[0.03] p-6">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                {items.map(({ title, value, description, icon: Icon, glow }) => (
+                    <article
+                        key={title}
+                        className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.05] p-6 transition hover:border-white/25 hover:bg-white/[0.08]"
+                    >
+                        <div className={`pointer-events-none absolute -right-6 -top-10 h-32 w-32 rounded-full bg-gradient-to-br ${glow} to-transparent blur-2xl`} />
+                        <div className="relative flex flex-col gap-3">
+                            <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-white/50">
+                                <Icon className="h-4 w-4 text-white/60" />
+                                <span>{title}</span>
+                            </div>
+                            <span className="text-2xl font-semibold text-white md:text-3xl">{value}</span>
+                            <p className="text-xs text-white/60 md:text-sm">{description}</p>
                         </div>
-                        <span className="text-sm font-medium text-slate-600">
-                            Total de Previsões
-                        </span>
-                    </div>
-                    <div className="mt-2">
-                        <div className="text-2xl font-bold text-blue-900">
-                            {formatNumber(stats.totalPredictions)}
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-green-500/10 via-white/60 to-green-400/10 backdrop-blur-xl border-white/60 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-                <CardContent className="p-4">
-                    <div className="flex items-center gap-2">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/20 to-green-600/20 backdrop-blur-md">
-                            <Target className="h-4 w-4 text-green-700" />
-                        </div>
-                        <span className="text-sm font-medium text-slate-600">
-                            Acertos
-                        </span>
-                    </div>
-                    <div className="mt-2">
-                        <div className="text-2xl font-bold text-green-700">
-                            {formatNumber(stats.correctPredictions)}
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-purple-500/10 via-white/60 to-purple-400/10 backdrop-blur-xl border-white/60 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-                <CardContent className="p-4">
-                    <div className="flex items-center gap-2">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-md">
-                            <Percent className="h-4 w-4 text-purple-700" />
-                        </div>
-                        <span className="text-sm font-medium text-slate-600">
-                            Taxa de Acerto
-                        </span>
-                    </div>
-                    <div className="mt-2">
-                        <div className="text-2xl font-bold text-purple-700">
-                            {formatPercentage(stats.accuracy)}
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-yellow-500/10 via-white/60 to-yellow-400/10 backdrop-blur-xl border-white/60 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-                <CardContent className="p-4">
-                    <div className="flex items-center gap-2">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 backdrop-blur-md">
-                            <Coins className="h-4 w-4 text-yellow-700" />
-                        </div>
-                        <span className="text-sm font-medium text-slate-600">
-                            Pontos Apostados
-                        </span>
-                    </div>
-                    <div className="mt-2">
-                        <div className="text-2xl font-bold text-yellow-900">
-                            {formatNumber(stats.totalPointsBet)}
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-orange-500/10 via-white/60 to-orange-400/10 backdrop-blur-xl border-white/60 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-                <CardContent className="p-4">
-                    <div className="flex items-center gap-2">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500/20 to-orange-600/20 backdrop-blur-md">
-                            <Award className="h-4 w-4 text-orange-700" />
-                        </div>
-                        <span className="text-sm font-medium text-slate-600">
-                            Pontos Ganhos
-                        </span>
-                    </div>
-                    <div className="mt-2">
-                        <div className="text-2xl font-bold text-orange-700">
-                            {formatNumber(stats.totalPointsGained)}
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-indigo-500/10 via-white/60 to-indigo-400/10 backdrop-blur-xl border-white/60 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-                <CardContent className="p-4">
-                    <div className="flex items-center gap-2">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500/20 to-indigo-600/20 backdrop-blur-md">
-                            <TrendingUp className="h-4 w-4 text-indigo-700" />
-                        </div>
-                        <span className="text-sm font-medium text-slate-600">
-                            Saldo Líquido
-                        </span>
-                    </div>
-                    <div className="mt-2">
-                        <div className={`text-2xl font-bold ${getNetPointsColor(stats.netPoints)}`}>
-                            {stats.netPoints > 0 ? '+' : ''}{formatNumber(stats.netPoints)}
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+                    </article>
+                ))}
+            </div>
+        </section>
     )
 }

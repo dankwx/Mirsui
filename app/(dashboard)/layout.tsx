@@ -57,18 +57,21 @@ export default async function DashboardLayout({
     }
 
     return (
-        <div className="grid h-screen w-screen grid-cols-[auto_1fr] grid-rows-1 overflow-hidden">
-            {/* Sidebar - recebe userProfile como prop */}
+        <div className="flex h-screen w-screen overflow-hidden bg-[#05030f] text-white">
+            {/* Sidebar fixa - recebe userProfile como prop */}
             <Sidebar userProfile={userProfile} />
 
-            {/* Área principal - header + conteúdo */}
-            <div className="flex min-h-0 flex-col overflow-hidden">
+            {/* Área principal - header + conteúdo com margem para a sidebar */}
+            <div className="ml-[280px] flex flex-1 min-h-0 flex-col">
                 {/* Header fixo - também pode receber userProfile se precisar */}
                 <Header userProfile={userProfile} />
 
                 {/* Conteúdo com scroll */}
-                <main className="flex-1 overflow-y-auto bg-[#f8f6f4] bg-background text-foreground">
-                    {children}
+                <main className="relative flex-1 overflow-y-auto bg-gradient-to-b from-[#060214] via-[#05030f] to-[#020008]">
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(9,4,24,0)_100%)]" />
+                    <div className="relative h-full">
+                        {children}
+                    </div>
                 </main>
             </div>
         </div>

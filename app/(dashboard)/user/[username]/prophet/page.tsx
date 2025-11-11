@@ -95,14 +95,18 @@ export default async function ProphetPage({ params }: ProphetPageParams) {
     }
 
     return (
-        <div className="px-6 py-6 font-sans min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30">
-            <MusicProphetComponent
-                userData={userData}
-                predictions={predictions}
-                prophetStats={prophetStats}
-                isLoggedIn={isLoggedIn}
-                isOwnProfile={isOwnProfile}
-            />
+        <div className="relative min-h-screen overflow-hidden bg-[#05030f] font-sans text-slate-100">
+            <div className="pointer-events-none absolute -left-32 top-10 h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(168,124,255,0.25),_transparent_65%)] blur-3xl" />
+            <div className="pointer-events-none absolute -right-40 bottom-0 h-[520px] w-[520px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(255,143,171,0.25),_transparent_70%)] blur-3xl" />
+            <div className="relative px-6 pb-16 pt-12">
+                <MusicProphetComponent
+                    userData={userData}
+                    predictions={predictions}
+                    prophetStats={prophetStats}
+                    isLoggedIn={isLoggedIn}
+                    isOwnProfile={isOwnProfile}
+                />
+            </div>
         </div>
     )
 }

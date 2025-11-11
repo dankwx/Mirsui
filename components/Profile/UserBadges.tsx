@@ -17,8 +17,8 @@ const UserBadges: React.FC<AchievmentsSectionProps> = ({ userAchievments }) => {
             {userAchievments.map((achievment) => (
                 <Badge
                     key={achievment.achievement_id}
-                    variant="secondary"
-                    className="bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300"
+                    variant="outline"
+                    className="rounded-full border border-white/15 bg-white/[0.06] px-4 py-1 text-[11px] font-medium uppercase tracking-[0.35em] text-white/65 shadow-[0_12px_28px_rgba(8,4,20,0.45)] hover:border-white/25 hover:text-white"
                 >
                     🏆 {achievment.title}
                 </Badge>
@@ -26,20 +26,20 @@ const UserBadges: React.FC<AchievmentsSectionProps> = ({ userAchievments }) => {
             {userAchievments.length === 0 && (
                 <>
                     <Badge
-                        variant="secondary"
-                        className="bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300"
+                        variant="outline"
+                        className="rounded-full border border-white/15 bg-white/[0.06] px-4 py-1 text-[11px] font-medium uppercase tracking-[0.35em] text-white/65 shadow-[0_12px_28px_rgba(8,4,20,0.45)] hover:border-white/25 hover:text-white"
                     >
                         🎧 Audiophile
                     </Badge>
                     <Badge
-                        variant="secondary"
-                        className="bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300"
+                        variant="outline"
+                        className="rounded-full border border-white/15 bg-white/[0.06] px-4 py-1 text-[11px] font-medium uppercase tracking-[0.35em] text-white/65 shadow-[0_12px_28px_rgba(8,4,20,0.45)] hover:border-white/25 hover:text-white"
                     >
                         📈 Trending Spotter
                     </Badge>
                     <Badge
-                        variant="secondary"
-                        className="bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300"
+                        variant="outline"
+                        className="rounded-full border border-white/15 bg-white/[0.06] px-4 py-1 text-[11px] font-medium uppercase tracking-[0.35em] text-white/65 shadow-[0_12px_28px_rgba(8,4,20,0.45)] hover:border-white/25 hover:text-white"
                     >
                         👥 Subscriber Magnet
                     </Badge>

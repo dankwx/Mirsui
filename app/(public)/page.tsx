@@ -2,16 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import {
-    TrendingUp,
-    Headphones,
-    Award,
-    Play,
-    Share2,
-    ArrowRight,
-} from 'lucide-react'
+import { TrendingUp, Headphones, Award, Play, ArrowRight } from 'lucide-react'
 import { Music, Clock, Target } from 'lucide-react'
 import GetAuth from '@/components/GetAuth/GetAuth'
 import { createClient } from '@/utils/supabase/server'
@@ -35,42 +26,73 @@ export default async function HomePage() {
     const trendingTracks = await getTrendingTracks(3)
     const featuredTrack = await getFeaturedTrack()
 
-    return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-            {/* Navigation */}
-            <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white/70 px-4 py-4 backdrop-blur-xl shadow-lg">
-                <div className="mx-auto flex max-w-7xl items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-purple-700 shadow-lg shadow-purple-600/30">
-                            <Music className="h-4 w-4 text-white" />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-gray-900">
-                                mirsui
-                            </h1>
-                            <p className="text-xs text-gray-500">
-                                Music Discovery
-                            </p>
-                        </div>
-                    </div>
+    const valueProps = [
+        {
+            title: 'Você ouviu primeiro',
+            description: 'Descubra sons novos antes de virarem hype. Seu gosto, registrado.',
+            icon: Clock,
+            accent: 'from-purple-500/30 via-purple-400/10 to-transparent',
+        },
+        {
+            title: 'Mostre seu ouvido',
+            description: 'Quanto mais suas músicas bombam, mais você prova que sabe escolher',
+            icon: Target,
+            accent: 'from-indigo-400/30 via-indigo-300/10 to-transparent',
+        },
+        {
+            title: 'Música de verdade',
+            description: 'Sons que você não vai achar em qualquer playlist. Todos os gêneros.',
+            icon: Music,
+            accent: 'from-pink-400/30 via-pink-300/10 to-transparent',
+        },
+    ]
 
-                    <div className="mx-auto max-w-7xl flex gap-6">
-                        <Link
-                            href="/how-it-works"
-                            className="font-medium text-gray-600 hover:text-gray-900 transition-colors"
-                        >
+    const howItWorksSteps = [
+        {
+            title: '1. Escuta',
+            description: 'Explora as músicas. Acha aquela que você sente que vai bombar. Confia no seu ouvido.',
+            icon: Headphones,
+            glow: 'from-purple-500/25',
+        },
+        {
+            title: '2. Salva',
+            description: 'Clica em claim. Simples assim. Agora ficou registrado que você tava aqui primeiro.',
+            icon: Award,
+            glow: 'from-blue-500/25',
+        },
+        {
+            title: '3. Comprova',
+            description: 'Quando a música explodir, todo mundo vai saber: você ouviu primeiro.',
+            icon: TrendingUp,
+            glow: 'from-rose-500/25',
+        },
+    ]
+
+    return (
+        <div className="relative min-h-screen overflow-hidden bg-[#05030f] text-slate-100">
+            <div className="pointer-events-none absolute -left-36 top-10 h-[460px] w-[460px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(133,92,255,0.18),_transparent_70%)] blur-3xl" />
+            <div className="pointer-events-none absolute -right-52 bottom-0 h-[520px] w-[520px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(255,123,187,0.18),_transparent_75%)] blur-3xl" />
+
+            <nav className="sticky top-0 z-40 border-b border-white/10 bg-[#05030f]/75 backdrop-blur-2xl">
+                <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+                    <Link href="/" className="flex items-center gap-4">
+                        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 via-fuchsia-500 to-indigo-500 text-white shadow-[0_18px_40px_rgba(132,94,255,0.45)]">
+                            <Music className="h-5 w-5" />
+                        </span>
+                        <span className="flex flex-col leading-tight">
+                            <span className="text-xl font-semibold tracking-tight text-white">mirsui</span>
+                            <span className="text-[11px] uppercase tracking-[0.4em] text-white/45">Music Discovery</span>
+                        </span>
+                    </Link>
+
+                    <div className="hidden items-center gap-6 text-sm font-semibold uppercase tracking-[0.35em] text-white/50 md:flex">
+                        <Link href="/how-it-works" className="transition hover:text-white">
                             Como funciona
                         </Link>
-                        <Link
-                            href="#discover"
-                            className="font-medium text-gray-600 hover:text-gray-900 transition-colors"
-                        >
+                        <Link href="#discover" className="transition hover:text-white">
                             Explorar
                         </Link>
-                        <Link
-                            href="#about"
-                            className="font-medium text-gray-600 hover:text-gray-900 transition-colors"
-                        >
+                        <Link href="#about" className="transition hover:text-white">
                             Sobre
                         </Link>
                     </div>
@@ -78,7 +100,7 @@ export default async function HomePage() {
                     <div className="flex items-center gap-3">
                         <GetAuth />
                         <Link href="/feed">
-                            <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-600/30">
+                            <Button className="rounded-full border border-white/15 bg-gradient-to-r from-purple-500 to-pink-500 px-5 py-2 text-sm font-semibold uppercase tracking-[0.3em] text-white shadow-[0_14px_32px_rgba(137,97,255,0.35)] hover:from-purple-600 hover:to-pink-600">
                                 Entrar
                             </Button>
                         </Link>
@@ -86,564 +108,305 @@ export default async function HomePage() {
                 </div>
             </nav>
 
-            {/* Hero Section */}
-            <section className="relative overflow-hidden px-4 py-20">
-                <div className="relative z-10 mx-auto max-w-7xl">
-                    <div className="mx-auto max-w-4xl text-center">
-                        <h1 className="mb-6 text-5xl font-bold leading-tight text-gray-900 md:text-7xl">
+            <main className="relative mx-auto flex max-w-6xl flex-col gap-24 px-6 pb-24 pt-20 lg:px-10">
+                <section className="relative overflow-hidden rounded-[40px] border border-white/10 bg-white/[0.03] px-8 py-16 text-center shadow-[0_35px_80px_rgba(8,4,20,0.45)] sm:px-14">
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(157,124,255,0.22),_transparent_70%)]" />
+                    <div className="relative space-y-10">
+                        <h1 className="text-4xl font-semibold tracking-tight text-white md:text-6xl">
                             Você ouviu primeiro.
-                            <span className="text-purple-600 block">
-                                E tem como provar.
-                            </span>
+                            <span className="block text-purple-200">E tem como provar.</span>
                         </h1>
-                        <p className="mx-auto mb-10 max-w-3xl text-xl leading-relaxed text-gray-600 md:text-2xl">
-                            Salve suas músicas favoritas antes delas bombarem.
-                            Quando todo mundo descobrir, você já vai ter seu registro.
+                        <p className="mx-auto max-w-2xl text-base leading-relaxed text-white/70 md:text-lg">
+                            Salve suas músicas favoritas antes delas bombarem. Quando todo mundo descobrir, você já vai ter seu registro.
                         </p>
-                        <div className="flex flex-col justify-center gap-4 sm:flex-row">
+                        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                             <Link href="/feed">
-                                <Button
-                                    size="lg"
-                                    className="bg-purple-600 hover:bg-purple-700 px-8 py-4 text-lg text-white shadow-2xl shadow-purple-600/40 hover:shadow-3xl hover:shadow-purple-600/60 transition-all duration-300"
-                                >
+                                <Button className="h-12 rounded-full border border-white/15 bg-gradient-to-r from-purple-500 to-pink-500 px-8 text-sm font-semibold uppercase tracking-[0.3em] shadow-[0_22px_52px_rgba(137,97,255,0.4)] hover:from-purple-600 hover:to-pink-600">
                                     Explorar músicas
-                                    <ArrowRight className="ml-2" size={20} />
+                                    <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
                             </Link>
                             <Link href="/how-it-works">
                                 <Button
-                                    size="lg"
                                     variant="outline"
-                                    className="border-purple-600 bg-white/50 backdrop-blur-xl px-8 py-4 text-lg text-gray-900 hover:bg-purple-600/10 hover:border-purple-700 hover:text-purple-700 shadow-lg hover:shadow-xl transition-all duration-300"
+                                    className="h-12 rounded-full border border-white/15 bg-white/[0.04] px-8 text-sm font-semibold uppercase tracking-[0.3em] text-white/80 transition hover:border-white/35 hover:text-white"
                                 >
                                     Como funciona
                                 </Button>
                             </Link>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                {/* Background Elements */}
-                <div className="absolute inset-0 overflow-hidden opacity-40">
-                    <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-gradient-to-br from-purple-600/20 to-purple-400/20 blur-3xl"></div>
-                    <div className="absolute -left-32 top-1/2 h-96 w-96 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl"></div>
-                    <div className="absolute bottom-0 right-1/4 h-96 w-96 rounded-full bg-gradient-to-br from-purple-700/20 to-purple-500/20 blur-3xl"></div>
-                </div>
-            </section>
+                <section className="grid gap-6 md:grid-cols-3">
+                    {valueProps.map(({ title, description, icon: Icon, accent }) => (
+                        <article
+                            key={title}
+                            className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-8 shadow-[0_20px_55px_rgba(8,4,20,0.4)] transition hover:border-white/25 hover:bg-white/[0.08]"
+                        >
+                            <div className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br ${accent} to-transparent blur-2xl`} />
+                            <div className="relative flex flex-col gap-4 text-left">
+                                <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.07] text-white/80">
+                                    <Icon className="h-6 w-6" />
+                                </span>
+                                <h3 className="text-lg font-semibold text-white">{title}</h3>
+                                <p className="text-sm leading-relaxed text-white/65">{description}</p>
+                            </div>
+                        </article>
+                    ))}
+                </section>
 
-            {/* Value Proposition Section */}
-            <section className="px-4 py-16">
-                <div className="mx-auto max-w-7xl">
-                    <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-                        <Card className="border-gray-200 bg-gradient-to-br from-purple-600/10 via-white/60 to-purple-600/5 backdrop-blur-xl shadow-xl shadow-purple-600/10 hover:shadow-2xl hover:shadow-purple-600/20 transition-all duration-300">
-                            <CardContent className="pt-8 text-center">
-                                <div className="bg-gradient-to-br from-purple-600/20 to-purple-700/20 backdrop-blur-md mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-purple-600/30 shadow-lg">
-                                    <Clock
-                                        className="text-purple-600"
-                                        size={32}
-                                    />
-                                </div>
-                                <h3 className="text-gray-900 mb-3 text-xl font-semibold">
-                                    Você ouviu primeiro
-                                </h3>
-                                <p className="text-gray-600 leading-relaxed">
-                                    Descubra sons novos antes de virarem hype.
-                                    Seu gosto, registrado.
-                                </p>
-                            </CardContent>
-                        </Card>
-                        <Card className="border-gray-200 bg-gradient-to-br from-blue-500/10 via-white/60 to-blue-500/5 backdrop-blur-xl shadow-xl shadow-blue-500/10 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-300">
-                            <CardContent className="pt-8 text-center">
-                                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-md border border-blue-500/30 shadow-lg">
-                                    <Target
-                                        className="text-blue-500"
-                                        size={32}
-                                    />
-                                </div>
-                                <h3 className="mb-3 text-xl font-semibold text-gray-900">
-                                    Mostre seu ouvido
-                                </h3>
-                                <p className="leading-relaxed text-gray-600">
-                                    Quanto mais suas músicas bombam,
-                                    mais você prova que sabe escolher
-                                </p>
-                            </CardContent>
-                        </Card>
-                        <Card className="border-gray-200 bg-gradient-to-br from-purple-500/10 via-white/60 to-purple-500/5 backdrop-blur-xl shadow-xl shadow-purple-500/10 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300">
-                            <CardContent className="pt-8 text-center">
-                                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-md border border-purple-500/30 shadow-lg">
-                                    <Music
-                                        className="text-purple-500"
-                                        size={32}
-                                    />
-                                </div>
-                                <h3 className="mb-3 text-xl font-semibold text-gray-900">
-                                    Música de verdade
-                                </h3>
-                                <p className="leading-relaxed text-gray-600">
-                                    Sons que você não vai achar em qualquer playlist.
-                                    Todos os gêneros.
-                                </p>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
-            </section>
-
-            {/* Trending Section */}
-            <section
-                id="discover"
-                className="relative overflow-hidden bg-gradient-to-b from-gray-100/50 to-white px-4 py-16"
-            >
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 via-transparent to-purple-400/10"></div>
-                <div className="mx-auto max-w-7xl relative z-10">
-                    <div className="mb-12 text-center">
-                        <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
+                <section id="discover" className="space-y-12">
+                    <header className="text-center">
+                        <h2 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
                             Músicas pra você salvar agora
                         </h2>
-                        <p className="mx-auto max-w-2xl text-lg text-gray-700">
+                        <p className="mx-auto mt-4 max-w-xl text-sm text-white/65 md:text-base">
                             Essas estão começando a crescer. Salva antes que fique mainstream.
                         </p>
-                    </div>
+                    </header>
 
-                    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-6 lg:grid-cols-3">
                         {trendingTracks.length > 0 ? (
                             trendingTracks.map((track, index) => (
-                                <Card key={track.id} className="group border-white/60 bg-white/50 backdrop-blur-xl transition-all duration-300 hover:shadow-2xl hover:bg-white/70 hover:scale-[1.02]">
-                                    <CardHeader className="relative aspect-square bg-gradient-to-br from-emerald-100 to-emerald-200 p-0">
+                                <article
+                                    key={track.id}
+                                    className="group relative flex flex-col overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.03] shadow-[0_20px_55px_rgba(8,4,20,0.45)] transition hover:border-white/25 hover:bg-white/[0.08]"
+                                >
+                                    <div className="relative aspect-square overflow-hidden">
                                         <Image
-                                            src={track.track_thumbnail || "/placeholder.svg?height=300&width=300"}
+                                            src={track.track_thumbnail || '/placeholder.svg?height=300&width=300'}
                                             alt={`Capa de ${track.track_title}`}
-                                            width={300}
-                                            height={300}
-                                            className="h-full w-full rounded-t-lg object-cover"
+                                            width={320}
+                                            height={320}
+                                            className="h-full w-full object-cover"
                                         />
-                                        <Button
-                                            size="icon"
-                                            className="text-emerald-700 absolute bottom-4 right-4 rounded-full bg-white/95 backdrop-blur-md opacity-0 shadow-xl transition-all duration-300 hover:bg-white hover:scale-110 group-hover:opacity-100"
-                                        >
-                                            <Play size={20} className="ml-0.5" />
-                                        </Button>
-                                        <Badge className={`absolute right-4 top-4 backdrop-blur-md shadow-lg ${
-                                            index === 0 ? 'border-amber-300/50 bg-amber-200/80 text-amber-800' :
-                                            index === 1 ? 'border-emerald-300/50 bg-emerald-200/80 text-emerald-800' :
-                                            'border-violet-300/50 bg-violet-200/80 text-violet-800'
+                                        <Badge className={`absolute left-5 top-5 rounded-full border border-white/20 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-800 ${
+                                            index === 0
+                                                ? 'shadow-[0_10px_30px_rgba(245,196,94,0.4)]'
+                                                : index === 1
+                                                    ? 'shadow-[0_10px_30px_rgba(74,222,128,0.35)]'
+                                                    : 'shadow-[0_10px_30px_rgba(192,132,252,0.4)]'
                                         }`}>
                                             {index === 0 ? 'Em Alta' : index === 1 ? 'Crescendo' : 'Popular'}
                                         </Badge>
-                                    </CardHeader>
-                                    <CardContent className="pt-6 bg-gradient-to-b from-white/80 to-white/60 backdrop-blur-sm">
-                                        <div className="flex items-start justify-between">
-                                            <div>
-                                                <h3 className="text-lg font-semibold text-slate-900">
-                                                    {track.track_title}
-                                                </h3>
-                                                <p className="text-slate-600">
-                                                    {track.artist_name}
-                                                </p>
-                                                <p className="mt-1 text-xs text-slate-500">
-                                                    {track.genre} • {track.year}
-                                                </p>
-                                            </div>
-                                            <Link href={`/track/${track.track_url?.split('/').pop() || track.track_title}`}>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg shadow-purple-600/30"
-                                                >
-                                                    Ver Track
-                                                </Button>
-                                            </Link>
+                                    </div>
+                                    <div className="flex flex-1 flex-col gap-6 p-6">
+                                        <div className="space-y-2">
+                                            <h3 className="text-xl font-semibold tracking-tight text-white">
+                                                {track.track_title}
+                                            </h3>
+                                            <p className="text-sm text-white/60">{track.artist_name}</p>
+                                            <p className="text-xs uppercase tracking-[0.35em] text-white/40">
+                                                {track.genre} • {track.year}
+                                            </p>
                                         </div>
-                                    </CardContent>
-                                    <CardFooter className="flex justify-between border-t border-white/50 bg-white/40 backdrop-blur-sm pt-4">
-                                        <div className="flex items-center gap-2 text-sm text-slate-600">
-                                            <TrendingUp size={16} />
-                                            <span>{track.total_claims} claims</span>
+                                        <div className="mt-auto flex items-center justify-between text-sm text-white/65">
+                                            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
+                                                <TrendingUp className="h-4 w-4 text-purple-300" />
+                                                {track.total_claims} claims
+                                            </span>
+                                            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3 py-1">
+                                                <Award className="h-4 w-4 text-pink-300" />
+                                                #{track.position}
+                                            </span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm text-slate-600">
-                                            <Award size={16} />
-                                            <span>#{track.position}</span>
-                                        </div>
-                                    </CardFooter>
-                                </Card>
+                                        <Link
+                                            href={`/track/${track.track_url?.split('/').pop() || track.track_title}`}
+                                            className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.07] px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white transition hover:border-white/30 hover:bg-white/[0.12]"
+                                        >
+                                            Ver Track
+                                        </Link>
+                                    </div>
+                                </article>
                             ))
                         ) : (
-                            // Fallback com dados fictícios caso não haja tracks reais
                             <>
-                                {/* Track Card 1 */}
-                                <Card className="group border-white/60 bg-white/50 backdrop-blur-xl transition-all duration-300 hover:shadow-2xl hover:bg-white/70 hover:scale-[1.02]">
-                                    <CardHeader className="from-emerald-100 to-emerald-200 relative aspect-square bg-gradient-to-br p-0">
-                                        <Image
-                                            src="/placeholder.svg?height=300&width=300"
-                                            alt="Track artwork"
-                                            width={300}
-                                            height={300}
-                                            className="h-full w-full rounded-t-lg object-cover"
-                                        />
-                                        <Button
-                                            size="icon"
-                                            className="text-emerald-700 absolute bottom-4 right-4 rounded-full bg-white/95 backdrop-blur-md opacity-0 shadow-xl transition-all duration-300 hover:bg-white hover:scale-110 group-hover:opacity-100"
-                                        >
-                                            <Play size={20} className="ml-0.5" />
-                                        </Button>
-                                        <Badge className="absolute right-4 top-4 border-amber-300/50 bg-amber-200/80 backdrop-blur-md text-amber-800 shadow-lg">
-                                            Em Alta
+                                {[
+                                    {
+                                        title: 'Sonhos da Meia-Noite',
+                                        artist: 'Luna Nova',
+                                        sub: 'Indie Pop • 2024',
+                                        badge: 'Em Alta',
+                                    },
+                                    {
+                                        title: 'Alma Elétrica',
+                                        artist: 'Neon Pulse',
+                                        sub: 'Eletrônica • 2024',
+                                        badge: 'Crescendo',
+                                    },
+                                    {
+                                        title: 'Boulevard do Pôr do Sol',
+                                        artist: 'Coastal Waves',
+                                        sub: 'Alternativo • 2024',
+                                        badge: 'Popular',
+                                    },
+                                ].map((fallback) => (
+                                    <article
+                                        key={fallback.title}
+                                        className="relative flex flex-col overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.03] p-6 text-white/70 shadow-[0_20px_55px_rgba(8,4,20,0.45)]"
+                                    >
+                                        <div className="mb-6 flex h-40 items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.02] text-white/30">
+                                            <Play className="h-8 w-8" />
+                                        </div>
+                                        <Badge className="mb-4 w-fit rounded-full border border-white/20 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-800">
+                                            {fallback.badge}
                                         </Badge>
-                                    </CardHeader>
-                                    <CardContent className="pt-6 bg-gradient-to-b from-white/80 to-white/60 backdrop-blur-sm">
-                                        <div className="flex items-start justify-between">
-                                            <div>
-                                                <h3 className="text-lg font-semibold text-slate-900">
-                                                    Sonhos da Meia-Noite
-                                                </h3>
-                                                <p className="text-slate-600">
-                                                    Luna Nova
-                                                </p>
-                                                <p className="mt-1 text-xs text-slate-500">
-                                                    Indie Pop • 2024
-                                                </p>
-                                            </div>
-                                            <Button
-                                                size="sm"
-                                                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg shadow-purple-600/30"
-                                            >
-                                                Reivindicar
-                                            </Button>
+                                        <h3 className="text-xl font-semibold text-white">{fallback.title}</h3>
+                                        <p className="text-sm text-white/60">{fallback.artist}</p>
+                                        <p className="text-xs uppercase tracking-[0.35em] text-white/40">{fallback.sub}</p>
+                                        <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-xs uppercase tracking-[0.3em] text-white/60">
+                                            <TrendingUp className="h-4 w-4 text-purple-200" />
+                                            Disponível
                                         </div>
-                                    </CardContent>
-                                    <CardFooter className="flex justify-between border-t border-white/50 bg-white/40 backdrop-blur-sm pt-4">
-                                        <div className="flex items-center gap-2 text-sm text-slate-600">
-                                            <TrendingUp size={16} />
-                                            <span>Disponível</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-slate-600">
-                                            <Award size={16} />
-                                            <span>Disponível</span>
-                                        </div>
-                                    </CardFooter>
-                                </Card>
-
-                                {/* Track Card 2 */}
-                                <Card className="group border-white/60 bg-white/50 backdrop-blur-xl transition-all duration-300 hover:shadow-2xl hover:bg-white/70 hover:scale-[1.02]">
-                                    <CardHeader className="relative aspect-square bg-gradient-to-br from-blue-100 to-blue-200 p-0">
-                                        <Image
-                                            src="/placeholder.svg?height=300&width=300"
-                                            alt="Track artwork"
-                                            width={300}
-                                            height={300}
-                                            className="h-full w-full rounded-t-lg object-cover"
-                                        />
-                                        <Button
-                                            size="icon"
-                                            className="absolute bottom-4 right-4 rounded-full bg-white/95 backdrop-blur-md text-blue-700 opacity-0 shadow-xl transition-all duration-300 hover:bg-white hover:scale-110 group-hover:opacity-100"
-                                        >
-                                            <Play size={20} className="ml-0.5" />
-                                        </Button>
-                                        <Badge className="absolute right-4 top-4 border-emerald-300/50 bg-emerald-200/80 backdrop-blur-md text-emerald-800 shadow-lg">
-                                            Crescendo
-                                        </Badge>
-                                    </CardHeader>
-                                    <CardContent className="pt-6 bg-gradient-to-b from-white/80 to-white/60 backdrop-blur-sm">
-                                        <div className="flex items-start justify-between">
-                                            <div>
-                                                <h3 className="text-lg font-semibold text-slate-900">
-                                                    Alma Elétrica
-                                                </h3>
-                                                <p className="text-slate-600">
-                                                    Neon Pulse
-                                                </p>
-                                                <p className="mt-1 text-xs text-slate-500">
-                                                    Eletrônica • 2024
-                                                </p>
-                                            </div>
-                                            <Button
-                                                size="sm"
-                                                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg shadow-purple-600/30"
-                                            >
-                                                Reivindicar
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                    <CardFooter className="flex justify-between border-t border-white/50 bg-white/40 backdrop-blur-sm pt-4">
-                                        <div className="flex items-center gap-2 text-sm text-slate-600">
-                                            <TrendingUp size={16} />
-                                            <span>Disponível</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-slate-600">
-                                            <Award size={16} />
-                                            <span>Disponível</span>
-                                        </div>
-                                    </CardFooter>
-                                </Card>
-
-                                {/* Track Card 3 */}
-                                <Card className="group border-white/60 bg-white/50 backdrop-blur-xl transition-all duration-300 hover:shadow-2xl hover:bg-white/70 hover:scale-[1.02]">
-                                    <CardHeader className="relative aspect-square bg-gradient-to-br from-rose-100 to-rose-200 p-0">
-                                        <Image
-                                            src="/placeholder.svg?height=300&width=300"
-                                            alt="Track artwork"
-                                            width={300}
-                                            height={300}
-                                            className="h-full w-full rounded-t-lg object-cover"
-                                        />
-                                        <Button
-                                            size="icon"
-                                            className="absolute bottom-4 right-4 rounded-full bg-white/95 backdrop-blur-md text-rose-700 opacity-0 shadow-xl transition-all duration-300 hover:bg-white hover:scale-110 group-hover:opacity-100"
-                                        >
-                                            <Play size={20} className="ml-0.5" />
-                                        </Button>
-                                        <Badge className="absolute right-4 top-4 border-violet-300/50 bg-violet-200/80 backdrop-blur-md text-violet-800 shadow-lg">
-                                            Popular
-                                        </Badge>
-                                    </CardHeader>
-                                    <CardContent className="pt-6 bg-gradient-to-b from-white/80 to-white/60 backdrop-blur-sm">
-                                        <div className="flex items-start justify-between">
-                                            <div>
-                                                <h3 className="text-lg font-semibold text-slate-900">
-                                                    Boulevard do Pôr do Sol
-                                                </h3>
-                                                <p className="text-slate-600">
-                                                    Coastal Waves
-                                                </p>
-                                                <p className="mt-1 text-xs text-slate-500">
-                                                    Alternativo • 2024
-                                                </p>
-                                            </div>
-                                            <Button
-                                                size="sm"
-                                                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg shadow-purple-600/30"
-                                            >
-                                                Reivindicar
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                    <CardFooter className="flex justify-between border-t border-white/50 bg-white/40 backdrop-blur-sm pt-4">
-                                        <div className="flex items-center gap-2 text-sm text-slate-600">
-                                            <TrendingUp size={16} />
-                                            <span>Disponível</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-slate-600">
-                                            <Award size={16} />
-                                            <span>Disponível</span>
-                                        </div>
-                                    </CardFooter>
-                                </Card>
+                                    </article>
+                                ))}
                             </>
                         )}
                     </div>
 
-                    <div className="mt-12 text-center">
+                    <div className="text-center">
                         <Link href="/feed">
                             <Button
                                 variant="outline"
-                                className="border-purple-600 bg-white/40 backdrop-blur-xl px-8 text-gray-900 hover:bg-purple-600/10 hover:border-purple-700 hover:text-purple-700 shadow-lg hover:shadow-xl transition-all duration-300"
+                                className="rounded-full border border-white/15 bg-white/[0.04] px-8 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white/75 transition hover:border-white/35 hover:text-white"
                             >
                                 Ver mais
-                                <ArrowRight className="ml-2" size={16} />
+                                <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
                         </Link>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* Featured Track Section */}
-            <section className="bg-gradient-to-br from-slate-800 to-slate-900 px-4 py-16 text-white">
-                <div className="mx-auto max-w-7xl">
-                    <div className="flex flex-col items-center gap-12 lg:flex-row">
-                        <div className="w-full lg:w-1/2">
-                            <Badge className="bg-emerald-100 text-emerald-700 mb-4">
+                <section className="relative overflow-hidden rounded-[38px] border border-white/10 bg-white/[0.03] p-8 shadow-[0_28px_70px_rgba(8,4,20,0.5)] lg:p-12">
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_left,_rgba(56,189,248,0.18),_transparent_65%)]" />
+                    <div className="relative grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-center">
+                        <div className="space-y-5">
+                            <Badge className="rounded-full border border-white/15 bg-white/85 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-slate-800">
                                 Track em Destaque
                             </Badge>
                             {featuredTrack ? (
                                 <>
-                                    <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+                                    <h2 className="text-3xl font-semibold text-white md:text-4xl">
                                         {featuredTrack.track_title}
                                     </h2>
-                                    <h3 className="mb-2 text-xl font-semibold text-slate-300">
+                                    <h3 className="text-lg text-white/70">
                                         {featuredTrack.artist_name}
                                     </h3>
-                                    <p className="mb-6 leading-relaxed text-slate-300">
-                                        A galera tá começando a pegar essa. Tem aquela vibe que pode viralizar
-                                        do nada. Vale a pena salvar antes que todo mundo descubra.
+                                    <p className="text-sm leading-relaxed text-white/65">
+                                        A galera tá começando a pegar essa. Tem aquela vibe que pode viralizar do nada. Vale a pena salvar antes que todo mundo descubra.
                                     </p>
-                                    <div className="flex flex-col gap-4 sm:flex-row">
-                                        <Link href={`/track/${featuredTrack.track_url?.split('/').pop() || featuredTrack.track_title}`}>
-                                            <Button className="bg-white text-slate-800 hover:bg-slate-100 shadow-lg">
-                                                <Award size={16} className="mr-2" />
-                                                Ver Detalhes
-                                            </Button>
-                                        </Link>
-                                    </div>
+                                    <Link
+                                        href={`/track/${featuredTrack.track_url?.split('/').pop() || featuredTrack.track_title}`}
+                                        className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-900 transition hover:bg-slate-100"
+                                    >
+                                        <Award className="h-3.5 w-3.5" />
+                                        Ver Detalhes
+                                    </Link>
                                 </>
                             ) : (
                                 <>
-                                    <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+                                    <h2 className="text-3xl font-semibold text-white md:text-4xl">
                                         Ondas Cósmicas
                                     </h2>
-                                    <h3 className="mb-2 text-xl font-semibold text-slate-300">
+                                    <h3 className="text-lg text-white/70">
                                         por Stellar Dreams
                                     </h3>
-                                    <p className="mb-6 leading-relaxed text-slate-300">
+                                    <p className="text-sm leading-relaxed text-white/65">
                                         Esta track etérea combina sintetizadores sonhadores com vocais cativantes, criando uma experiência auditiva de outro mundo. Com seu som único e buzz crescente, tem todos os elementos para se tornar a próxima sensação viral.
                                     </p>
-                                    <div className="flex flex-col gap-4 sm:flex-row">
-                                        <Button className="bg-white text-slate-800 hover:bg-slate-100 shadow-lg">
-                                            <Award size={16} className="mr-2" />
-                                            Reivindicar Track
-                                        </Button>
-                                    </div>
+                                    <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-900">
+                                        <Award className="h-3.5 w-3.5" />
+                                        Reivindicar Track
+                                    </span>
                                 </>
                             )}
                         </div>
-                        <div className="w-full lg:w-1/2">
-                            <div className="relative aspect-square overflow-hidden rounded-2xl shadow-2xl">
-                                <Image
-                                    src={featuredTrack?.track_thumbnail || "/placeholder.svg?height=500&width=500"}
-                                    alt={featuredTrack ? `Capa de ${featuredTrack.track_title}` : "Featured track artwork"}
-                                    width={500}
-                                    height={500}
-                                    className="h-full w-full object-cover"
-                                />
-                            </div>
+                        <div className="order-first overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] shadow-[0_18px_55px_rgba(8,4,20,0.45)] lg:order-last">
+                            <Image
+                                src={featuredTrack?.track_thumbnail || '/placeholder.svg?height=500&width=500'}
+                                alt={featuredTrack ? `Capa de ${featuredTrack.track_title}` : 'Featured track artwork'}
+                                width={500}
+                                height={500}
+                                className="h-full w-full object-cover"
+                            />
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* How It Works Section */}
-            <section
-                id="how-it-works"
-                className="bg-gradient-to-b from-slate-50/50 to-white px-4 py-20"
-            >
-                <div className="mx-auto max-w-7xl">
-                    <div className="mb-16 text-center">
-                        <h2 className="mb-4 text-3xl font-bold text-slate-800 md:text-4xl">
+                <section id="how-it-works" className="space-y-12">
+                    <header className="text-center">
+                        <h2 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
                             Como funciona
                         </h2>
-                        <p className="mx-auto max-w-3xl text-xl leading-relaxed text-slate-600">
+                        <p className="mx-auto mt-4 max-w-xl text-sm text-white/65 md:text-base">
                             É simples. Você descobre, salva e comprova.
                         </p>
+                    </header>
+                    <div className="grid gap-6 md:grid-cols-3">
+                        {howItWorksSteps.map(({ title, description, icon: Icon, glow }) => (
+                            <article
+                                key={title}
+                                className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-8 text-center shadow-[0_24px_60px_rgba(8,4,20,0.45)]"
+                            >
+                                <div className={`pointer-events-none absolute -top-12 left-1/2 h-32 w-32 -translate-x-1/2 rounded-full bg-gradient-to-br ${glow} to-transparent blur-2xl`} />
+                                <div className="relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] text-white/80">
+                                    <Icon className="h-7 w-7" />
+                                </div>
+                                <h3 className="text-lg font-semibold text-white">{title}</h3>
+                                <p className="mt-3 text-sm text-white/65">{description}</p>
+                            </article>
+                        ))}
                     </div>
+                </section>
 
-                    <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
-                        <Card className="border-white/40 bg-white/40 backdrop-blur-2xl text-center transition-all duration-300 hover:shadow-2xl hover:shadow-purple-600/20 hover:bg-white/60">
-                            <CardContent className="pt-10">
-                                <div className="from-purple-600/30 to-purple-700/30 mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br backdrop-blur-md border border-purple-600/40 shadow-xl">
-                                    <Headphones
-                                        className="text-purple-600"
-                                        size={40}
-                                    />
-                                </div>
-                                <h3 className="mb-4 text-xl font-semibold text-slate-900">
-                                    1. Escuta
-                                </h3>
-                                <p className="leading-relaxed text-slate-700">
-                                    Explora as músicas. Acha aquela que você sente
-                                    que vai bombar. Confia no seu ouvido.
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="border-white/40 bg-white/40 backdrop-blur-2xl text-center transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 hover:bg-white/60">
-                            <CardContent className="pt-10">
-                                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500/30 to-blue-600/30 backdrop-blur-md border border-blue-400/40 shadow-xl">
-                                    <Award
-                                        className="text-blue-700"
-                                        size={40}
-                                    />
-                                </div>
-                                <h3 className="mb-4 text-xl font-semibold text-slate-900">
-                                    2. Salva
-                                </h3>
-                                <p className="leading-relaxed text-slate-700">
-                                    Clica em claim. Simples assim.
-                                    Agora ficou registrado que você tava aqui primeiro.
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="border-white/40 bg-white/40 backdrop-blur-2xl text-center transition-all duration-300 hover:shadow-2xl hover:shadow-rose-500/20 hover:bg-white/60">
-                            <CardContent className="pt-10">
-                                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-rose-500/30 to-rose-600/30 backdrop-blur-md border border-rose-400/40 shadow-xl">
-                                    <TrendingUp
-                                        className="text-rose-700"
-                                        size={40}
-                                    />
-                                </div>
-                                <h3 className="mb-4 text-xl font-semibold text-slate-900">
-                                    3. Comprova
-                                </h3>
-                                <p className="leading-relaxed text-slate-700">
-                                    Quando a música explodir, todo mundo vai saber:
-                                    você ouviu primeiro.
-                                </p>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
-            </section>
-
-            {/* About Section */}
-            <section id="about" className="relative overflow-hidden px-4 py-16">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-100/40 via-transparent to-pink-100/40"></div>
-                <div className="mx-auto max-w-4xl text-center relative z-10">
-                    <div className="bg-white/60 backdrop-blur-2xl rounded-3xl p-12 border border-white/60 shadow-2xl">
-                        <h2 className="mb-6 text-3xl font-bold text-slate-900 md:text-4xl">
+                <section id="about" className="relative overflow-hidden rounded-[36px] border border-white/10 bg-white/[0.04] px-8 py-16 text-center shadow-[0_30px_70px_rgba(8,4,20,0.5)]">
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(192,132,252,0.18),_transparent_70%)]" />
+                    <div className="relative space-y-6">
+                        <h2 className="text-3xl font-semibold text-white md:text-4xl">
                             Pra quem tem ouvido
                         </h2>
-                        <p className="mb-8 text-xl leading-relaxed text-slate-700">
-                            Mirsui é pra quem realmente ouve música. Não é playlist do Spotify,
-                            não é algoritmo. É você explorando, descobrindo e salvando
-                            o que ninguém ainda prestou atenção.
+                        <p className="text-base leading-relaxed text-white/70 md:text-lg">
+                            Mirsui é pra quem realmente ouve música. Não é playlist do Spotify, não é algoritmo. É você explorando, descobrindo e salvando o que ninguém ainda prestou atenção.
                         </p>
-                        <p className="mb-10 text-lg leading-relaxed text-slate-700">
-                            Indie, eletrônica, rap, whatever. Se você sente que uma música vai bombar,
-                            você salva. E quando ela explodir, você tem a prova que tava lá desde o início.
+                        <p className="text-sm leading-relaxed text-white/70 md:text-base">
+                            Indie, eletrônica, rap, whatever. Se você sente que uma música vai bombar, você salva. E quando ela explodir, você tem a prova que tava lá desde o início.
                         </p>
                         <Link href="/feed">
-                            <Button
-                                size="lg"
-                                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-10 py-4 text-lg text-white shadow-2xl shadow-purple-600/40 hover:shadow-3xl hover:shadow-purple-600/60 transition-all duration-300"
-                            >
+                            <Button className="mt-4 rounded-full border border-white/15 bg-gradient-to-r from-purple-500 to-pink-500 px-8 py-3 text-sm font-semibold uppercase tracking-[0.3em] shadow-[0_18px_45px_rgba(137,97,255,0.4)] hover:from-purple-600 hover:to-pink-600">
                                 Começar
-                                <ArrowRight className="ml-2" size={20} />
+                                <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
                         </Link>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* CTA Section */}
-            <section className="from-purple-600/20 via-purple-500/20 to-purple-700/20 bg-gradient-to-br px-4 py-20 relative overflow-hidden">
-                <div className="absolute inset-0 bg-white/60 backdrop-blur-3xl"></div>
-                <div className="mx-auto max-w-4xl text-center relative z-10">
-                    <h2 className="mb-6 text-3xl font-bold text-slate-900 md:text-4xl">
-                        Bora descobrir música?
-                    </h2>
-                    <p className="mb-10 text-xl leading-relaxed text-slate-700">
-                        Entre, explore e salve suas descobertas.
-                        Mostre que você tem ouvido pra música boa.
-                    </p>
-                    <div className="flex flex-col justify-center gap-4 sm:flex-row">
-                        <Link href="/register">
+                <section className="relative overflow-hidden rounded-[36px] border border-white/10 bg-white/[0.04] px-8 py-16 text-center shadow-[0_32px_75px_rgba(8,4,20,0.55)]">
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(125,211,252,0.18),_transparent_70%)]" />
+                    <div className="relative space-y-8">
+                        <h2 className="text-3xl font-semibold text-white md:text-4xl">
+                            Bora descobrir música?
+                        </h2>
+                        <p className="text-base leading-relaxed text-white/70 md:text-lg">
+                            Entre, explore e salve suas descobertas. Mostre que você tem ouvido pra música boa.
+                        </p>
+                        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+                            <Link href="/register">
+                                <Button className="h-12 rounded-full border border-white/15 bg-gradient-to-r from-purple-500 to-pink-500 px-8 text-sm font-semibold uppercase tracking-[0.3em] shadow-[0_20px_50px_rgba(137,97,255,0.4)] hover:from-purple-600 hover:to-pink-600">
+                                    Entrar grátis
+                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                </Button>
+                            </Link>
                             <Button
-                                size="lg"
-                                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-10 py-4 text-lg text-white shadow-2xl shadow-purple-600/40 hover:shadow-3xl hover:shadow-purple-600/60 transition-all duration-300"
+                                variant="outline"
+                                className="h-12 rounded-full border border-white/15 bg-white/[0.04] px-8 text-sm font-semibold uppercase tracking-[0.3em] text-white/75 transition hover:border-white/35 hover:text-white"
                             >
-                                Entrar grátis
-                                <ArrowRight className="ml-2" size={20} />
+                                Saber mais
                             </Button>
-                        </Link>
-                        <Button
-                            size="lg"
-                            variant="outline"
-                            className="border-purple-600 bg-white/40 backdrop-blur-xl px-10 py-4 text-lg text-gray-900 hover:bg-purple-600/10 hover:border-purple-700 hover:text-purple-700 shadow-lg hover:shadow-xl transition-all duration-300"
-                        >
-                            Saber mais
-                        </Button>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            </main>
         </div>
     )
 }

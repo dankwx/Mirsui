@@ -32,23 +32,32 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
         const formData = new FormData()
         formData.append('email', email)
         formData.append('password', password)
-        if (isRegistering) {
-            formData.append('username', username)
-            const result = await signup(formData)
-            if (result.error) {
-                setError(result.error)
+        
+        try {
+            if (isRegistering) {
+                formData.append('username', username)
+                const result = await signup(formData)
+                // If result exists, it means there was an error (redirect throws on success)
+                if (result?.error) {
+                    setError(result.error)
+                } else {
+                    // Handle successful signup
+                    onLogin(email, password)
+                }
             } else {
-                // Handle successful signup
-                onLogin(email, password)
+                const result = await login(formData)
+                // If result exists, it means there was an error (redirect throws on success)
+                if (result?.error) {
+                    setError(result.error)
+                } else {
+                    // Handle successful login
+                    onLogin(email, password)
+                }
             }
-        } else {
-            const result = await login(formData)
-            if (result.error) {
-                setError(result.error)
-            } else {
-                // Handle successful login
-                onLogin(email, password)
-            }
+        } catch (error) {
+            // Next.js redirect() throws an error to perform the redirect
+            // This is expected behavior and means the operation was successful
+            // The redirect will be handled automatically
         }
     }
 

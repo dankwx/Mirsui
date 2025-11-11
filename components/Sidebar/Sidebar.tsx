@@ -3,6 +3,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import type { LucideIcon } from 'lucide-react'
 import { Home, Library, Disc, Lamp, Music, Sparkles } from 'lucide-react'
 
 // Tipo para o perfil do usuário
@@ -20,25 +21,42 @@ interface SidebarProps {
     userProfile: UserProfile | null
 }
 
-const navigationItems = [
+type NavigationItem = {
+    title: string
+    url: string
+    icon: LucideIcon
+    match?: (pathname: string) => boolean
+}
+
+const navigationItems: NavigationItem[] = [
     {
         title: 'Home',
         url: '/',
         icon: Home,
+        match: (pathname) => pathname === '/' || pathname.startsWith('/feed'),
     },
-    { title: 'My Library', url: '/library', icon: Library },
     {
-        title: 'Discover', url: '/discover', icon: Lamp
+        title: 'My Library',
+        url: '/library',
+        icon: Library,
+        match: (pathname) => pathname.startsWith('/library'),
+    },
+    {
+        title: 'Discover',
+        url: '/discover',
+        icon: Lamp,
     },
     {
         title: 'Music Prophet',
         url: '/prophet',
         icon: Sparkles,
+        match: (pathname) => pathname.split('/').includes('prophet'),
     },
     {
         title: 'Claim Track',
         url: '/claimtrack',
         icon: Disc,
+        match: (pathname) => pathname.startsWith('/claimtrack'),
     },
 ]
 
@@ -64,11 +82,14 @@ export default function Sidebar({ userProfile }: SidebarProps) {
         return 'U'
     }
 
-    const isActive = (url: string) => {
-        if (url === '/') {
+    const isActive = (item: NavigationItem) => {
+        if (item.match) {
+            return item.match(pathname)
+        }
+        if (item.url === '/') {
             return pathname === '/'
         }
-        return pathname.startsWith(url)
+        return pathname.startsWith(item.url)
     }
 
     return (
@@ -104,7 +125,7 @@ export default function Sidebar({ userProfile }: SidebarProps) {
                     <div className="flex flex-col gap-1.5">
                         {navigationItems.map((item) => {
                             const Icon = item.icon
-                            const active = isActive(item.url)
+                            const active = isActive(item)
                             return (
                                 <Link
                                     key={item.title}

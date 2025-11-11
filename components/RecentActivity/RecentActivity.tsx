@@ -2,7 +2,6 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import Image from 'next/image'
-import SearchWithResults from '../SearchWithResults/SearchWithResults'
 
 interface ClaimedTrack {
     track_title: string
@@ -63,83 +62,84 @@ export default async function RecentActivity() {
     }
 
     return (
-        <div className="mr-8 max-w-xl rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-6 text-lg font-semibold text-gray-900">
-                Recent Activity
-            </h2>
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-8 text-white shadow-[0_40px_80px_-50px_rgba(90,64,214,0.9)] backdrop-blur-2xl">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(162,132,255,0.22),transparent_60%)]" />
+            <div className="relative">
+                <h2 className="mb-6 text-xl font-semibold text-white">
+                    Atividade recente
+                </h2>
 
-            {claimedTracksData && claimedTracksData.length > 0 ? (
-                <div className="space-y-4">
-                    {claimedTracksData.map((track, index) => (
-                        <div key={index} className="flex items-start space-x-3">
-                            {/* Avatar */}
-                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200">
-                                {track.avatar_url ? (
-                                    <Image
-                                        src={track.avatar_url}
-                                        alt={`${track.username} avatar`}
-                                        width={32}
-                                        height={32}
-                                        className="h-full w-full rounded-full object-cover"
-                                        placeholder="blur"
-                                        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyEkJNij2iYP2i4OFbLFzjbW1VTl5fwqRVWodaOyqTdZEkKGWY4jVBJBJZiLUpYLCUZDCUBjCPQTGDqIjJIZSyQlAXJAJNJzBaZTGNFMBmkZa1ZQYKGDdGSkyJQXjdJkRjdOjQjPfJmQZGWXQRASGCMJDGGJQFJkBOmCQZAKJZlBhQxAVdHHDJWPJGAGPJGAGPJGAGPJGAGPJGAGMJGAGMJGAGMJGAGMJGAGMJGAGMJGAGMJGAGMJGAGP/2Q=="
-                                    />
-                                ) : (
-                                    <span className="text-xs font-medium text-gray-600">
-                                        {track.username.charAt(0).toUpperCase()}
-                                    </span>
-                                )}
-                            </div>
-
-                            {/* Content */}
-                            <div className="min-w-0 flex-1">
-                                <div className="flex items-center space-x-2 text-sm">
-                                    <Link
-                                        href={`/user/${track.username}`}
-                                        className="font-medium text-gray-900 hover:underline"
-                                    >
-                                        {track.username}
-                                    </Link>
-                                    <span className="text-gray-500">
-                                        reinvidicou
-                                    </span>
-                                    <span className="text-gray-400">
-                                        {formatClaimedAt(track.claimed_at)}
-                                    </span>
-                                </div>
-
-                                <div className="mt-1">
-                                    <p className="text-sm font-medium text-gray-900">
-                                        <Link
-                                            href={`/track/${track.track_id || track.track_title}`}
-                                            className="hover:underline"
-                                        >
-                                            {track.track_title}
-                                        </Link>{' '}
-                                        by{' '}
-                                        <Link
-                                            href={`/artist/${track.artist_name}`}
-                                            className="text-blue-600 hover:underline"
-                                        >
-                                            {track.artist_name}
-                                        </Link>
-                                    </p>
-
-                                    {track.claim_message && (
-                                        <p className="mt-1 text-sm italic text-gray-600">
-                                            &quot;{track.claim_message}&quot;
-                                        </p>
+                {claimedTracksData && claimedTracksData.length > 0 ? (
+                    <div className="space-y-5">
+                        {claimedTracksData.map((track, index) => (
+                            <div key={index} className="flex items-start gap-3">
+                                {/* Avatar */}
+                                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white/10">
+                                    {track.avatar_url ? (
+                                        <Image
+                                            src={track.avatar_url}
+                                            alt={`${track.username} avatar`}
+                                            width={36}
+                                            height={36}
+                                            className="h-full w-full object-cover"
+                                            placeholder="blur"
+                                            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyEkJNij2iYP2i4OFbLFzjbW1VTl5fwqRVWodaOyqTdZEkKGWY4jVBJBJZiLUpYLCUZDCUBjCPQTGDqIjJIZSyQlAXJAJNJzBaZTGNFMBmkZa1ZQYKGDdGSkyJQXjdJkRjdOjQjPfJmQZGWXQRASGCMJDGGJQFJkBOmCQZAKJZlBhQxAVdHHDJWPJGAGPJGAGPJGAGPJGAGPJGAGMJGAGMJGAGMJGAGMJGAGMJGAGMJGAGMJGAGMJGAGP/2Q=="
+                                        />
+                                    ) : (
+                                        <span className="text-xs font-medium uppercase tracking-[0.2em] text-white/70">
+                                            {track.username.charAt(0).toUpperCase()}
+                                        </span>
                                     )}
                                 </div>
+
+                                {/* Content */}
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex flex-wrap items-center gap-2 text-sm text-white/60">
+                                        <Link
+                                            href={`/user/${track.username}`}
+                                            className="font-semibold text-white hover:text-purple-200"
+                                        >
+                                            {track.username}
+                                        </Link>
+                                        <span>reivindicou</span>
+                                        <span className="text-white/40">
+                                            {formatClaimedAt(track.claimed_at)}
+                                        </span>
+                                    </div>
+
+                                    <div className="mt-2">
+                                        <p className="text-sm font-semibold text-white">
+                                            <Link
+                                                href={`/track/${track.track_id || track.track_title}`}
+                                                className="hover:text-purple-200"
+                                            >
+                                                {track.track_title}
+                                            </Link>{' '}
+                                            <span className="text-white/50">por</span>{' '}
+                                            <Link
+                                                href={`/artist/${track.artist_name}`}
+                                                className="text-purple-200 hover:text-purple-100"
+                                            >
+                                                {track.artist_name}
+                                            </Link>
+                                        </p>
+
+                                        {track.claim_message && (
+                                            <p className="mt-1 text-sm italic text-white/60">
+                                                &quot;{track.claim_message}&quot;
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <p className="text-sm text-gray-500">
-                    Nenhuma atividade recente encontrada.
-                </p>
-            )}
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-sm text-white/50">
+                        Nenhuma atividade recente encontrada.
+                    </p>
+                )}
+            </div>
         </div>
     )
 }

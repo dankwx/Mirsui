@@ -44,10 +44,7 @@ export default function Header({ userProfile }: HeaderProps) {
                         <span>explorar catapultas sonoras</span>
                     </div>
                     <div className="relative w-[min(620px,60vw)]">
-                        <div className="pointer-events-none absolute inset-0 rounded-2xl border border-white/10 bg-gradient-to-r from-white/15 to-transparent blur" />
-                        <div className="relative rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-2 shadow-[0_18px_50px_rgba(109,76,231,0.18)]">
-                            <SearchWithResults />
-                        </div>
+                        <SearchWithResults />
                     </div>
                 </div>
 

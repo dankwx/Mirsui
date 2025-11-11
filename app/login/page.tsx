@@ -68,9 +68,9 @@ export default function LoginPage() {
             if (result?.error) {
                 setError(result.error)
             } else {
-                // Redirecionar para a página principal após registro bem-sucedido
-                router.push('/')
-                router.refresh()
+                // Redirecionar para a página de confirmação de email após registro
+                const nextUrl = `/auth/check-email?email=${encodeURIComponent(email)}`
+                router.push(nextUrl)
             }
         } catch (err) {
             setError('Erro interno do servidor. Tente novamente.')

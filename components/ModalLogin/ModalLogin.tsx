@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 import {
     Dialog,
@@ -12,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { login, signup } from '../../app/login/actions'
+import { useRouter } from 'next/navigation'
 
 interface LoginModalProps {
     trigger: React.ReactNode
@@ -25,6 +28,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
     const [isRegistering, setIsRegistering] = React.useState(false)
     const [isForgotPassword, setIsForgotPassword] = React.useState(false)
     const [error, setError] = React.useState<string | null>(null)
+    const router = useRouter()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -32,32 +36,27 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
         const formData = new FormData()
         formData.append('email', email)
         formData.append('password', password)
-        
+
         try {
             if (isRegistering) {
                 formData.append('username', username)
                 const result = await signup(formData)
-                // If result exists, it means there was an error (redirect throws on success)
                 if (result?.error) {
                     setError(result.error)
                 } else {
-                    // Handle successful signup
-                    onLogin(email, password)
+                    router.push(`/auth/check-email?email=${encodeURIComponent(email)}`)
                 }
             } else {
                 const result = await login(formData)
-                // If result exists, it means there was an error (redirect throws on success)
                 if (result?.error) {
                     setError(result.error)
                 } else {
-                    // Handle successful login
                     onLogin(email, password)
                 }
             }
-        } catch (error) {
-            // Next.js redirect() throws an error to perform the redirect
-            // This is expected behavior and means the operation was successful
-            // The redirect will be handled automatically
+        } catch (err) {
+            console.error('Authentication error', err)
+            setError('Ocorreu um erro inesperado. Tente novamente.')
         }
     }
 

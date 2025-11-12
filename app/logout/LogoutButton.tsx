@@ -23,10 +23,11 @@ export default function LogoutButton({
         startTransition(async () => {
             try {
                 await SignOut()
+                router.push('/')
+                router.refresh()
             } catch (error) {
                 console.error('Erro ao encerrar sessão', error)
             } finally {
-                router.refresh()
                 onComplete?.()
             }
         })

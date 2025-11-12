@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { login, signup } from '../../app/login/actions'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/utils/supabase/client'
 
 interface LoginModalProps {
     trigger: React.ReactNode
@@ -45,11 +46,24 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
         resetFeedback()
 
         if (mode === 'forgot') {
-            // Placeholder for future password recovery implementation
-            console.log('Forgot password for email:', email)
-            setStatusMessage(
-                'Se o email estiver cadastrado, você receberá um link em instantes.'
-            )
+            try {
+                const supabase = createClient()
+                const { error } = await supabase.auth.resetPasswordForEmail(
+                    email,
+                    {
+                        redirectTo: `${window.location.origin}/auth/confirm`,
+                    }
+                )
+                
+                if (error) throw error
+                
+                setStatusMessage(
+                    'Se o email estiver cadastrado, você receberá um link em instantes.'
+                )
+            } catch (err) {
+                console.error('Password reset error:', err)
+                setError('Erro ao enviar email de recuperação.')
+            }
             return
         }
 

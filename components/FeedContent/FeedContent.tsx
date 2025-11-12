@@ -1,9 +1,9 @@
 import React from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { 
-    TrendingUp, 
-    Music, 
+import {
+    TrendingUp,
+    Music,
     Sparkles,
     Crown,
     Plus,
@@ -48,8 +48,8 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                 <header className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                     <div className="space-y-4">
                         <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.3em] text-white/40">
-                            <Music className="h-4 w-4 text-purple-300" />
-                            <span>feed sonoro</span>
+
+                            <span>feed</span>
                         </div>
                         <div className="space-y-2">
                             <h1 className="text-3xl font-semibold tracking-tight text-white md:text-[2.75rem]">
@@ -83,13 +83,12 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                 <span className="pointer-events-none absolute left-5 top-0 bottom-0 hidden w-px bg-white/10 lg:block" />
                                 {initialPosts.map((post, index) => (
                                     <li key={post.id} className="relative pl-2 pr-2 lg:pl-14">
-                                        <span className={`pointer-events-none absolute left-[18px] top-8 h-3 w-3 rounded-full ring-4 ring-[#05030f] lg:left-5 ${
-                                            index % 3 === 0
+                                        <span className={`pointer-events-none absolute left-[18px] top-8 h-3 w-3 rounded-full ring-4 ring-[#05030f] lg:left-5 ${index % 3 === 0
                                                 ? 'bg-purple-400'
                                                 : index % 3 === 1
                                                     ? 'bg-pink-400'
                                                     : 'bg-blue-400'
-                                        }`} />
+                                            }`} />
                                         <article className="group flex flex-col gap-6 rounded-[24px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_22px_52px_rgba(8,4,20,0.32)] transition hover:border-white/25 hover:bg-white/[0.07] lg:p-7">
                                             <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
                                                 <div className="flex flex-1 items-start gap-4">

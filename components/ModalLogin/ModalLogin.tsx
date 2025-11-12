@@ -199,7 +199,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                     </DialogHeader>
 
                     <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div className="flex items-center gap-2 rounded-full border border-white/12 bg-white/5 p-1 text-[11px] font-semibold uppercase tracking-[0.3em]">
+                        <div className="flex items-center gap-2.5 rounded-full border border-white/12 bg-white/5 p-1.5 text-xs font-semibold uppercase tracking-[0.22em]">
                             {(['login', 'register'] as AuthMode[]).map((value) => (
                                 <button
                                     key={value}
@@ -211,7 +211,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                                     className={`rounded-full px-4 py-2 transition-all duration-200 ${
                                         mode === value
                                             ? 'bg-white text-[#08031a] shadow-[0_12px_30px_rgba(255,255,255,0.18)]'
-                                            : 'text-white/60 hover:text-white'
+                                            : 'text-white/70 hover:text-white'
                                     }`}
                                 >
                                     {value === 'login' ? 'Entrar' : 'Registrar'}
@@ -226,7 +226,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                                     setMode(mode === 'forgot' ? 'login' : 'forgot')
                                     resetFeedback()
                                 }}
-                                className="text-[11px] font-semibold uppercase tracking-[0.3em] text-purple-200 transition hover:text-white"
+                                className="text-xs font-semibold uppercase tracking-[0.22em] text-purple-100 transition hover:text-white"
                             >
                                 {mode === 'forgot' ? 'Voltar para login' : 'Esqueci a senha'}
                             </button>
@@ -258,7 +258,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                         </DialogFooter>
                     </form>
 
-                    <div className="space-y-3 text-center text-[11px] font-semibold uppercase tracking-[0.25em] text-white/45">
+                    <div className="space-y-3 text-center text-xs font-semibold uppercase tracking-[0.22em] text-white/60">
                         {mode === 'login' && (
                             <button
                                 type="button"
@@ -266,7 +266,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                                     setMode('register')
                                     resetFeedback()
                                 }}
-                                className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2 text-white/70 transition hover:bg-white/10 hover:text-white"
+                                className="w-full rounded-full border border-white/12 bg-white/10 px-4 py-2 text-white/80 transition hover:bg-white/15 hover:text-white"
                             >
                                 Não tem conta? Crie agora
                             </button>
@@ -278,7 +278,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                                     setMode('login')
                                     resetFeedback()
                                 }}
-                                className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2 text-white/70 transition hover:bg-white/10 hover:text-white"
+                                className="w-full rounded-full border border-white/12 bg-white/10 px-4 py-2 text-white/80 transition hover:bg-white/15 hover:text-white"
                             >
                                 Já é membro? Entre com sua conta
                             </button>

@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
-import Deslog from '@/app/logout/page' // Assumindo que este é um componente de cliente que lida com o logout
+import LogoutButton from '@/app/logout/LogoutButton'
 import LoginModalButton from '../LoginModalButton/LoginModalButton'
 
 export default async function GetAuth() {
@@ -63,9 +63,8 @@ export default async function GetAuth() {
                                 Política de Privacidade
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="cursor-pointer">
-                                {/* Componente para deslogar o usuário */}
-                                <Deslog />
+                            <DropdownMenuItem asChild>
+                                <LogoutButton className="w-full text-left text-red-600 hover:text-red-700 focus:text-red-700 dark:text-red-500" />
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

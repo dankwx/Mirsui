@@ -23,12 +23,13 @@ export default function LogoutButton({
         startTransition(async () => {
             try {
                 await SignOut()
-                router.push('/')
-                router.refresh()
+                // O redirect já é feito pela action SignOut
+                onComplete?.()
             } catch (error) {
                 console.error('Erro ao encerrar sessão', error)
-            } finally {
-                onComplete?.()
+                // Em caso de erro, tentar redirecionar manualmente
+                router.push('/')
+                router.refresh()
             }
         })
     }

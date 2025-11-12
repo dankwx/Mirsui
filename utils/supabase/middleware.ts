@@ -1,69 +1,106 @@
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
+
+// Função auxiliar para obter o nome do cookie do Supabase
+function getSupabaseCookieName(): string {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+    const projectId = supabaseUrl.split('//')[1]?.split('.')[0] || 'unknown'
+    return `sb-${projectId}-auth-token`
+}
+
 export async function updateSession(request: NextRequest) {
-    let supabaseResponse = NextResponse.next({
+    const response = NextResponse.next({
         request,
     })
 
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                getAll() {
-                    return request.cookies.getAll()
-                },
-                setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value, options }) =>
-                        request.cookies.set(name, value)
-                    )
-                    supabaseResponse = NextResponse.next({
-                        request,
-                    })
-                    cookiesToSet.forEach(({ name, value, options }) =>
-                        supabaseResponse.cookies.set(name, value, options)
-                    )
-                },
-            },
-        }
+    // Rotas públicas que não precisam de autenticação
+    const publicPaths = [
+        '/login',
+        '/auth',
+        '/reset-password',
+        '/',
+        '/how-it-works',
+        '/user',
+        '/logout'
+    ]
+
+    const isPublicPath = publicPaths.some(path => 
+        request.nextUrl.pathname === path || 
+        request.nextUrl.pathname.startsWith(path + '/')
     )
 
-    // IMPORTANT: Avoid writing any logic between createServerClient and
-    // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-    // issues with users being randomly logged out.
+    // Se for rota pública, deixa passar
+    if (isPublicPath) {
+        return response
+    }
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
+    // Buscar o token do cookie
+    const cookieName = getSupabaseCookieName()
+    const cookieValue = request.cookies.get(cookieName)?.value
 
-    if (
-        !user &&
-        !request.nextUrl.pathname.startsWith('/login') &&
-        !request.nextUrl.pathname.startsWith('/auth') &&
-        !request.nextUrl.pathname.startsWith('/reset-password') &&
-        request.nextUrl.pathname !== '/' &&
-        !request.nextUrl.pathname.startsWith('/how-it-works') &&
-        !request.nextUrl.pathname.startsWith('/user')
-    ) {
-        // no user, potentially respond by redirecting the user to the login page
+    if (!cookieValue) {
+        console.log(`[Middleware] Sem cookie em ${request.nextUrl.pathname}`)
+        // Sem token, redirecionar para home (modal de login)
         const url = request.nextUrl.clone()
-        url.pathname = '/login'
+        url.pathname = '/'
         return NextResponse.redirect(url)
     }
 
-    // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
-    // creating a new response object with NextResponse.next() make sure to:
-    // 1. Pass the request in it, like so:
-    //    const myNewResponse = NextResponse.next({ request })
-    // 2. Copy over the cookies, like so:
-    //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
-    // 3. Change the myNewResponse object to fit your needs, but avoid changing
-    //    the cookies!
-    // 4. Finally:
-    //    return myNewResponse
-    // If this is not done, you may be causing the browser and server to go out
-    // of sync and terminate the user's session prematurely!
+    try {
+        // Parsear o cookie para pegar o access_token
+        const session = JSON.parse(cookieValue)
+        const accessToken = session.access_token
 
-    return supabaseResponse
+        if (!accessToken) {
+            console.log(`[Middleware] Token não encontrado no cookie`)
+            throw new Error('Token não encontrado no cookie')
+        }
+
+        // Verificar o token com o backend
+        const verifyResponse = await fetch(`${BACKEND_URL}/auth/verify`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            // Timeout de 5 segundos
+            signal: AbortSignal.timeout(5000)
+        })
+
+        if (!verifyResponse.ok) {
+            console.log(`[Middleware] Verificação falhou: ${verifyResponse.status}`)
+            // Token inválido, redirecionar para home (modal de login)
+            const url = request.nextUrl.clone()
+            url.pathname = '/'
+            return NextResponse.redirect(url)
+        }
+
+        const data = await verifyResponse.json()
+
+        if (!data.authenticated) {
+            console.log(`[Middleware] Não autenticado`)
+            // Não autenticado, redirecionar para home (modal de login)
+            const url = request.nextUrl.clone()
+            url.pathname = '/'
+            return NextResponse.redirect(url)
+        }
+
+        console.log(`[Middleware] ✅ Autenticado - permitindo acesso a ${request.nextUrl.pathname}`)
+        // Token válido, deixar passar
+        return response
+
+    } catch (error) {
+        console.error('[Middleware] Erro ao verificar autenticação:', error)
+        // Em caso de erro de conexão, deixar passar (fail open)
+        // Isso evita que o site fique inacessível se o backend estiver offline
+        if (error instanceof Error && error.name === 'AbortError') {
+            console.log('[Middleware] Timeout na verificação - permitindo acesso')
+            return response
+        }
+        // Em caso de erro, redirecionar para home (modal de login)
+        const url = request.nextUrl.clone()
+        url.pathname = '/'
+        return NextResponse.redirect(url)
+    }
 }

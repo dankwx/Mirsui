@@ -12,7 +12,6 @@ import { Music } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { createClient } from '@/utils/supabase/client'
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
@@ -21,6 +20,7 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
     const router = useRouter()
 
     // Definir título da página
@@ -39,12 +39,23 @@ export default function LoginPage() {
         setLoading(true)
 
         try {
-            const supabase = createClient()
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: `${window.location.origin}/auth/confirm`,
+            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'
+            const response = await fetch(`${backendUrl}/auth/reset-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    email,
+                    redirectUrl: `${window.location.origin}/auth/confirm`
+                }),
             })
 
-            if (error) throw error
+            const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Erro ao enviar email de recuperação')
+            }
 
             setSuccess('Email de recuperação enviado! Verifique sua caixa de entrada.')
         } catch (err: any) {

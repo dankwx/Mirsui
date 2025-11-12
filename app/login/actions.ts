@@ -1,100 +1,110 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
+import { getSupabaseCookieName } from '@/utils/supabase/cookie-helper'
 
-import { createClient } from '@/utils/supabase/server'
-
-// Função para gerar um display name aleatório
-function generateRandomDisplayName(): string {
-    const adjectives = [
-        'Happy',
-        'Lucky',
-        'Clever',
-        'Brave',
-        'Gentle',
-        'Kind',
-        'Swift',
-        'Calm',
-    ]
-    const nouns = [
-        'Tiger',
-        'Eagle',
-        'Dolphin',
-        'Panda',
-        'Lion',
-        'Wolf',
-        'Bear',
-        'Fox',
-    ]
-    const randomAdjective =
-        adjectives[Math.floor(Math.random() * adjectives.length)]
-    const randomNoun = nouns[Math.floor(Math.random() * nouns.length)]
-    const randomNumber = Math.floor(Math.random() * 1000)
-    return `${randomAdjective}${randomNoun}${randomNumber}`
-}
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
 
 export async function login(formData: FormData) {
-    const supabase = createClient()
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
 
-    const data = {
-        email: formData.get('email') as string,
-        password: formData.get('password') as string,
+    try {
+        const response = await fetch(`${BACKEND_URL}/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+            return { error: data.error || 'Erro ao fazer login' }
+        }
+
+        // Armazenar o token da sessão nos cookies com os nomes que o Supabase espera
+        if (data.session?.access_token) {
+            const cookieStore = cookies()
+            const cookieName = getSupabaseCookieName()
+            
+            // Criar o objeto de sessão no formato que o Supabase espera
+            const sessionData = JSON.stringify({
+                access_token: data.session.access_token,
+                refresh_token: data.session.refresh_token,
+                expires_in: data.session.expires_in,
+                expires_at: data.session.expires_at,
+                token_type: data.session.token_type,
+                user: data.user
+            })
+            
+            cookieStore.set(cookieName, sessionData, {
+                path: '/',
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 60 * 60 * 24 * 7, // 7 dias
+            })
+        }
+
+        revalidatePath('/', 'layout')
+        return { success: true }
+    } catch (error) {
+        console.error('Erro no login:', error)
+        return { error: 'Erro ao conectar com o servidor' }
     }
-
-    const { error } = await supabase.auth.signInWithPassword(data)
-
-    if (error) {
-        return { error: error.message }
-    }
-
-    revalidatePath('/', 'layout')
-    return { success: true }
 }
 
 export async function signup(formData: FormData) {
-    const supabase = createClient()
-
     const email = formData.get('email') as string
     const password = formData.get('password') as string
     const username = formData.get('username') as string
 
-    // Verificar se o username já existe
-    const { data: existingUser } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('username', username)
-        .single()
-
-    if (existingUser) {
-        return { error: 'Nome de usuário já está em uso' }
-    }
-
-    // Gerar um display name aleatório
-    const displayName = generateRandomDisplayName()
-
-    // URL padrão para o avatar
-    const defaultAvatarUrl =
-        'https://tqprioqqitimssshcrcr.supabase.co/storage/v1/object/public/user-profile-images/default.jpg'
-
-    const data = {
-        email,
-        password,
-        options: {
-            data: {
-                username,
-                display_name: displayName,
-                avatar_url: defaultAvatarUrl,
+    try {
+        const response = await fetch(`${BACKEND_URL}/auth/signup`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
             },
-        },
+            body: JSON.stringify({ email, password, username }),
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+            return { error: data.error || 'Erro ao criar conta' }
+        }
+
+        // Armazenar o token da sessão nos cookies se retornar
+        if (data.session?.access_token) {
+            const cookieStore = cookies()
+            const cookieName = getSupabaseCookieName()
+            
+            // Criar o objeto de sessão no formato que o Supabase espera
+            const sessionData = JSON.stringify({
+                access_token: data.session.access_token,
+                refresh_token: data.session.refresh_token,
+                expires_in: data.session.expires_in,
+                expires_at: data.session.expires_at,
+                token_type: data.session.token_type,
+                user: data.user
+            })
+            
+            cookieStore.set(cookieName, sessionData, {
+                path: '/',
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 60 * 60 * 24 * 7, // 7 dias
+            })
+        }
+
+        revalidatePath('/', 'layout')
+        return { success: true, message: data.message }
+    } catch (error) {
+        console.error('Erro no signup:', error)
+        return { error: 'Erro ao conectar com o servidor' }
     }
-
-    const { error } = await supabase.auth.signUp(data)
-
-    if (error) {
-        return { error: error.message }
-    }
-
-    revalidatePath('/', 'layout')
-    return { success: true }
 }

@@ -98,11 +98,8 @@ export default async function HomePage() {
                         </Link>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center">
                         <GetAuth />
-                        <Button asChild className={pillButtonClass('secondary')}>
-                            <Link href="/feed">Entrar</Link>
-                        </Button>
                     </div>
                 </div>
             </nav>

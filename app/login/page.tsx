@@ -12,12 +12,14 @@ import { Music } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import { createClient } from '@/utils/supabase/client'
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [username, setUsername] = useState('')
     const [error, setError] = useState<string | null>(null)
+    const [success, setSuccess] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
     const router = useRouter()
 
@@ -26,9 +28,36 @@ export default function LoginPage() {
         document.title = 'Login - Mirsui'
     }, [])
 
+    const handleForgotPassword = async () => {
+        if (!email) {
+            setError('Digite seu email primeiro')
+            return
+        }
+        
+        setError(null)
+        setSuccess(null)
+        setLoading(true)
+
+        try {
+            const supabase = createClient()
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/auth/confirm`,
+            })
+
+            if (error) throw error
+
+            setSuccess('Email de recuperação enviado! Verifique sua caixa de entrada.')
+        } catch (err: any) {
+            setError(err.message || 'Erro ao enviar email de recuperação.')
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
+        setSuccess(null)
         setLoading(true)
 
         try {
@@ -55,6 +84,7 @@ export default function LoginPage() {
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
+        setSuccess(null)
         setLoading(true)
 
         try {
@@ -135,6 +165,11 @@ export default function LoginPage() {
                                             <AlertDescription>{error}</AlertDescription>
                                         </Alert>
                                     )}
+                                    {success && (
+                                        <Alert className="bg-green-50 border-green-200 text-green-800">
+                                            <AlertDescription>{success}</AlertDescription>
+                                        </Alert>
+                                    )}
                                 </CardContent>
                                 <CardFooter className="flex flex-col space-y-4">
                                     <Button 
@@ -143,6 +178,15 @@ export default function LoginPage() {
                                         disabled={loading}
                                     >
                                         {loading ? 'Entrando...' : 'Entrar'}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        className="w-full text-sm text-purple-600 hover:text-purple-700"
+                                        onClick={handleForgotPassword}
+                                        disabled={loading}
+                                    >
+                                        Esqueci minha senha
                                     </Button>
                                     <p className="text-sm text-center text-gray-600">
                                         Não tem uma conta?{' '}

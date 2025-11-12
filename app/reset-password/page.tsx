@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 
@@ -10,8 +10,22 @@ export default function ResetPasswordPage() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState(false)
+    const [isValidSession, setIsValidSession] = useState(false)
     const router = useRouter()
     const supabase = createClient()
+
+    // Verificar se há uma sessão válida ao carregar a página
+    useEffect(() => {
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (session) {
+                setIsValidSession(true)
+            } else {
+                setError('Sessão inválida. Solicite um novo link de recuperação.')
+            }
+        }
+        checkSession()
+    }, [supabase])
 
     const handleResetPassword = async (e: React.FormEvent) => {
         e.preventDefault()

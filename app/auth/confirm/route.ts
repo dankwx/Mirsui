@@ -18,6 +18,10 @@ export async function GET(request: NextRequest) {
             token_hash,
         })
         if (!error) {
+            // Se for recuperação de senha, redireciona para a página de reset
+            if (type === 'recovery') {
+                redirect('/reset-password')
+            }
             // redirect user to specified redirect URL or root of app
             redirect(next)
         }

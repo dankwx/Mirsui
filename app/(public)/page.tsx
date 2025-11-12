@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
+import { pillButtonClass } from '@/components/ui/pill-button'
 import { Badge } from '@/components/ui/badge'
 import { TrendingUp, Headphones, Award, Play, ArrowRight } from 'lucide-react'
 import { Music, Clock, Target } from 'lucide-react'
@@ -99,11 +100,9 @@ export default async function HomePage() {
 
                     <div className="flex items-center gap-3">
                         <GetAuth />
-                        <Link href="/feed">
-                            <Button className="rounded-full border border-white/15 bg-gradient-to-r from-purple-500 to-pink-500 px-5 py-2 text-sm font-semibold uppercase tracking-[0.3em] text-white shadow-[0_14px_32px_rgba(137,97,255,0.35)] hover:from-purple-600 hover:to-pink-600">
-                                Entrar
-                            </Button>
-                        </Link>
+                        <Button asChild className={pillButtonClass('secondary')}>
+                            <Link href="/feed">Entrar</Link>
+                        </Button>
                     </div>
                 </div>
             </nav>
@@ -120,20 +119,15 @@ export default async function HomePage() {
                             Salve suas músicas favoritas antes delas bombarem. Quando todo mundo descobrir, você já vai ter seu registro.
                         </p>
                         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                            <Link href="/feed">
-                                <Button className="h-12 rounded-full border border-white/15 bg-gradient-to-r from-purple-500 to-pink-500 px-8 text-sm font-semibold uppercase tracking-[0.3em] shadow-[0_22px_52px_rgba(137,97,255,0.4)] hover:from-purple-600 hover:to-pink-600">
-                                    Explorar músicas
-                                    <ArrowRight className="ml-2 h-4 w-4" />
-                                </Button>
-                            </Link>
-                            <Link href="/how-it-works">
-                                <Button
-                                    variant="outline"
-                                    className="h-12 rounded-full border border-white/15 bg-white/[0.04] px-8 text-sm font-semibold uppercase tracking-[0.3em] text-white/80 transition hover:border-white/35 hover:text-white"
-                                >
-                                    Como funciona
-                                </Button>
-                            </Link>
+                            <Button asChild className={pillButtonClass('primary')}>
+                                <Link href="/feed">
+                                    <span>Explorar músicas</span>
+                                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                                </Link>
+                            </Button>
+                            <Button asChild className={pillButtonClass('ghost')}>
+                                <Link href="/how-it-works">Como funciona</Link>
+                            </Button>
                         </div>
                     </div>
                 </section>
@@ -211,12 +205,14 @@ export default async function HomePage() {
                                                 #{track.position}
                                             </span>
                                         </div>
-                                        <Link
-                                            href={`/track/${track.track_url?.split('/').pop() || track.track_title}`}
-                                            className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.07] px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white transition hover:border-white/30 hover:bg-white/[0.12]"
+                                        <Button
+                                            asChild
+                                            className={pillButtonClass('ghost', 'sm')}
                                         >
-                                            Ver Track
-                                        </Link>
+                                            <Link href={`/track/${track.track_url?.split('/').pop() || track.track_title}`}>
+                                                Ver track
+                                            </Link>
+                                        </Button>
                                     </div>
                                 </article>
                             ))
@@ -266,15 +262,12 @@ export default async function HomePage() {
                     </div>
 
                     <div className="text-center">
-                        <Link href="/feed">
-                            <Button
-                                variant="outline"
-                                className="rounded-full border border-white/15 bg-white/[0.04] px-8 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white/75 transition hover:border-white/35 hover:text-white"
-                            >
-                                Ver mais
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
-                        </Link>
+                        <Button asChild className={pillButtonClass('secondary')}>
+                            <Link href="/feed">
+                                <span>Ver mais</span>
+                                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                            </Link>
+                        </Button>
                     </div>
                 </section>
 
@@ -296,13 +289,15 @@ export default async function HomePage() {
                                     <p className="text-sm leading-relaxed text-white/65">
                                         A galera tá começando a pegar essa. Tem aquela vibe que pode viralizar do nada. Vale a pena salvar antes que todo mundo descubra.
                                     </p>
-                                    <Link
-                                        href={`/track/${featuredTrack.track_url?.split('/').pop() || featuredTrack.track_title}`}
-                                        className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-900 transition hover:bg-slate-100"
+                                    <Button
+                                        asChild
+                                        className={pillButtonClass('contrast', 'sm')}
                                     >
-                                        <Award className="h-3.5 w-3.5" />
-                                        Ver Detalhes
-                                    </Link>
+                                        <Link href={`/track/${featuredTrack.track_url?.split('/').pop() || featuredTrack.track_title}`}>
+                                            <Award className="h-3.5 w-3.5 text-purple-600" />
+                                            Ver detalhes
+                                        </Link>
+                                    </Button>
                                 </>
                             ) : (
                                 <>
@@ -315,9 +310,9 @@ export default async function HomePage() {
                                     <p className="text-sm leading-relaxed text-white/65">
                                         Esta track etérea combina sintetizadores sonhadores com vocais cativantes, criando uma experiência auditiva de outro mundo. Com seu som único e buzz crescente, tem todos os elementos para se tornar a próxima sensação viral.
                                     </p>
-                                    <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-900">
-                                        <Award className="h-3.5 w-3.5" />
-                                        Reivindicar Track
+                                    <span className={pillButtonClass('contrast', 'sm')}>
+                                        <Award className="h-3.5 w-3.5 text-purple-600" />
+                                        Reivindicar track
                                     </span>
                                 </>
                             )}
@@ -372,12 +367,12 @@ export default async function HomePage() {
                         <p className="text-sm leading-relaxed text-white/70 md:text-base">
                             Indie, eletrônica, rap, whatever. Se você sente que uma música vai bombar, você salva. E quando ela explodir, você tem a prova que tava lá desde o início.
                         </p>
-                        <Link href="/feed">
-                            <Button className="mt-4 rounded-full border border-white/15 bg-gradient-to-r from-purple-500 to-pink-500 px-8 py-3 text-sm font-semibold uppercase tracking-[0.3em] shadow-[0_18px_45px_rgba(137,97,255,0.4)] hover:from-purple-600 hover:to-pink-600">
-                                Começar
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
-                        </Link>
+                        <Button asChild className={pillButtonClass('primary')}>
+                            <Link href="/feed">
+                                <span>Começar</span>
+                                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                            </Link>
+                        </Button>
                     </div>
                 </section>
 
@@ -391,16 +386,13 @@ export default async function HomePage() {
                             Entre, explore e salve suas descobertas. Mostre que você tem ouvido pra música boa.
                         </p>
                         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                            <Link href="/register">
-                                <Button className="h-12 rounded-full border border-white/15 bg-gradient-to-r from-purple-500 to-pink-500 px-8 text-sm font-semibold uppercase tracking-[0.3em] shadow-[0_20px_50px_rgba(137,97,255,0.4)] hover:from-purple-600 hover:to-pink-600">
-                                    Entrar grátis
-                                    <ArrowRight className="ml-2 h-4 w-4" />
-                                </Button>
-                            </Link>
-                            <Button
-                                variant="outline"
-                                className="h-12 rounded-full border border-white/15 bg-white/[0.04] px-8 text-sm font-semibold uppercase tracking-[0.3em] text-white/75 transition hover:border-white/35 hover:text-white"
-                            >
+                            <Button asChild className={pillButtonClass('primary')}>
+                                <Link href="/register">
+                                    <span>Entrar grátis</span>
+                                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                                </Link>
+                            </Button>
+                            <Button type="button" className={pillButtonClass('ghost')}>
                                 Saber mais
                             </Button>
                         </div>

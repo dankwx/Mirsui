@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { Sparkles, Target, Headphones } from 'lucide-react'
 import {
     Dialog,
     DialogContent,
@@ -21,38 +22,61 @@ interface LoginModalProps {
     onLogin: (email: string, password: string) => void
 }
 
+type AuthMode = 'login' | 'register' | 'forgot'
+
 const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
+    const [mode, setMode] = React.useState<AuthMode>('login')
     const [email, setEmail] = React.useState('')
     const [password, setPassword] = React.useState('')
     const [username, setUsername] = React.useState('')
-    const [isRegistering, setIsRegistering] = React.useState(false)
-    const [isForgotPassword, setIsForgotPassword] = React.useState(false)
     const [error, setError] = React.useState<string | null>(null)
+    const [statusMessage, setStatusMessage] = React.useState<string | null>(
+        null
+    )
     const router = useRouter()
+
+    const resetFeedback = () => {
+        setError(null)
+        setStatusMessage(null)
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        setError(null)
+        resetFeedback()
+
+        if (mode === 'forgot') {
+            // Placeholder for future password recovery implementation
+            console.log('Forgot password for email:', email)
+            setStatusMessage(
+                'Se o email estiver cadastrado, você receberá um link em instantes.'
+            )
+            return
+        }
+
         const formData = new FormData()
         formData.append('email', email)
         formData.append('password', password)
 
         try {
-            if (isRegistering) {
+            if (mode === 'register') {
                 formData.append('username', username)
                 const result = await signup(formData)
                 if (result?.error) {
                     setError(result.error)
                 } else {
-                    router.push(`/auth/check-email?email=${encodeURIComponent(email)}`)
+                    router.push(
+                        `/auth/check-email?email=${encodeURIComponent(email)}`
+                    )
                 }
+                return
+            }
+
+            const result = await login(formData)
+            if (result?.error) {
+                setError(result.error)
             } else {
-                const result = await login(formData)
-                if (result?.error) {
-                    setError(result.error)
-                } else {
-                    onLogin(email, password)
-                }
+                onLogin(email, password)
+                setStatusMessage('Login realizado com sucesso.')
             }
         } catch (err) {
             console.error('Authentication error', err)
@@ -60,16 +84,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
         }
     }
 
-    const handleForgotPassword = (e: React.FormEvent) => {
-        e.preventDefault()
-        // Implement forgot password logic here
-        console.log('Forgot password for email:', email)
-    }
-
-    const renderForm = () => (
-        <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email" className="text-right text-slate-900 font-medium">
+    const renderFormFields = () => (
+        <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+                <Label
+                    htmlFor="email"
+                    className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/60"
+                >
                     Email
                 </Label>
                 <Input
@@ -77,118 +98,197 @@ const LoginModal: React.FC<LoginModalProps> = ({ trigger, onLogin }) => {
                     name="email"
                     type="email"
                     required
-                    className="col-span-3 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white/50 backdrop-blur-md border-white/50 shadow-sm placeholder:text-slate-500"
+                    className="h-11 rounded-xl border border-white/15 bg-white/5 px-4 text-white placeholder:text-white/40 focus-visible:border-white/30 focus-visible:ring-2 focus-visible:ring-purple-400/70"
                     value={email}
-                    placeholder="email@email.com"
+                    placeholder="você@email.com"
                     onChange={(e) => setEmail(e.target.value)}
                 />
             </div>
-            <div
-                className={`grid origin-top grid-cols-4 items-center gap-4 transition-all duration-300 ease-in-out ${!isForgotPassword ? 'max-h-20 scale-y-100 opacity-100' : 'max-h-0 scale-y-0 opacity-0'}`}
-            >
-                <Label htmlFor="password" className="text-right text-slate-900 font-medium">
-                    Password
-                </Label>
-                <Input
-                    id="password"
-                    name="password"
-                    className="col-span-3 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white/50 backdrop-blur-md border-white/50 shadow-sm placeholder:text-slate-500"
-                    required={!isForgotPassword}
-                    type="password"
-                    placeholder="*******"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-            </div>
-            <div
-                className={`grid origin-top grid-cols-4 items-center gap-4 transition-all duration-300 ease-in-out ${isRegistering && !isForgotPassword ? 'max-h-20 scale-y-100 opacity-100' : 'max-h-0 scale-y-0 opacity-0'}`}
-            >
-                <Label htmlFor="username" className="text-right text-slate-900 font-medium">
-                    Username
-                </Label>
-                <Input
-                    id="username"
-                    name="username"
-                    className="col-span-3 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white/50 backdrop-blur-md border-white/50 shadow-sm placeholder:text-slate-500"
-                    required={isRegistering}
-                    type="text"
-                    placeholder="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-            </div>
+
+            {mode === 'register' && (
+                <div className="flex flex-col gap-2">
+                    <Label
+                        htmlFor="username"
+                        className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/60"
+                    >
+                        Username
+                    </Label>
+                    <Input
+                        id="username"
+                        name="username"
+                        type="text"
+                        required
+                        className="h-11 rounded-xl border border-white/15 bg-white/5 px-4 text-white placeholder:text-white/40 focus-visible:border-white/30 focus-visible:ring-2 focus-visible:ring-purple-400/70"
+                        placeholder="seuusuario"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                    />
+                </div>
+            )}
+
+            {mode !== 'forgot' && (
+                <div className="flex flex-col gap-2">
+                    <Label
+                        htmlFor="password"
+                        className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/60"
+                    >
+                        Senha
+                    </Label>
+                    <Input
+                        id="password"
+                        name="password"
+                        type="password"
+                        required
+                        className="h-11 rounded-xl border border-white/15 bg-white/5 px-4 text-white placeholder:text-white/40 focus-visible:border-white/30 focus-visible:ring-2 focus-visible:ring-purple-400/70"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                </div>
+            )}
         </div>
     )
 
+    const primaryActionLabel =
+        mode === 'forgot' ? 'Enviar link' : mode === 'register' ? 'Criar conta' : 'Entrar'
+
     return (
-        <Dialog modal={false}>
+        <Dialog>
             <DialogTrigger asChild>{trigger}</DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] bg-white/40 backdrop-blur-3xl border-white/40 shadow-2xl">
-                <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold text-slate-900">
-                        {isForgotPassword
-                            ? 'Forgot Password'
-                            : isRegistering
-                              ? 'Register'
-                              : 'Log In'}
-                    </DialogTitle>
-                    <DialogDescription className="text-slate-700">
-                        {isForgotPassword
-                            ? "Enter your email address and we'll send you a link to reset your password."
-                            : 'By continuing, you agree to our User Agreement and acknowledge that you understand the Privacy Policy.'}
-                    </DialogDescription>
-                </DialogHeader>
-                <form
-                    onSubmit={
-                        isForgotPassword ? handleForgotPassword : handleSubmit
-                    }
-                >
-                    {renderForm()}
-                    {error && (
-                        <div className="mt-2 text-sm text-red-700 bg-red-100/60 backdrop-blur-md px-3 py-2 rounded-lg border border-red-300/40">
-                            {error}
+            <DialogContent className="grid !max-w-3xl !grid-cols-1 overflow-hidden rounded-[34px] border border-white/15 bg-[#060214] p-0 text-white shadow-[0_45px_130px_rgba(137,97,255,0.6)] backdrop-blur-3xl md:!grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+                <div className="relative flex min-h-[520px] flex-col justify-between bg-gradient-to-br from-purple-600/35 via-fuchsia-500/15 to-indigo-500/25 p-10 md:border-r md:border-white/10">
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.18),_transparent_55%)]" />
+                    <div className="relative space-y-6">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-white/70">
+                            <Sparkles className="h-4 w-4 text-purple-200" />
+                            Early listeners club
+                        </span>
+                        <h2 className="text-3xl font-semibold leading-snug text-white">
+                            Entre para descobrir sons antes de todo mundo.
+                        </h2>
+                        <p className="max-w-sm text-sm leading-relaxed text-white/70">
+                            Salve suas apostas, acompanhe quando elas explodirem e mostre que seu ouvido capta tendências antes de virarem hype.
+                        </p>
+                    </div>
+                    <div className="relative mt-12 space-y-4 text-sm text-white/75">
+                        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-4">
+                            <Headphones className="h-5 w-5 text-purple-200" />
+                            <span>Playlists curadas por quem realmente descobre música.</span>
                         </div>
-                    )}
-                    <DialogFooter className="mt-4">
-                        <Button 
-                            type="submit"
-                            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300"
-                        >
-                            {isForgotPassword
-                                ? 'Reset Password'
-                                : isRegistering
-                                  ? 'Register'
-                                  : 'Login'}
-                        </Button>
-                    </DialogFooter>
-                </form>
-                <div className="mt-4 flex justify-between bg-white/30 backdrop-blur-xl rounded-xl p-3 border border-white/40">
-                    <DialogDescription
-                        className="cursor-pointer text-purple-700 hover:text-purple-800 font-medium transition-colors"
-                        onClick={() => {
-                            setIsRegistering(!isRegistering)
-                            setIsForgotPassword(false)
-                            setError(null)
-                        }}
-                    >
-                        {isRegistering
-                            ? 'Already have an account? Log in'
-                            : "Don't have an account? Register"}
-                    </DialogDescription>
-                    {!isRegistering && (
-                        <DialogDescription
-                            className="cursor-pointer text-purple-700 hover:text-purple-800 font-medium transition-colors"
-                            onClick={() => {
-                                setIsForgotPassword(!isForgotPassword)
-                                setIsRegistering(false)
-                                setError(null)
-                            }}
-                        >
-                            {isForgotPassword
-                                ? 'Back to Login'
-                                : 'Forgot Password?'}
+                        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-4">
+                            <Target className="h-5 w-5 text-purple-200" />
+                            <span>Ganhe score quando suas descobertas virarem hits.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="relative flex min-h-[520px] flex-col gap-6 bg-[#08031a] p-8 md:p-10">
+                    <DialogHeader className="space-y-3 text-left">
+                        <DialogTitle className="text-3xl font-semibold tracking-tight text-white">
+                            {mode === 'forgot'
+                                ? 'Recuperar acesso'
+                                : mode === 'register'
+                                    ? 'Criar conta'
+                                    : 'Entrar no Mirsui'}
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-white/65">
+                            {mode === 'forgot'
+                                ? 'Informe seu email e enviaremos instruções para redefinir sua senha.'
+                                : 'Ao continuar, você concorda com nossos Termos de Uso e Política de Privacidade.'}
                         </DialogDescription>
-                    )}
+                    </DialogHeader>
+
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 rounded-full border border-white/12 bg-white/5 p-1 text-[11px] font-semibold uppercase tracking-[0.3em]">
+                            {(['login', 'register'] as AuthMode[]).map((value) => (
+                                <button
+                                    key={value}
+                                    type="button"
+                                    onClick={() => {
+                                        setMode(value)
+                                        resetFeedback()
+                                    }}
+                                    className={`rounded-full px-4 py-2 transition-all duration-200 ${
+                                        mode === value
+                                            ? 'bg-white text-[#08031a] shadow-[0_12px_30px_rgba(255,255,255,0.18)]'
+                                            : 'text-white/60 hover:text-white'
+                                    }`}
+                                >
+                                    {value === 'login' ? 'Entrar' : 'Registrar'}
+                                </button>
+                            ))}
+                        </div>
+
+                        {mode !== 'register' && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setMode(mode === 'forgot' ? 'login' : 'forgot')
+                                    resetFeedback()
+                                }}
+                                className="text-[11px] font-semibold uppercase tracking-[0.3em] text-purple-200 transition hover:text-white"
+                            >
+                                {mode === 'forgot' ? 'Voltar para login' : 'Esqueci a senha'}
+                            </button>
+                        )}
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+                        {renderFormFields()}
+
+                        {error && (
+                            <div className="rounded-2xl border border-red-400/30 bg-red-500/15 px-4 py-3 text-sm text-red-100">
+                                {error}
+                            </div>
+                        )}
+
+                        {statusMessage && (
+                            <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+                                {statusMessage}
+                            </div>
+                        )}
+
+                        <DialogFooter className="mt-2">
+                            <Button
+                                type="submit"
+                                className="h-12 w-full rounded-full border border-white/15 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 text-sm font-semibold uppercase tracking-[0.3em] text-white shadow-[0_18px_48px_rgba(137,97,255,0.4)] transition hover:from-purple-600 hover:to-pink-600"
+                            >
+                                {primaryActionLabel}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+
+                    <div className="space-y-3 text-center text-[11px] font-semibold uppercase tracking-[0.25em] text-white/45">
+                        {mode === 'login' && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setMode('register')
+                                    resetFeedback()
+                                }}
+                                className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2 text-white/70 transition hover:bg-white/10 hover:text-white"
+                            >
+                                Não tem conta? Crie agora
+                            </button>
+                        )}
+                        {mode === 'register' && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setMode('login')
+                                    resetFeedback()
+                                }}
+                                className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2 text-white/70 transition hover:bg-white/10 hover:text-white"
+                            >
+                                Já é membro? Entre com sua conta
+                            </button>
+                        )}
+                        {mode === 'forgot' && (
+                            <span className="block text-white/60">
+                                Use um email cadastrado para receber o link de redefinição.
+                            </span>
+                        )}
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>

@@ -130,7 +130,7 @@ export default function Header({ userProfile }: HeaderProps) {
                                     </div>
                                     <div className="flex flex-col p-2 text-sm text-white/70">
                                         <Link
-                                            href="/profile"
+                                            href={`/user/${userProfile?.username || userProfile?.id}`}
                                             className="flex items-center gap-2 rounded-xl px-3 py-2 transition-colors duration-200 hover:bg-white/10"
                                             onClick={() => setIsMenuOpen(false)}
                                         >

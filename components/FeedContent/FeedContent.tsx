@@ -1,4 +1,6 @@
-import React from 'react'
+'use client'
+
+import React, { useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -8,23 +10,28 @@ import {
     Crown,
     Plus,
     Award,
-    Target
+    Target,
+    Loader2
 } from 'lucide-react'
 import PostInteractions from '@/components/PostInteractions/PostInteractions'
-import { FeedPostWithInteractions } from '@/utils/socialInteractionsService'
+import { FeedPostWithInteractions } from '@/utils/feedService.backend'
 import { getUserBadge, isUserVerified } from '@/utils/feedHelpers'
 import Link from 'next/link'
 import RecentClaims from '@/components/RecentClaims/RecentClaims'
-import { RecentClaim } from '@/utils/recentClaimsService'
+import { RecentClaim } from '@/utils/feedService.backend'
 
 interface FeedContentProps {
     initialPosts: (FeedPostWithInteractions & { isLiked: boolean })[]
     recentClaims: RecentClaim[]
 }
 
-// Server Component otimizado para feed
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'
+
+// Client Component com paginação
 export default function FeedContent({ initialPosts, recentClaims }: FeedContentProps) {
-    const totalPosts = initialPosts.length
+    const [posts, setPosts] = useState(initialPosts)
+    const [loading, setLoading] = useState(false)
+    const [hasMore, setHasMore] = useState(initialPosts.length === 5)
 
     const formatClaimDate = (claimedat?: string | null) => {
         if (!claimedat) return 'Data não disponível'
@@ -36,6 +43,80 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
             }).format(new Date(claimedat))
         } catch {
             return 'Data não disponível'
+        }
+    }
+
+    const loadMorePosts = async () => {
+        setLoading(true)
+        
+        // Salvar a posição atual do scroll antes de carregar
+        const scrollPosition = window.scrollY
+        
+        try {
+            console.log(`🔍 Carregando mais posts: offset=${posts.length}, limit=5`)
+            const response = await fetch(`${BACKEND_URL}/feed?limit=5&offset=${posts.length}`)
+            
+            if (!response.ok) {
+                console.error('Erro ao carregar mais posts')
+                setLoading(false)
+                return
+            }
+
+            const data = await response.json()
+            const newPosts = data.posts || []
+            
+            console.log(`📦 Backend retornou ${newPosts.length} posts`)
+
+            if (newPosts.length === 0) {
+                setHasMore(false)
+                setLoading(false)
+                return
+            }
+
+            // Buscar likes do usuário para os novos posts
+            const trackIds = newPosts.map((post: any) => post.id)
+            
+            // Tentar pegar o token do cookie
+            let userLikes: Set<number> = new Set()
+            try {
+                const likesResponse = await fetch(`${BACKEND_URL}/feed/user-likes`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ track_ids: trackIds }),
+                })
+
+                if (likesResponse.ok) {
+                    const likesData = await likesResponse.json()
+                    userLikes = new Set(likesData.liked_tracks || [])
+                }
+            } catch (error) {
+                console.error('Erro ao buscar likes:', error)
+            }
+
+            // Mapear novos posts com informação de like
+            const postsWithLikes = newPosts.map((post: any) => ({
+                ...post,
+                isLiked: userLikes.has(post.id)
+            }))
+
+            setPosts([...posts, ...postsWithLikes])
+            
+            // Se retornou menos que 5, não há mais posts
+            if (newPosts.length < 5) {
+                setHasMore(false)
+            }
+
+            // Restaurar a posição do scroll após o React renderizar os novos posts
+            setTimeout(() => {
+                window.scrollTo(0, scrollPosition)
+            }, 0)
+        } catch (error) {
+            console.error('Erro ao carregar mais posts:', error)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -61,7 +142,7 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                         </div>
                         <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.3em] text-white/45">
                             <span className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-1">
-                                {totalPosts} histórias recentes
+                                {posts.length} histórias carregadas
                             </span>
                             <span className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-1">
                                 curadores ativos
@@ -78,10 +159,11 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
 
                 <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
                     <section className="space-y-8">
-                        {initialPosts.length > 0 ? (
-                            <ul className="relative space-y-8">
-                                <span className="pointer-events-none absolute left-5 top-0 bottom-0 hidden w-px bg-white/10 lg:block" />
-                                {initialPosts.map((post, index) => (
+                        {posts.length > 0 ? (
+                            <>
+                                <ul className="relative space-y-8">
+                                    <span className="pointer-events-none absolute left-5 top-0 bottom-0 hidden w-px bg-white/10 lg:block" />
+                                    {posts.map((post, index) => (
                                     <li key={post.id} className="relative pl-2 pr-2 lg:pl-14">
                                         <span className={`pointer-events-none absolute left-[18px] top-8 h-3 w-3 rounded-full ring-4 ring-[#05030f] lg:left-5 ${index % 3 === 0
                                                 ? 'bg-purple-400'
@@ -214,6 +296,26 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                                     </li>
                                 ))}
                             </ul>
+                            
+                            {hasMore && (
+                                <div className="flex justify-center pt-4">
+                                    <Button
+                                        onClick={loadMorePosts}
+                                        disabled={loading}
+                                        className="rounded-full border border-white/10 bg-white/[0.05] px-8 py-3 text-sm font-medium uppercase tracking-[0.28em] text-white transition hover:border-white/25 hover:bg-white/[0.1] disabled:opacity-50"
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Carregando...
+                                            </>
+                                        ) : (
+                                            'Carregar mais'
+                                        )}
+                                    </Button>
+                                </div>
+                            )}
+                        </>
                         ) : (
                             <div className="rounded-[28px] border border-dashed border-white/15 bg-white/[0.02] px-8 py-14 text-center">
                                 <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]">

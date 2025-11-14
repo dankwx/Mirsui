@@ -5,18 +5,36 @@ import { getSupabaseCookieName } from '@/utils/supabase/cookie-helper'
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
 
 // Função auxiliar para pegar o token do cookie
-function getAccessToken(): string | null {
+async function getAccessToken(): Promise<string | null> {
   try {
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     const cookieName = getSupabaseCookieName()
+    
+    console.log('🔍 Procurando cookie:', cookieName)
+    
     const cookieValue = cookieStore.get(cookieName)?.value
 
-    if (!cookieValue) return null
+    if (!cookieValue) {
+      console.log('❌ Cookie não encontrado')
+      // Tentar todos os cookies que começam com 'sb-'
+      const allCookies = cookieStore.getAll()
+      console.log('📋 Cookies disponíveis:', allCookies.map(c => c.name))
+      
+      const sbCookie = allCookies.find(c => c.name.startsWith('sb-') && c.name.includes('auth-token'))
+      if (sbCookie) {
+        console.log('✅ Encontrado cookie alternativo:', sbCookie.name)
+        const session = JSON.parse(sbCookie.value)
+        return session.access_token || null
+      }
+      
+      return null
+    }
 
+    console.log('✅ Cookie encontrado')
     const session = JSON.parse(cookieValue)
     return session.access_token || null
   } catch (error) {
-    console.error('Erro ao pegar token:', error)
+    console.error('❌ Erro ao pegar token:', error)
     return null
   }
 }
@@ -26,16 +44,17 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    console.log('📤 Buscando comentários do backend:', `${BACKEND_URL}/tracks/${params.id}/comments`)
+    
     const response = await fetch(`${BACKEND_URL}/tracks/${params.id}/comments`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      method: 'GET'
     })
 
     const data = await response.json()
+    console.log('📥 Comentários recebidos do backend:', response.status, data)
 
     if (!response.ok) {
+      console.error('❌ Erro ao buscar comentários:', data)
       return NextResponse.json(
         { error: data.error || 'Erro ao buscar comentários' },
         { status: response.status }
@@ -45,7 +64,7 @@ export async function GET(
     // Retornar os comentários do backend
     return NextResponse.json(data.comments || [])
   } catch (error) {
-    console.error('Erro ao buscar comentários:', error)
+    console.error('❌ Erro ao buscar comentários:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -58,9 +77,11 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const token = getAccessToken()
+    const token = await getAccessToken()
+    console.log('🔑 Token encontrado (POST comment):', !!token)
 
     if (!token) {
+      console.error('❌ Token não encontrado - usuário não autenticado')
       return NextResponse.json(
         { error: 'Usuário não autenticado' },
         { status: 401 }
@@ -68,6 +89,7 @@ export async function POST(
     }
 
     const { comment_text } = await request.json()
+    console.log('📤 Enviando comentário para backend:', comment_text)
 
     const response = await fetch(`${BACKEND_URL}/tracks/${params.id}/comments`, {
       method: 'POST',
@@ -79,29 +101,20 @@ export async function POST(
     })
 
     const data = await response.json()
+    console.log('📥 Resposta do backend (POST comment):', response.status, data)
 
     if (!response.ok) {
+      console.error('❌ Erro na resposta do backend:', data)
       return NextResponse.json(
         { error: data.error || 'Erro ao criar comentário' },
         { status: response.status }
       )
     }
 
-    // Transformar para o formato esperado pelo frontend (se necessário)
+    // O backend já retorna no formato correto agora
     if (data.comment) {
-      const comment = data.comment
-      const profile = Array.isArray(comment.profiles) ? comment.profiles[0] : comment.profiles
-      return NextResponse.json({
-        id: comment.id,
-        track_id: params.id,
-        user_id: comment.user_id,
-        comment_text: comment.comment_text,
-        created_at: comment.created_at,
-        updated_at: comment.created_at,
-        username: profile?.username || '',
-        display_name: profile?.display_name || null,
-        avatar_url: profile?.avatar_url || null
-      })
+      console.log('✅ Comentário criado com sucesso:', data.comment)
+      return NextResponse.json(data.comment)
     }
 
     return NextResponse.json(data)

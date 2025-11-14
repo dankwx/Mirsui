@@ -2,6 +2,7 @@
 import Header from '@/components/Header/Header'
 import Sidebar from '@/components/Sidebar/Sidebar'
 import { createClient } from '@/utils/supabase/server'
+import { AuthProvider } from '@/components/AuthProvider/AuthProvider'
 
 // Tipo para o perfil do usuário
 interface UserProfile {
@@ -57,23 +58,25 @@ export default async function DashboardLayout({
     }
 
     return (
-        <div className="flex h-screen w-screen overflow-hidden bg-[#05030f] text-white">
-            {/* Sidebar fixa - recebe userProfile como prop */}
-            <Sidebar userProfile={userProfile} />
+        <AuthProvider>
+            <div className="flex h-screen w-screen overflow-hidden bg-[#05030f] text-white">
+                {/* Sidebar fixa - recebe userProfile como prop */}
+                <Sidebar userProfile={userProfile} />
 
-            {/* Área principal - header + conteúdo com margem para a sidebar */}
-            <div className="ml-[280px] flex flex-1 min-h-0 flex-col">
-                {/* Header fixo - também pode receber userProfile se precisar */}
-                <Header userProfile={userProfile} />
+                {/* Área principal - header + conteúdo com margem para a sidebar */}
+                <div className="ml-[280px] flex flex-1 min-h-0 flex-col">
+                    {/* Header fixo - também pode receber userProfile se precisar */}
+                    <Header userProfile={userProfile} />
 
-                {/* Conteúdo com scroll */}
-                <main className="relative flex-1 overflow-y-auto bg-gradient-to-b from-[#060214] via-[#05030f] to-[#020008]">
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(9,4,24,0)_100%)]" />
-                    <div className="relative h-full">
-                        {children}
-                    </div>
-                </main>
+                    {/* Conteúdo com scroll */}
+                    <main className="relative flex-1 overflow-y-auto bg-gradient-to-b from-[#060214] via-[#05030f] to-[#020008]">
+                        <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(9,4,24,0)_100%)]" />
+                        <div className="relative h-full">
+                            {children}
+                        </div>
+                    </main>
+                </div>
             </div>
-        </div>
+        </AuthProvider>
     )
 }

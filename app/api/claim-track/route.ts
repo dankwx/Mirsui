@@ -7,9 +7,9 @@ import { getSupabaseCookieName } from '@/utils/supabase/cookie-helper'
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
 
 // Função auxiliar para pegar o token do cookie
-function getAccessToken(): string | null {
+async function getAccessToken(): Promise<string | null> {
     try {
-        const cookieStore = cookies()
+        const cookieStore = await cookies()
         const cookieName = getSupabaseCookieName()
         const cookieValue = cookieStore.get(cookieName)?.value
 
@@ -25,7 +25,7 @@ function getAccessToken(): string | null {
 
 export async function POST(request: NextRequest) {
     try {
-        const token = getAccessToken()
+        const token = await getAccessToken()
 
         if (!token) {
             return NextResponse.json(

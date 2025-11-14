@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { createClient } from '@/utils/supabase/client'
+import { useAuth } from '@/components/AuthProvider/AuthProvider'
 
 interface TrackComment {
   id: number
@@ -41,43 +41,56 @@ export default function PostInteractions({
   const [newComment, setNewComment] = useState('')
   const [isLoadingComments, setIsLoadingComments] = useState(false)
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
-  const [user, setUser] = useState<any>(null)
-
-  // Verificar usuário logado
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user)
-    })
-  }, [])
+  
+  // Usar o Context ao invés de fazer requisição
+  const { user, isLoading: isLoadingUser, isAuthenticated } = useAuth()
 
   const handleLike = async () => {
-    if (!user) return
+    if (!isAuthenticated) {
+      console.log('❌ Usuário não está logado')
+      return
+    }
+
+    console.log('👆 Processando like...', { trackId, isLiked })
 
     try {
       if (isLiked) {
         // Descurtir
+        console.log('📤 Removendo like...')
         const response = await fetch(`/api/tracks/${trackId}/like`, {
           method: 'DELETE',
         })
         
+        console.log('📥 Resposta DELETE:', response.status)
+        
         if (response.ok) {
           setIsLiked(false)
           setLikesCount(prev => prev - 1)
+          console.log('✅ Like removido com sucesso')
+        } else {
+          const error = await response.json()
+          console.error('❌ Erro ao remover like:', error)
         }
       } else {
         // Curtir
+        console.log('📤 Adicionando like...')
         const response = await fetch(`/api/tracks/${trackId}/like`, {
           method: 'POST',
         })
         
+        console.log('📥 Resposta POST:', response.status)
+        
         if (response.ok) {
           setIsLiked(true)
           setLikesCount(prev => prev + 1)
+          console.log('✅ Like adicionado com sucesso')
+        } else {
+          const error = await response.json()
+          console.error('❌ Erro ao adicionar like:', error)
         }
       }
     } catch (error) {
-      console.error('Erro ao processar like:', error)
+      console.error('❌ Erro ao processar like:', error)
     }
   }
 
@@ -112,7 +125,17 @@ export default function PostInteractions({
   }
 
   const handleSubmitComment = async () => {
-    if (!user || !newComment.trim()) return
+    if (!user) {
+      console.log('❌ Usuário não está logado')
+      return
+    }
+    
+    if (!newComment.trim()) {
+      console.log('❌ Comentário vazio')
+      return
+    }
+
+    console.log('💬 Enviando comentário...', { trackId, comment: newComment.trim() })
 
     setIsSubmittingComment(true)
     try {
@@ -124,14 +147,20 @@ export default function PostInteractions({
         body: JSON.stringify({ comment_text: newComment.trim() }),
       })
 
+      console.log('📥 Resposta POST comentário:', response.status)
+
       if (response.ok) {
         const newCommentData = await response.json()
+        console.log('✅ Comentário criado:', newCommentData)
         setComments(prev => [newCommentData, ...prev])
         setCommentsCount(prev => prev + 1)
         setNewComment('')
+      } else {
+        const error = await response.json()
+        console.error('❌ Erro ao criar comentário:', error)
       }
     } catch (error) {
-      console.error('Erro ao enviar comentário:', error)
+      console.error('❌ Erro ao enviar comentário:', error)
     } finally {
       setIsSubmittingComment(false)
     }
@@ -154,16 +183,24 @@ export default function PostInteractions({
 
   return (
     <div className="space-y-4">
+      {/* Debug info - remover depois */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="text-xs text-gray-500">
+          Debug: {isLoadingUser ? '⏳ Carregando...' : user ? '✅ Logado' : '❌ Não logado'}
+        </div>
+      )}
+      
       {/* Botões de interação */}
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
           size="sm"
           onClick={handleLike}
-          disabled={!user}
+          disabled={isLoadingUser || !user}
           className={`flex items-center gap-2 ${
             isLiked ? 'text-red-500' : 'text-gray-500'
           }`}
+          title={!user ? 'Faça login para curtir' : ''}
         >
           <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
           <span>{likesCount}</span>

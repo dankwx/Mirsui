@@ -1,51 +1,56 @@
 // app/api/user/points/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
+import { cookies } from 'next/headers'
+import { getSupabaseCookieName } from '@/utils/supabase/cookie-helper'
+
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
+
+// Função auxiliar para pegar o token do cookie
+function getAccessToken(): string | null {
+    try {
+        const cookieStore = cookies()
+        const cookieName = getSupabaseCookieName()
+        const cookieValue = cookieStore.get(cookieName)?.value
+
+        if (!cookieValue) return null
+
+        const session = JSON.parse(cookieValue)
+        return session.access_token || null
+    } catch (error) {
+        console.error('Erro ao pegar token:', error)
+        return null
+    }
+}
 
 export async function GET(request: NextRequest) {
     try {
-        const { searchParams } = new URL(request.url)
-        const userId = searchParams.get('userId')
+        const token = getAccessToken()
 
-        const supabase = createClient()
-
-        // Verificar se o usuário está autenticado
-        const { data: authData, error: authError } = await supabase.auth.getUser()
-        
-        if (authError || !authData?.user) {
+        if (!token) {
             return NextResponse.json(
                 { message: 'Usuário não autenticado' },
                 { status: 401 }
             )
         }
 
-        // Se não foi passado userId, usar o usuário logado
-        const targetUserId = userId || authData.user.id
-
-        // Verificar se o usuário logado pode ver os pontos do usuário solicitado
-        if (targetUserId !== authData.user.id) {
-            return NextResponse.json(
-                { message: 'Não autorizado a ver pontos de outro usuário' },
-                { status: 403 }
-            )
-        }
-
-        // Buscar pontos do usuário
-        const { data: points, error } = await supabase
-            .rpc('get_user_points', { user_uuid: targetUserId })
-
-        if (error) {
-            console.error('Erro ao buscar pontos:', error)
-            return NextResponse.json(
-                { message: 'Erro ao buscar pontos do usuário' },
-                { status: 500 }
-            )
-        }
-
-        return NextResponse.json({ 
-            points: points || 0,
-            userId: targetUserId 
+        const response = await fetch(`${BACKEND_URL}/user/points`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
         })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+            return NextResponse.json(
+                { message: data.error || 'Erro ao buscar pontos' },
+                { status: response.status }
+            )
+        }
+
+        return NextResponse.json(data)
 
     } catch (error) {
         console.error('Erro na API de pontos:', error)

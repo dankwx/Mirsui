@@ -19,7 +19,6 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useToast } from '@/components/ui/use-toast'
-import { createClient } from '@/utils/supabase/client'
 
 interface TrackClaimsMessagesProps {
     trackUri: string
@@ -55,7 +54,6 @@ export default function TrackClaimsMessages({
     const [youtubeUrl, setYoutubeUrl] = useState<string | null>(youtubeUrlProp) // New state for YouTube URL
     const textareaRef = useRef<HTMLTextAreaElement>(null)
     const { toast } = useToast()
-    const supabase = createClient()
 
     // Foca no textarea quando expandir
     useEffect(() => {
@@ -71,115 +69,63 @@ export default function TrackClaimsMessages({
         setIsLoading(true)
 
         try {
-            // Verificar se o usuário está autenticado
-            const { data: userData, error: authError } =
-                await supabase.auth.getUser()
-
-            if (authError || !userData.user) {
-                toast({
-                    title: 'Erro de autenticação',
-                    description:
-                        'Você precisa estar logado para reivindicar uma música.',
-                    variant: 'destructive',
-                })
-                return
-            }
-
-            const userId = userData.user.id
-
-            // Verificar se o usuário já reivindicou esta música (double-check no client)
-            const { data: existingClaim, error: existingError } = await supabase
-                .from('tracks')
-                .select('id, position, youtube_url') // Select youtube_url
-                .eq('user_id', userId)
-                .eq('track_uri', trackUri)
-                .single()
-
-            if (existingError && existingError.code !== 'PGRST116') {
-                throw existingError
-            }
-
-            if (existingClaim) {
-                // Se já existe, apenas atualizar o estado local
-                setIsClaimed(true)
-                setClaimPosition(existingClaim.position)
-                setYoutubeUrl(existingClaim.youtube_url) // Set existing YouTube URL
-                toast({
-                    title: 'Música já reivindicada',
-                    description: `Você já reivindicou esta música na posição #${existingClaim.position}.`,
-                    variant: 'destructive',
-                })
-                return
-            }
-
-            // Contar quantas vezes esta música foi reivindicada (para calcular a posição)
-            const { count: trackCount, error: countError } = await supabase
-                .from('tracks')
-                .select('*', { count: 'exact' })
-                .eq('track_uri', trackUri)
-
-            if (countError) {
-                throw countError
-            }
-
-            // A próxima posição será a contagem atual + 1
-            const nextPosition = trackCount !== null ? trackCount + 1 : 1
-
-            // Calcular discover_rating
-            const discoverRating = 100 - popularity + 100 / nextPosition
-
             // Construir URL do Spotify se não fornecida
             const spotifyUrl =
                 trackUrl ||
                 `https://open.spotify.com/track/${trackUri.split(':')[2]}`
 
-            // Fetch YouTube URL from API
-            const youtubeResponse = await fetch('/api/get-youtube-link', {
+            // Chamar API route que vai chamar o backend
+            const response = await fetch('/api/claim-track', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    trackTitle: trackTitle,
-                    artistName: artistName,
+                    trackUri,
+                    trackName: trackTitle,
+                    artistName,
+                    albumName,
+                    spotifyUrl,
+                    trackThumbnail,
+                    popularity,
+                    claimMessage: message.trim() || undefined,
                 }),
             })
 
-            let foundYoutubeUrl: string | null = null
-            if (youtubeResponse.ok) {
-                const youtubeData = await youtubeResponse.json()
-                foundYoutubeUrl = youtubeData.youtubeUrl || null
-                setYoutubeUrl(foundYoutubeUrl)
-            } else {
-                console.warn('Could not find YouTube URL for this track.')
+            const data = await response.json()
+
+            if (!response.ok) {
+                // Se erro 401 (não autenticado)
+                if (response.status === 401) {
+                    toast({
+                        title: 'Erro de autenticação',
+                        description: data.error || 'Você precisa estar logado para reivindicar uma música.',
+                        variant: 'destructive',
+                    })
+                    return
+                }
+
+                // Se erro 409 (já reivindicado)
+                if (response.status === 409) {
+                    setIsClaimed(true)
+                    setClaimPosition(data.position)
+                    setYoutubeUrl(data.youtubeUrl || null)
+                    toast({
+                        title: 'Música já reivindicada',
+                        description: `Você já reivindicou esta música na posição #${data.position}.`,
+                        variant: 'destructive',
+                    })
+                    return
+                }
+
+                throw new Error(data.error || 'Erro ao reivindicar música')
             }
 
-            // Preparar os dados para inserção
-            const insertData = {
-                track_url: spotifyUrl,
-                track_uri: trackUri,
-                track_title: trackTitle,
-                artist_name: artistName,
-                album_name: albumName,
-                popularity: popularity,
-                discover_rating: discoverRating,
-                track_thumbnail: trackThumbnail,
-                user_id: userId,
-                position: nextPosition,
-                claimedat: new Date().toISOString(),
-                youtube_url: foundYoutubeUrl, // Add youtube_url to insert data
-                ...(message.trim() && { claim_message: message.trim() }),
-            }
+            // Sucesso!
+            const nextPosition = data.position
+            const foundYoutubeUrl = data.youtubeUrl || null
 
-            // Inserir no banco de dados
-            const { error: insertError } = await supabase
-                .from('tracks')
-                .insert([insertData])
-
-            if (insertError) {
-                throw insertError
-            }
-
+            setYoutubeUrl(foundYoutubeUrl)
             setIsClaimed(true)
             setClaimPosition(nextPosition)
             setShowSuccess(true)
@@ -199,7 +145,7 @@ export default function TrackClaimsMessages({
             console.error('Erro ao reivindicar música:', error)
             toast({
                 title: 'Erro ao reivindicar música',
-                description: 'Ocorreu um erro inesperado. Tente novamente.',
+                description: error instanceof Error ? error.message : 'Ocorreu um erro inesperado. Tente novamente.',
                 variant: 'destructive',
             })
         } finally {

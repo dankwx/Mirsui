@@ -3,7 +3,6 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Heart, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
@@ -36,102 +35,69 @@ export default function ClaimButton({
     const [isClaimed, setIsClaimed] = useState(initialClaimed)
     const [claimPosition, setClaimPosition] = useState(userPosition)
     const { toast } = useToast()
-    const supabase = createClient()
 
     const handleClaimTrack = async () => {
         setIsLoading(true)
 
         try {
-            // Verificar se o usuário está autenticado
-            const { data: userData, error: authError } =
-                await supabase.auth.getUser()
-
-            if (authError || !userData.user) {
-                // Rastrear tentativa de claim sem login
-                event({
-                    action: 'claim_attempt_unauthenticated',
-                    category: 'engagement',
-                    label: `${artistName} - ${trackTitle}`
-                })
-                
-                toast({
-                    title: 'Erro de autenticação',
-                    description:
-                        'Você precisa estar logado para reivindicar uma música.',
-                    variant: 'destructive',
-                })
-                return
-            }
-
-            const userId = userData.user.id
-
-            // Verificar se o usuário já reivindicou esta música (double-check no client)
-            const { data: existingClaim, error: existingError } = await supabase
-                .from('tracks')
-                .select('id, position')
-                .eq('user_id', userId)
-                .eq('track_uri', trackUri)
-                .single()
-
-            if (existingError && existingError.code !== 'PGRST116') {
-                throw existingError
-            }
-
-            if (existingClaim) {
-                // Se já existe, apenas atualizar o estado local
-                setIsClaimed(true)
-                setClaimPosition(existingClaim.position)
-                toast({
-                    title: 'Música já reivindicada',
-                    description: `Você já reivindicou esta música na posição #${existingClaim.position}.`,
-                    variant: 'destructive',
-                })
-                return
-            }
-
-            // Contar quantas vezes esta música foi reivindicada (para calcular a posição)
-            const { count: trackCount, error: countError } = await supabase
-                .from('tracks')
-                .select('*', { count: 'exact' })
-                .eq('track_uri', trackUri)
-
-            if (countError) {
-                throw countError
-            }
-
-            // A próxima posição será a contagem atual + 1
-            const nextPosition = trackCount !== null ? trackCount + 1 : 1
-
-            // Calcular discover_rating
-            const discoverRating = 100 - popularity + 100 / nextPosition
-
             // Construir URL do Spotify se não fornecida
             const spotifyUrl =
                 trackUrl ||
                 `https://open.spotify.com/track/${trackUri.split(':')[2]}`
 
-            // Inserir no banco de dados
-            const { error: insertError } = await supabase
-                .from('tracks')
-                .insert([
-                    {
-                        track_url: spotifyUrl,
-                        track_uri: trackUri,
-                        track_title: trackTitle,
-                        artist_name: artistName,
-                        album_name: albumName,
-                        popularity: popularity,
-                        discover_rating: discoverRating,
-                        track_thumbnail: trackThumbnail,
-                        user_id: userId,
-                        position: nextPosition,
-                        claimedat: new Date().toISOString(),
-                    },
-                ])
+            // Chamar API route que vai chamar o backend
+            const response = await fetch('/api/claim-track', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    trackUri,
+                    trackName: trackTitle,
+                    artistName,
+                    albumName,
+                    spotifyUrl,
+                    trackThumbnail,
+                    popularity,
+                }),
+            })
 
-            if (insertError) {
-                throw insertError
+            const data = await response.json()
+
+            if (!response.ok) {
+                // Se erro 401 (não autenticado)
+                if (response.status === 401) {
+                    event({
+                        action: 'claim_attempt_unauthenticated',
+                        category: 'engagement',
+                        label: `${artistName} - ${trackTitle}`
+                    })
+                    
+                    toast({
+                        title: 'Erro de autenticação',
+                        description: data.error || 'Você precisa estar logado para reivindicar uma música.',
+                        variant: 'destructive',
+                    })
+                    return
+                }
+
+                // Se erro 409 (já reivindicado)
+                if (response.status === 409) {
+                    setIsClaimed(true)
+                    setClaimPosition(data.position)
+                    toast({
+                        title: 'Música já reivindicada',
+                        description: `Você já reivindicou esta música na posição #${data.position}.`,
+                        variant: 'destructive',
+                    })
+                    return
+                }
+
+                throw new Error(data.error || 'Erro ao reivindicar música')
             }
+
+            // Sucesso!
+            const nextPosition = data.position
 
             // Rastrear o claim no Google Analytics
             trackClaimTrack(trackTitle, artistName)
@@ -154,7 +120,7 @@ export default function ClaimButton({
             console.error('Erro ao reivindicar música:', error)
             toast({
                 title: 'Erro ao reivindicar música',
-                description: 'Ocorreu um erro inesperado. Tente novamente.',
+                description: error instanceof Error ? error.message : 'Ocorreu um erro inesperado. Tente novamente.',
                 variant: 'destructive',
             })
         } finally {

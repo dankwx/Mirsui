@@ -1,60 +1,60 @@
-import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import { getSupabaseCookieName } from '@/utils/supabase/cookie-helper'
+
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
+
+// Função auxiliar para pegar o token do cookie
+function getAccessToken(): string | null {
+  try {
+    const cookieStore = cookies()
+    const cookieName = getSupabaseCookieName()
+    const cookieValue = cookieStore.get(cookieName)?.value
+
+    if (!cookieValue) return null
+
+    const session = JSON.parse(cookieValue)
+    return session.access_token || null
+  } catch (error) {
+    console.error('Erro ao pegar token:', error)
+    return null
+  }
+}
 
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { commentId: string } }
 ) {
   try {
-    const supabase = createClient()
-    const commentId = parseInt(params.commentId)
-    
-    // Verificar se o usuário está autenticado
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
+    const token = getAccessToken()
+
+    if (!token) {
       return NextResponse.json(
         { error: 'Usuário não autenticado' },
         { status: 401 }
       )
     }
-    
-    // Verificar se o comentário pertence ao usuário
-    const { data: comment, error: fetchError } = await supabase
-      .from('track_comments')
-      .select('user_id')
-      .eq('id', commentId)
-      .single()
-    
-    if (fetchError || !comment) {
+
+    const response = await fetch(`${BACKEND_URL}/comments/${params.commentId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
       return NextResponse.json(
-        { error: 'Comentário não encontrado' },
-        { status: 404 }
+        { error: data.error || 'Erro ao deletar comentário' },
+        { status: response.status }
       )
     }
-    
-    if (comment.user_id !== user.id) {
-      return NextResponse.json(
-        { error: 'Não autorizado a deletar este comentário' },
-        { status: 403 }
-      )
-    }
-    
-    // Deletar comentário
-    const { error } = await supabase
-      .from('track_comments')
-      .delete()
-      .eq('id', commentId)
-    
-    if (error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      )
-    }
-    
-    return NextResponse.json({ success: true })
+
+    return NextResponse.json(data)
   } catch (error) {
+    console.error('Erro ao deletar comentário:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

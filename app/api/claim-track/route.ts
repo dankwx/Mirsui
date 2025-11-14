@@ -1,109 +1,60 @@
 // app/api/claim-track/route.ts
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { fetchAuthData } from '@/utils/profileService'
-import {
-    saveTrackWithYouTube,
-    checkUserTrackClaim,
-} from '@/utils/fetchTrackInfo'
+import { cookies } from 'next/headers'
+import { getSupabaseCookieName } from '@/utils/supabase/cookie-helper'
+
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
+
+// Função auxiliar para pegar o token do cookie
+function getAccessToken(): string | null {
+    try {
+        const cookieStore = cookies()
+        const cookieName = getSupabaseCookieName()
+        const cookieValue = cookieStore.get(cookieName)?.value
+
+        if (!cookieValue) return null
+
+        const session = JSON.parse(cookieValue)
+        return session.access_token || null
+    } catch (error) {
+        console.error('Erro ao pegar token:', error)
+        return null
+    }
+}
 
 export async function POST(request: NextRequest) {
     try {
-        // Verifica autenticação
-        const authData = await fetchAuthData()
-        if (!authData?.user) {
+        const token = getAccessToken()
+
+        if (!token) {
             return NextResponse.json(
                 { error: 'Usuário não autenticado' },
                 { status: 401 }
             )
         }
 
-        // Parse do body da requisição
         const body = await request.json()
-        const {
-            trackUri,
-            trackName,
-            artistName,
-            albumName,
-            spotifyUrl,
-            trackThumbnail,
-            popularity,
-            duration_ms,
-        } = body
 
-        // Validação dos dados obrigatórios
-        if (!trackUri || !trackName || !artistName) {
-            return NextResponse.json(
-                { error: 'Dados da música são obrigatórios' },
-                { status: 400 }
-            )
-        }
-
-        // Verifica se o usuário já reivindicou esta música
-        console.log('[API] Verificando se o usuário já reivindicou a música:', { userId: authData.user.id, trackUri })
-        const existingClaim = await checkUserTrackClaim(
-            authData.user.id,
-            trackUri
-        )
-        console.log('[API] Resultado da verificação de reivindicação:', existingClaim)
-
-        if (existingClaim?.claimed) {
-            console.log('[API] Usuário já reivindicou esta música, retornando 409', existingClaim)
-            return NextResponse.json(
-                {
-                    error: 'Você já reivindicou esta música',
-                    position: existingClaim.position,
-                    youtubeUrl: existingClaim.youtubeUrl,
-                },
-                { status: 409 }
-            )
-        }
-
-        // Gera posição aleatória (você pode implementar sua lógica aqui)
-        const position = Math.floor(Math.random() * 100) + 1
-        console.log('[API] Posição gerada para a música:', position)
-
-        // Prepara dados para salvar
-        const trackData = {
-            trackUri,
-            trackName,
-            artistName,
-            albumName,
-            spotifyUrl,
-            trackThumbnail,
-            popularity: popularity || 0,
-            duration_ms: duration_ms || 0,
-            userId: authData.user.id,
-            position,
-        }
-        console.log('[API] Dados preparados para salvar:', trackData)
-
-        // Salva a música com busca automática no YouTube
-        const result = await saveTrackWithYouTube(trackData)
-        console.log('[API] Resultado da função saveTrackWithYouTube:', result)
-
-        if (!result.success) {
-            console.log('[API] Erro ao salvar música:', result.error)
-            return NextResponse.json(
-                { error: result.error || 'Erro ao salvar música' },
-                { status: 500 }
-            )
-        }
-
-        // Retorna sucesso com informações
-        console.log('[API] Música reivindicada com sucesso! Retornando dados:', {
-            position: position,
-            youtubeUrl: result.data?.youtube_url,
-            data: result.data,
+        const response = await fetch(`${BACKEND_URL}/tracks/claim`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(body)
         })
-        return NextResponse.json({
-            success: true,
-            message: 'Música reivindicada com sucesso!',
-            position: position,
-            youtubeUrl: result.data?.youtube_url,
-            data: result.data,
-        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+            return NextResponse.json(
+                { error: data.error || 'Erro ao reivindicar música' },
+                { status: response.status }
+            )
+        }
+
+        return NextResponse.json(data)
     } catch (error) {
         console.error('Erro na API claim-track:', error)
         return NextResponse.json(
@@ -113,9 +64,18 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// Opcional: GET para verificar status de reivindicação
+// GET para verificar status de reivindicação
 export async function GET(request: NextRequest) {
     try {
+        const token = getAccessToken()
+
+        if (!token) {
+            return NextResponse.json(
+                { error: 'Usuário não autenticado' },
+                { status: 401 }
+            )
+        }
+
         const { searchParams } = new URL(request.url)
         const trackUri = searchParams.get('trackUri')
 
@@ -126,24 +86,24 @@ export async function GET(request: NextRequest) {
             )
         }
 
-        const authData = await fetchAuthData()
-        if (!authData?.user) {
+        const response = await fetch(`${BACKEND_URL}/tracks/claim/status?trackUri=${encodeURIComponent(trackUri)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
             return NextResponse.json(
-                { error: 'Usuário não autenticado' },
-                { status: 401 }
+                { error: data.error || 'Erro ao verificar claim' },
+                { status: response.status }
             )
         }
 
-        const claimStatus = await checkUserTrackClaim(
-            authData.user.id,
-            trackUri
-        )
-
-        return NextResponse.json({
-            claimed: claimStatus?.claimed || false,
-            position: claimStatus?.position,
-            youtubeUrl: claimStatus?.youtubeUrl,
-        })
+        return NextResponse.json(data)
     } catch (error) {
         console.error('Erro ao verificar reivindicação:', error)
         return NextResponse.json(

@@ -183,13 +183,6 @@ export default function PostInteractions({
 
   return (
     <div className="space-y-4">
-      {/* Debug info - remover depois */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="text-xs text-gray-500">
-          Debug: {isLoadingUser ? '⏳ Carregando...' : user ? '✅ Logado' : '❌ Não logado'}
-        </div>
-      )}
-      
       {/* Botões de interação */}
       <div className="flex items-center gap-4">
         <Button
@@ -197,8 +190,10 @@ export default function PostInteractions({
           size="sm"
           onClick={handleLike}
           disabled={isLoadingUser || !user}
-          className={`flex items-center gap-2 ${
-            isLiked ? 'text-red-500' : 'text-gray-500'
+          className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium uppercase tracking-[0.2em] hover:bg-transparent ${
+            isLiked
+              ? 'text-pink-300 hover:text-pink-200'
+              : 'text-white/60 hover:text-white'
           }`}
           title={!user ? 'Faça login para curtir' : ''}
         >
@@ -211,7 +206,7 @@ export default function PostInteractions({
           size="sm"
           onClick={loadComments}
           disabled={isLoadingComments}
-          className="flex items-center gap-2 text-gray-500"
+          className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium uppercase tracking-[0.2em] text-white/60 hover:bg-transparent hover:text-white"
         >
           <MessageCircle className="h-4 w-4" />
           <span>{commentsCount}</span>
@@ -223,18 +218,20 @@ export default function PostInteractions({
         <div className="space-y-4">
           {/* Formulário para novo comentário */}
           {user && (
-            <Card className="p-4">
+            <Card className="border border-white/10 bg-white/[0.02] p-4 text-white">
               <div className="flex gap-3">
                 <Textarea
                   placeholder="Escreva um comentário..."
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  className="flex-1 min-h-[80px]"
+                  className="flex-1 min-h-[80px] border border-white/10 bg-white/[0.02] text-white placeholder:text-white/40 focus-visible:ring-white/40"
                 />
                 <Button
+                  variant="ghost"
                   onClick={handleSubmitComment}
                   disabled={isSubmittingComment || !newComment.trim()}
                   size="sm"
+                  className="rounded-full border border-white/20 bg-white/[0.08] text-white hover:bg-white/20"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
@@ -245,11 +242,11 @@ export default function PostInteractions({
           {/* Lista de comentários */}
           <div className="space-y-3">
             {comments.map((comment) => (
-              <Card key={comment.id} className="p-4">
+              <Card key={comment.id} className="border border-white/10 bg-white/[0.02] p-4 text-white">
                 <div className="flex gap-3">
-                  <Avatar className="h-8 w-8">
+                  <Avatar className="h-8 w-8 border border-white/10 bg-white/10">
                     <AvatarImage src={comment.avatar_url || undefined} />
-                    <AvatarFallback>
+                    <AvatarFallback className="bg-purple-600/30 text-purple-100">
                       {(comment.display_name || comment.username || 'U').charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -257,10 +254,10 @@ export default function PostInteractions({
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">
+                        <span className="text-sm font-medium text-white">
                           {comment.display_name || comment.username}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-white/45">
                           {new Date(comment.created_at).toLocaleDateString('pt-BR')}
                         </span>
                       </div>
@@ -270,14 +267,14 @@ export default function PostInteractions({
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDeleteComment(comment.id)}
-                          className="text-red-500 hover:text-red-700"
+                          className="text-red-300 hover:bg-transparent hover:text-red-200"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
                     </div>
                     
-                    <p className="text-sm mt-1 text-gray-700">
+                    <p className="mt-1 text-sm text-white/80">
                       {comment.comment_text}
                     </p>
                   </div>
@@ -286,7 +283,7 @@ export default function PostInteractions({
             ))}
             
             {comments.length === 0 && !isLoadingComments && (
-              <p className="text-center text-gray-500 py-4">
+              <p className="py-4 text-center text-white/45">
                 Nenhum comentário ainda. Seja o primeiro a comentar!
               </p>
             )}

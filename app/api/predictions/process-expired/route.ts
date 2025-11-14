@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/server'
 export async function POST(request: NextRequest) {
     try {
         console.log('🚀 API: process-expired chamada')
-        const supabase = createClient()
+        const supabase = await createClient()
 
         // Verificar se o usuário está autenticado
         const { data: authData, error: authError } = await supabase.auth.getUser()
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
     try {
-        const supabase = createClient()
+        const supabase = await createClient()
 
         // Verificar se o usuário está autenticado
         const { data: authData, error: authError } = await supabase.auth.getUser()

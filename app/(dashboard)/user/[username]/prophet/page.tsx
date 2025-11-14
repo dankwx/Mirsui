@@ -43,7 +43,7 @@ export default async function ProphetPage({ params }: ProphetPageParams) {
     const isOwnProfile = authData?.user?.id === userData.id
 
     // Buscar previsões do usuário
-    const supabase = createClient()
+    const supabase = await createClient()
     
     let predictions: any[] = []
     let prophetStats = {

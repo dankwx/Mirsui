@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 
 // Função para buscar os seguidores
 export async function fetchFollowers(userId: string) {
-    const supabase = createClient()
+    const supabase = await createClient()
     try {
         const { data, error, status } = await supabase
             .from('followers')
@@ -33,7 +33,7 @@ export async function fetchFollowers(userId: string) {
 
 // Função para buscar quem o usuário está seguindo
 export async function fetchFollowing(userId: string) {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     try {
         const { data, error, status } = await supabase

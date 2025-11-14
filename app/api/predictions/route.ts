@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        const supabase = createClient()
+        const supabase = await createClient()
 
         console.log('🔐 Verificando autenticação...')
         // Verificar se o usuário está autenticado
@@ -223,7 +223,7 @@ export async function GET(request: NextRequest) {
             )
         }
 
-        const supabase = createClient()
+        const supabase = await createClient()
 
         // Verificar se o usuário está autenticado
         const { data: authData, error: authError } = await supabase.auth.getUser()

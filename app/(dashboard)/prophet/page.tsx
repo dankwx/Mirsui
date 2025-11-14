@@ -12,7 +12,7 @@ export default async function ProphetRedirectPage() {
 
     // Buscar username do usuário logado
     const { createClient } = require('@/utils/supabase/server')
-    const supabase = createClient()
+    const supabase = await createClient()
     
     const { data: profile } = await supabase
         .from('profiles')

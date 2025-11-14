@@ -16,7 +16,7 @@ export async function getTrackPopularityTrend(
   trackUri: string,
   days: number = 30
 ): Promise<PopularityTrendData[]> {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   const { data, error } = await supabase
     .rpc('get_track_popularity_trend', {
@@ -73,7 +73,7 @@ export async function getTrackStats(trackUri: string): Promise<TrackStatsData> {
 }
 
 export async function getTopTrackClaimers(trackUri: string, limit: number = 10) {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   const { data, error } = await supabase
     .from('tracks')

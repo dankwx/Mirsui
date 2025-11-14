@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 }
 
 export default async function HowItWorksPage() {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data, error } = await supabase.auth.getUser()
     
     // Se o usuário estiver logado, redireciona para o feed

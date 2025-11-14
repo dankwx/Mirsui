@@ -45,7 +45,7 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
     const isOwnProfile = authData?.user?.id === userData.id
     const currentUserId = authData?.user?.id
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Fetch only songs and profile data
     const [

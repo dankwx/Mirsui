@@ -117,7 +117,7 @@ export default async function TrackDetailsPage({
     let userClaimYoutubeUrl = null
 
     if (isLoggedIn && trackInfo?.uri) {
-        const supabase = createClient()
+        const supabase = await createClient()
         const { data: userClaim, error } = await supabase
             .from('tracks')
             .select('position, youtube_url')

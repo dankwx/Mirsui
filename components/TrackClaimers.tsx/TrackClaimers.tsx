@@ -40,7 +40,7 @@ function getInitials(username: string): string {
 }
 
 export default async function TrackClaimers({ trackUri }: TrackClaimersProps) {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Busca os usuários que fizeram claim da track
     const { data: claimers, error } = await supabase.rpc(

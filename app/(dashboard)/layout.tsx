@@ -19,7 +19,7 @@ export default async function DashboardLayout({
 }: {
     children: React.ReactNode
 }) {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Buscar dados do usuário no servidor (rápido)
     let userProfile: UserProfile | null = null

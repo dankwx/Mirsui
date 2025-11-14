@@ -26,7 +26,7 @@ export interface FeaturedTrack extends TrendingTrack {
 }
 
 export async function getTrendingTracks(limit: number = 6): Promise<TrendingTrack[]> {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   // Buscar tracks mais populares e recentes (sem duplicatas)
   const { data, error } = await supabase
@@ -103,7 +103,7 @@ export async function getTrendingTracks(limit: number = 6): Promise<TrendingTrac
 }
 
 export async function getFeaturedTrack(): Promise<FeaturedTrack | null> {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   // Buscar a track com maior discover_rating dos últimos 7 dias
   let { data, error } = await supabase
@@ -197,7 +197,7 @@ export async function getFeaturedTrack(): Promise<FeaturedTrack | null> {
 }
 
 export async function getRecentActivity(limit: number = 5) {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   const { data, error } = await supabase
     .from('tracks')

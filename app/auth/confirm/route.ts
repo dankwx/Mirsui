@@ -1,7 +1,7 @@
 import { type EmailOtpType } from '@supabase/supabase-js'
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { createClient } from '@/utils/supabase/server'
+import { createClientForActions } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 
 export async function GET(request: NextRequest) {
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const code = searchParams.get('code')
     const next = searchParams.get('next') ?? '/'
 
-    const supabase = createClient()
+    const supabase = await createClientForActions()
 
     // Novo fluxo PKCE - usando code (usado pelo Supabase para recovery emails)
     if (code) {

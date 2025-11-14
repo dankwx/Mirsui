@@ -14,7 +14,7 @@ import LogoutButton from '@/app/logout/LogoutButton'
 import LoginModalButton from '../LoginModalButton/LoginModalButton'
 
 export default async function GetAuth() {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data, error } = await supabase.auth.getUser()
 

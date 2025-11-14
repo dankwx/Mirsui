@@ -32,7 +32,7 @@ export async function getTrackTimelineData(trackUri: string): Promise<{
   earlyAdopters: EarlyAdopter[]
   events: TimelineEvent[]
 }> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Buscar todos os claims da track ordenados por data

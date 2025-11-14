@@ -36,7 +36,7 @@ export interface LibraryStats {
  * Busca todas as playlists do usuário
  */
 export async function fetchUserPlaylists(userId: string): Promise<Playlist[]> {
-    const supabase = createClient()
+    const supabase = await createClient()
     
     try {
         const { data, error } = await supabase.rpc('get_user_playlists', {
@@ -59,7 +59,7 @@ export async function fetchUserPlaylists(userId: string): Promise<Playlist[]> {
  * Busca os tracks de uma playlist específica
  */
 export async function fetchPlaylistTracks(playlistId: string): Promise<PlaylistTrack[]> {
-    const supabase = createClient()
+    const supabase = await createClient()
     
     try {
         const { data, error } = await supabase.rpc('get_playlist_tracks', {
@@ -150,7 +150,7 @@ export async function calculateLibraryStats(userId: string, savedSongs: any[]): 
  * Cria uma nova playlist
  */
 export async function createPlaylist(userId: string, name: string, description?: string): Promise<Playlist | null> {
-    const supabase = createClient()
+    const supabase = await createClient()
     
     try {
         const { data, error } = await supabase
@@ -193,8 +193,8 @@ export async function addTrackToPlaylist(
         track_url: string
         duration?: string
     }
-): Promise<boolean> {
-    const supabase = createClient()
+    ): Promise<boolean> {
+    const supabase = await createClient()
     
     try {
         // Buscar a próxima posição
@@ -238,7 +238,7 @@ export async function addTrackToPlaylist(
  * Remove uma track de uma playlist
  */
 export async function removeTrackFromPlaylist(trackId: string): Promise<boolean> {
-    const supabase = createClient()
+    const supabase = await createClient()
     
     try {
         const { error } = await supabase
@@ -262,7 +262,7 @@ export async function removeTrackFromPlaylist(trackId: string): Promise<boolean>
  * Deleta uma playlist
  */
 export async function deletePlaylist(playlistId: string): Promise<boolean> {
-    const supabase = createClient()
+    const supabase = await createClient()
     
     try {
         const { error } = await supabase
@@ -289,7 +289,7 @@ export async function updatePlaylist(
     playlistId: string, 
     updates: { name?: string; description?: string }
 ): Promise<boolean> {
-    const supabase = createClient()
+    const supabase = await createClient()
     
     try {
         const { error } = await supabase

@@ -39,7 +39,7 @@ export async function getFeedPostsWithInteractions(
   limit: number = 20,
   offset: number = 0
 ): Promise<FeedPostWithInteractions[]> {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   try {
     // Query mais eficiente usando agregação SQL
@@ -144,7 +144,7 @@ export async function checkUserLikedTrack(
   trackId: number,
   userId: string
 ): Promise<boolean> {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   const { data, error } = await supabase
     .from('track_likes')
@@ -166,7 +166,7 @@ export async function checkUserLikedTracks(
   trackIds: number[],
   userId: string
 ): Promise<Set<number>> {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   if (trackIds.length === 0) {
     return new Set()
@@ -193,7 +193,7 @@ export async function getTrackComments(
   limit: number = 10,
   offset: number = 0
 ): Promise<TrackComment[]> {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   const { data, error } = await supabase
     .from('track_comments')

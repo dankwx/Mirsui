@@ -5,7 +5,7 @@ export async function fetchSongs(
     userId: string,
     currentUserId?: string
 ): Promise<Song[]> {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     let query = supabase
         .from('tracks')

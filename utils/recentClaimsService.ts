@@ -16,7 +16,7 @@ export interface RecentClaim {
  * @returns Array de reivindicações recentes sem músicas duplicadas
  */
 export async function getRecentClaims(limit: number = 4): Promise<RecentClaim[]> {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     try {
         // Buscar mais reivindicações do que o necessário para filtrar duplicatas

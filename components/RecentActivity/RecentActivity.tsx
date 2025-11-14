@@ -43,7 +43,7 @@ function formatClaimedAt(timestamp: string | number | Date): string {
 }
 
 export default async function RecentActivity() {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const {
         data: { session },

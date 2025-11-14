@@ -13,7 +13,7 @@ import { searchYouTubeVideo } from '@/utils/youtubeService'
 export async function countTrackOccurrences(
     spotifyTrackUri: string
 ): Promise<number> {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { count, error } = await supabase
         .from('tracks')
@@ -94,7 +94,7 @@ export async function findAndSaveYouTubeUrl(
 export async function saveTrackWithYouTube(
     trackData: TrackData
 ): Promise<{ success: boolean; error?: string; data?: any }> {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     try {
         console.log(
@@ -164,7 +164,7 @@ export async function checkUserTrackClaim(
     position?: number
     youtubeUrl?: string
 } | null> {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     try {
         const { data, error } = await supabase
@@ -206,7 +206,7 @@ export async function updateTrackWithYouTube(
     trackName: string,
     artistName: string
 ): Promise<{ success: boolean; youtubeUrl?: string; error?: string }> {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     try {
         // Busca URL do YouTube

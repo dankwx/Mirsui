@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data, error } = await supabase.auth.getUser()
     if (data.user) {
         redirect('/feed')

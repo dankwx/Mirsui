@@ -58,7 +58,7 @@ export default async function LibraryPage({ params }: LibraryPageParams) {
     const playlists = await fetchUserPlaylistsWithTracks(targetUserId)
 
     // Buscar dados adicionais do Supabase
-    const supabase = createClient()
+    const supabase = await createClient()
     const [
         achievementResult,
         ratingResult,

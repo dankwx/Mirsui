@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { createClientForActions } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -8,7 +8,7 @@ export async function updateDisplayName(
     formData: FormData
 ): Promise<{ success: boolean; newDisplayName?: string }> {
     const newDisplayName = formData.get('display_name')
-    const supabase = createClient()
+    const supabase = await createClientForActions()
     const {
         data: { user },
     } = await supabase.auth.getUser()
@@ -44,7 +44,7 @@ export async function updateDescription(
     formData: FormData
 ): Promise<{ success: boolean; newDescription?: string | null }> {
     const newDescription = formData.get('description')
-    const supabase = createClient()
+    const supabase = await createClientForActions()
     const {
         data: { user },
     } = await supabase.auth.getUser()
@@ -84,7 +84,7 @@ export async function updateDescription(
 export async function toggleFollow(
     followingId: string
 ): Promise<{ success: boolean; isFollowing: boolean }> {
-    const supabase = createClient()
+    const supabase = await createClientForActions()
     const {
         data: { user },
     } = await supabase.auth.getUser()
@@ -141,7 +141,7 @@ export async function toggleFollow(
 
 export async function removeTrack(trackId: string) {
     try {
-        const supabase = createClient()
+        const supabase = await createClientForActions()
 
         // Verificar se o usuário está autenticado
         const {
@@ -177,7 +177,7 @@ export async function removeTrack(trackId: string) {
 
 export async function toggleFavorite(trackId: string, shouldFavorite: boolean) {
     try {
-        const supabase = createClient()
+        const supabase = await createClientForActions()
 
         // Verificar se o usuário está autenticado
         const {

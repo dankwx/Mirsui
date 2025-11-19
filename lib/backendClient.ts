@@ -8,9 +8,41 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:300
  */
 export class BackendClient {
     private static async getAuthToken(): Promise<string | null> {
-        const supabase = createClient()
-        const { data: { session } } = await supabase.auth.getSession()
-        return session?.access_token || null
+        try {
+            const supabase = createClient()
+            
+            // Primeiro tenta getSession
+            let { data: { session }, error } = await supabase.auth.getSession()
+            
+            if (error) {
+                console.error('❌ Erro ao obter sessão:', error)
+                return null
+            }
+            
+            // Se não há sessão, tenta refresh
+            if (!session) {
+                console.log('⚠️ Nenhuma sessão encontrada, tentando refresh...')
+                const { data, error: refreshError } = await supabase.auth.refreshSession()
+                
+                if (refreshError) {
+                    console.error('❌ Erro ao fazer refresh da sessão:', refreshError)
+                    return null
+                }
+                
+                session = data.session
+            }
+            
+            if (session?.access_token) {
+                console.log('✅ Token obtido com sucesso')
+                return session.access_token
+            }
+            
+            console.log('⚠️ Nenhuma sessão encontrada mesmo após refresh')
+            return null
+        } catch (error) {
+            console.error('❌ Erro ao buscar token:', error)
+            return null
+        }
     }
 
     static async get(endpoint: string, requireAuth: boolean = false) {
@@ -46,10 +78,14 @@ export class BackendClient {
 
         if (requireAuth) {
             const token = await this.getAuthToken()
+            console.log('🔑 Token para requisição:', token ? `${token.substring(0, 20)}...` : 'null')
+            
             if (!token) {
-                throw new Error('Não autenticado')
+                console.error('❌ ERRO: Token não disponível. Usuário precisa fazer login.')
+                throw new Error('Não autenticado. Por favor, faça login novamente.')
             }
             headers['Authorization'] = `Bearer ${token}`
+            console.log('✅ Header Authorization adicionado')
         }
 
         const response = await fetch(`${BACKEND_URL}${endpoint}`, {

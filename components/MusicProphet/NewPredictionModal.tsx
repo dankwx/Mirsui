@@ -1,7 +1,7 @@
 // components/MusicProphet/NewPredictionModal.tsx
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input'
 import { X, Calendar, Target, Coins, TrendingUp } from 'lucide-react'
 import { toast } from 'sonner'
 import MusicSearchForPrediction from './MusicSearchForPrediction'
-import { BACKEND_API } from '@/lib/backendClient'
 
 interface SpotifyTrack {
     album: {
@@ -160,9 +159,23 @@ export default function NewPredictionModal({
                 initialPopularity: selectedTrack.popularity
             }
             
-            console.log('📤 Enviando requisição para backend:', requestBody)
+            console.log('📤 Enviando requisição para API:', requestBody)
             
-            const result = await BACKEND_API.prophet.createPrediction(requestBody)
+            // Usar a API Route do Next.js que tem autenticação server-side
+            const response = await fetch('/api/predictions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody),
+            })
+
+            if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.message || 'Erro ao criar previsão')
+            }
+
+            const result = await response.json()
             
             console.log('✅ Sucesso:', result)
             toast.success('Previsão criada com sucesso! 🔮')

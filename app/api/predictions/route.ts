@@ -8,11 +8,19 @@ export async function POST(request: NextRequest) {
         const requestData = await request.json()
         console.log('📥 Dados recebidos na API:', requestData)
         
-        const { trackId, trackData, predictedViralDate, pointsBet, predictionConfidence, targetPopularity } = requestData
+        const { trackId, trackData, predictedViralDate, pointsBet, predictionConfidence, predictionType, initialPopularity } = requestData
 
         // Validações básicas
-        if (!trackId || !trackData || !predictedViralDate || !pointsBet || !predictionConfidence || !targetPopularity) {
-            console.log('❌ Campos obrigatórios faltando:', { trackId: !!trackId, trackData: !!trackData, predictedViralDate: !!predictedViralDate, pointsBet: !!pointsBet, predictionConfidence: !!predictionConfidence, targetPopularity: !!targetPopularity })
+        if (!trackId || !trackData || !predictedViralDate || !pointsBet || !predictionConfidence || !predictionType || initialPopularity === undefined) {
+            console.log('❌ Campos obrigatórios faltando:', { 
+                trackId: !!trackId, 
+                trackData: !!trackData, 
+                predictedViralDate: !!predictedViralDate, 
+                pointsBet: !!pointsBet, 
+                predictionConfidence: !!predictionConfidence, 
+                predictionType: !!predictionType,
+                initialPopularity: initialPopularity !== undefined
+            })
             return NextResponse.json(
                 { message: 'Todos os campos são obrigatórios' },
                 { status: 400 }
@@ -54,10 +62,10 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Validar popularidade alvo
-        if (targetPopularity < 1 || targetPopularity > 100) {
+        // Validar tipo de previsão
+        if (predictionType !== 'increase' && predictionType !== 'decrease') {
             return NextResponse.json(
-                { message: 'Popularidade alvo deve estar entre 1 e 100' },
+                { message: 'Tipo de previsão inválido' },
                 { status: 400 }
             )
         }
@@ -91,15 +99,17 @@ export async function POST(request: NextRequest) {
             .from('prediction_tracks')
             .select('id')
             .eq('spotify_id', trackId)
-            .single()
+            .maybeSingle() // Usar maybeSingle() em vez de single()
 
         let predictionTrackId: number
 
         if (existingPredictionTrack.data) {
             // Música já existe na tabela prediction_tracks
             predictionTrackId = existingPredictionTrack.data.id
+            console.log('📀 Música já existe na tabela prediction_tracks:', predictionTrackId)
         } else {
             // Criar nova entrada na tabela prediction_tracks
+            console.log('➕ Criando nova entrada na tabela prediction_tracks...')
             const { data: newPredictionTrack, error: predictionTrackError } = await supabase
                 .from('prediction_tracks')
                 .insert({
@@ -116,7 +126,7 @@ export async function POST(request: NextRequest) {
                 .single()
 
             if (predictionTrackError) {
-                console.error('Erro ao criar prediction track:', predictionTrackError)
+                console.error('❌ Erro ao criar prediction track:', predictionTrackError)
                 return NextResponse.json(
                     { message: 'Erro ao salvar música no banco de dados' },
                     { status: 500 }
@@ -128,11 +138,11 @@ export async function POST(request: NextRequest) {
 
         // Verificar se já existe uma previsão para esta música pelo usuário
         const { data: existingPrediction } = await supabase
-            .from('music_predictions')
+            .from('music_predictions_v2')
             .select('id')
             .eq('user_id', userId)
             .eq('prediction_track_id', predictionTrackId)
-            .single()
+            .maybeSingle()
 
         if (existingPrediction) {
             return NextResponse.json(
@@ -152,16 +162,16 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Criar a previsão
+        // Criar a previsão na tabela V2
         const { data: prediction, error: predictionError } = await supabase
-            .from('music_predictions')
+            .from('music_predictions_v2')
             .insert({
                 user_id: userId,
                 prediction_track_id: predictionTrackId,
-                predicted_viral_date: predictedViralDate,
+                predicted_date: predictedViralDate,
                 points_bet: pointsBet,
-                prediction_confidence: predictionConfidence,
-                target_popularity: targetPopularity,
+                prediction_type: predictionType,
+                initial_popularity: initialPopularity,
                 status: 'pending'
             })
             .select('*')
@@ -187,7 +197,7 @@ export async function POST(request: NextRequest) {
         if (!debitResult) {
             // Se falhou o débito, deletar a previsão criada
             await supabase
-                .from('music_predictions')
+                .from('music_predictions_v2')
                 .delete()
                 .eq('id', prediction.id)
 
@@ -235,9 +245,9 @@ export async function GET(request: NextRequest) {
             )
         }
 
-        // Buscar previsões do usuário
+        // Buscar previsões do usuário (V2)
         const { data: predictions, error } = await supabase
-            .rpc('get_user_predictions', { user_uuid: userId })
+            .rpc('get_user_predictions_v2', { p_user_id: userId })
 
         if (error) {
             console.error('Erro ao buscar previsões:', error)

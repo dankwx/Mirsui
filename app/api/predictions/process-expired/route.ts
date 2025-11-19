@@ -20,10 +20,10 @@ export async function POST(request: NextRequest) {
 
         console.log('✅ API: Usuário autenticado:', authData.user.id)
 
-        // Executar função para processar previsões expiradas
-        console.log('📊 API: Executando process_expired_predictions...')
+        // Executar função para processar previsões expiradas (V2)
+        console.log('📊 API: Executando process_expired_predictions_v2...')
         const { data: processedPredictions, error } = await supabase
-            .rpc('process_expired_predictions')
+            .rpc('process_expired_predictions_v2')
 
         if (error) {
             console.error('❌ API: Erro ao processar previsões expiradas:', error)
@@ -64,20 +64,20 @@ export async function GET(request: NextRequest) {
             )
         }
 
-        // Buscar previsões expiradas (só para visualização)
+        // Buscar previsões expiradas (só para visualização) - V2
         const { data: expiredPredictions, error } = await supabase
-            .from('music_predictions')
+            .from('music_predictions_v2')
             .select(`
                 id,
-                predicted_viral_date,
+                predicted_date,
                 status,
-                tracks!inner (
+                prediction_tracks!inner (
                     track_title,
                     artist_name
                 )
             `)
             .eq('status', 'pending')
-            .lt('predicted_viral_date', new Date().toISOString())
+            .lt('predicted_date', new Date().toISOString().split('T')[0])
 
         if (error) {
             console.error('Erro ao buscar previsões expiradas:', error)

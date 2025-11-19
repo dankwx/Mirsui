@@ -6,7 +6,9 @@ export interface CreatePredictionData {
     predictedViralDate: string
     pointsBet: number
     predictionConfidence: number
+    predictionType: 'increase' | 'decrease'
     targetPopularity: number
+    initialPopularity: number
 }
 
 export interface PredictionStats {
@@ -24,7 +26,7 @@ export class MusicProphetService {
     async getUserPredictions(userId: string) {
         try {
             const { data, error } = await this.supabase
-                .rpc('get_user_predictions', { user_uuid: userId })
+                .rpc('get_user_predictions_v2', { p_user_id: userId })
 
             if (error) {
                 console.error('Erro ao buscar previsões:', error)
@@ -41,11 +43,9 @@ export class MusicProphetService {
     async getUserPredictionStats(userId: string): Promise<{ stats: PredictionStats, error: any }> {
         try {
             const { data, error } = await this.supabase
-                .from('music_predictions')
-                .select('status, points_gained, points_bet')
-                .eq('user_id', userId)
+                .rpc('get_user_prediction_stats_v2', { p_user_id: userId })
 
-            if (error) {
+            if (error || !data || data.length === 0) {
                 console.error('Erro ao buscar estatísticas:', error)
                 return { 
                     stats: {
@@ -60,14 +60,15 @@ export class MusicProphetService {
                 }
             }
 
-            const stats = data || []
+            // A função RPC já retorna as stats calculadas
+            const statsData = data[0]
             const predictionStats: PredictionStats = {
-                totalPredictions: stats.length,
-                correctPredictions: stats.filter(s => s.status === 'won').length,
-                totalPointsGained: stats.reduce((sum, s) => sum + (s.points_gained || 0), 0),
-                totalPointsBet: stats.reduce((sum, s) => sum + s.points_bet, 0),
-                accuracy: stats.length > 0 ? (stats.filter(s => s.status === 'won').length / stats.length) * 100 : 0,
-                netPoints: stats.reduce((sum, s) => sum + (s.points_gained || 0) - s.points_bet, 0)
+                totalPredictions: statsData.total_predictions || 0,
+                correctPredictions: statsData.correct_predictions || 0,
+                totalPointsGained: statsData.total_points_earned || 0,
+                totalPointsBet: statsData.total_points_bet || 0,
+                accuracy: statsData.accuracy_percentage || 0,
+                netPoints: statsData.net_profit || 0
             }
 
             return { stats: predictionStats, error: null }
@@ -97,7 +98,9 @@ export class MusicProphetService {
                     predicted_viral_date: predictionData.predictedViralDate,
                     points_bet: predictionData.pointsBet,
                     prediction_confidence: predictionData.predictionConfidence,
-                    target_popularity: predictionData.targetPopularity
+                    prediction_type: predictionData.predictionType,
+                    target_popularity: predictionData.targetPopularity,
+                    initial_popularity: predictionData.initialPopularity
                 })
                 .select()
                 .single()

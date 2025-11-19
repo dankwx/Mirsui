@@ -8,6 +8,7 @@ import PredictionCard from './PredictionCard'
 import ProphetStats from './ProphetStats'
 import NewPredictionModal from './NewPredictionModal'
 import { toast } from 'sonner'
+import { BACKEND_API } from '@/lib/backendClient'
 
 interface UserData {
     id: string
@@ -23,14 +24,15 @@ interface Prediction {
     artist_name: string
     track_thumbnail: string
     current_popularity: number
-    predicted_viral_date: string
+    predicted_date: string // Alterado de predicted_viral_date
     points_bet: number
-    prediction_confidence: number
-    target_popularity: number
+    prediction_type: 'increase' | 'decrease' // Agora obrigatório
+    initial_popularity: number // Agora obrigatório
+    final_popularity?: number
     status: string
-    points_gained: number
+    points_earned: number // Alterado de points_gained
     created_at: string
-    days_until_prediction: number
+    days_remaining: number // Alterado de days_until_prediction
     is_expired: boolean
 }
 
@@ -78,13 +80,14 @@ export default function MusicProphetComponent({
     const [filter, setFilter] = useState<(typeof filterOptions)[number]>('all')
     const [isProcessingExpired, setIsProcessingExpired] = useState(false)
 
-    // Processar previsões expiradas quando o componente carrega
+    // Log ao carregar
     useEffect(() => {
         console.log('🚀 useEffect executado:', { isOwnProfile })
-        if (isOwnProfile) {
-            processExpiredPredictions()
-        }
-    }, [isOwnProfile])
+        console.log('📊 Previsões recebidas no componente:', predictions)
+        console.log('📊 Total de previsões:', predictions.length)
+        console.log('📊 Stats recebidas:', prophetStats)
+        // Removi o processamento automático - use o botão "Sincronizar status"
+    }, [isOwnProfile, predictions])
 
     const displayName = userData.display_name || userData.username
 
@@ -98,6 +101,7 @@ export default function MusicProphetComponent({
                     dotClass: 'bg-emerald-400'
                 }
             case 'incorrect':
+            case 'lost':
             case 'Errou':
                 return {
                     label: 'Errou',
@@ -127,54 +131,43 @@ export default function MusicProphetComponent({
 
     const processExpiredPredictions = async () => {
         try {
-            console.log('🔍 Iniciando processamento de previsões expiradas...')
+            console.log('🔍 Iniciando processamento de previsões expiradas via backend...')
             setIsProcessingExpired(true)
             
-            const response = await fetch('/api/predictions/process-expired', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-
-            if (response.ok) {
-                const data = await response.json()
-                console.log('📊 Dados recebidos:', data)
+            const data = await BACKEND_API.prophet.processExpired()
+            console.log('📊 Dados recebidos do backend:', data)
+            
+            if (data.count > 0) {
+                console.log(`✅ ${data.count} previsão(ões) processada(s)!`)
+                toast.success(`${data.count} previsão(ões) processada(s)!`)
                 
-                if (data.count > 0) {
-                    console.log(`✅ ${data.count} previsão(ões) processada(s)!`)
-                    toast.success(`${data.count} previsão(ões) processada(s)!`)
-                    
-                    // Mostrar notificações para cada previsão processada
-                    data.processed.forEach((prediction: any) => {
-                        console.log('🎯 Processando previsão:', prediction)
-                        if (prediction.new_status === 'correct') {
-                            toast.success(
-                                `🎉 Acertou! "${prediction.track_title}" - +${prediction.points_gained} pontos!`,
-                                { duration: 5000 }
-                            )
-                        } else if (prediction.points_returned > 0) {
-                            toast.info(
-                                `📈 Chegou perto! "${prediction.track_title}" - +${prediction.points_returned} pontos`,
-                                { duration: 4000 }
-                            )
-                        }
-                    })
-                    
-                    // Recarregar a página após 2 segundos para mostrar as atualizações
-                    setTimeout(() => {
-                        window.location.reload()
-                    }, 2000)
-                } else {
-                    console.log('ℹ️ Nenhuma previsão expirada para processar')
-                }
+                // Mostrar notificações para cada previsão processada
+                data.processed.forEach((prediction: any) => {
+                    console.log('🎯 Processando previsão:', prediction)
+                    if (prediction.status_result === 'won') {
+                        toast.success(
+                            `🎉 Acertou! "${prediction.track_title}" - +${prediction.points_result} pontos!`,
+                            { duration: 5000 }
+                        )
+                    } else if (prediction.points_result > 0) {
+                        toast.info(
+                            `📈 Chegou perto! "${prediction.track_title}" - +${prediction.points_result} pontos`,
+                            { duration: 4000 }
+                        )
+                    }
+                })
+                
+                // Recarregar a página após 2 segundos para mostrar as atualizações
+                setTimeout(() => {
+                    window.location.reload()
+                }, 2000)
             } else {
-                console.error('❌ Erro na resposta:', response.status, response.statusText)
-                const errorData = await response.json()
-                console.error('❌ Dados do erro:', errorData)
+                console.log('ℹ️ Nenhuma previsão expirada para processar')
+                toast.info('Nenhuma previsão expirada para processar')
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('💥 Erro ao processar previsões expiradas:', error)
+            toast.error(error.message || 'Erro ao processar previsões')
         } finally {
             setIsProcessingExpired(false)
         }
@@ -191,7 +184,7 @@ export default function MusicProphetComponent({
             return prediction.status === 'correct' || prediction.status === 'won'
         }
         if (filter === 'incorrect') {
-            return prediction.status === 'incorrect' || prediction.status === 'Errou'
+            return prediction.status === 'incorrect' || prediction.status === 'lost' || prediction.status === 'Errou'
         }
         if (filter === 'expired') {
             return prediction.status === 'expired' || prediction.is_expired
@@ -269,7 +262,7 @@ export default function MusicProphetComponent({
                                     case 'correct':
                                         return predictions.filter(p => p.status === 'correct' || p.status === 'won').length
                                     case 'incorrect':
-                                        return predictions.filter(p => p.status === 'incorrect' || p.status === 'Errou').length
+                                        return predictions.filter(p => p.status === 'incorrect' || p.status === 'lost' || p.status === 'Errou').length
                                     case 'expired':
                                         return predictions.filter(p => p.status === 'expired' || p.is_expired).length
                                     default:

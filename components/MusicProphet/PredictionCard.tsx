@@ -1,5 +1,5 @@
 // components/MusicProphet/PredictionCard.tsx
-import { Clock, TrendingUp, Target, Calendar, Coins } from 'lucide-react'
+import { Clock, TrendingUp, Calendar, Coins } from 'lucide-react'
 import Image from 'next/image'
 
 interface Prediction {
@@ -9,17 +9,16 @@ interface Prediction {
     artist_name: string
     track_thumbnail: string
     current_popularity: number
-    predicted_viral_date: string
+    predicted_date: string // Alterado de predicted_viral_date
     points_bet: number
-    prediction_confidence: number
-    target_popularity: number
-    status: string
-    points_gained: number
-    created_at: string
-    days_until_prediction: number
-    is_expired: boolean
-    partial_return?: boolean
+    prediction_type: 'increase' | 'decrease' // Agora obrigatório
+    initial_popularity: number // Agora obrigatório
     final_popularity?: number
+    status: string
+    points_earned: number // Alterado de points_gained
+    created_at: string
+    days_remaining: number // Alterado de days_until_prediction
+    is_expired: boolean
 }
 
 interface StatusMeta {
@@ -57,12 +56,6 @@ export default function PredictionCard({ prediction, statusMeta, isLast }: Predi
         return null
     }
 
-    const getConfidenceColor = (confidence: number) => {
-        if (confidence >= 80) return 'text-emerald-300'
-        if (confidence >= 60) return 'text-amber-300'
-        return 'text-rose-300'
-    }
-
     return (
         <li className="relative pl-12 md:pl-16">
             <span className={`absolute left-[1.05rem] top-9 bottom-[-1.5rem] w-px bg-white/10 md:hidden ${isLast ? 'hidden' : ''}`} />
@@ -93,11 +86,7 @@ export default function PredictionCard({ prediction, statusMeta, isLast }: Predi
                                 <span className="text-xs text-white/50">
                                     Criado em {formatDate(prediction.created_at)}
                                 </span>
-                                {prediction.partial_return && prediction.status !== 'correct' && prediction.status !== 'won' && (
-                                    <span className="inline-flex items-center rounded-full border border-amber-300/40 bg-amber-300/10 px-3 py-1 text-[11px] uppercase tracking-[0.3em] text-amber-200">
-                                        Retorno parcial
-                                    </span>
-                                )}
+
                             </div>
                             <div>
                                 <h3 className="text-lg font-semibold tracking-tight text-white md:text-xl">
@@ -114,50 +103,44 @@ export default function PredictionCard({ prediction, statusMeta, isLast }: Predi
                                 {prediction.points_bet} pts apostados
                             </div>
                             {prediction.status !== 'pending' && (
-                                <div className={`rounded-full border px-3 py-1 text-sm font-semibold ${prediction.points_gained > 0 ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200' : prediction.points_gained < 0 ? 'border-rose-400/40 bg-rose-400/10 text-rose-200' : 'border-slate-400/40 bg-slate-400/10 text-slate-200'}`}>
-                                    {formatPoints(prediction.points_gained)} pts
+                                <div className={`rounded-full border px-3 py-1 text-sm font-semibold ${prediction.points_earned > 0 ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200' : prediction.points_earned < 0 ? 'border-rose-400/40 bg-rose-400/10 text-rose-200' : 'border-slate-400/40 bg-slate-400/10 text-slate-200'}`}>
+                                    {formatPoints(prediction.points_earned)} pts
                                 </div>
                             )}
                         </div>
                     </div>
 
                     <div className="flex flex-wrap gap-3 text-sm text-white/70">
+                        {prediction.prediction_type && (
+                            <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 font-medium ${
+                                prediction.prediction_type === 'increase' 
+                                    ? 'border-green-500/40 bg-green-500/10 text-green-200' 
+                                    : 'border-red-500/40 bg-red-500/10 text-red-200'
+                            }`}>
+                                {prediction.prediction_type === 'increase' ? '📈 Vai Crescer' : '📉 Vai Cair'}
+                            </span>
+                        )}
                         <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
                             <TrendingUp className="h-4 w-4 text-white/60" />
-                            Popularidade atual {prediction.current_popularity}
-                        </span>
-                        <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
-                            <Target className="h-4 w-4 text-white/60" />
-                            Meta {prediction.target_popularity}
+                            Inicial {prediction.initial_popularity} → Atual {prediction.current_popularity}
+                            {prediction.final_popularity && (
+                                <span className="text-white/40">→ Final {prediction.final_popularity}</span>
+                            )}
                         </span>
                         <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
                             <Calendar className="h-4 w-4 text-white/60" />
-                            {formatDate(prediction.predicted_viral_date)}
+                            {formatDate(prediction.predicted_date)}
                         </span>
                     </div>
 
-                    <div className="flex flex-col gap-3 border-t border-white/10 pt-4 text-xs text-white/60 md:flex-row md:items-center md:justify-between">
-                        <div className="flex flex-wrap items-center gap-3">
-                            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
-                                Confiança
-                                <span className={`font-semibold ${getConfidenceColor(prediction.prediction_confidence)}`}>
-                                    {prediction.prediction_confidence}%
-                                </span>
+                    {prediction.status === 'pending' && (
+                        <div className="flex flex-col gap-3 border-t border-white/10 pt-4 text-xs text-white/60">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 w-fit">
+                                <Clock className="h-3.5 w-3.5 text-white/50" />
+                                {getDaysText(prediction.days_remaining, prediction.status)}
                             </span>
-                            {prediction.status === 'pending' && (
-                                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
-                                    <Clock className="h-3.5 w-3.5 text-white/50" />
-                                    {getDaysText(prediction.days_until_prediction, prediction.status)}
-                                </span>
-                            )}
                         </div>
-                        {prediction.final_popularity && (
-                            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-white/70">
-                                <TrendingUp className="h-3.5 w-3.5 text-white/50" />
-                                Popularidade final {prediction.final_popularity}
-                            </span>
-                        )}
-                    </div>
+                    )}
                 </div>
             </article>
         </li>

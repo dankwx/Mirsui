@@ -42,7 +42,7 @@ export default async function ProphetPage({ params }: ProphetPageParams) {
     const isLoggedIn = !!authData?.user
     const isOwnProfile = authData?.user?.id === userData.id
 
-    // Buscar previsões do usuário
+    // Buscar previsões do usuário diretamente do Supabase (SSR)
     const supabase = await createClient()
     
     let predictions: any[] = []
@@ -56,41 +56,40 @@ export default async function ProphetPage({ params }: ProphetPageParams) {
     }
 
     try {
-        // Primeiro, processar previsões expiradas automaticamente
-        try {
-            await supabase.rpc('process_expired_predictions')
-            console.log('Previsões expiradas processadas com sucesso')
-        } catch (processError) {
-            console.warn('Aviso ao processar previsões expiradas:', processError)
-            // Continuar mesmo se houver erro no processamento
-        }
-
-        // Agora buscar as previsões atualizadas
+        console.log('🔍 Buscando previsões para user_id:', userData.id)
+        
+        // Buscar previsões (V2)
         const { data: predictionsData, error: predictionsError } = await supabase
-            .rpc('get_user_predictions', { user_uuid: userData.id })
+            .rpc('get_user_predictions_v2', { p_user_id: userData.id })
 
-        if (!predictionsError && predictionsData) {
-            predictions = predictionsData
+        if (predictionsError) {
+            console.error('❌ Erro ao buscar previsões:', predictionsError)
+        } else {
+            predictions = predictionsData || []
+            console.log('✅ Previsões carregadas:', predictions.length)
+            console.log('📊 Dados das previsões:', predictions)
         }
 
-        // Buscar estatísticas do profeta
+        // Buscar estatísticas (V2)
         const { data: stats, error: statsError } = await supabase
-            .from('music_predictions')
-            .select('status, points_gained, points_bet')
-            .eq('user_id', userData.id)
+            .rpc('get_user_prediction_stats_v2', { p_user_id: userData.id })
 
-        if (stats && !statsError) {
+        if (statsError) {
+            console.error('❌ Erro ao buscar estatísticas:', statsError)
+        } else if (stats && stats.length > 0) {
+            const statsData = stats[0]
             prophetStats = {
-                totalPredictions: stats.length,
-                correctPredictions: stats.filter(s => s.status === 'won').length,
-                totalPointsGained: stats.reduce((sum, s) => sum + (s.points_gained || 0), 0),
-                totalPointsBet: stats.reduce((sum, s) => sum + s.points_bet, 0),
-                accuracy: stats.length > 0 ? (stats.filter(s => s.status === 'won').length / stats.length) * 100 : 0,
-                netPoints: stats.reduce((sum, s) => sum + (s.points_gained || 0) - s.points_bet, 0)
+                totalPredictions: statsData.total_predictions || 0,
+                correctPredictions: statsData.correct_predictions || 0,
+                totalPointsGained: statsData.total_points_earned || 0,
+                totalPointsBet: statsData.total_points_bet || 0,
+                accuracy: statsData.accuracy_percentage || 0,
+                netPoints: statsData.net_profit || 0
             }
+            console.log('✅ Estatísticas carregadas:', prophetStats)
         }
     } catch (error) {
-        console.error('Erro ao buscar dados do profeta:', error)
+        console.error('💥 Erro ao buscar dados do profeta:', error)
         // Usar dados padrão em caso de erro
     }
 

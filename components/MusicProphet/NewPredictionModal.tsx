@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { X, Calendar, Target, Coins, TrendingUp } from 'lucide-react'
 import { toast } from 'sonner'
 import MusicSearchForPrediction from './MusicSearchForPrediction'
+import { BACKEND_API } from '@/lib/backendClient'
 
 interface SpotifyTrack {
     album: {
@@ -41,8 +42,7 @@ export default function NewPredictionModal({
     const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null)
     const [predictedDate, setPredictedDate] = useState('')
     const [pointsBet, setPointsBet] = useState([100])
-    const [confidence, setConfidence] = useState([75])
-    const [targetPopularity, setTargetPopularity] = useState([70])
+    const [predictionType, setPredictionType] = useState<'increase' | 'decrease'>('increase')
     const [isLoading, setIsLoading] = useState(false)
     const [userPoints, setUserPoints] = useState<number | null>(null)
     const [loadingPoints, setLoadingPoints] = useState(false)
@@ -82,8 +82,7 @@ export default function NewPredictionModal({
         setSelectedTrack(null)
         setPredictedDate('')
         setPointsBet([100])
-        setConfidence([75])
-        setTargetPopularity([70])
+        setPredictionType('increase')
         setUserPoints(null)
     }
 
@@ -92,20 +91,12 @@ export default function NewPredictionModal({
         onClose()
     }
 
-    const calculateEstimatedReturn = () => {
-        const basePoints = pointsBet[0]
-        const confidenceMultiplier = 2.0 - (confidence[0] / 100.0)
-        const estimatedReturn = Math.round(basePoints * confidenceMultiplier)
-        return estimatedReturn
-    }
-
     const handleTrackSelect = (track: SpotifyTrack | null) => {
         setSelectedTrack(track)
-        if (track) {
-            // Sugerir meta de popularidade baseada na popularidade atual
-            const suggestedTarget = Math.min(track.popularity + 20, 100)
-            setTargetPopularity([suggestedTarget])
-        }
+    }
+
+    const handlePredictionTypeChange = (type: 'increase' | 'decrease') => {
+        setPredictionType(type)
     }
 
     const handleSubmit = async () => {
@@ -163,38 +154,25 @@ export default function NewPredictionModal({
                 },
                 predictedViralDate: predictedDate,
                 pointsBet: pointsBet[0],
-                predictionConfidence: confidence[0],
-                targetPopularity: targetPopularity[0]
+                predictionConfidence: 50,
+                predictionType: predictionType,
+                targetPopularity: null,
+                initialPopularity: selectedTrack.popularity
             }
             
-            console.log('📤 Enviando requisição para /api/predictions:', requestBody)
+            console.log('📤 Enviando requisição para backend:', requestBody)
             
-            const response = await fetch('/api/predictions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestBody)
-            })
-
-            console.log('📥 Resposta recebida:', { status: response.status, statusText: response.statusText })
-
-            if (response.ok) {
-                const result = await response.json()
-                console.log('✅ Sucesso:', result)
-                toast.success('Previsão criada com sucesso! 🔮')
-                handleClose()
-                if (onPredictionCreated) {
-                    onPredictionCreated()
-                }
-            } else {
-                const error = await response.json()
-                console.log('❌ Erro na resposta:', error)
-                toast.error(error.message || 'Erro ao criar previsão')
+            const result = await BACKEND_API.prophet.createPrediction(requestBody)
+            
+            console.log('✅ Sucesso:', result)
+            toast.success('Previsão criada com sucesso! 🔮')
+            handleClose()
+            if (onPredictionCreated) {
+                onPredictionCreated()
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('💥 Erro ao criar previsão:', error)
-            toast.error('Erro ao criar previsão')
+            toast.error(error.message || 'Erro ao criar previsão')
         } finally {
             setIsLoading(false)
         }
@@ -249,11 +227,54 @@ export default function NewPredictionModal({
 
                     {selectedTrack && (
                         <>
+                            {/* Tipo de Previsão */}
+                            <div className="space-y-2">
+                                <Label className="text-sm font-medium flex items-center gap-2">
+                                    <TrendingUp className="h-4 w-4" />
+                                    Tipo de Previsão
+                                </Label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => handlePredictionTypeChange('increase')}
+                                        className={`p-4 rounded-lg border-2 transition-all ${
+                                            predictionType === 'increase'
+                                                ? 'border-green-500 bg-green-50 text-green-700'
+                                                : 'border-gray-200 hover:border-green-300'
+                                        }`}
+                                    >
+                                        <div className="text-2xl mb-1">📈</div>
+                                        <div className="font-semibold">Vai Crescer</div>
+                                        <div className="text-xs text-muted-foreground mt-1">
+                                            Popularidade vai aumentar
+                                        </div>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handlePredictionTypeChange('decrease')}
+                                        className={`p-4 rounded-lg border-2 transition-all ${
+                                            predictionType === 'decrease'
+                                                ? 'border-red-500 bg-red-50 text-red-700'
+                                                : 'border-gray-200 hover:border-red-300'
+                                        }`}
+                                    >
+                                        <div className="text-2xl mb-1">📉</div>
+                                        <div className="font-semibold">Vai Cair</div>
+                                        <div className="text-xs text-muted-foreground mt-1">
+                                            Popularidade vai diminuir
+                                        </div>
+                                        <div className="text-xs font-semibold text-red-600 mt-1">
+                                            +30% bônus
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+
                             {/* Data da Previsão */}
                             <div className="space-y-2">
                                 <Label htmlFor="predicted-date" className="text-sm font-medium flex items-center gap-2">
                                     <Calendar className="h-4 w-4" />
-                                    Quando vai viralizar?
+                                    Data limite da previsão
                                 </Label>
                                 <Input
                                     id="predicted-date"
@@ -264,29 +285,6 @@ export default function NewPredictionModal({
                                     max={new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
                                     className="w-full"
                                 />
-                            </div>
-
-                            {/* Meta de Popularidade */}
-                            <div className="space-y-3">
-                                <Label className="text-sm font-medium flex items-center gap-2">
-                                    <TrendingUp className="h-4 w-4" />
-                                    Meta de Popularidade (atual: {selectedTrack.popularity})
-                                </Label>
-                                <div className="px-2">
-                                    <Slider
-                                        value={targetPopularity}
-                                        onValueChange={setTargetPopularity}
-                                        max={100}
-                                        min={Math.max(selectedTrack.popularity + 1, 1)}
-                                        step={1}
-                                        className="w-full"
-                                    />
-                                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                                        <span>{Math.max(selectedTrack.popularity + 1, 1)}</span>
-                                        <span className="font-medium">{targetPopularity[0]}</span>
-                                        <span>100</span>
-                                    </div>
-                                </div>
                             </div>
 
                             {/* Pontos para Apostar */}
@@ -314,48 +312,19 @@ export default function NewPredictionModal({
                                 </div>
                             </div>
 
-                            {/* Nível de Confiança */}
-                            <div className="space-y-3">
-                                <Label className="text-sm font-medium">Nível de Confiança</Label>
-                                <div className="px-2">
-                                    <Slider
-                                        value={confidence}
-                                        onValueChange={setConfidence}
-                                        max={100}
-                                        min={1}
-                                        step={1}
-                                        className="w-full"
-                                    />
-                                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                                        <span>1%</span>
-                                        <span className={`font-medium ${getConfidenceColor(confidence[0])}`}>
-                                            {confidence[0]}% - {getConfidenceLabel(confidence[0])}
-                                        </span>
-                                        <span>100%</span>
-                                    </div>
-                                </div>
-                                <p className="text-xs text-muted-foreground">
-                                    ⚡ Menor confiança = maior recompensa se acertar!
+                            {/* Aviso sobre recompensa */}
+                            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+                                <p className="text-sm text-center text-gray-700">
+                                    <span className="font-semibold">💡 Como funciona:</span><br/>
+                                    Os pontos ganhos serão calculados pela diferença de popularidade na data escolhida!<br/>
+                                    <span className="text-xs text-gray-600 mt-1 block">
+                                        {predictionType === 'increase' && '📈 Quanto mais crescer, mais pontos você ganha!'}
+                                        {predictionType === 'decrease' && '📉 Quanto mais cair, mais pontos você ganha! (+30% bônus)'}
+                                    </span>
                                 </p>
                             </div>
 
-                            {/* Estimativa de Retorno */}
-                            <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-foreground">Retorno Estimado</p>
-                                        <p className="text-xs text-muted-foreground">Se sua previsão estiver correta</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-lg font-bold text-green-600">
-                                            +{calculateEstimatedReturn()} pts
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                            {Math.round(((calculateEstimatedReturn() - pointsBet[0]) / pointsBet[0]) * 100)}% lucro
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+
                         </>
                     )}
 
@@ -369,7 +338,11 @@ export default function NewPredictionModal({
                                 console.log('🖱️ Botão "Fazer Previsão" clicado!')
                                 handleSubmit()
                             }}
-                            disabled={!selectedTrack || !predictedDate || isLoading}
+                            disabled={
+                                !selectedTrack || 
+                                !predictedDate || 
+                                isLoading
+                            }
                             className="min-w-[120px]"
                         >
                             {isLoading ? 'Criando...' : 'Fazer Previsão'}

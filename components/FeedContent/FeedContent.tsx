@@ -19,6 +19,7 @@ import { getUserBadge, isUserVerified } from '@/utils/feedHelpers'
 import Link from 'next/link'
 import RecentClaims from '@/components/RecentClaims/RecentClaims'
 import { RecentClaim } from '@/utils/feedService.backend'
+import { createClient } from '@/utils/supabase/client'
 
 interface FeedContentProps {
     initialPosts: (FeedPostWithInteractions & { isLiked: boolean })[]
@@ -53,9 +54,8 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
         const scrollPosition = window.scrollY
         
         try {
-            console.log(`🔍 Carregando mais posts: offset=${posts.length}, limit=5`)
             const response = await fetch(`${BACKEND_URL}/feed?limit=5&offset=${posts.length}`)
-            
+
             if (!response.ok) {
                 console.error('Erro ao carregar mais posts')
                 setLoading(false)
@@ -64,8 +64,6 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
 
             const data = await response.json()
             const newPosts = data.posts || []
-            
-            console.log(`📦 Backend retornou ${newPosts.length} posts`)
 
             if (newPosts.length === 0) {
                 setHasMore(false)
@@ -75,16 +73,23 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
 
             // Buscar likes do usuário para os novos posts
             const trackIds = newPosts.map((post: any) => post.id)
-            
-            // Tentar pegar o token do cookie
+
             let userLikes: Set<number> = new Set()
             try {
+                // O backend lê o token do header Authorization, não de cookies
+                const supabase = createClient()
+                const { data: { session } } = await supabase.auth.getSession()
+
+                const headers: HeadersInit = {
+                    'Content-Type': 'application/json',
+                }
+                if (session?.access_token) {
+                    headers['Authorization'] = `Bearer ${session.access_token}`
+                }
+
                 const likesResponse = await fetch(`${BACKEND_URL}/feed/user-likes`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
+                    headers,
                     body: JSON.stringify({ track_ids: trackIds }),
                 })
 

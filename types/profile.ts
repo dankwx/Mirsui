@@ -1,14 +1,17 @@
 // types/profile.ts - Tipos atualizados
+// Reflete as colunas públicas reais da tabela profiles
 export interface User {
     id: string
-    first_name: string
-    last_name: string
     avatar_url: string | null
     username: string | null
     display_name?: string
     description?: string | null
     rating?: number
-    followingId: string
+    points?: number
+    prophet_points?: number
+    // Campos legados que não existem na tabela — mantidos opcionais
+    first_name?: string
+    last_name?: string
     isFollowing?: boolean
 }
 

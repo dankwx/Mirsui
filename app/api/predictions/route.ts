@@ -3,24 +3,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 
 export async function POST(request: NextRequest) {
-    console.log('🎯 API /api/predictions POST chamada')
     try {
         const requestData = await request.json()
-        console.log('📥 Dados recebidos na API:', requestData)
-        
+
         const { trackId, trackData, predictedViralDate, pointsBet, predictionConfidence, predictionType, initialPopularity } = requestData
 
         // Validações básicas
         if (!trackId || !trackData || !predictedViralDate || !pointsBet || !predictionConfidence || !predictionType || initialPopularity === undefined) {
-            console.log('❌ Campos obrigatórios faltando:', { 
-                trackId: !!trackId, 
-                trackData: !!trackData, 
-                predictedViralDate: !!predictedViralDate, 
-                pointsBet: !!pointsBet, 
-                predictionConfidence: !!predictionConfidence, 
-                predictionType: !!predictionType,
-                initialPopularity: initialPopularity !== undefined
-            })
             return NextResponse.json(
                 { message: 'Todos os campos são obrigatórios' },
                 { status: 400 }
@@ -72,19 +61,10 @@ export async function POST(request: NextRequest) {
 
         const supabase = await createClient()
 
-        console.log('🔐 Verificando autenticação...')
         // Verificar se o usuário está autenticado
         const { data: authData, error: authError } = await supabase.auth.getUser()
-        
-        console.log('👤 Resultado da autenticação:', { 
-            hasAuthData: !!authData, 
-            hasUser: !!authData?.user, 
-            authError: authError?.message,
-            userId: authData?.user?.id 
-        })
-        
+
         if (authError || !authData?.user) {
-            console.log('❌ Usuário não autenticado')
             return NextResponse.json(
                 { message: 'Usuário não autenticado' },
                 { status: 401 }
@@ -92,7 +72,6 @@ export async function POST(request: NextRequest) {
         }
 
         const userId = authData.user.id
-        console.log('✅ Usuário autenticado:', userId)
 
         // Verificar se a música já existe na tabela prediction_tracks
         let existingPredictionTrack = await supabase
@@ -106,10 +85,8 @@ export async function POST(request: NextRequest) {
         if (existingPredictionTrack.data) {
             // Música já existe na tabela prediction_tracks
             predictionTrackId = existingPredictionTrack.data.id
-            console.log('📀 Música já existe na tabela prediction_tracks:', predictionTrackId)
         } else {
             // Criar nova entrada na tabela prediction_tracks
-            console.log('➕ Criando nova entrada na tabela prediction_tracks...')
             const { data: newPredictionTrack, error: predictionTrackError } = await supabase
                 .from('prediction_tracks')
                 .insert({
@@ -126,7 +103,7 @@ export async function POST(request: NextRequest) {
                 .single()
 
             if (predictionTrackError) {
-                console.error('❌ Erro ao criar prediction track:', predictionTrackError)
+                console.error('Erro ao criar prediction track:', predictionTrackError)
                 return NextResponse.json(
                     { message: 'Erro ao salvar música no banco de dados' },
                     { status: 500 }

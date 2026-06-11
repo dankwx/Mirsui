@@ -8,7 +8,6 @@ import PredictionCard from './PredictionCard'
 import ProphetStats from './ProphetStats'
 import NewPredictionModal from './NewPredictionModal'
 import { toast } from 'sonner'
-import { BACKEND_API } from '@/lib/backendClient'
 
 interface UserData {
     id: string
@@ -131,19 +130,22 @@ export default function MusicProphetComponent({
 
     const processExpiredPredictions = async () => {
         try {
-            console.log('🔍 Iniciando processamento de previsões expiradas via backend...')
             setIsProcessingExpired(true)
-            
-            const data = await BACKEND_API.prophet.processExpired()
-            console.log('📊 Dados recebidos do backend:', data)
-            
+
+            const response = await fetch('/api/predictions/process-expired', {
+                method: 'POST',
+            })
+            const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Erro ao processar previsões')
+            }
+
             if (data.count > 0) {
-                console.log(`✅ ${data.count} previsão(ões) processada(s)!`)
                 toast.success(`${data.count} previsão(ões) processada(s)!`)
-                
+
                 // Mostrar notificações para cada previsão processada
                 data.processed.forEach((prediction: any) => {
-                    console.log('🎯 Processando previsão:', prediction)
                     if (prediction.status_result === 'won') {
                         toast.success(
                             `🎉 Acertou! "${prediction.track_title}" - +${prediction.points_result} pontos!`,
@@ -162,11 +164,10 @@ export default function MusicProphetComponent({
                     window.location.reload()
                 }, 2000)
             } else {
-                console.log('ℹ️ Nenhuma previsão expirada para processar')
                 toast.info('Nenhuma previsão expirada para processar')
             }
         } catch (error: any) {
-            console.error('💥 Erro ao processar previsões expiradas:', error)
+            console.error('Erro ao processar previsões expiradas:', error)
             toast.error(error.message || 'Erro ao processar previsões')
         } finally {
             setIsProcessingExpired(false)

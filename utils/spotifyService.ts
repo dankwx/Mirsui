@@ -22,7 +22,6 @@ export interface SpotifyTrack {
     id: string
 }
 
-// Nova interface para os resultados de busca
 export interface SpotifySearchResponse {
     tracks: {
         items: SpotifyTrack[]
@@ -57,7 +56,6 @@ export interface SpotifyArtist {
     }
 }
 
-// Nova interface para álbuns
 export interface SpotifyAlbum {
     id: string
     name: string
@@ -72,7 +70,6 @@ export interface SpotifyAlbum {
     artists: { name: string; id: string }[]
 }
 
-// Interface para top tracks
 export interface SpotifyTopTracks {
     tracks: SpotifyTrack[]
 }
@@ -82,8 +79,14 @@ let cachedSpotifyAccessToken: string | null = null
 let cachedTokenExpiryTime: number | null = null
 
 async function getSpotifyAccessToken(): Promise<string | null> {
-    const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID
-    const clientSecret = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET
+    // Fallback para os nomes NEXT_PUBLIC_ antigos enquanto as variáveis
+    // do ambiente de deploy não forem renomeadas
+    const clientId =
+        process.env.SPOTIFY_CLIENT_ID ||
+        process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID
+    const clientSecret =
+        process.env.SPOTIFY_CLIENT_SECRET ||
+        process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET
 
     if (!clientId || !clientSecret) {
         console.error(
@@ -92,13 +95,11 @@ async function getSpotifyAccessToken(): Promise<string | null> {
         return null
     }
 
-    // Verifica se o token em cache existe e ainda é válido
     if (
         cachedSpotifyAccessToken &&
         cachedTokenExpiryTime &&
         Date.now() < cachedTokenExpiryTime
     ) {
-        console.log('Usando token do Spotify em cache.')
         return cachedSpotifyAccessToken
     }
 
@@ -110,7 +111,6 @@ async function getSpotifyAccessToken(): Promise<string | null> {
                 Authorization: 'Basic ' + btoa(clientId + ':' + clientSecret),
             },
             body: 'grant_type=client_credentials',
-            next: { revalidate: 3600 },
         })
 
         if (!response.ok) {
@@ -125,9 +125,9 @@ async function getSpotifyAccessToken(): Promise<string | null> {
 
         const data: SpotifyTokenResponse = await response.json()
         cachedSpotifyAccessToken = data.access_token
+        // Renova 5 minutos antes de expirar
         cachedTokenExpiryTime =
             Date.now() + data.expires_in * 1000 - 5 * 60 * 1000
-        console.log('Novo token do Spotify obtido e cacheado.')
         return cachedSpotifyAccessToken
     } catch (error) {
         console.error('Erro ao buscar token do Spotify:', error)
@@ -135,9 +135,14 @@ async function getSpotifyAccessToken(): Promise<string | null> {
     }
 }
 
-export async function fetchSpotifyTrackInfo(
-    trackId: string
-): Promise<SpotifyTrack | null> {
+/**
+ * Faz uma requisição autenticada à API do Spotify, cuidando do token,
+ * tratamento de erro e invalidação do cache em caso de 401.
+ */
+async function spotifyApiFetch<T>(
+    path: string,
+    revalidateSeconds: number
+): Promise<T | null> {
     const accessToken = await getSpotifyAccessToken()
 
     if (!accessToken) {
@@ -146,30 +151,22 @@ export async function fetchSpotifyTrackInfo(
     }
 
     try {
-        const response = await fetch(
-            `https://api.spotify.com/v1/tracks/${trackId}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-                next: { revalidate: 86400 },
-            }
-        )
+        const response = await fetch(`https://api.spotify.com/v1${path}`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+            next: { revalidate: revalidateSeconds },
+        })
 
         if (!response.ok) {
             const errorText = await response.text()
             console.error(
-                `Falha ao buscar informações da faixa ${trackId}:`,
+                `Falha na requisição ao Spotify (${path}):`,
                 response.status,
                 errorText
             )
-            if (
-                response.status === 401 &&
-                errorText.includes('The access token expired')
-            ) {
-                console.warn(
-                    'Token do Spotify expirou. Forçando renovação na próxima requisição.'
-                )
+            if (response.status === 401) {
+                // Token expirou — força renovação na próxima requisição
                 cachedSpotifyAccessToken = null
                 cachedTokenExpiryTime = null
             }
@@ -178,271 +175,68 @@ export async function fetchSpotifyTrackInfo(
 
         return await response.json()
     } catch (error) {
-        console.error(`Erro ao buscar informações da faixa ${trackId}:`, error)
+        console.error(`Erro na requisição ao Spotify (${path}):`, error)
         return null
     }
 }
 
-// Nova função para buscar no Spotify
+export async function fetchSpotifyTrackInfo(
+    trackId: string
+): Promise<SpotifyTrack | null> {
+    return spotifyApiFetch<SpotifyTrack>(`/tracks/${trackId}`, 86400)
+}
+
 export async function searchSpotify(
     query: string,
     type: string = 'track,artist',
     limit: number = 10
 ): Promise<SpotifySearchResponse | null> {
-    const accessToken = await getSpotifyAccessToken()
-
-    if (!accessToken) {
-        console.error('Token do Spotify não disponível.')
-        return null
-    }
-
     if (!query.trim()) {
         return null
     }
 
-    try {
-        // Codifica a query para URL
-        const encodedQuery = encodeURIComponent(query.trim())
-
-        const response = await fetch(
-            `https://api.spotify.com/v1/search?q=${encodedQuery}&type=${type}&limit=${limit}&market=BR`,
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-                next: { revalidate: 300 }, // Cache por 5 minutos para buscas
-            }
-        )
-
-        if (!response.ok) {
-            const errorText = await response.text()
-            console.error(
-                `Falha ao buscar no Spotify para "${query}":`,
-                response.status,
-                errorText
-            )
-
-            if (response.status === 401) {
-                console.warn('Token do Spotify expirou. Invalidando cache.')
-                cachedSpotifyAccessToken = null
-                cachedTokenExpiryTime = null
-            }
-            return null
-        }
-
-        return await response.json()
-    } catch (error) {
-        console.error(`Erro ao buscar no Spotify para "${query}":`, error)
-        return null
-    }
+    const encodedQuery = encodeURIComponent(query.trim())
+    return spotifyApiFetch<SpotifySearchResponse>(
+        `/search?q=${encodedQuery}&type=${type}&limit=${limit}&market=BR`,
+        300
+    )
 }
 
 export async function fetchSpotifyArtistInfo(
     artistId: string
 ): Promise<SpotifyArtist | null> {
-    const accessToken = await getSpotifyAccessToken()
-
-    if (!accessToken) {
-        console.error('Token do Spotify não disponível.')
-        return null
-    }
-
-    try {
-        const response = await fetch(
-            `https://api.spotify.com/v1/artists/${artistId}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-                next: { revalidate: 86400 },
-            }
-        )
-
-        if (!response.ok) {
-            const errorText = await response.text()
-            console.error(
-                `Falha ao buscar informações do artista ${artistId}:`,
-                response.status,
-                errorText
-            )
-            if (
-                response.status === 401 &&
-                errorText.includes('The access token expired')
-            ) {
-                console.warn(
-                    'Token do Spotify expirou. Forçando renovação na próxima requisição.'
-                )
-                cachedSpotifyAccessToken = null
-                cachedTokenExpiryTime = null
-            }
-            return null
-        }
-
-        return await response.json()
-    } catch (error) {
-        console.error(
-            `Erro ao buscar informações do artista ${artistId}:`,
-            error
-        )
-        return null
-    }
+    return spotifyApiFetch<SpotifyArtist>(`/artists/${artistId}`, 86400)
 }
 
-// Nova função para buscar álbuns do artista
 export async function fetchSpotifyArtistAlbums(
     artistId: string,
     includeGroups: string = 'album,single,compilation',
     limit: number = 50
 ): Promise<SpotifyAlbum[] | null> {
-    const accessToken = await getSpotifyAccessToken()
-
-    if (!accessToken) {
-        console.error('Token do Spotify não disponível.')
-        return null
-    }
-
-    try {
-        const response = await fetch(
-            `https://api.spotify.com/v1/artists/${artistId}/albums?include_groups=${includeGroups}&market=BR&limit=${limit}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-                next: { revalidate: 86400 },
-            }
-        )
-
-        if (!response.ok) {
-            const errorText = await response.text()
-            console.error(
-                `Falha ao buscar álbuns do artista ${artistId}:`,
-                response.status,
-                errorText
-            )
-            if (
-                response.status === 401 &&
-                errorText.includes('The access token expired')
-            ) {
-                console.warn(
-                    'Token do Spotify expirou. Forçando renovação na próxima requisição.'
-                )
-                cachedSpotifyAccessToken = null
-                cachedTokenExpiryTime = null
-            }
-            return null
-        }
-
-        const data = await response.json()
-        return data.items || []
-    } catch (error) {
-        console.error(`Erro ao buscar álbuns do artista ${artistId}:`, error)
-        return null
-    }
+    const data = await spotifyApiFetch<{ items: SpotifyAlbum[] }>(
+        `/artists/${artistId}/albums?include_groups=${includeGroups}&market=BR&limit=${limit}`,
+        86400
+    )
+    return data ? data.items || [] : null
 }
 
-// Nova função para buscar top tracks do artista
 export async function fetchSpotifyArtistTopTracks(
     artistId: string
 ): Promise<SpotifyTrack[] | null> {
-    const accessToken = await getSpotifyAccessToken()
-
-    if (!accessToken) {
-        console.error('Token do Spotify não disponível.')
-        return null
-    }
-
-    try {
-        const response = await fetch(
-            `https://api.spotify.com/v1/artists/${artistId}/top-tracks?market=BR`,
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-                next: { revalidate: 86400 },
-            }
-        )
-
-        if (!response.ok) {
-            const errorText = await response.text()
-            console.error(
-                `Falha ao buscar top tracks do artista ${artistId}:`,
-                response.status,
-                errorText
-            )
-            if (
-                response.status === 401 &&
-                errorText.includes('The access token expired')
-            ) {
-                console.warn(
-                    'Token do Spotify expirou. Forçando renovação na próxima requisição.'
-                )
-                cachedSpotifyAccessToken = null
-                cachedTokenExpiryTime = null
-            }
-            return null
-        }
-
-        const data = await response.json()
-        return data.tracks || []
-    } catch (error) {
-        console.error(
-            `Erro ao buscar top tracks do artista ${artistId}:`,
-            error
-        )
-        return null
-    }
+    const data = await spotifyApiFetch<{ tracks: SpotifyTrack[] }>(
+        `/artists/${artistId}/top-tracks?market=BR`,
+        86400
+    )
+    return data ? data.tracks || [] : null
 }
 
-// Nova função para buscar tracks de um álbum específico
 export async function fetchSpotifyAlbumTracks(
     albumId: string,
     limit: number = 50
 ): Promise<SpotifyTrack[] | null> {
-    const accessToken = await getSpotifyAccessToken()
-
-    if (!accessToken) {
-        console.error('Token do Spotify não disponível.')
-        return null
-    }
-
-    try {
-        const response = await fetch(
-            `https://api.spotify.com/v1/albums/${albumId}/tracks?limit=${limit}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-                next: { revalidate: 86400 },
-            }
-        )
-
-        if (!response.ok) {
-            const errorText = await response.text()
-            console.error(
-                `Falha ao buscar tracks do álbum ${albumId}:`,
-                response.status,
-                errorText
-            )
-            if (
-                response.status === 401 &&
-                errorText.includes('The access token expired')
-            ) {
-                console.warn(
-                    'Token do Spotify expirou. Forçando renovação na próxima requisição.'
-                )
-                cachedSpotifyAccessToken = null
-                cachedTokenExpiryTime = null
-            }
-            return null
-        }
-
-        const data = await response.json()
-        return data.items || []
-    } catch (error) {
-        console.error(
-            `Erro ao buscar tracks do álbum ${albumId}:`,
-            error
-        )
-        return null
-    }
+    const data = await spotifyApiFetch<{ items: SpotifyTrack[] }>(
+        `/albums/${albumId}/tracks?limit=${limit}`,
+        86400
+    )
+    return data ? data.items || [] : null
 }

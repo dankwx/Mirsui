@@ -1,10 +1,31 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { cookies } from 'next/headers'
-import { getSupabaseCookieName } from '@/utils/supabase/cookie-helper'
+import { createClientForActions } from '@/utils/supabase/server'
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
+
+/**
+ * Grava a sessão retornada pelo backend usando o cliente @supabase/ssr,
+ * que escreve os cookies no formato canônico do Supabase — legível tanto
+ * pelo servidor (middleware, route handlers) quanto pelo browser client.
+ */
+async function persistSession(session: {
+    access_token: string
+    refresh_token: string
+}) {
+    const supabase = await createClientForActions()
+    const { error } = await supabase.auth.setSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+    })
+
+    if (error) {
+        console.error('Erro ao persistir sessão:', error)
+        return false
+    }
+    return true
+}
 
 export async function login(formData: FormData) {
     const email = formData.get('email') as string
@@ -25,28 +46,11 @@ export async function login(formData: FormData) {
             return { error: data.error || 'Erro ao fazer login' }
         }
 
-        // Armazenar o token da sessão nos cookies com os nomes que o Supabase espera
         if (data.session?.access_token) {
-            const cookieStore = cookies()
-            const cookieName = getSupabaseCookieName()
-            
-            // Criar o objeto de sessão no formato que o Supabase espera
-            const sessionData = JSON.stringify({
-                access_token: data.session.access_token,
-                refresh_token: data.session.refresh_token,
-                expires_in: data.session.expires_in,
-                expires_at: data.session.expires_at,
-                token_type: data.session.token_type,
-                user: data.user
-            })
-            
-            cookieStore.set(cookieName, sessionData, {
-                path: '/',
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                maxAge: 60 * 60 * 24 * 7, // 7 dias
-            })
+            const ok = await persistSession(data.session)
+            if (!ok) {
+                return { error: 'Erro ao iniciar sessão. Tente novamente.' }
+            }
         }
 
         revalidatePath('/', 'layout')
@@ -77,28 +81,9 @@ export async function signup(formData: FormData) {
             return { error: data.error || 'Erro ao criar conta' }
         }
 
-        // Armazenar o token da sessão nos cookies se retornar
+        // O signup pode não retornar sessão (confirmação de email pendente)
         if (data.session?.access_token) {
-            const cookieStore = cookies()
-            const cookieName = getSupabaseCookieName()
-            
-            // Criar o objeto de sessão no formato que o Supabase espera
-            const sessionData = JSON.stringify({
-                access_token: data.session.access_token,
-                refresh_token: data.session.refresh_token,
-                expires_in: data.session.expires_in,
-                expires_at: data.session.expires_at,
-                token_type: data.session.token_type,
-                user: data.user
-            })
-            
-            cookieStore.set(cookieName, sessionData, {
-                path: '/',
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                maxAge: 60 * 60 * 24 * 7, // 7 dias
-            })
+            await persistSession(data.session)
         }
 
         revalidatePath('/', 'layout')

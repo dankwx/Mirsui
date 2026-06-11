@@ -1,26 +1,8 @@
 // app/api/user/points/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import { getSupabaseCookieName } from '@/utils/supabase/cookie-helper'
+import { getAccessToken } from '@/utils/supabase/get-access-token'
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
-
-// Função auxiliar para pegar o token do cookie
-async function getAccessToken(): Promise<string | null> {
-    try {
-        const cookieStore = await cookies()
-        const cookieName = getSupabaseCookieName()
-        const cookieValue = cookieStore.get(cookieName)?.value
-
-        if (!cookieValue) return null
-
-        const session = JSON.parse(cookieValue)
-        return session.access_token || null
-    } catch (error) {
-        console.error('Erro ao pegar token:', error)
-        return null
-    }
-}
 
 export async function GET(request: NextRequest) {
     try {

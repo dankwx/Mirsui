@@ -33,9 +33,10 @@ export default async function DashboardLayout({
             const userId = authData.user.id
 
             // Buscar informações do perfil na tabela profiles
+            // (email vem do auth, não da tabela)
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
-                .select('*')
+                .select('id, username, description, display_name, avatar_url, rating')
                 .eq('id', userId)
                 .single()
 
@@ -50,7 +51,7 @@ export default async function DashboardLayout({
                     username: undefined,
                 }
             } else {
-                userProfile = profileData
+                userProfile = { ...profileData, email: authData.user.email }
             }
         }
     } catch (error) {

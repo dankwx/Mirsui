@@ -6,10 +6,10 @@ export async function fetchUserData(username: string) {
         data: { user: currentUser },
     } = await supabase.auth.getUser()
 
-    // Buscar dados do usuário do perfil
+    // Buscar dados do usuário do perfil (apenas campos públicos — email fica de fora)
     const { data: userData, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, username, description, display_name, avatar_url, rating, points, prophet_points')
         .eq('username', username)
         .single()
 

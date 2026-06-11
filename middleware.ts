@@ -8,6 +8,7 @@ const PUBLIC_ROUTES = [
   '/login',
   '/how-it-works',
   '/auth/confirm',
+  '/auth/check-email',
   '/reset-password',
   '/check-email',
 ]
@@ -16,6 +17,18 @@ const PUBLIC_ROUTES = [
 const PUBLIC_API_ROUTES = [
   '/api/auth/',
 ]
+
+function isPublicPath(pathname: string): boolean {
+  const isPublicRoute = PUBLIC_ROUTES.some(route =>
+    route === '/'
+      ? pathname === '/'
+      : pathname === route || pathname.startsWith(`${route}/`)
+  )
+  const isPublicApiRoute = PUBLIC_API_ROUTES.some(route =>
+    pathname.startsWith(route)
+  )
+  return isPublicRoute || isPublicApiRoute
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -29,11 +42,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Verificar se é rota pública
-  const isPublicRoute = PUBLIC_ROUTES.some(route => pathname === route || pathname.startsWith(route))
-  const isPublicApiRoute = PUBLIC_API_ROUTES.some(route => pathname.startsWith(route))
-
-  if (isPublicRoute || isPublicApiRoute) {
+  if (isPublicPath(pathname)) {
     return NextResponse.next()
   }
 
@@ -62,19 +71,16 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Verificar sessão do usuário
-  const { data: { session } } = await supabase.auth.getSession()
+  // getUser() valida o token junto ao Supabase (getSession() apenas lê o cookie,
+  // sem validar — não deve ser usado para proteger rotas)
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  // Se não houver sessão e a rota não for pública, redirecionar para login
-  if (!session) {
+  if (!user) {
     const redirectUrl = new URL('/login', request.url)
     redirectUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(redirectUrl)
-  }
-
-  // Se houver sessão mas está na página de login, redirecionar para feed
-  if (session && pathname === '/login') {
-    return NextResponse.redirect(new URL('/feed', request.url))
   }
 
   return response

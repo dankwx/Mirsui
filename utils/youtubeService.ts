@@ -28,19 +28,16 @@ export interface YouTubeSearchResponse {
     }
 }
 
-/**
- * Busca uma música no YouTube usando a API do YouTube
- * @param trackName Nome da música
- * @param artistName Nome do artista
- * @param maxResults Número máximo de resultados (padrão: 5)
- * @returns Promise com o primeiro resultado encontrado ou null
- */
-export async function searchYouTubeVideo(
+async function searchYouTube(
     trackName: string,
     artistName: string,
-    maxResults: number = 5
-): Promise<string | null> {
-    const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY
+    maxResults: number
+): Promise<YouTubeVideo[] | null> {
+    // Fallback para o nome NEXT_PUBLIC_ antigo enquanto a variável
+    // do ambiente de deploy não for renomeada
+    const apiKey =
+        process.env.YOUTUBE_API_KEY || process.env.NEXT_PUBLIC_YOUTUBE_API_KEY
+
     if (!apiKey) {
         console.error(
             '[youtubeService] YouTube API Key não encontrada nas variáveis de ambiente'
@@ -48,10 +45,8 @@ export async function searchYouTubeVideo(
         return null
     }
 
-    // Limpa e formata a query de busca
     const query = `${trackName} ${artistName}`.trim()
     const encodedQuery = encodeURIComponent(query)
-    console.log('[youtubeService] Iniciando busca no YouTube para:', query)
 
     try {
         const response = await fetch(
@@ -60,10 +55,7 @@ export async function searchYouTubeVideo(
                 next: { revalidate: 86400 }, // Cache por 24 horas
             }
         )
-        console.log(
-            '[youtubeService] Resposta da API YouTube:',
-            response.status
-        )
+
         if (!response.ok) {
             const errorText = await response.text()
             console.error(
@@ -75,22 +67,7 @@ export async function searchYouTubeVideo(
         }
 
         const data: YouTubeSearchResponse = await response.json()
-        console.log('[youtubeService] Dados retornados da API YouTube:', data)
-        if (!data.items || data.items.length === 0) {
-            console.log(
-                `[youtubeService] Nenhum resultado encontrado no YouTube para: ${query}`
-            )
-            return null
-        }
-
-        // Pega o primeiro resultado e retorna a URL completa do YouTube
-        const firstVideo = data.items[0]
-        const youtubeUrl = `https://www.youtube.com/watch?v=${firstVideo.id.videoId}`
-
-        console.log(
-            `[youtubeService] Música encontrada no YouTube: ${firstVideo.snippet.title} - ${youtubeUrl}`
-        )
-        return youtubeUrl
+        return data.items || []
     } catch (error) {
         console.error(
             `[youtubeService] Erro ao buscar no YouTube para "${query}":`,
@@ -101,65 +78,29 @@ export async function searchYouTubeVideo(
 }
 
 /**
- * Busca múltiplos resultados no YouTube e retorna informações detalhadas
- * @param trackName Nome da música
- * @param artistName Nome do artista
- * @param maxResults Número máximo de resultados
- * @returns Promise com array de vídeos encontrados
+ * Busca uma música no YouTube e retorna a URL do primeiro resultado, ou null.
+ */
+export async function searchYouTubeVideo(
+    trackName: string,
+    artistName: string,
+    maxResults: number = 5
+): Promise<string | null> {
+    const videos = await searchYouTube(trackName, artistName, maxResults)
+
+    if (!videos || videos.length === 0) {
+        return null
+    }
+
+    return `https://www.youtube.com/watch?v=${videos[0].id.videoId}`
+}
+
+/**
+ * Busca múltiplos resultados no YouTube com informações detalhadas.
  */
 export async function searchYouTubeVideosDetailed(
     trackName: string,
     artistName: string,
     maxResults: number = 10
 ): Promise<YouTubeVideo[] | null> {
-    const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY
-
-    if (!apiKey) {
-        console.error(
-            '[youtubeService] YouTube API Key não encontrada nas variáveis de ambiente'
-        )
-        return null
-    }
-
-    const query = `${trackName} ${artistName}`.trim()
-    const encodedQuery = encodeURIComponent(query)
-    console.log(
-        '[youtubeService] Iniciando busca detalhada no YouTube para:',
-        query
-    )
-
-    try {
-        const response = await fetch(
-            `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=${maxResults}&q=${encodedQuery}&key=${apiKey}`,
-            {
-                next: { revalidate: 86400 },
-            }
-        )
-        console.log(
-            '[youtubeService] Resposta da API YouTube (detalhada):',
-            response.status
-        )
-        if (!response.ok) {
-            const errorText = await response.text()
-            console.error(
-                `[youtubeService] Falha ao buscar no YouTube para "${query}":`,
-                response.status,
-                errorText
-            )
-            return null
-        }
-
-        const data: YouTubeSearchResponse = await response.json()
-        console.log(
-            '[youtubeService] Dados detalhados retornados da API YouTube:',
-            data
-        )
-        return data.items || []
-    } catch (error) {
-        console.error(
-            `[youtubeService] Erro ao buscar no YouTube para "${query}":`,
-            error
-        )
-        return null
-    }
+    return searchYouTube(trackName, artistName, maxResults)
 }

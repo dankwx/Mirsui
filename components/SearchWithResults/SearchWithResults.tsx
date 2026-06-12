@@ -23,8 +23,8 @@ interface SpotifyTrack {
 interface SpotifyArtist {
     id: string
     name: string
-    images: { url: string }[]
-    followers: { total: number }
+    images?: { url: string }[]
+    followers?: { total: number }
     genres: string[]
 }
 
@@ -331,7 +331,7 @@ export default function SearchWithResults() {
                                             className="group flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors duration-200 hover:bg-white/8"
                                         >
                                             <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full">
-                                                {artist.images[0] ? (
+                                                {artist.images?.[0]?.url ? (
                                                     <Image
                                                         src={
                                                             artist.images[0]
@@ -351,9 +351,11 @@ export default function SearchWithResults() {
                                                 <span className="block truncate text-sm font-medium text-white">
                                                     {artist.name}
                                                 </span>
-                                                <span className="block text-xs text-white/50">
-                                                    {artist.followers.total.toLocaleString()} seguidores
-                                                </span>
+                                                {artist.followers?.total != null && (
+                                                    <span className="block text-xs text-white/50">
+                                                        {artist.followers.total.toLocaleString()} seguidores
+                                                    </span>
+                                                )}
                                             </div>
                                         </button>
                                     ))}

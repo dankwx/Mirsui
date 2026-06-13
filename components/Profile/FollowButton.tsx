@@ -48,10 +48,10 @@ export default function FollowButton({
 
     if (type === 'icon') {
         const iconClass = cn(
-            'h-10 w-10 rounded-full border border-white/10 bg-white/[0.06] text-white transition hover:border-white/25 hover:bg-white/[0.12]',
+            'h-10 w-10 rounded-full border transition',
             isFollowing
-                ? 'text-white/80'
-                : 'bg-gradient-to-r from-purple-500/85 to-pink-500/85 text-white shadow-[0_18px_45px_rgba(132,94,255,0.35)] hover:from-purple-600/90 hover:to-pink-600/90'
+                ? 'border-mir-line2 bg-mir-fill1 text-mir-text2 hover:bg-mir-fill2 hover:text-mir-text'
+                : 'border-transparent bg-mir-acc text-mir-on-acc hover:bg-mir-acc hover:brightness-105'
         )
 
         return (
@@ -73,10 +73,10 @@ export default function FollowButton({
     }
 
     const textClass = cn(
-        'rounded-full border border-white/12 px-5 py-2 text-xs font-semibold uppercase tracking-[0.35em] transition',
+        'rounded-[9px] border px-[18px] py-[9px] text-[13.5px] font-semibold transition active:translate-y-px',
         isFollowing
-            ? 'bg-white/[0.08] text-white/75 hover:border-white/25 hover:bg-white/[0.12] hover:text-white'
-            : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-[0_18px_45px_rgba(132,94,255,0.35)] hover:from-purple-600 hover:to-pink-600'
+            ? 'border-mir-line2 bg-transparent text-mir-text2 hover:border-mir-text3 hover:bg-mir-fill1 hover:text-mir-text'
+            : 'border-transparent bg-mir-acc text-mir-on-acc hover:bg-mir-acc hover:brightness-105'
     )
 
     return (

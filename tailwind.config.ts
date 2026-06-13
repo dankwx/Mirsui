@@ -18,7 +18,26 @@ const config = {
     		}
     	},
     	extend: {
+    		fontFamily: {
+    			sans: ['var(--font-hanken)', 'system-ui', 'sans-serif'],
+    			mono: ['var(--font-jetbrains)', 'ui-monospace', 'monospace']
+    		},
     		colors: {
+    			mir: {
+    				bg: '#13110f',
+    				surface: '#1a1714',
+    				card: '#211d18',
+    				line: 'rgba(236,232,224,0.085)',
+    				line2: 'rgba(236,232,224,0.15)',
+    				fill1: 'rgba(236,232,224,0.035)',
+    				fill2: 'rgba(236,232,224,0.07)',
+    				text: '#ece8e0',
+    				text2: '#9b958b',
+    				text3: '#6a655c',
+    				acc: '#84b86a',
+    				'acc-soft': 'rgba(132,184,106,0.14)',
+    				'on-acc': '#0e1408'
+    			},
     			border: 'hsl(var(--border))',
     			input: 'hsl(var(--input))',
     			ring: 'hsl(var(--ring))',

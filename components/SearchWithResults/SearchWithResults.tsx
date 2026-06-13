@@ -171,31 +171,29 @@ export default function SearchWithResults() {
             ref={searchRef}
             className="group relative w-full"
         >
-            <div className="pointer-events-none absolute inset-0 rounded-[18px] bg-[radial-gradient(circle_at_top,_rgba(136,99,241,0.35),_transparent_55%),_linear-gradient(120deg,_rgba(86,51,221,0.4),_rgba(12,18,39,0))] opacity-0 blur-3xl transition-opacity duration-500 group-focus-within:opacity-100 group-hover:opacity-100" />
-            <div className="relative flex h-12 items-stretch rounded-[18px] border border-white/10 bg-white/[0.04] shadow-[0_30px_60px_-20px_rgba(94,61,237,0.65)] backdrop-blur-2xl">
+            <div className="relative flex h-10 items-stretch overflow-hidden rounded-full border border-mir-line bg-mir-fill1 transition-colors focus-within:border-mir-line2 focus-within:bg-mir-fill2">
                 {/* Botão de filtro */}
                 <div ref={filterRef} className="relative">
                     <button
                         type="button"
                         onClick={() => setShowFilterMenu(!showFilterMenu)}
-                        className="flex h-full items-center gap-2 border-r border-white/10 bg-white/[0.04] px-4 text-xs font-semibold uppercase tracking-[0.28em] text-white/60 transition-colors duration-300 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-0"
+                        className="flex h-full items-center gap-1.5 border-r border-mir-line px-3 text-xs font-semibold text-mir-text2 transition-colors hover:bg-mir-fill2 hover:text-mir-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mir-acc/60"
                     >
-                        {searchFilter === 'all' && <Filter className="h-4 w-4 text-purple-200/80" />}
-                        {searchFilter === 'tracks' && <Music className="h-4 w-4 text-purple-200/80" />}
-                        {searchFilter === 'artists' && <User className="h-4 w-4 text-purple-200/80" />}
-                        <span className="hidden sm:inline">{getFilterLabel(searchFilter)}</span>
-                        <ChevronDown className="h-3 w-3 text-white/50" />
+                        {searchFilter === 'all' && <Filter className="h-3.5 w-3.5" />}
+                        {searchFilter === 'tracks' && <Music className="h-3.5 w-3.5" />}
+                        {searchFilter === 'artists' && <User className="h-3.5 w-3.5" />}
+                        <ChevronDown className="h-3 w-3 text-mir-text3" />
                     </button>
 
                     {/* Menu de filtros */}
                     {showFilterMenu && (
-                        <div className="absolute left-0 top-[calc(100%+10px)] z-50 w-44 overflow-hidden rounded-2xl border border-white/10 bg-[#0f1324]/95 p-1 shadow-[0_24px_50px_-20px_rgba(40,20,120,0.7)] backdrop-blur-xl">
+                        <div className="absolute left-0 top-[calc(100%+10px)] z-50 w-44 overflow-hidden rounded-xl border border-mir-line bg-mir-surface p-1 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
                             <button
                                 onClick={() => {
                                     setSearchFilter('all')
                                     setShowFilterMenu(false)
                                 }}
-                                className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/70 transition-colors duration-200 hover:bg-white/10 ${searchFilter === 'all' ? 'bg-white/10 text-white' : ''}`}
+                                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-mir-text2 transition-colors duration-200 hover:bg-mir-fill2 hover:text-mir-text ${searchFilter === 'all' ? 'bg-mir-fill2 text-mir-text' : ''}`}
                             >
                                 <Filter className="h-4 w-4" />
                                 Tudo
@@ -205,7 +203,7 @@ export default function SearchWithResults() {
                                     setSearchFilter('tracks')
                                     setShowFilterMenu(false)
                                 }}
-                                className={`mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/70 transition-colors duration-200 hover:bg-white/10 ${searchFilter === 'tracks' ? 'bg-white/10 text-white' : ''}`}
+                                className={`mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-mir-text2 transition-colors duration-200 hover:bg-mir-fill2 hover:text-mir-text ${searchFilter === 'tracks' ? 'bg-mir-fill2 text-mir-text' : ''}`}
                             >
                                 <Music className="h-4 w-4" />
                                 Músicas
@@ -215,7 +213,7 @@ export default function SearchWithResults() {
                                     setSearchFilter('artists')
                                     setShowFilterMenu(false)
                                 }}
-                                className={`mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/70 transition-colors duration-200 hover:bg-white/10 ${searchFilter === 'artists' ? 'bg-white/10 text-white' : ''}`}
+                                className={`mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-mir-text2 transition-colors duration-200 hover:bg-mir-fill2 hover:text-mir-text ${searchFilter === 'artists' ? 'bg-mir-fill2 text-mir-text' : ''}`}
                             >
                                 <User className="h-4 w-4" />
                                 Artistas
@@ -226,31 +224,31 @@ export default function SearchWithResults() {
 
                 {/* Campo de busca */}
                 <div className="relative flex-1">
-                    <SearchIcon className="absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-white/40" />
+                    <SearchIcon className="absolute left-3.5 top-1/2 z-10 h-3.5 w-3.5 -translate-y-1/2 text-mir-text3" />
                     <Input
                         type="search"
                         placeholder={getPlaceholderText(searchFilter)}
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onFocus={() => results && setShowResults(true)}
-                        className="h-full rounded-none border-none bg-transparent pl-10 pr-12 text-sm text-white placeholder:text-white/40 focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-0"
+                        className="h-full rounded-none border-none bg-transparent pl-9 pr-10 text-[13px] text-mir-text placeholder:text-mir-text3 focus-visible:ring-0 focus-visible:ring-offset-0"
                     />
                     {isLoading && (
-                        <Loader2 className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-white/40" />
+                        <Loader2 className="absolute right-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 animate-spin text-mir-text3" />
                     )}
                 </div>
             </div>
 
             {/* Dropdown de resultados */}
             {showResults && results && query.trim().length >= 2 && (
-                <div className="absolute left-0 right-0 top-[calc(100%+12px)] z-40 max-h-96 overflow-y-auto rounded-2xl border border-white/10 bg-[#0b1120]/95 shadow-[0_30px_80px_-35px_rgba(94,61,237,0.9)] backdrop-blur-2xl">
+                <div className="absolute left-0 right-0 top-[calc(100%+12px)] z-40 max-h-96 overflow-y-auto rounded-xl border border-mir-line bg-mir-surface shadow-[0_30px_80px_rgba(0,0,0,0.55)]">
                     {/* Tracks - só mostra se o filtro permitir */}
                     {(searchFilter === 'all' || searchFilter === 'tracks') &&
                         results.tracks?.items &&
                         results.tracks.items.length > 0 && (
                             <div className="p-3">
                                 {searchFilter === 'all' && (
-                                    <div className="flex items-center gap-2 px-2 pb-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/40">
+                                    <div className="flex items-center gap-2 px-2 pb-2 font-mono text-[10px] font-medium uppercase tracking-[0.13em] text-mir-text3">
                                         <Music className="h-3 w-3" />
                                         Músicas
                                     </div>
@@ -264,7 +262,7 @@ export default function SearchWithResults() {
                                             onClick={() =>
                                                 handleTrackClick(track)
                                             }
-                                            className="group flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors duration-200 hover:bg-white/8"
+                                            className="group flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors duration-200 hover:bg-mir-fill2"
                                         >
                                             <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg">
                                                 {track.album.images[0] ? (
@@ -279,16 +277,16 @@ export default function SearchWithResults() {
                                                         className="object-cover"
                                                     />
                                                 ) : (
-                                                    <div className="flex h-full w-full items-center justify-center bg-white/10">
-                                                        <Music className="h-4 w-4 text-white/40" />
+                                                    <div className="flex h-full w-full items-center justify-center bg-mir-fill2">
+                                                        <Music className="h-4 w-4 text-mir-text3" />
                                                     </div>
                                                 )}
                                             </div>
                                             <div className="min-w-0 flex-1">
-                                                <span className="block truncate text-sm font-medium text-white">
+                                                <span className="block truncate text-sm font-medium text-mir-text">
                                                     {track.name}
                                                 </span>
-                                                <span className="block truncate text-xs text-white/50">
+                                                <span className="block truncate text-xs text-mir-text2">
                                                     {track.artists
                                                         .map(
                                                             (artist) =>
@@ -298,7 +296,7 @@ export default function SearchWithResults() {
                                                     • {track.album.name}
                                                 </span>
                                             </div>
-                                            <span className="flex-shrink-0 text-xs text-white/40">
+                                            <span className="flex-shrink-0 font-mono text-[11px] text-mir-text3">
                                                 {formatDuration(
                                                     track.duration_ms
                                                 )}
@@ -312,9 +310,9 @@ export default function SearchWithResults() {
                     {(searchFilter === 'all' || searchFilter === 'artists') &&
                         results.artists?.items &&
                         results.artists.items.length > 0 && (
-                            <div className={`p-3 ${searchFilter === 'all' && results.tracks?.items?.length ? 'border-t border-white/5' : ''}`}>
+                            <div className={`p-3 ${searchFilter === 'all' && results.tracks?.items?.length ? 'border-t border-mir-line' : ''}`}>
                                 {searchFilter === 'all' && (
-                                    <div className="flex items-center gap-2 px-2 pb-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/40">
+                                    <div className="flex items-center gap-2 px-2 pb-2 font-mono text-[10px] font-medium uppercase tracking-[0.13em] text-mir-text3">
                                         <User className="h-3 w-3" />
                                         Artistas
                                     </div>
@@ -328,7 +326,7 @@ export default function SearchWithResults() {
                                             onClick={() =>
                                                 handleArtistClick(artist)
                                             }
-                                            className="group flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors duration-200 hover:bg-white/8"
+                                            className="group flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors duration-200 hover:bg-mir-fill2"
                                         >
                                             <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full">
                                                 {artist.images?.[0]?.url ? (
@@ -342,17 +340,17 @@ export default function SearchWithResults() {
                                                         className="object-cover"
                                                     />
                                                 ) : (
-                                                    <div className="flex h-full w-full items-center justify-center bg-white/10">
-                                                        <User className="h-4 w-4 text-white/40" />
+                                                    <div className="flex h-full w-full items-center justify-center bg-mir-fill2">
+                                                        <User className="h-4 w-4 text-mir-text3" />
                                                     </div>
                                                 )}
                                             </div>
                                             <div className="min-w-0 flex-1">
-                                                <span className="block truncate text-sm font-medium text-white">
+                                                <span className="block truncate text-sm font-medium text-mir-text">
                                                     {artist.name}
                                                 </span>
                                                 {artist.followers?.total != null && (
-                                                    <span className="block text-xs text-white/50">
+                                                    <span className="block text-xs text-mir-text2">
                                                         {artist.followers.total.toLocaleString()} seguidores
                                                     </span>
                                                 )}
@@ -366,7 +364,7 @@ export default function SearchWithResults() {
                     {((searchFilter === 'all' && !results.tracks?.items?.length && !results.artists?.items?.length) ||
                       (searchFilter === 'tracks' && !results.tracks?.items?.length) ||
                       (searchFilter === 'artists' && !results.artists?.items?.length)) && (
-                            <div className="p-4 text-center text-sm text-white/50">
+                            <div className="p-4 text-center text-sm text-mir-text2">
                                 Nenhum resultado encontrado para &quot;{query}&quot;
                             </div>
                         )}

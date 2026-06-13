@@ -1,9 +1,10 @@
 "use client"
 
 import SearchWithResults from '../SearchWithResults/SearchWithResults'
-import { ChevronDown, LogOut, Sparkles } from 'lucide-react'
+import { ChevronDown, LogOut, Settings, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 // Tipo para o perfil do usuário
 interface UserProfile {
@@ -20,9 +21,60 @@ interface HeaderProps {
     userProfile?: UserProfile | null
 }
 
+type NavLink = {
+    title: string
+    url: string
+    match: (pathname: string) => boolean
+}
+
+const navLinks: NavLink[] = [
+    {
+        title: 'Início',
+        url: '/',
+        match: (p) => p === '/' || p.startsWith('/feed'),
+    },
+    {
+        title: 'Acervo',
+        url: '/library',
+        match: (p) => p.startsWith('/library') || p.startsWith('/user'),
+    },
+    {
+        title: 'Descobrir',
+        url: '/discover',
+        match: (p) => p.startsWith('/discover'),
+    },
+    {
+        title: 'Prophet',
+        url: '/prophet',
+        match: (p) => p.split('/').includes('prophet'),
+    },
+    {
+        title: 'Claim',
+        url: '/claimtrack',
+        match: (p) => p.startsWith('/claimtrack'),
+    },
+]
+
+function Glyph({ size = 22 }: { size?: number }) {
+    return (
+        <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
+            <circle
+                cx="12"
+                cy="12"
+                r="9.4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+            />
+            <circle cx="12" cy="12" r="3" fill="#84b86a" />
+        </svg>
+    )
+}
+
 export default function Header({ userProfile }: HeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const profileRef = useRef<HTMLDivElement>(null)
+    const pathname = usePathname()
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -59,28 +111,50 @@ export default function Header({ userProfile }: HeaderProps) {
         }
         return 'U'
     }
+
     return (
-        <header className="sticky top-0 z-40 border-b border-white/5 bg-white/[0.03] backdrop-blur-3xl">
-            <div className="flex items-center justify-between px-10 py-5">
-                <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.4em] text-white/40">
-                        <Sparkles className="h-4 w-4 text-purple-300" />
-                        <span>explorar catapultas sonoras</span>
-                    </div>
-                    <div className="relative w-[min(620px,60vw)]">
-                        <SearchWithResults />
-                    </div>
+        <header className="sticky top-0 z-40 border-b border-mir-line bg-mir-bg/85 backdrop-blur-xl">
+            <nav className="mx-auto flex h-16 w-full max-w-[1180px] items-center gap-6 px-5 sm:px-10">
+                <Link
+                    href="/"
+                    className="flex items-center gap-2.5 text-lg font-extrabold tracking-tight text-mir-text"
+                >
+                    <Glyph />
+                    Mirsui
+                </Link>
+
+                <div className="hidden items-center gap-6 md:flex">
+                    {navLinks.map((link) => {
+                        const active = link.match(pathname)
+                        return (
+                            <Link
+                                key={link.title}
+                                href={link.url}
+                                className={`text-[13.5px] font-semibold transition-colors ${
+                                    active
+                                        ? 'text-mir-text'
+                                        : 'text-mir-text2 hover:text-mir-text'
+                                }`}
+                            >
+                                {link.title}
+                            </Link>
+                        )
+                    })}
                 </div>
 
-                <div className="flex items-center gap-4">
-                    {userProfile && (
+                <div className="ml-auto flex items-center gap-3">
+                    <div className="hidden w-[260px] lg:block">
+                        <SearchWithResults />
+                    </div>
+
+                    {userProfile ? (
                         <div className="relative" ref={profileRef}>
                             <button
                                 type="button"
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                className="group flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white/70 shadow-[0_25px_60px_-30px_rgba(106,76,227,0.55)] transition-colors duration-200 hover:bg-white/8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
+                                className="group flex items-center gap-2 rounded-full border border-mir-line bg-mir-fill1 py-1 pl-1 pr-2.5 transition-colors hover:border-mir-line2 hover:bg-mir-fill2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mir-acc/60"
                             >
-                                <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-2xl bg-white/10">
+                                <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-mir-card">
                                     {userProfile?.avatar_url ? (
                                         <img
                                             src={userProfile.avatar_url}
@@ -88,7 +162,7 @@ export default function Header({ userProfile }: HeaderProps) {
                                             className="h-full w-full object-cover"
                                         />
                                     ) : (
-                                        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-white">
+                                        <span className="text-[11px] font-bold text-mir-text">
                                             {getInitials(
                                                 userProfile?.display_name,
                                                 userProfile?.email
@@ -96,56 +170,47 @@ export default function Header({ userProfile }: HeaderProps) {
                                         </span>
                                     )}
                                 </div>
-                                <div className="hidden flex-col leading-tight text-left md:flex">
-                                    <span className="text-sm font-medium text-white">
-                                        {userProfile?.display_name ||
-                                            userProfile?.username ||
-                                            'Explorador'}
-                                    </span>
-                                    <span className="text-[11px] uppercase tracking-[0.3em] text-white/40">
-                                        {userProfile?.rating ? `score ${userProfile.rating}` : 'online'}
-                                    </span>
-                                </div>
                                 <ChevronDown
-                                    className={`hidden h-4 w-4 text-white/50 transition-transform duration-200 md:block ${
+                                    className={`h-3.5 w-3.5 text-mir-text3 transition-transform duration-200 ${
                                         isMenuOpen ? 'rotate-180' : ''
                                     }`}
                                 />
                             </button>
 
                             {isMenuOpen && (
-                                <div className="absolute right-0 top-[calc(100%+12px)] min-w-[220px] overflow-hidden rounded-2xl border border-white/10 bg-[#0b1021]/95 shadow-[0_30px_90px_-40px_rgba(80,56,204,0.85)] backdrop-blur-2xl">
-                                    <div className="border-b border-white/5 px-4 py-3">
-                                        <p className="text-sm font-semibold text-white">
+                                <div className="absolute right-0 top-[calc(100%+10px)] min-w-[210px] overflow-hidden rounded-xl border border-mir-line bg-mir-surface shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
+                                    <div className="border-b border-mir-line px-4 py-3">
+                                        <p className="text-sm font-bold text-mir-text">
                                             {userProfile?.display_name ||
                                                 userProfile?.username ||
                                                 'Explorador'}
                                         </p>
-                                        <p className="text-xs uppercase tracking-[0.3em] text-white/35">
-                                            score{' '}
-                                            {userProfile?.rating
-                                                ? userProfile.rating
-                                                : '—'}
-                                        </p>
+                                        {userProfile?.username && (
+                                            <p className="font-mono text-[11px] text-mir-text3">
+                                                @{userProfile.username}
+                                            </p>
+                                        )}
                                     </div>
-                                    <div className="flex flex-col p-2 text-sm text-white/70">
+                                    <div className="flex flex-col p-1.5 text-sm text-mir-text2">
                                         <Link
                                             href={`/user/${userProfile?.username || userProfile?.id}`}
-                                            className="flex items-center gap-2 rounded-xl px-3 py-2 transition-colors duration-200 hover:bg-white/10"
+                                            className="flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors hover:bg-mir-fill2 hover:text-mir-text"
                                             onClick={() => setIsMenuOpen(false)}
                                         >
+                                            <UserRound className="h-4 w-4" />
                                             Perfil
                                         </Link>
                                         <Link
                                             href="/settings"
-                                            className="flex items-center gap-2 rounded-xl px-3 py-2 transition-colors duration-200 hover:bg-white/10"
+                                            className="flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors hover:bg-mir-fill2 hover:text-mir-text"
                                             onClick={() => setIsMenuOpen(false)}
                                         >
+                                            <Settings className="h-4 w-4" />
                                             Configurações
                                         </Link>
                                         <Link
                                             href="/logout"
-                                            className="flex items-center gap-2 rounded-xl px-3 py-2 text-red-200 transition-colors duration-200 hover:bg-red-300/10"
+                                            className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-red-300/80 transition-colors hover:bg-red-400/10 hover:text-red-300"
                                             onClick={() => setIsMenuOpen(false)}
                                         >
                                             <LogOut className="h-4 w-4" />
@@ -155,17 +220,16 @@ export default function Header({ userProfile }: HeaderProps) {
                                 </div>
                             )}
                         </div>
-                    )}
-                    {!userProfile && (
+                    ) : (
                         <Link
                             href="/login"
-                            className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-white/70 transition-colors duration-200 hover:bg-white/10"
+                            className="inline-flex items-center rounded-lg bg-mir-acc px-4 py-2 text-[13px] font-semibold text-mir-on-acc transition hover:brightness-110"
                         >
-                            entrar
+                            Entrar
                         </Link>
                     )}
                 </div>
-            </div>
+            </nav>
         </header>
     )
 }

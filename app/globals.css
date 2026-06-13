@@ -253,3 +253,602 @@
   box-shadow: inset 0 0 44px rgba(0, 0, 0, 0.34);
   pointer-events: none;
 }
+.mir-cover-ini {
+  position: absolute;
+  left: 10px;
+  bottom: 2px;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: rgba(255, 255, 255, 0.07);
+  line-height: 0.8;
+  user-select: none;
+}
+
+/* ======================================================
+   Mirsui — Landing (deslogado) · direção fotográfica imersiva
+   Portado de referencia/Mirsui - Landing.html, escopado em .mir-landing
+   ====================================================== */
+.mir-landing {
+  --bg: #13110f;
+  --surface: #1a1714;
+  --line: rgba(236, 232, 224, 0.085);
+  --line2: rgba(236, 232, 224, 0.15);
+  --fill1: rgba(236, 232, 224, 0.035);
+  --fill2: rgba(236, 232, 224, 0.07);
+  --text: #ece8e0;
+  --text2: #9b958b;
+  --text3: #6a655c;
+  --acc: #84b86a;
+  --acc-soft: rgba(132, 184, 106, 0.14);
+  --on-acc: #0e1408;
+  --mono: var(--font-jetbrains), ui-monospace, monospace;
+  --wrap: 1180px;
+  --pad: clamp(20px, 5vw, 56px);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+.mir-landing ::selection {
+  background: var(--acc);
+  color: var(--on-acc);
+}
+.mir-landing .wrap {
+  width: 100%;
+  max-width: var(--wrap);
+  margin: 0 auto;
+  padding-left: var(--pad);
+  padding-right: var(--pad);
+}
+
+/* ---------- Buttons ---------- */
+.mir-landing .b {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.14s, border-color 0.14s, color 0.14s, transform 0.1s,
+    filter 0.14s;
+}
+.mir-landing .b:active {
+  transform: translateY(1px);
+}
+.mir-landing .b-acc {
+  background: var(--acc);
+  color: var(--on-acc);
+}
+.mir-landing .b-acc:hover {
+  filter: brightness(1.07);
+}
+.mir-landing .b-light {
+  background: transparent;
+  color: var(--text);
+  border-color: rgba(236, 232, 224, 0.3);
+}
+.mir-landing .b-light:hover {
+  background: rgba(236, 232, 224, 0.1);
+  border-color: rgba(236, 232, 224, 0.5);
+}
+.mir-landing .b-solid {
+  background: var(--fill2);
+  color: var(--text);
+  border-color: var(--line2);
+}
+.mir-landing .b-solid:hover {
+  background: var(--fill1);
+  border-color: var(--text3);
+}
+
+.mir-landing .early-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--acc);
+  box-shadow: 0 0 0 3px var(--acc-soft);
+  flex: none;
+}
+.mir-landing .eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.mir-landing .live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--acc);
+  flex: none;
+  box-shadow: 0 0 0 0 var(--acc-soft);
+  animation: mir-pulse 2s infinite;
+}
+@keyframes mir-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(132, 184, 106, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(132, 184, 106, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(132, 184, 106, 0);
+  }
+}
+
+/* ---------- Hero ---------- */
+.mir-landing .hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.mir-landing .hero-photo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #0c0b0a url('/assets/hero-art.png') 58% 32% / cover no-repeat;
+  transform: scale(1.04);
+  animation: mir-slowzoom 26s ease-in-out infinite alternate;
+}
+@keyframes mir-slowzoom {
+  from {
+    transform: scale(1.04);
+  }
+  to {
+    transform: scale(1.12);
+  }
+}
+.mir-landing .hero-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+      180deg,
+      rgba(12, 11, 10, 0.66) 0%,
+      rgba(12, 11, 10, 0.12) 30%,
+      rgba(12, 11, 10, 0.42) 62%,
+      rgba(12, 11, 10, 0.97) 100%
+    ),
+    radial-gradient(125% 95% at 14% 86%, rgba(12, 11, 10, 0.78), transparent 58%);
+}
+.mir-landing .hero-grain {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.mir-landing .lp-nav,
+.mir-landing .hero-inner,
+.mir-landing .ticker {
+  position: relative;
+  z-index: 2;
+}
+
+/* nav flutuante sobre a foto */
+.mir-landing .lp-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+.mir-landing .lp-nav .nav {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  height: 76px;
+}
+.mir-landing .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.mir-landing .lp-nav .links {
+  display: flex;
+  gap: 24px;
+  margin-left: 14px;
+}
+.mir-landing .lp-nav .links a {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: rgba(236, 232, 224, 0.72);
+  transition: color 0.14s;
+}
+.mir-landing .lp-nav .links a:hover {
+  color: var(--text);
+}
+.mir-landing .lp-nav .nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mir-landing .lp-nav .b {
+  padding: 9px 17px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+/* conteúdo do hero, ancorado embaixo à esquerda */
+.mir-landing .hero-inner {
+  margin-top: auto;
+  padding-top: 120px;
+  padding-bottom: clamp(34px, 4.5vw, 54px);
+}
+.mir-landing .hero-kick {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(236, 232, 224, 0.78);
+}
+.mir-landing .hero h1 {
+  margin: 20px 0 0;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+  font-size: clamp(46px, 9.2vw, 128px);
+  max-width: 13ch;
+  text-wrap: balance;
+  text-shadow: 0 2px 40px rgba(0, 0, 0, 0.4);
+}
+.mir-landing .hero-sub {
+  margin: 24px 0 0;
+  font-size: clamp(15.5px, 1.7vw, 19px);
+  line-height: 1.5;
+  color: rgba(236, 232, 224, 0.82);
+  max-width: 40ch;
+}
+.mir-landing .hero-cta {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+.mir-landing .hero-cta .b {
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+/* ticker ao vivo — base do hero */
+.mir-landing .ticker {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  border-top: 1px solid rgba(236, 232, 224, 0.13);
+  background: rgba(12, 11, 10, 0.34);
+  backdrop-filter: blur(10px);
+}
+.mir-landing .ticker-lead {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 20px 0 var(--pad);
+  background: linear-gradient(90deg, rgba(12, 11, 10, 0.92) 70%, transparent);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text);
+  white-space: nowrap;
+}
+.mir-landing .ticker-track {
+  display: flex;
+  width: max-content;
+  animation: mir-ticker 44s linear infinite;
+}
+.mir-landing .ticker:hover .ticker-track {
+  animation-play-state: paused;
+}
+.mir-landing .ti {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 14px 28px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--text2);
+  border-right: 1px solid rgba(236, 232, 224, 0.08);
+  white-space: nowrap;
+}
+.mir-landing .ti b {
+  color: var(--text);
+  font-weight: 600;
+}
+.mir-landing .ti .tk {
+  color: var(--acc);
+}
+.mir-landing .ti .ago {
+  color: var(--text3);
+}
+@keyframes mir-ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------- Seções ---------- */
+.mir-landing .sec-head {
+  max-width: 60ch;
+}
+.mir-landing .sec-head .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.mir-landing .sec-head h2 {
+  margin: 13px 0 0;
+  font-size: clamp(27px, 3.7vw, 44px);
+  font-weight: 800;
+  letter-spacing: -0.034em;
+  line-height: 1.02;
+}
+.mir-landing .sec-head .sh-sub {
+  margin: 14px 0 0;
+  color: var(--text2);
+  font-size: 15.5px;
+  line-height: 1.55;
+  max-width: 50ch;
+}
+
+/* Wall horizontal (subindo na cena) */
+.mir-landing .wall-sec {
+  padding-top: clamp(54px, 7vw, 92px);
+  padding-bottom: clamp(54px, 7vw, 92px);
+}
+.mir-landing .wall-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.mir-landing .wall-head .b {
+  padding: 11px 18px;
+  border-radius: 10px;
+  font-size: 13.5px;
+}
+.mir-landing .hwall {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  margin-top: clamp(28px, 3.5vw, 40px);
+  padding-bottom: 16px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.mir-landing .hwall::-webkit-scrollbar {
+  display: none;
+}
+.mir-landing .poster {
+  flex: 0 0 clamp(170px, 21vw, 224px);
+  scroll-snap-align: start;
+  display: block;
+}
+.mir-landing .poster .cover-wrap {
+  position: relative;
+}
+.mir-landing .poster .cover-art {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 13px;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.mir-landing .poster .cover-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mir-landing .poster:hover .cover-art {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.46);
+}
+.mir-landing .poster .mir-cover-ini {
+  font-size: 50px;
+}
+.mir-landing .rank-chip {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text);
+  background: rgba(15, 13, 11, 0.62);
+  backdrop-filter: blur(6px);
+  padding: 4px 9px;
+  border-radius: 8px;
+  letter-spacing: 0.04em;
+}
+.mir-landing .ear-tab {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--on-acc);
+  background: var(--acc);
+  padding: 4px 8px;
+  border-radius: 7px;
+  font-weight: 600;
+}
+.mir-landing .poster .play {
+  position: absolute;
+  right: 11px;
+  bottom: 11px;
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--acc);
+  color: var(--on-acc);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transform: translateY(8px) scale(0.92);
+  transition: opacity 0.17s, transform 0.17s;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+}
+.mir-landing .poster:hover .play {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.mir-landing .poster .ptt {
+  margin: 12px 0 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mir-landing .poster .par {
+  font-size: 12.5px;
+  color: var(--text2);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mir-landing .poster .padds {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 7px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--acc);
+}
+
+/* Manifesto */
+.mir-landing .manifesto {
+  border-top: 1px solid var(--line);
+  padding: clamp(70px, 10vw, 128px) 0;
+}
+.mir-landing .manifesto p {
+  margin: 0;
+  font-size: clamp(28px, 4.4vw, 54px);
+  font-weight: 700;
+  letter-spacing: -0.034em;
+  line-height: 1.14;
+  max-width: 21ch;
+  text-wrap: balance;
+}
+.mir-landing .manifesto em {
+  font-style: normal;
+  color: var(--acc);
+}
+.mir-landing .manifesto .sig {
+  margin-top: 30px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text3);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* CTA final */
+.mir-landing .endcta {
+  position: relative;
+  border-top: 1px solid var(--line);
+  padding: clamp(64px, 9vw, 116px) 0;
+  text-align: center;
+  overflow: hidden;
+}
+.mir-landing .endcta::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  width: 520px;
+  height: 320px;
+  background: radial-gradient(closest-side, var(--acc-soft), transparent 70%);
+  filter: blur(30px);
+  pointer-events: none;
+}
+.mir-landing .endcta > * {
+  position: relative;
+}
+.mir-landing .endcta h2 {
+  margin: 0 auto;
+  font-size: clamp(30px, 4.6vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.036em;
+  line-height: 1;
+  max-width: 16ch;
+}
+.mir-landing .endcta p {
+  margin: 18px auto 0;
+  color: var(--text2);
+  font-size: 16px;
+  line-height: 1.55;
+  max-width: 42ch;
+}
+.mir-landing .endcta .b {
+  padding: 15px 28px;
+  border-radius: 13px;
+  font-size: 15.5px;
+  margin-top: 30px;
+}
+.mir-landing .endcta .fine {
+  margin-top: 18px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mir-landing .hero-photo,
+  .mir-landing .ticker-track,
+  .mir-landing .live-dot {
+    animation: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .mir-landing .lp-nav .links {
+    display: none;
+  }
+  .mir-landing .lp-nav .b-light {
+    display: none;
+  }
+  .mir-landing .ticker-lead {
+    display: none;
+  }
+}

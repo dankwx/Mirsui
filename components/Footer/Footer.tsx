@@ -1,132 +1,73 @@
 import Link from 'next/link'
-import { Music } from 'lucide-react'
+
+function Glyph({ size = 20 }: { size?: number }) {
+    return (
+        <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
+            <circle
+                cx="12"
+                cy="12"
+                r="9.4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+            />
+            <circle cx="12" cy="12" r="3" fill="#84b86a" />
+        </svg>
+    )
+}
+
+const cols = [
+    { h: 'Plataforma', links: ['A cena', 'Descobrir', 'Acervo'] },
+    { h: 'Mirsui', links: ['Sobre', 'Privacidade', 'Contato'] },
+]
 
 export default function Footer() {
     return (
-        <footer className="border-t border-slate-200 bg-white px-4 py-12">
-            <div className="mx-auto max-w-7xl">
-                <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-4">
-                    <div className="md:col-span-2">
-                        <div className="mb-4 flex items-center gap-3">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
-                                <Music className="h-4 w-4 text-white" />
-                            </div>
-                            <div>
-                                <h1 className="text-xl font-bold text-slate-800">
-                                    Mirsui
-                                </h1>
-                                <p className="text-sm text-slate-500">
-                                    Music Discovery Platform
-                                </p>
-                            </div>
+        <footer className="border-t border-mir-line bg-mir-surface py-12 text-mir-text">
+            <div className="mx-auto w-full max-w-[1180px] px-[clamp(20px,5vw,56px)]">
+                <div className="flex flex-wrap justify-between gap-12">
+                    <div className="max-w-[32ch]">
+                        <div className="flex items-center gap-2.5 text-lg font-extrabold tracking-tight text-mir-text">
+                            <Glyph size={20} /> Mirsui
                         </div>
-                        <p className="max-w-md leading-relaxed text-slate-600">
-                            Discover music before everyone else and build your
-                            reputation as a true tastemaker. Join the community
-                            that spots tomorrow&apos;s hits today.
+                        <p className="mt-3.5 text-[13px] leading-relaxed text-mir-text3">
+                            Acervo coletivo de descoberta musical. Para quem ouve
+                            primeiro e tem como provar.
                         </p>
                     </div>
 
-                    <div>
-                        <h3 className="mb-4 font-semibold text-slate-800">
-                            Platform
-                        </h3>
-                        <div className="space-y-2">
-                            <Link
-                                href="/how-it-works"
-                                className="block text-slate-600 hover:text-slate-800"
-                            >
-                                How It Works
-                            </Link>
-                            <Link
-                                href="/feed"
-                                className="block text-slate-600 hover:text-slate-800"
-                            >
-                                Discover
-                            </Link>
-                            <Link
-                                href="/#about"
-                                className="block text-slate-600 hover:text-slate-800"
-                            >
-                                About
-                            </Link>
-                            <Link
-                                href="/how-it-works"
-                                className="block text-slate-600 hover:text-slate-800"
-                            >
-                                Features
-                            </Link>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 className="mb-4 font-semibold text-slate-800">
-                            Company
-                        </h3>
-                        <div className="space-y-2">
-                            <Link
-                                href="#"
-                                className="block text-slate-600 hover:text-slate-800"
-                            >
-                                About Us
-                            </Link>
-                            <Link
-                                href="#"
-                                className="block text-slate-600 hover:text-slate-800"
-                            >
-                                Privacy
-                            </Link>
-                            <Link
-                                href="#"
-                                className="block text-slate-600 hover:text-slate-800"
-                            >
-                                Terms
-                            </Link>
-                            <Link
-                                href="#"
-                                className="block text-slate-600 hover:text-slate-800"
-                            >
-                                Contact
-                            </Link>
-                        </div>
+                    <div className="flex flex-wrap gap-[clamp(36px,6vw,72px)]">
+                        {cols.map((c) => (
+                            <div key={c.h}>
+                                <h5 className="mb-4 font-mono text-[10px] uppercase tracking-[0.16em] text-mir-text3">
+                                    {c.h}
+                                </h5>
+                                {c.links.map((l) => (
+                                    <Link
+                                        key={l}
+                                        href="#"
+                                        className="mb-2.5 block text-[13.5px] text-mir-text2 transition-colors hover:text-mir-text"
+                                    >
+                                        {l}
+                                    </Link>
+                                ))}
+                            </div>
+                        ))}
                     </div>
                 </div>
 
-                <div className="flex flex-col items-center justify-between border-t border-slate-200 pt-8 md:flex-row">
-                    <p className="text-sm text-slate-500">
-                        © 2025 Mirsui. All rights reserved.
-                    </p>
-                    <div className="mt-4 flex gap-6 md:mt-0">
-                        <Link
-                            href="#"
-                            className="text-slate-400 hover:text-slate-600"
-                        >
-                            <span className="sr-only">Twitter</span>
-                            <svg
-                                className="h-5 w-5"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
+                <div className="mt-11 flex flex-wrap items-center justify-between gap-3.5 border-t border-mir-line pt-5 font-mono text-[11.5px] text-mir-text3">
+                    <span>© 2026 Mirsui · Rio de Janeiro</span>
+                    <div className="flex gap-3.5">
+                        {['Instagram', 'X', 'GitHub'].map((s) => (
+                            <Link
+                                key={s}
+                                href="#"
+                                className="text-mir-text3 transition-colors hover:text-mir-text"
                             >
-                                <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84" />
-                            </svg>
-                        </Link>
-                        <Link
-                            href="#"
-                            className="text-slate-400 hover:text-slate-600"
-                        >
-                            <span className="sr-only">Instagram</span>
-                            <svg
-                                className="h-5 w-5"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
-                                    clipRule="evenodd"
-                                />
-                            </svg>
-                        </Link>
+                                {s}
+                            </Link>
+                        ))}
                     </div>
                 </div>
             </div>

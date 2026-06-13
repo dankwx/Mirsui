@@ -1,81 +1,93 @@
 // components/RecentClaims/RecentClaims.tsx
 import Link from 'next/link'
-import { Music, Sparkles } from 'lucide-react'
 import { RecentClaim } from '@/utils/recentClaimsService'
+import { formatTimestamp } from '@/utils/feedHelpers'
 
 interface RecentClaimsProps {
     claims: RecentClaim[]
 }
 
-export default function RecentClaims({ claims }: RecentClaimsProps) {
-    if (claims.length === 0) {
-        return (
-            <section className="space-y-5 rounded-[24px] border border-white/10 bg-white/[0.04] px-6 py-9 text-center text-sm text-white/60 shadow-[0_18px_42px_rgba(8,4,20,0.32)] backdrop-blur-2xl">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/[0.05]">
-                    <Music className="h-6 w-6 text-purple-300" />
-                </div>
-                <div className="space-y-2">
-                    <h3 className="text-lg font-semibold text-white">Nada reivindicado ainda</h3>
-                    <p>Assim que a comunidade cravar novas apostas, elas aparecem aqui.</p>
-                </div>
-                <Link
-                    href="/claimtrack"
-                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-gradient-to-r from-purple-500 to-pink-500 px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-[0_12px_35px_rgba(137,97,255,0.35)] hover:from-purple-600 hover:to-pink-600"
-                >
-                    <Sparkles className="h-4 w-4" />
-                    fazer primeira claim
-                </Link>
-            </section>
-        )
-    }
+const TONES = [
+    '#241f1a', '#1c2320', '#27201f', '#1b2026', '#231d27', '#202420',
+    '#2a201b', '#1a2326', '#25211c', '#1d2126', '#26211f', '#1f231d',
+]
+function tone(seed: string) {
+    let h = 0
+    for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0
+    return TONES[h % TONES.length]
+}
+function initials(name: string) {
+    return (name || '')
+        .split(' ')
+        .map((n) => n[0])
+        .filter(Boolean)
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+}
 
+export default function RecentClaims({ claims }: RecentClaimsProps) {
     return (
-        <section className="space-y-5 rounded-[24px] border border-white/10 bg-white/[0.04] p-6 text-white shadow-[0_18px_42px_rgba(8,4,20,0.32)] backdrop-blur-2xl">
-            <header className="flex flex-col gap-2">
-                <div className="flex items-center justify-between gap-3">
-                    <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.3em] text-white/50">
-                        <Music className="h-4 w-4 text-purple-300" />
-                        Reivindicações recentes
-                    </h2>
-                    <Link
-                        href="/claimtrack"
-                        className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/70 transition hover:border-white/25 hover:text-white"
-                    >
-                        ver tudo
-                    </Link>
-                </div>
-                <p className="text-xs text-white/55">
-                    As últimas faixas capturadas pela comunidade antes de virarem tendência.
+        <section className="rounded-[14px] border border-mir-line bg-mir-surface p-5">
+            <div className="mb-1 flex items-baseline justify-between gap-2.5">
+                <span className="text-[12.5px] font-bold uppercase tracking-[0.08em] text-mir-text2">
+                    Subindo na cena
+                </span>
+                <span className="flex-none font-mono text-[10px] uppercase tracking-[0.1em] text-mir-text3">
+                    semana
+                </span>
+            </div>
+            <p className="mb-3.5 mt-1.5 text-[12.5px] leading-[1.5] text-mir-text3">
+                Ainda dá tempo de salvar antes de virar tendência.
+            </p>
+
+            {claims.length === 0 ? (
+                <p className="py-6 text-center font-mono text-[12px] text-mir-text3">
+                    Nada reivindicado ainda.
                 </p>
-            </header>
-            <ul className="space-y-3.5">
-                {claims.map((claim) => (
-                    <li key={claim.id}>
-                        <Link
-                            href={`/track/${claim.track_url?.split('/').pop() || claim.track_title}`}
-                            className="group flex items-center gap-4 rounded-2xl border border-white/5 bg-white/[0.03] p-3 transition hover:border-white/20 hover:bg-white/[0.08]"
-                        >
-                            {claim.track_thumbnail ? (
-                                <img
-                                    src={claim.track_thumbnail}
-                                    alt={claim.track_title}
-                                    className="h-12 w-12 rounded-xl object-cover shadow-[0_10px_24px_rgba(10,6,24,0.4)]"
-                                />
-                            ) : (
-                                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] text-white/60">
-                                    <Sparkles className="h-5 w-5" />
+            ) : (
+                <ol className="flex flex-col">
+                    {claims.map((claim, index) => (
+                        <li key={claim.id}>
+                            <Link
+                                href={`/track/${claim.track_url?.split('/').pop() || claim.track_title}`}
+                                className="group grid grid-cols-[18px_40px_1fr_auto] items-center gap-3 border-b border-mir-line py-[9px] first:pt-0 last:border-b-0 last:pb-0"
+                            >
+                                <span className="font-mono text-[12px] tabular-nums text-mir-text3">
+                                    {String(index + 1).padStart(2, '0')}
+                                </span>
+                                {claim.track_thumbnail ? (
+                                    <img
+                                        src={claim.track_thumbnail}
+                                        alt={claim.track_title}
+                                        className="h-10 w-10 rounded-md object-cover"
+                                    />
+                                ) : (
+                                    <div
+                                        className="mir-cover h-10 w-10 rounded-md"
+                                        style={{ ['--tone' as string]: tone(claim.artist_name) }}
+                                    >
+                                        <span className="absolute bottom-0.5 left-2.5 select-none text-[21px] font-extrabold leading-[0.8] tracking-[-0.05em] text-white/[0.07]">
+                                            {initials(claim.artist_name)}
+                                        </span>
+                                    </div>
+                                )}
+                                <div className="flex min-w-0 flex-col leading-[1.3]">
+                                    <span className="truncate text-[13px] font-semibold text-mir-text transition-colors group-hover:text-mir-acc">
+                                        {claim.track_title}
+                                    </span>
+                                    <span className="truncate text-[11.5px] text-mir-text3">
+                                        {claim.artist_name}
+                                    </span>
                                 </div>
-                            )}
-                            <div className="min-w-0 flex-1">
-                                <h3 className="truncate text-sm font-semibold text-white transition group-hover:text-purple-200">
-                                    {claim.track_title}
-                                </h3>
-                                <p className="truncate text-xs text-white/50">{claim.artist_name}</p>
-                            </div>
-                        </Link>
-                    </li>
-                ))}
-            </ul>
+                                <span className="font-mono text-[11px] text-mir-text3">
+                                    {formatTimestamp(claim.claimedat)}
+                                </span>
+                            </Link>
+                        </li>
+                    ))}
+                </ol>
+            )}
         </section>
     )
 }

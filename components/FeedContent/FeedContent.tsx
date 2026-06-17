@@ -6,7 +6,6 @@ import { Loader2, Play, Plus, Check } from 'lucide-react'
 import { FeedPostWithInteractions } from '@/utils/feedService.backend'
 import { RecentClaim } from '@/utils/feedService.backend'
 import { formatTimestamp } from '@/utils/feedHelpers'
-import { useAuth } from '@/components/AuthProvider/AuthProvider'
 import RecentClaims from '@/components/RecentClaims/RecentClaims'
 import { createClient } from '@/utils/supabase/client'
 import { toggleTrackLike } from '@/utils/trackActions'
@@ -14,6 +13,7 @@ import { toggleTrackLike } from '@/utils/trackActions'
 interface FeedContentProps {
     initialPosts: (FeedPostWithInteractions & { isLiked: boolean })[]
     recentClaims: RecentClaim[]
+    currentUserId: string | null
 }
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'
@@ -89,17 +89,19 @@ function Cover({
 /* ---------- Item do feed (estilo activity editorial) ---------- */
 function FeedItem({
     post,
+    currentUserId,
 }: {
     post: FeedPostWithInteractions & { isLiked: boolean }
+    currentUserId: string | null
 }) {
-    const { user, isAuthenticated } = useAuth()
     const [saved, setSaved] = useState(post.isLiked)
     const [count, setCount] = useState(post.likes_count)
     const [busy, setBusy] = useState(false)
 
     const early = typeof post.position === 'number' && post.position <= 10
     const who = post.display_name || post.username
-    const isOwnClaim = !!user && user.id === post.user_id
+    const isAuthenticated = !!currentUserId
+    const isOwnClaim = !!currentUserId && currentUserId === post.user_id
 
     const toggleSave = async () => {
         if (!isAuthenticated || busy) return
@@ -212,7 +214,7 @@ function FeedItem({
 }
 
 /* ---------- App ---------- */
-export default function FeedContent({ initialPosts, recentClaims }: FeedContentProps) {
+export default function FeedContent({ initialPosts, recentClaims, currentUserId }: FeedContentProps) {
     const [posts, setPosts] = useState(initialPosts)
     const [loading, setLoading] = useState(false)
     const [hasMore, setHasMore] = useState(initialPosts.length === 5)
@@ -319,7 +321,7 @@ export default function FeedContent({ initialPosts, recentClaims }: FeedContentP
                     {feed.length > 0 ? (
                         <>
                             {feed.map((post) => (
-                                <FeedItem key={post.id} post={post} />
+                                <FeedItem key={post.id} post={post} currentUserId={currentUserId} />
                             ))}
 
                             {tab === 'cena' && hasMore && (

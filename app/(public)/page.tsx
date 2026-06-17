@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import MirsuiLogo from '@/components/MirsuiLogo/MirsuiLogo'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { getTrendingTracks, getRecentActivity } from '@/utils/homepageService'
@@ -14,19 +15,7 @@ export const metadata: Metadata = {
 
 /* ---------- primitivos visuais ---------- */
 function Glyph({ size = 22 }: { size?: number }) {
-    return (
-        <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
-            <circle
-                cx="12"
-                cy="12"
-                r="9.4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-            />
-            <circle cx="12" cy="12" r="3" fill="var(--acc)" />
-        </svg>
-    )
+    return <MirsuiLogo size={size} />
 }
 
 function ArrowIcon({ size = 16 }: { size?: number }) {

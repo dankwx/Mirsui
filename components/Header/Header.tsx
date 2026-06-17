@@ -1,6 +1,7 @@
 "use client"
 
 import SearchWithResults from '../SearchWithResults/SearchWithResults'
+import MirsuiLogo from '../MirsuiLogo/MirsuiLogo'
 import { ChevronDown, LogOut, Settings, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
@@ -55,22 +56,6 @@ const navLinks: NavLink[] = [
     },
 ]
 
-function Glyph({ size = 22 }: { size?: number }) {
-    return (
-        <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
-            <circle
-                cx="12"
-                cy="12"
-                r="9.4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-            />
-            <circle cx="12" cy="12" r="3" fill="#84b86a" />
-        </svg>
-    )
-}
-
 export default function Header({ userProfile }: HeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const profileRef = useRef<HTMLDivElement>(null)
@@ -119,7 +104,7 @@ export default function Header({ userProfile }: HeaderProps) {
                     href="/"
                     className="flex items-center gap-2.5 text-lg font-extrabold tracking-tight text-mir-text"
                 >
-                    <Glyph />
+                    <MirsuiLogo size={34} />
                     Mirsui
                 </Link>
 

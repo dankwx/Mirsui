@@ -5,6 +5,8 @@ import SongsList from '@/components/Profile/SongsList'
 import { isEarly } from '@/components/Profile/early'
 import { fetchUserData, fetchAuthData } from '@/utils/profileService'
 import { fetchSongs } from '@/utils/fetchSongs'
+import { fetchProfileComments } from '@/utils/profileCommentsService'
+import Recados from '@/components/Profile/Recados/Recados'
 import { createClient } from '@/utils/supabase/server'
 import type { Metadata } from 'next'
 
@@ -55,12 +57,14 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
         ratingResult,
         followersResult,
         followingResult,
+        recados,
     ] = await Promise.all([
         fetchSongs(userData.id, currentUserId),
         supabase.rpc('get_user_achievements', { user_uuid: userData.id }),
         supabase.rpc('get_user_rating', { user_uuid: userData.id }),
         supabase.rpc('get_user_followers', { user_uuid: userData.id }),
         supabase.rpc('get_user_following', { user_uuid: userData.id }),
+        fetchProfileComments(userData.id),
     ])
 
     const songs = Array.isArray(rawSongs) ? rawSongs : []
@@ -100,6 +104,15 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
                     username: profileData.username,
                     avatar_url: profileData.avatar_url,
                 }}
+            />
+
+            <div className="h-px bg-mir-line" />
+
+            <Recados
+                profileId={userData.id}
+                currentUserId={currentUserId}
+                initialComments={recados.comments}
+                total={recados.total}
             />
         </div>
     )

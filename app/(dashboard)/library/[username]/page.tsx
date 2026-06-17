@@ -5,9 +5,9 @@ import LibraryHeader from '@/components/Library/LibraryHeader'
 import LibraryTabs from '@/components/Library/LibraryTabs'
 import { fetchUserData, fetchAuthData } from '@/utils/profileService'
 import { fetchSongs } from '@/utils/fetchSongs'
-import { 
-    fetchUserPlaylistsWithTracks, 
-    calculateLibraryStats 
+import {
+    fetchUserPlaylistsWithTracks,
+    calculateLibraryStats
 } from '@/utils/libraryService'
 import type { Metadata } from 'next'
 

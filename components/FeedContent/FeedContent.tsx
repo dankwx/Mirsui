@@ -9,6 +9,7 @@ import { formatTimestamp } from '@/utils/feedHelpers'
 import { useAuth } from '@/components/AuthProvider/AuthProvider'
 import RecentClaims from '@/components/RecentClaims/RecentClaims'
 import { createClient } from '@/utils/supabase/client'
+import { toggleTrackLike } from '@/utils/trackActions'
 
 interface FeedContentProps {
     initialPosts: (FeedPostWithInteractions & { isLiked: boolean })[]
@@ -107,10 +108,8 @@ function FeedItem({
         setSaved(next)
         setCount((c) => c + (next ? 1 : -1))
         try {
-            const res = await fetch(`/api/tracks/${post.id}/like`, {
-                method: next ? 'POST' : 'DELETE',
-            })
-            if (!res.ok) {
+            const result = await toggleTrackLike(post.id, next)
+            if (!result.success) {
                 // reverte em caso de erro
                 setSaved(!next)
                 setCount((c) => c + (next ? -1 : 1))

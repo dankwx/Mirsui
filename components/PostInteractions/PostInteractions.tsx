@@ -1,24 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Heart, MessageCircle, Send, Trash2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from '@/components/AuthProvider/AuthProvider'
-
-interface TrackComment {
-  id: number
-  track_id: number
-  user_id: string
-  comment_text: string
-  created_at: string
-  updated_at: string
-  username: string
-  display_name: string | null
-  avatar_url: string | null
-}
+import { createClient } from '@/utils/supabase/client'
+import { toggleTrackLike, addTrackComment, deleteTrackComment } from '@/utils/trackActions'
+import {
+  TRACK_COMMENT_SELECT,
+  TRACK_COMMENTS_PAGE_SIZE,
+  flattenTrackComment,
+  type TrackComment,
+} from '@/utils/trackComments'
 
 interface PostInteractionsProps {
   trackId: number
@@ -46,51 +42,18 @@ export default function PostInteractions({
   const { user, isLoading: isLoadingUser, isAuthenticated } = useAuth()
 
   const handleLike = async () => {
-    if (!isAuthenticated) {
-      console.log('❌ Usuário não está logado')
-      return
-    }
+    if (!isAuthenticated) return
 
-    console.log('👆 Processando like...', { trackId, isLiked })
+    const next = !isLiked
+    // atualização otimista
+    setIsLiked(next)
+    setLikesCount(prev => prev + (next ? 1 : -1))
 
-    try {
-      if (isLiked) {
-        // Descurtir
-        console.log('📤 Removendo like...')
-        const response = await fetch(`/api/tracks/${trackId}/like`, {
-          method: 'DELETE',
-        })
-        
-        console.log('📥 Resposta DELETE:', response.status)
-        
-        if (response.ok) {
-          setIsLiked(false)
-          setLikesCount(prev => prev - 1)
-          console.log('✅ Like removido com sucesso')
-        } else {
-          const error = await response.json()
-          console.error('❌ Erro ao remover like:', error)
-        }
-      } else {
-        // Curtir
-        console.log('📤 Adicionando like...')
-        const response = await fetch(`/api/tracks/${trackId}/like`, {
-          method: 'POST',
-        })
-        
-        console.log('📥 Resposta POST:', response.status)
-        
-        if (response.ok) {
-          setIsLiked(true)
-          setLikesCount(prev => prev + 1)
-          console.log('✅ Like adicionado com sucesso')
-        } else {
-          const error = await response.json()
-          console.error('❌ Erro ao adicionar like:', error)
-        }
-      }
-    } catch (error) {
-      console.error('❌ Erro ao processar like:', error)
+    const result = await toggleTrackLike(trackId, next)
+    if (!result.success) {
+      // reverte em caso de erro
+      setIsLiked(!next)
+      setLikesCount(prev => prev + (next ? -1 : 1))
     }
   }
 
@@ -102,21 +65,18 @@ export default function PostInteractions({
 
     setIsLoadingComments(true)
     try {
-      const url = `/api/tracks/${trackId}/comments?limit=10&offset=0`
-      console.log('Fazendo request para:', url)
-      
-      const response = await fetch(url)
-      console.log('Response status:', response.status)
-      
-      if (response.ok) {
-        const data = await response.json()
-        console.log('Comentários recebidos:', data)
-        setComments(data)
-        setShowComments(true)
-      } else {
-        const errorText = await response.text()
-        console.error('Erro na resposta:', response.status, errorText)
-      }
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('track_comments')
+        .select(TRACK_COMMENT_SELECT)
+        .eq('track_id', trackId)
+        .order('created_at', { ascending: false })
+        .range(0, TRACK_COMMENTS_PAGE_SIZE - 1)
+
+      if (error) throw error
+
+      setComments((data ?? []).map(flattenTrackComment))
+      setShowComments(true)
     } catch (error) {
       console.error('Erro ao carregar comentários:', error)
     } finally {
@@ -125,59 +85,33 @@ export default function PostInteractions({
   }
 
   const handleSubmitComment = async () => {
-    if (!user) {
-      console.log('❌ Usuário não está logado')
-      return
-    }
-    
-    if (!newComment.trim()) {
-      console.log('❌ Comentário vazio')
-      return
-    }
-
-    console.log('💬 Enviando comentário...', { trackId, comment: newComment.trim() })
+    if (!user || !newComment.trim() || isSubmittingComment) return
 
     setIsSubmittingComment(true)
     try {
-      const response = await fetch(`/api/tracks/${trackId}/comments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ comment_text: newComment.trim() }),
-      })
-
-      console.log('📥 Resposta POST comentário:', response.status)
-
-      if (response.ok) {
-        const newCommentData = await response.json()
-        console.log('✅ Comentário criado:', newCommentData)
-        setComments(prev => [newCommentData, ...prev])
+      const result = await addTrackComment(trackId, newComment.trim())
+      if (result.success) {
+        setComments(prev => [result.data, ...prev])
         setCommentsCount(prev => prev + 1)
         setNewComment('')
       } else {
-        const error = await response.json()
-        console.error('❌ Erro ao criar comentário:', error)
+        console.error('Erro ao criar comentário:', result.message)
       }
-    } catch (error) {
-      console.error('❌ Erro ao enviar comentário:', error)
     } finally {
       setIsSubmittingComment(false)
     }
   }
 
   const handleDeleteComment = async (commentId: number) => {
-    try {
-      const response = await fetch(`/api/comments/${commentId}`, {
-        method: 'DELETE',
-      })
+    const snapshot = comments
+    setComments(prev => prev.filter(c => c.id !== commentId))
+    setCommentsCount(prev => prev - 1)
 
-      if (response.ok) {
-        setComments(prev => prev.filter(c => c.id !== commentId))
-        setCommentsCount(prev => prev - 1)
-      }
-    } catch (error) {
-      console.error('Erro ao deletar comentário:', error)
+    const result = await deleteTrackComment(commentId)
+    if (!result.success) {
+      setComments(snapshot)
+      setCommentsCount(prev => prev + 1)
+      console.error('Erro ao deletar comentário:', result.message)
     }
   }
 

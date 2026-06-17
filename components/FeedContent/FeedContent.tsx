@@ -92,13 +92,14 @@ function FeedItem({
 }: {
     post: FeedPostWithInteractions & { isLiked: boolean }
 }) {
-    const { isAuthenticated } = useAuth()
+    const { user, isAuthenticated } = useAuth()
     const [saved, setSaved] = useState(post.isLiked)
     const [count, setCount] = useState(post.likes_count)
     const [busy, setBusy] = useState(false)
 
     const early = typeof post.position === 'number' && post.position <= 10
     const who = post.display_name || post.username
+    const isOwnClaim = !!user && user.id === post.user_id
 
     const toggleSave = async () => {
         if (!isAuthenticated || busy) return
@@ -173,19 +174,29 @@ function FeedItem({
                     <span className="font-mono text-[11px] text-mir-text3">{count} também têm</span>
 
                     <div className="ml-auto flex gap-2">
-                        <button
-                            onClick={toggleSave}
-                            disabled={busy || !isAuthenticated}
-                            title={!isAuthenticated ? 'Entre para salvar' : ''}
-                            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-lg px-3.5 py-[7px] text-[12.5px] font-semibold transition active:translate-y-px disabled:opacity-60 ${
-                                saved
-                                    ? 'border border-mir-line2 bg-transparent text-mir-text2 hover:border-mir-text3 hover:bg-mir-fill1 hover:text-mir-text'
-                                    : 'bg-mir-acc text-mir-on-acc hover:brightness-[1.07]'
-                            }`}
-                        >
-                            {saved ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-                            {saved ? 'Salva' : 'Salvar'}
-                        </button>
+                        {isOwnClaim ? (
+                            <span
+                                title="Esta faixa é sua"
+                                className="inline-flex cursor-default items-center gap-2 whitespace-nowrap rounded-lg border border-mir-line2 px-3.5 py-[7px] text-[12.5px] font-semibold text-mir-text3"
+                            >
+                                <Check className="h-3.5 w-3.5" />
+                                Salva
+                            </span>
+                        ) : (
+                            <button
+                                onClick={toggleSave}
+                                disabled={busy || !isAuthenticated}
+                                title={!isAuthenticated ? 'Entre para salvar' : ''}
+                                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-lg px-3.5 py-[7px] text-[12.5px] font-semibold transition active:translate-y-px disabled:opacity-60 ${
+                                    saved
+                                        ? 'border border-mir-line2 bg-transparent text-mir-text2 hover:border-mir-text3 hover:bg-mir-fill1 hover:text-mir-text'
+                                        : 'bg-mir-acc text-mir-on-acc hover:brightness-[1.07]'
+                                }`}
+                            >
+                                {saved ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                                {saved ? 'Salva' : 'Salvar'}
+                            </button>
+                        )}
                         <Link
                             href={trackHref(post)}
                             aria-label="Abrir faixa"

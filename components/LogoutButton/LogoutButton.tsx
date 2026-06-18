@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useTransition, type ReactNode } from 'react'
-import { SignOut } from './actions'
+import { signOut } from '@/app/auth/actions'
 import { cn } from '@/lib/utils'
 
 type LogoutButtonProps = {
@@ -22,8 +22,8 @@ export default function LogoutButton({
     const handleClick = () => {
         startTransition(async () => {
             try {
-                await SignOut()
-                // O redirect já é feito pela action SignOut
+                await signOut()
+                // O redirect já é feito pela action signOut
                 onComplete?.()
             } catch (error) {
                 console.error('Erro ao encerrar sessão', error)

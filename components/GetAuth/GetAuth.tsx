@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
-import LogoutButton from '@/app/logout/LogoutButton'
+import LogoutButton from '@/components/LogoutButton/LogoutButton'
 import LoginModalButton from '../LoginModalButton/LoginModalButton'
 
 export default async function GetAuth() {

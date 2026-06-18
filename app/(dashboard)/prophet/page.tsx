@@ -6,8 +6,8 @@ export default async function ProphetRedirectPage() {
     const authData = await fetchAuthData()
     
     if (!authData?.user) {
-        // Se não estiver logado, redireciona para login
-        redirect('/login')
+        // Se não estiver logado, redireciona para a home (login via modal)
+        redirect('/')
     }
 
     // Buscar username do usuário logado

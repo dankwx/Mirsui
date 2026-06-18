@@ -43,10 +43,10 @@ export default function CheckEmailPage({ searchParams }: CheckEmailPageProps) {
                     </p>
                     <div className="flex flex-col gap-3">
                         <Button asChild className="w-full">
-                            <Link href="/login">Voltar para o login</Link>
+                            <Link href="/">Voltar para o início</Link>
                         </Button>
                         <p className="text-xs text-gray-500 text-center">
-                            Ainda sem o email? Aguarde alguns minutos ou tente reenviar a confirmação a partir da tela de login.
+                            Ainda sem o email? Aguarde alguns minutos ou tente reenviar a confirmação a partir da tela inicial.
                         </p>
                     </div>
                 </div>

@@ -195,10 +195,10 @@ export default function ResetPasswordPage() {
 
                                 <div className="text-center">
                                     <Link
-                                        href="/login"
+                                        href="/"
                                         className="text-sm text-white/60 underline decoration-white/20 underline-offset-4 transition hover:text-white"
                                     >
-                                        Voltar para o login
+                                        Voltar para o início
                                     </Link>
                                 </div>
                             </form>

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import MirsuiLogo from '@/components/MirsuiLogo/MirsuiLogo'
+import AuthModalTrigger from '@/components/AuthModalTrigger/AuthModalTrigger'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { getTrendingTracks, getRecentActivity } from '@/utils/homepageService'
@@ -136,12 +137,12 @@ export default async function HomePage() {
                             <a href="#manifesto">Sobre</a>
                         </div>
                         <div className="nav-right">
-                            <Link href="/login" className="b b-light">
+                            <AuthModalTrigger className="b b-light" mode="login">
                                 Entrar
-                            </Link>
-                            <Link href="/login" className="b b-acc">
+                            </AuthModalTrigger>
+                            <AuthModalTrigger className="b b-acc" mode="signup">
                                 Criar conta
-                            </Link>
+                            </AuthModalTrigger>
                         </div>
                     </nav>
                 </div>
@@ -156,12 +157,12 @@ export default async function HomePage() {
                         que a descoberta foi sua.
                     </p>
                     <div className="hero-cta">
-                        <Link href="/login" className="b b-acc">
+                        <AuthModalTrigger className="b b-acc" mode="signup">
                             Criar conta grátis <ArrowIcon size={16} />
-                        </Link>
-                        <Link href="/login" className="b b-light">
+                        </AuthModalTrigger>
+                        <AuthModalTrigger className="b b-light" mode="login">
                             Já tenho conta
-                        </Link>
+                        </AuthModalTrigger>
                     </div>
                 </div>
 
@@ -201,16 +202,17 @@ export default async function HomePage() {
                                     tendência.
                                 </p>
                             </div>
-                            <Link href="/login" className="b b-solid">
+                            <AuthModalTrigger className="b b-solid" mode="login">
                                 Explorar tudo <ArrowIcon size={15} />
-                            </Link>
+                            </AuthModalTrigger>
                         </div>
 
                         <div className="hwall">
                             {trendingTracks.map((t, i) => (
-                                <Link
-                                    href="/login"
+                                <AuthModalTrigger
+                                    as="div"
                                     className="poster"
+                                    mode="login"
                                     key={t.id}
                                 >
                                     <div className="cover-wrap">
@@ -253,7 +255,7 @@ export default async function HomePage() {
                                         <TrendIcon size={12} /> +{t.total_claims}{' '}
                                         essa semana
                                     </div>
-                                </Link>
+                                </AuthModalTrigger>
                             ))}
                         </div>
                     </div>
@@ -277,9 +279,9 @@ export default async function HomePage() {
                     histórico de quem ouviu antes.
                 </p>
                 <div>
-                    <Link href="/login" className="b b-acc">
+                    <AuthModalTrigger className="b b-acc" mode="signup">
                         Criar conta grátis <ArrowIcon size={16} />
-                    </Link>
+                    </AuthModalTrigger>
                 </div>
                 <div className="fine">Grátis · sem cartão · sem algoritmo</div>
             </section>

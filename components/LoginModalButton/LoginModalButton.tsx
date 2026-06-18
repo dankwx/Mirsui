@@ -13,6 +13,7 @@ export default function LoginModalButton() {
 
     return (
         <LoginModal
+            defaultMode="login"
             trigger={
                 <Button
                     type="button"

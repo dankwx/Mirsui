@@ -5,7 +5,6 @@ import { createServerClient } from '@supabase/ssr'
 // Rotas públicas que não precisam de autenticação
 const PUBLIC_ROUTES = [
   '/',
-  '/login',
   '/how-it-works',
   '/auth/confirm',
   '/auth/check-email',
@@ -78,7 +77,9 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    const redirectUrl = new URL('/login', request.url)
+    // Não há mais página de login: usuários não autenticados voltam para a
+    // home (landing), onde o login/registro acontece via modal.
+    const redirectUrl = new URL('/', request.url)
     redirectUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(redirectUrl)
   }

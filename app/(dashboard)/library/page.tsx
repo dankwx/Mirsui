@@ -12,14 +12,14 @@ export default async function LibraryRedirectPage() {
     const authData = await fetchAuthData()
     
     if (!authData?.user) {
-        redirect('/login')
+        redirect('/')
     }
 
     // Buscar username do usuário
     const username = authData.user.user_metadata?.username || authData.user.email
     
     if (!username) {
-        redirect('/login')
+        redirect('/')
     }
 
     // Redirecionar para a biblioteca do usuário

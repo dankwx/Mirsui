@@ -2,10 +2,12 @@
 
 import SearchWithResults from '../SearchWithResults/SearchWithResults'
 import MirsuiLogo from '../MirsuiLogo/MirsuiLogo'
+import LoginModal from '../ModalLogin/ModalLogin'
 import { ChevronDown, LogOut, Settings, UserRound } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { signOut } from '@/app/auth/actions'
 
 // Tipo para o perfil do usuário
 interface UserProfile {
@@ -60,6 +62,21 @@ export default function Header({ userProfile }: HeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const profileRef = useRef<HTMLDivElement>(null)
     const pathname = usePathname()
+    const router = useRouter()
+    const [isSigningOut, startSignOut] = useTransition()
+
+    const handleSignOut = () => {
+        setIsMenuOpen(false)
+        startSignOut(async () => {
+            try {
+                await signOut()
+            } catch (error) {
+                console.error('Erro ao encerrar sessão', error)
+                router.push('/')
+                router.refresh()
+            }
+        })
+    }
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -193,25 +210,31 @@ export default function Header({ userProfile }: HeaderProps) {
                                             <Settings className="h-4 w-4" />
                                             Configurações
                                         </Link>
-                                        <Link
-                                            href="/logout"
-                                            className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-red-300/80 transition-colors hover:bg-red-400/10 hover:text-red-300"
-                                            onClick={() => setIsMenuOpen(false)}
+                                        <button
+                                            type="button"
+                                            onClick={handleSignOut}
+                                            disabled={isSigningOut}
+                                            className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-red-300/80 transition-colors hover:bg-red-400/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
                                             <LogOut className="h-4 w-4" />
-                                            Sair
-                                        </Link>
+                                            {isSigningOut ? 'Saindo...' : 'Sair'}
+                                        </button>
                                     </div>
                                 </div>
                             )}
                         </div>
                     ) : (
-                        <Link
-                            href="/login"
-                            className="inline-flex items-center rounded-lg bg-mir-acc px-4 py-2 text-[13px] font-semibold text-mir-on-acc transition hover:brightness-110"
-                        >
-                            Entrar
-                        </Link>
+                        <LoginModal
+                            defaultMode="login"
+                            trigger={
+                                <button
+                                    type="button"
+                                    className="inline-flex items-center rounded-lg bg-mir-acc px-4 py-2 text-[13px] font-semibold text-mir-on-acc transition hover:brightness-110"
+                                >
+                                    Entrar
+                                </button>
+                            }
+                        />
                     )}
                 </div>
             </nav>

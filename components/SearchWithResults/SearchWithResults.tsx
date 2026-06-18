@@ -171,18 +171,18 @@ export default function SearchWithResults() {
             ref={searchRef}
             className="group relative w-full"
         >
-            <div className="relative flex h-10 items-stretch overflow-hidden rounded-full border border-mir-line bg-mir-fill1 transition-colors focus-within:border-mir-line2 focus-within:bg-mir-fill2">
+            <div className="relative flex h-11 items-stretch overflow-hidden rounded-full border border-mir-line bg-mir-fill1 transition-colors focus-within:border-mir-line2 focus-within:bg-mir-fill2">
                 {/* Botão de filtro */}
                 <div ref={filterRef} className="relative">
                     <button
                         type="button"
                         onClick={() => setShowFilterMenu(!showFilterMenu)}
-                        className="flex h-full items-center gap-1.5 border-r border-mir-line px-3 text-xs font-semibold text-mir-text2 transition-colors hover:bg-mir-fill2 hover:text-mir-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mir-acc/60"
+                        className="flex h-full items-center gap-1.5 border-r border-mir-line px-3 text-sm font-semibold text-mir-text2 transition-colors hover:bg-mir-fill2 hover:text-mir-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mir-acc/60"
                     >
-                        {searchFilter === 'all' && <Filter className="h-3.5 w-3.5" />}
-                        {searchFilter === 'tracks' && <Music className="h-3.5 w-3.5" />}
-                        {searchFilter === 'artists' && <User className="h-3.5 w-3.5" />}
-                        <ChevronDown className="h-3 w-3 text-mir-text3" />
+                        {searchFilter === 'all' && <Filter className="h-4 w-4" />}
+                        {searchFilter === 'tracks' && <Music className="h-4 w-4" />}
+                        {searchFilter === 'artists' && <User className="h-4 w-4" />}
+                        <ChevronDown className="h-3.5 w-3.5 text-mir-text3" />
                     </button>
 
                     {/* Menu de filtros */}
@@ -224,17 +224,17 @@ export default function SearchWithResults() {
 
                 {/* Campo de busca */}
                 <div className="relative flex-1">
-                    <SearchIcon className="absolute left-3.5 top-1/2 z-10 h-3.5 w-3.5 -translate-y-1/2 text-mir-text3" />
+                    <SearchIcon className="absolute left-3.5 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-mir-text3" />
                     <Input
                         type="search"
                         placeholder={getPlaceholderText(searchFilter)}
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onFocus={() => results && setShowResults(true)}
-                        className="h-full rounded-none border-none bg-transparent pl-9 pr-10 text-[13px] text-mir-text placeholder:text-mir-text3 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        className="h-full rounded-none border-none bg-transparent pl-9 pr-10 text-sm text-mir-text placeholder:text-mir-text3 focus-visible:ring-0 focus-visible:ring-offset-0"
                     />
                     {isLoading && (
-                        <Loader2 className="absolute right-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 animate-spin text-mir-text3" />
+                        <Loader2 className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-mir-text3" />
                     )}
                 </div>
             </div>

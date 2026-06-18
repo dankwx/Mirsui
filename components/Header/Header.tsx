@@ -42,11 +42,6 @@ const navLinks: NavLink[] = [
         match: (p) => p.startsWith('/library') || p.startsWith('/user'),
     },
     {
-        title: 'Descobrir',
-        url: '/discover',
-        match: (p) => p.startsWith('/discover'),
-    },
-    {
         title: 'Prophet',
         url: '/prophet',
         match: (p) => p.split('/').includes('prophet'),
@@ -116,23 +111,23 @@ export default function Header({ userProfile }: HeaderProps) {
 
     return (
         <header className="sticky top-0 z-40 border-b border-mir-line bg-mir-bg/85 backdrop-blur-xl">
-            <nav className="mx-auto flex h-16 w-full max-w-[1180px] items-center gap-6 px-5 sm:px-10">
+            <nav className="mx-auto flex h-[72px] w-full max-w-[1180px] items-center gap-7 px-5 sm:px-10">
                 <Link
                     href="/"
-                    className="flex items-center gap-2.5 text-lg font-extrabold tracking-tight text-mir-text"
+                    className="flex items-center gap-2.5 text-xl font-extrabold tracking-tight text-mir-text"
                 >
-                    <MirsuiLogo size={34} />
+                    <MirsuiLogo size={38} />
                     mirsui
                 </Link>
 
-                <div className="hidden items-center gap-6 md:flex">
+                <div className="hidden items-center gap-7 md:flex">
                     {navLinks.map((link) => {
                         const active = link.match(pathname)
                         return (
                             <Link
                                 key={link.title}
                                 href={link.url}
-                                className={`text-[13.5px] font-semibold transition-colors ${
+                                className={`text-[15px] font-semibold transition-colors ${
                                     active
                                         ? 'text-mir-text'
                                         : 'text-mir-text2 hover:text-mir-text'
@@ -145,7 +140,7 @@ export default function Header({ userProfile }: HeaderProps) {
                 </div>
 
                 <div className="ml-auto flex items-center gap-3">
-                    <div className="hidden w-[260px] lg:block">
+                    <div className="hidden w-[290px] lg:block">
                         <SearchWithResults />
                     </div>
 
@@ -156,7 +151,7 @@ export default function Header({ userProfile }: HeaderProps) {
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                                 className="group flex items-center gap-2 rounded-full border border-mir-line bg-mir-fill1 py-1 pl-1 pr-2.5 transition-colors hover:border-mir-line2 hover:bg-mir-fill2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mir-acc/60"
                             >
-                                <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-mir-card">
+                                <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-mir-card">
                                     {userProfile?.avatar_url ? (
                                         <img
                                             src={userProfile.avatar_url}
@@ -164,7 +159,7 @@ export default function Header({ userProfile }: HeaderProps) {
                                             className="h-full w-full object-cover"
                                         />
                                     ) : (
-                                        <span className="text-[11px] font-bold text-mir-text">
+                                        <span className="text-xs font-bold text-mir-text">
                                             {getInitials(
                                                 userProfile?.display_name,
                                                 userProfile?.email
@@ -173,7 +168,7 @@ export default function Header({ userProfile }: HeaderProps) {
                                     )}
                                 </div>
                                 <ChevronDown
-                                    className={`h-3.5 w-3.5 text-mir-text3 transition-transform duration-200 ${
+                                    className={`h-4 w-4 text-mir-text3 transition-transform duration-200 ${
                                         isMenuOpen ? 'rotate-180' : ''
                                     }`}
                                 />
@@ -229,7 +224,7 @@ export default function Header({ userProfile }: HeaderProps) {
                             trigger={
                                 <button
                                     type="button"
-                                    className="inline-flex items-center rounded-lg bg-mir-acc px-4 py-2 text-[13px] font-semibold text-mir-on-acc transition hover:brightness-110"
+                                    className="inline-flex items-center rounded-lg bg-mir-acc px-4 py-2 text-sm font-semibold text-mir-on-acc transition hover:brightness-110"
                                 >
                                     Entrar
                                 </button>

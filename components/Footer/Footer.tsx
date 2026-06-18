@@ -17,7 +17,7 @@ function Glyph({ size = 20 }: { size?: number }) {
 }
 
 const cols = [
-    { h: 'Plataforma', links: ['A cena', 'Descobrir', 'Acervo'] },
+    { h: 'Plataforma', links: ['A cena', 'Acervo'] },
     { h: 'Mirsui', links: ['Sobre', 'Privacidade', 'Contato'] },
 ]
 

@@ -187,7 +187,7 @@ function EndCTA() {
 /* ---------- Footer ---------- */
 function Foot() {
   const cols = [
-    { h: "Plataforma", links: ["A cena", "Descobrir", "Acervo"] },
+    { h: "Plataforma", links: ["A cena", "Acervo"] },
     { h: "Mirsui", links: ["Sobre", "Privacidade", "Contato"] },
   ];
   return (

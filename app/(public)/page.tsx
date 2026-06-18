@@ -9,7 +9,7 @@ import { formatTimestamp } from '@/utils/feedHelpers'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Mirsui — Você ouviu primeiro',
+    title: 'mirsui',
     description:
         'Cave som antes de todo mundo. Carimba, e fica registrado que a descoberta foi sua.',
 }
@@ -130,7 +130,7 @@ export default async function HomePage() {
                 <div className="lp-nav">
                     <nav className="nav wrap">
                         <Link href="/" className="logo">
-                            <Glyph /> Mirsui
+                            <Glyph /> mirsui
                         </Link>
                         <div className="links">
                             <a href="#cena">A cena</a>
@@ -151,10 +151,9 @@ export default async function HomePage() {
                     <span className="hero-kick">
                         <span className="live-dot" /> A cena, ao vivo
                     </span>
-                    <h1>Você ouviu primeiro.</h1>
+                    <h1>mir? sui.</h1>
                     <p className="hero-sub">
-                        Cave som antes de todo mundo. Carimba, e fica registrado
-                        que a descoberta foi sua.
+                        Você vai entender daqui 6 meses.
                     </p>
                     <div className="hero-cta">
                         <AuthModalTrigger className="b b-acc" mode="signup">

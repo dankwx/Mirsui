@@ -140,6 +140,11 @@
     * {
       @apply border-border;
     }
+    html {
+      /* Reserva o espaço da scrollbar sempre, evitando o "pulo" de layout
+         quando um modal trava o scroll do body (overflow: hidden). */
+      scrollbar-gutter: stable;
+    }
     body {
       @apply bg-background text-foreground;
     }
@@ -391,7 +396,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: #0c0b0a url('/assets/hero-art.png') 58% 32% / cover no-repeat;
+  background: #0c0b0a url('/assets/track-art2.png') 58% 32% / cover no-repeat;
   transform: scale(1.04);
   animation: mir-slowzoom 26s ease-in-out infinite alternate;
 }

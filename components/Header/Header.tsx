@@ -122,7 +122,7 @@ export default function Header({ userProfile }: HeaderProps) {
                     className="flex items-center gap-2.5 text-lg font-extrabold tracking-tight text-mir-text"
                 >
                     <MirsuiLogo size={34} />
-                    Mirsui
+                    mirsui
                 </Link>
 
                 <div className="hidden items-center gap-6 md:flex">

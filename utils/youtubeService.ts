@@ -2,7 +2,7 @@
 
 import 'server-only'
 
-export interface YouTubeVideo {
+interface YouTubeVideo {
     id: {
         videoId: string
     }
@@ -19,7 +19,7 @@ export interface YouTubeVideo {
     }
 }
 
-export interface YouTubeSearchResponse {
+interface YouTubeSearchResponse {
     items: YouTubeVideo[]
     nextPageToken?: string
     pageInfo: {
@@ -92,15 +92,4 @@ export async function searchYouTubeVideo(
     }
 
     return `https://www.youtube.com/watch?v=${videos[0].id.videoId}`
-}
-
-/**
- * Busca múltiplos resultados no YouTube com informações detalhadas.
- */
-export async function searchYouTubeVideosDetailed(
-    trackName: string,
-    artistName: string,
-    maxResults: number = 10
-): Promise<YouTubeVideo[] | null> {
-    return searchYouTube(trackName, artistName, maxResults)
 }

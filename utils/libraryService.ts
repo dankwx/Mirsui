@@ -37,7 +37,7 @@ export interface LibraryStats {
  */
 export async function fetchUserPlaylists(userId: string): Promise<Playlist[]> {
     const supabase = await createClient()
-    
+
     try {
         const { data, error } = await supabase.rpc('get_user_playlists', {
             user_uuid: userId
@@ -60,7 +60,7 @@ export async function fetchUserPlaylists(userId: string): Promise<Playlist[]> {
  */
 export async function fetchPlaylistTracks(playlistId: string): Promise<PlaylistTrack[]> {
     const supabase = await createClient()
-    
+
     try {
         const { data, error } = await supabase.rpc('get_playlist_tracks', {
             playlist_uuid: playlistId
@@ -84,7 +84,7 @@ export async function fetchPlaylistTracks(playlistId: string): Promise<PlaylistT
 export async function fetchUserPlaylistsWithTracks(userId: string): Promise<Playlist[]> {
     try {
         const playlists = await fetchUserPlaylists(userId)
-        
+
         // Buscar tracks para cada playlist
         const playlistsWithTracks = await Promise.all(
             playlists.map(async (playlist) => {
@@ -109,12 +109,12 @@ export async function fetchUserPlaylistsWithTracks(userId: string): Promise<Play
 export async function calculateLibraryStats(userId: string, savedSongs: any[]): Promise<LibraryStats> {
     try {
         const playlists = await fetchUserPlaylists(userId)
-        
+
         // Calcular total de tracks das playlists
         const totalPlaylistTracks = playlists.reduce((sum, playlist) => sum + playlist.track_count, 0)
-        
+
         // Calcular descobertas (tracks com rating alto)
-        const totalDiscoveries = savedSongs.filter(song => 
+        const totalDiscoveries = savedSongs.filter(song =>
             song.discover_rating && song.discover_rating > 7
         ).length
 
@@ -123,7 +123,7 @@ export async function calculateLibraryStats(userId: string, savedSongs: any[]): 
         const estimatedHours = Math.round((totalTracks * 3.5) / 60 * 10) / 10 // 3.5 min média por track
 
         // Score de descoberta baseado em proporção de tracks com rating alto
-        const discoveryScore = savedSongs.length > 0 
+        const discoveryScore = savedSongs.length > 0
             ? Math.round((totalDiscoveries / savedSongs.length) * 10 * 10) / 10
             : 0
 
@@ -143,168 +143,5 @@ export async function calculateLibraryStats(userId: string, savedSongs: any[]): 
             discoveryScore: 0,
             totalDiscoveries: 0
         }
-    }
-}
-
-/**
- * Cria uma nova playlist
- */
-export async function createPlaylist(userId: string, name: string, description?: string): Promise<Playlist | null> {
-    const supabase = await createClient()
-    
-    try {
-        const { data, error } = await supabase
-            .from('playlists')
-            .insert({
-                name,
-                description,
-                user_id: userId
-            })
-            .select('id, name, description, thumbnail_url, created_at, updated_at')
-            .single()
-
-        if (error) {
-            console.error('Error creating playlist:', error)
-            return null
-        }
-
-        return {
-            ...data,
-            thumbnail_url: data.thumbnail_url || null,
-            track_count: 0,
-            tracks: []
-        }
-    } catch (error) {
-        console.error('Error in createPlaylist:', error)
-        return null
-    }
-}
-
-/**
- * Adiciona uma track a uma playlist
- */
-export async function addTrackToPlaylist(
-    playlistId: string, 
-    track: {
-        track_title: string
-        artist_name: string
-        album_name: string
-        track_thumbnail?: string
-        track_url: string
-        duration?: string
-    }
-    ): Promise<boolean> {
-    const supabase = await createClient()
-    
-    try {
-        // Buscar a próxima posição
-        const { data: positionData } = await supabase
-            .from('playlist_tracks')
-            .select('track_position')
-            .eq('playlist_id', playlistId)
-            .order('track_position', { ascending: false })
-            .limit(1)
-
-        const nextPosition = positionData && positionData.length > 0 
-            ? positionData[0].track_position + 1 
-            : 1
-
-        const { error } = await supabase
-            .from('playlist_tracks')
-            .insert({
-                playlist_id: playlistId,
-                track_title: track.track_title,
-                artist_name: track.artist_name,
-                album_name: track.album_name,
-                track_thumbnail: track.track_thumbnail,
-                track_url: track.track_url,
-                duration: track.duration,
-                track_position: nextPosition
-            })
-
-        if (error) {
-            console.error('Error adding track to playlist:', error)
-            return false
-        }
-
-        return true
-    } catch (error) {
-        console.error('Error in addTrackToPlaylist:', error)
-        return false
-    }
-}
-
-/**
- * Remove uma track de uma playlist
- */
-export async function removeTrackFromPlaylist(trackId: string): Promise<boolean> {
-    const supabase = await createClient()
-    
-    try {
-        const { error } = await supabase
-            .from('playlist_tracks')
-            .delete()
-            .eq('id', trackId)
-
-        if (error) {
-            console.error('Error removing track from playlist:', error)
-            return false
-        }
-
-        return true
-    } catch (error) {
-        console.error('Error in removeTrackFromPlaylist:', error)
-        return false
-    }
-}
-
-/**
- * Deleta uma playlist
- */
-export async function deletePlaylist(playlistId: string): Promise<boolean> {
-    const supabase = await createClient()
-    
-    try {
-        const { error } = await supabase
-            .from('playlists')
-            .delete()
-            .eq('id', playlistId)
-
-        if (error) {
-            console.error('Error deleting playlist:', error)
-            return false
-        }
-
-        return true
-    } catch (error) {
-        console.error('Error in deletePlaylist:', error)
-        return false
-    }
-}
-
-/**
- * Atualiza uma playlist
- */
-export async function updatePlaylist(
-    playlistId: string, 
-    updates: { name?: string; description?: string }
-): Promise<boolean> {
-    const supabase = await createClient()
-    
-    try {
-        const { error } = await supabase
-            .from('playlists')
-            .update(updates)
-            .eq('id', playlistId)
-
-        if (error) {
-            console.error('Error updating playlist:', error)
-            return false
-        }
-
-        return true
-    } catch (error) {
-        console.error('Error in updatePlaylist:', error)
-        return false
     }
 }

@@ -1,18 +1,3 @@
-// Função para determinar o badge do usuário baseado na posição e discover rating
-export function getUserBadge(position: number, discoverRating?: number): string {
-    if (position === 1) return 'Primeiro!'
-    if (position <= 3) return 'Early Bird'
-    if (position <= 10) return 'Hipster'
-    if (discoverRating && discoverRating > 90) return 'Taste Maker'
-    if (position <= 50) return 'Discoverer'
-    return 'Music Lover'
-}
-
-// Função para determinar se o usuário é verificado (baseado em critérios simples)
-export function isUserVerified(position: number): boolean {
-    return position === 1 // Por exemplo, apenas primeiros claimers são "verificados"
-}
-
 // Helper function para formatar timestamp
 export function formatTimestamp(timestamp: string): string {
     const now = new Date()

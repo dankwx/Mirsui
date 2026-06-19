@@ -74,11 +74,11 @@ export default function FollowersFollowingSection({
     )
 
     const statTrigger = (count: number, label: string) => (
-        <button className="group flex flex-col gap-1 text-left">
-            <span className="text-[22px] font-extrabold leading-none tracking-tight tabular-nums text-mir-text transition group-hover:text-mir-acc">
+        <button className="group flex flex-col text-left">
+            <span className="text-[28px] font-extrabold leading-none tracking-[-0.03em] tabular-nums text-[#ece3d2] transition group-hover:text-[#cdef36] sm:text-[32px]">
                 {count}
             </span>
-            <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-mir-text3">
+            <span className="mt-[5px] font-mono text-[10px] uppercase tracking-[0.14em] text-[#ece3d2]/45">
                 {label}
             </span>
         </button>

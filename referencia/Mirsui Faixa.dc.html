@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#16120c}
+::selection{background:#cdef36;color:#16120c}
+input::placeholder{color:rgba(236,227,210,.42)}
+@keyframes mir-ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes mir-blink{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes mir-fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+
+<div style="background:#16120c;font-family:Archivo,system-ui,sans-serif;color:#ece3d2;min-height:100vh;width:100%;overflow-x:hidden;-webkit-font-smoothing:antialiased">
+
+  <!-- TICKER -->
+  <div style="background:#cdef36;color:#16120c;overflow:hidden;white-space:nowrap;border-bottom:2px solid #16120c">
+    <div style="display:inline-flex;animation:mir-ticker 36s linear infinite;will-change:transform">
+      <span style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.14em;padding:7px 0">&nbsp;&nbsp;● EM ALTA&nbsp;&nbsp;✦&nbsp;&nbsp;MAKE LOVE · DAFT PUNK · JANELA FECHADA&nbsp;&nbsp;✦&nbsp;&nbsp;DAA FOI O 1º A REIVINDICAR · +2 MESES ANTES DO PICO&nbsp;&nbsp;✦&nbsp;&nbsp;1 REIVINDICAÇÃO REGISTRADA&nbsp;&nbsp;✦&nbsp;&nbsp;Nº 047&nbsp;&nbsp;✦&nbsp;&nbsp;</span>
+      <span style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.14em;padding:7px 0">&nbsp;&nbsp;● EM ALTA&nbsp;&nbsp;✦&nbsp;&nbsp;MAKE LOVE · DAFT PUNK · JANELA FECHADA&nbsp;&nbsp;✦&nbsp;&nbsp;DAA FOI O 1º A REIVINDICAR · +2 MESES ANTES DO PICO&nbsp;&nbsp;✦&nbsp;&nbsp;1 REIVINDICAÇÃO REGISTRADA&nbsp;&nbsp;✦&nbsp;&nbsp;Nº 047&nbsp;&nbsp;✦&nbsp;&nbsp;</span>
+    </div>
+  </div>
+
+  <!-- MASTHEAD -->
+  <header style="border-bottom:1px solid rgba(236,227,210,.12);position:sticky;top:0;z-index:40;background:rgba(22,18,12,.82);backdrop-filter:blur(12px)">
+    <div style="max-width:1200px;margin:0 auto;padding:15px 32px;display:flex;align-items:center;gap:36px">
+      <a href="Mirsui Feed.dc.html" style="display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit">
+        <svg width="30" height="30" viewBox="0 0 100 100" style="display:block"><circle cx="50" cy="50" r="49" fill="#16120c"/><path d="M50 1 a49 49 0 0 1 0 98 a24.5 24.5 0 0 1 0-49 a24.5 24.5 0 0 0 0-49z" fill="#cdef36"/><circle cx="50" cy="25.5" r="7.2" fill="#16120c"/><circle cx="50" cy="74.5" r="7.2" fill="#cdef36"/></svg>
+        <span style="font-weight:900;font-size:24px;letter-spacing:-.04em">mirsui</span>
+      </a>
+      <nav style="display:flex;align-items:center;gap:26px;font-weight:600;font-size:15px">
+        <a href="Mirsui Feed.dc.html" style="color:rgba(236,227,210,.62);text-decoration:none">Início</a>
+        <a href="Mirsui Perfil.dc.html" style="color:#ece3d2;text-decoration:none;padding-bottom:3px;border-bottom:2px solid #cdef36">Acervo</a>
+        <a href="Mirsui Faro.dc.html" style="color:rgba(236,227,210,.62);text-decoration:none">Faro</a>
+        <a href="Mirsui Claim.dc.html" style="color:rgba(236,227,210,.62);text-decoration:none">Claim</a>
+      </nav>
+      <div style="flex:1"></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="display:flex;align-items:center;gap:9px;background:#211a11;border:1px solid rgba(236,227,210,.12);border-radius:999px;padding:9px 16px;width:300px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(236,227,210,.5)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+          <input value="make love" style="background:transparent;border:none;outline:none;color:#ece3d2;font-family:'Space Mono',monospace;font-size:12px;width:100%"/>
+        </div>
+        <a href="Mirsui Perfil.dc.html" style="width:38px;height:38px;border-radius:50%;background:radial-gradient(130% 130% at 32% 24%,#f3ecdb 0%,#cdef36 22%,#c14a26 54%,#16120c 88%);box-shadow:0 0 0 1.5px rgba(236,227,210,.18);text-decoration:none"></a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section>
+    <div style="max-width:1200px;margin:0 auto;padding:28px 32px 8px">
+      <a href="Mirsui Feed.dc.html" style="display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:rgba(236,227,210,.5);text-decoration:none">← VOLTAR</a>
+    </div>
+    <div style="max-width:1200px;margin:0 auto;padding:22px 32px 56px;display:flex;gap:46px;align-items:flex-start;flex-wrap:wrap">
+
+      <!-- COVER -->
+      <div style="flex:none;width:330px;height:330px;position:relative;border-radius:10px;overflow:hidden;box-shadow:0 30px 60px -24px rgba(0,0,0,.7)">
+        <div style="{{ cover._surf }}">
+          <div style="{{ cover._artistS }}">{{ cover.artist }}</div>
+          <div style="{{ cover._titleS }}">{{ cover.title }}</div>
+        </div>
+        <div style="position:absolute;top:14px;left:14px;display:flex;align-items:center;gap:6px;background:rgba(22,18,12,.62);backdrop-filter:blur(5px);border:1px solid rgba(205,239,54,.4);color:#cdef36;font-family:'Space Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.12em;padding:4px 9px;border-radius:999px">⚑ JANELA FECHADA</div>
+        <button onClick="{{ togglePlay }}" style="position:absolute;bottom:18px;right:18px;width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;background:#cdef36;color:#16120c;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(0,0,0,.4)">{{ playIcon }}</button>
+      </div>
+
+      <!-- META -->
+      <div style="flex:1;min-width:320px;padding-top:4px">
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px">
+          <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(205,239,54,.14);border:1px solid rgba(205,239,54,.4);color:#cdef36;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.08em;padding:5px 12px;border-radius:999px">↗ EM ALTA</span>
+          <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:rgba(236,227,210,.5)">FRENCH HOUSE · ELECTRO</span>
+        </div>
+        <h1 style="font-weight:900;font-size:clamp(56px,7vw,92px);line-height:.86;letter-spacing:-.05em;margin:0 0 12px">Make Love</h1>
+        <a href="Mirsui Perfil.dc.html" style="display:inline-block;font-weight:800;font-size:24px;letter-spacing:-.02em;color:#cdef36;text-decoration:none;margin-bottom:16px">Daft Punk</a>
+        <div style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:.04em;color:rgba(236,227,210,.55);margin-bottom:26px">Human After All · 2005 · ⏱ 4:49</div>
+
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:22px">
+          <button onClick="{{ toggleClaim }}" style="{{ claimBtnStyle }}">{{ claimIcon }} {{ claimLabel }}</button>
+          <button style="cursor:pointer;width:46px;height:46px;border-radius:999px;background:transparent;border:1.5px solid rgba(236,227,210,.22);color:rgba(236,227,210,.75);display:flex;align-items:center;justify-content:center;font-size:17px">♥</button>
+          <button style="cursor:pointer;width:46px;height:46px;border-radius:999px;background:transparent;border:1.5px solid rgba(236,227,210,.22);color:rgba(236,227,210,.75);display:flex;align-items:center;justify-content:center;font-size:16px">↗</button>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;font-size:12.5px;color:rgba(236,227,210,.62);flex-wrap:wrap">
+          <span style="width:8px;height:8px;border-radius:50%;background:#cdef36;animation:mir-blink 1.5s infinite"></span>
+          {{ proofText }}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN + RAIL -->
+  <section style="border-top:1px solid rgba(236,227,210,.1)">
+    <div style="max-width:1200px;margin:0 auto;padding:48px 32px 60px;display:grid;grid-template-columns:1fr 340px;gap:48px;align-items:start">
+
+      <!-- LEFT: PLAYER -->
+      <div>
+        <div style="background:#1c160e;border:1px solid rgba(236,227,210,.1);border-radius:14px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px">
+            <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;color:rgba(236,227,210,.5)">PRÉVIA</span>
+            <div style="display:flex;gap:8px">
+              <a href="#" style="display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px solid rgba(236,227,210,.2);color:rgba(236,227,210,.8);text-decoration:none;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.04em;padding:7px 13px;border-radius:999px">◉ Spotify</a>
+              <a href="#" style="display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px solid rgba(236,227,210,.2);color:rgba(236,227,210,.8);text-decoration:none;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.04em;padding:7px 13px;border-radius:999px">▷ YouTube</a>
+            </div>
+          </div>
+          <div style="position:relative;aspect-ratio:16/9;overflow:hidden">
+            <div style="{{ player._surf }}">
+              <div style="{{ player._artistS }}">{{ player.artist }}</div>
+              <div style="{{ player._titleS }}">{{ player.title }}</div>
+            </div>
+            <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,rgba(22,18,12,.15),rgba(22,18,12,.55))"></div>
+            <button onClick="{{ togglePlay }}" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:78px;height:78px;border-radius:50%;border:none;cursor:pointer;background:#cdef36;color:#16120c;font-size:28px;display:flex;align-items:center;justify-content:center;box-shadow:0 14px 34px rgba(0,0,0,.45)">{{ playIcon }}</button>
+          </div>
+          <div style="padding:18px 22px">
+            <div style="height:5px;background:rgba(236,227,210,.14);border-radius:3px;overflow:hidden;margin-bottom:10px">
+              <div style="{{ progressStyle }}"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:11px;color:rgba(236,227,210,.5)">
+              <span>{{ playing }}</span><span>0:48 / 4:49</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RELATED -->
+        <div style="margin-top:40px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:8px">
+            <h2 style="font-weight:900;font-size:28px;letter-spacing:-.03em;margin:0">Da mesma janela</h2>
+            <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.12em;color:rgba(236,227,210,.4)">QUEM SALVOU ISSO, SALVOU</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px">
+            <sc-for list="{{ related }}" as="r" hint-placeholder-count="4">
+              <a href="Mirsui Faixa.dc.html" style="text-decoration:none;color:inherit;animation:mir-fade .4s ease both">
+                <div style="position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;box-shadow:0 12px 26px -14px rgba(0,0,0,.7)">
+                  <div style="{{ r._surf }}">
+                    <div style="{{ r._artistS }}">{{ r.artist }}</div>
+                    <div style="{{ r._titleS }}">{{ r.title }}</div>
+                  </div>
+                  <sc-if value="{{ r.early }}" hint-placeholder-val="{{ true }}">
+                    <span style="position:absolute;top:8px;left:8px;background:#cdef36;color:#16120c;font-family:'Space Mono',monospace;font-weight:700;font-size:8.5px;letter-spacing:.1em;padding:3px 6px;border-radius:3px">⚑ {{ r.margin }}</span>
+                  </sc-if>
+                </div>
+                <div style="margin-top:10px;font-weight:700;font-size:14px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.title }}</div>
+                <div style="font-family:'Space Mono',monospace;font-size:10px;color:rgba(236,227,210,.5);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.artist }}</div>
+              </a>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <!-- RAIL -->
+      <aside style="display:flex;flex-direction:column;gap:22px;position:sticky;top:96px">
+        <div style="background:#1c160e;border:1px solid rgba(236,227,210,.1);border-radius:12px;padding:22px">
+          <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;color:#ece3d2;font-weight:700;margin-bottom:18px">FICHA TÉCNICA</div>
+          <sc-for list="{{ specs }}" as="s" hint-placeholder-count="5">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:10px 0;border-top:1px solid rgba(236,227,210,.08)">
+              <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.04em;color:rgba(236,227,210,.5)">{{ s.k }}</span>
+              <span style="font-weight:700;font-size:14px;text-align:right">{{ s.v }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:#cdef36;color:#16120c;border-radius:12px;padding:22px">
+          <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;font-weight:700;margin-bottom:14px">NÚMEROS</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+            <div><div style="font-weight:900;font-size:34px;letter-spacing:-.04em;line-height:1">1</div><div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.1em;margin-top:5px;opacity:.7">REIVIND.</div></div>
+            <div><div style="font-weight:900;font-size:34px;letter-spacing:-.04em;line-height:1">87</div><div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.1em;margin-top:5px;opacity:.7">POPULAR.</div></div>
+            <div><div style="font-weight:900;font-size:34px;letter-spacing:-.04em;line-height:1">2.1B</div><div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.1em;margin-top:5px;opacity:.7">PLAYS</div></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- A PROVA (paper) -->
+  <sc-if value="{{ showTimeline }}" hint-placeholder-val="{{ true }}">
+  <section style="background:#ece3d2;color:#16120c">
+    <div style="max-width:1200px;margin:0 auto;padding:64px 32px">
+      <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;color:#c14a26;margin-bottom:14px">★ A PROVA</div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:40px">
+        <h2 style="font-weight:900;font-size:clamp(36px,4.5vw,56px);line-height:.94;letter-spacing:-.04em;margin:0;max-width:560px">daa ouviu <span style="color:#c14a26">+2 meses</span> antes do mundo.</h2>
+        <p style="font-family:'Space Mono',monospace;font-size:12px;line-height:1.6;color:rgba(22,18,12,.6);max-width:280px;margin:0">A janela abre quando a faixa ainda é obscura e fecha quando vira tendência. Reivindicar dentro dela é o que entra pra história.</p>
+      </div>
+
+      <!-- TIMELINE -->
+      <div style="background:#efe7d6;border:1px solid rgba(22,18,12,.1);border-radius:12px;padding:34px 30px 28px;margin-bottom:30px">
+        <div style="position:relative;height:3px;background:rgba(22,18,12,.18);border-radius:2px;margin:30px 0 14px">
+          <div style="position:absolute;left:8%;right:32%;top:0;height:3px;background:#16120c;border-radius:2px"></div>
+          <div style="position:absolute;left:8%;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:#cdef36;border:3px solid #16120c"></div>
+          <div style="position:absolute;left:68%;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:#c14a26;border:3px solid #16120c"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.04em">
+          <div style="text-align:left">
+            <div style="color:#16120c;font-weight:700">daa reivindicou</div>
+            <div style="color:rgba(22,18,12,.5);margin-top:3px">abr 2026 · obscura</div>
+          </div>
+          <div style="text-align:right">
+            <div style="color:#c14a26;font-weight:700">virou tendência</div>
+            <div style="color:rgba(22,18,12,.5);margin-top:3px">jun 2026 · pico</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REIVINDICAÇÕES -->
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <h3 style="font-weight:800;font-size:22px;letter-spacing:-.02em;margin:0">Reivindicações</h3>
+        <span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.12em;color:rgba(22,18,12,.5)">1 NO TOTAL · JANELA FECHADA</span>
+      </div>
+      <div style="background:#efe7d6;border:1px solid rgba(22,18,12,.1);border-radius:10px;padding:18px 20px;display:flex;align-items:center;gap:16px">
+        <span style="font-family:'Space Mono',monospace;font-weight:700;font-size:18px;color:#c14a26;width:24px">♛</span>
+        <div style="width:46px;height:46px;border-radius:50%;flex:none;background:radial-gradient(130% 130% at 30% 22%,#f3ecdb 0%,#cdef36 20%,#c14a26 52%,#16120c 88%);box-shadow:0 0 0 1px rgba(22,18,12,.12)"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:800;font-size:18px;letter-spacing:-.02em">daa</div>
+          <div style="font-family:'Space Mono',monospace;font-size:11px;color:rgba(22,18,12,.55);margin-top:2px">primeiro a reivindicar · há 6 dias</div>
+        </div>
+        <span style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.08em;background:#16120c;color:#cdef36;padding:5px 11px;border-radius:999px">+2 MESES</span>
+      </div>
+    </div>
+  </section>
+  </sc-if>
+
+  <!-- FOOTER -->
+  <footer style="border-top:2px solid #cdef36">
+    <div style="max-width:1200px;margin:0 auto;padding:46px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px">
+      <div style="display:flex;align-items:center;gap:11px">
+        <svg width="26" height="26" viewBox="0 0 100 100"><circle cx="50" cy="50" r="49" fill="#16120c"/><path d="M50 1 a49 49 0 0 1 0 98 a24.5 24.5 0 0 1 0-49 a24.5 24.5 0 0 0 0-49z" fill="#cdef36"/><circle cx="50" cy="25.5" r="7.2" fill="#16120c"/><circle cx="50" cy="74.5" r="7.2" fill="#cdef36"/></svg>
+        <span style="font-weight:900;font-size:20px;letter-spacing:-.04em">mirsui</span>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:rgba(236,227,210,.4);text-align:center">ARQUIVO MUSICAL CURATORIAL · Nº 047 · DESDE 2024<br>feito por quem ouve cedo demais.</div>
+      <div style="display:flex;gap:18px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:rgba(236,227,210,.55)">
+        <a href="Mirsui Faro.dc.html" style="color:inherit;text-decoration:none">FARO</a>
+        <a href="Mirsui Claim.dc.html" style="color:inherit;text-decoration:none">CLAIM</a>
+        <a href="Mirsui Termos.dc.html" style="color:inherit;text-decoration:none">TERMOS</a>
+        <a href="Mirsui Privacidade.dc.html" style="color:inherit;text-decoration:none">PRIVACIDADE</a>
+      </div>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:1400},&quot;claimed&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;showTimeline&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { claimed: null, playing: false };
+
+  palettes() {
+    return [
+      { bg:'#cdef36', fg:'#16120c', mut:'rgba(22,18,12,.6)' },
+      { bg:'#c14a26', fg:'#f7ead7', mut:'rgba(247,234,215,.62)' },
+      { bg:'#27203a', fg:'#e7ddff', mut:'rgba(231,221,255,.55)' },
+      { bg:'#173a4a', fg:'#dcf0fb', mut:'rgba(220,240,251,.55)' },
+      { bg:'#3f3f17', fg:'#eef36a', mut:'rgba(238,243,106,.6)' },
+      { bg:'#e3d8c1', fg:'#16120c', mut:'rgba(22,18,12,.5)' },
+    ];
+  }
+  hash(s){let h=0;for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;}return h;}
+
+  coverStyles(o, t, a, i) {
+    return {
+      _surf:{ position:'absolute', inset:'0', background:o._bg, display:'flex', flexDirection:'column', justifyContent:'flex-end', padding:'18px', overflow:'hidden' },
+      _artistS:{ fontFamily:'"Space Mono",monospace', fontSize:a, letterSpacing:'.13em', textTransform:'uppercase', color:o._mut, marginBottom:'6px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', width:'100%' },
+      _titleS:{ fontFamily:'Archivo', fontWeight:'800', fontSize:t, lineHeight:'.95', letterSpacing:'-.03em', color:o._fg },
+    };
+  }
+  applyCover(o, t, a) {
+    const p = this.palettes();
+    const c = p[this.hash(o.title + '|' + o.artist) % p.length];
+    o._bg = c.bg; o._fg = c.fg; o._mut = c.mut;
+    Object.assign(o, this.coverStyles(o, t, a));
+    return o;
+  }
+
+  relatedData() {
+    return [
+      { title:'Instant Crush', artist:'Daft Punk, J. Casablancas', early:true, margin:'+3M' },
+      { title:'Feel Ur Love', artist:'Emma Louise, Flume', early:true, margin:'+9M' },
+      { title:'stray', artist:'meat computer', early:true, margin:'+10M' },
+      { title:'XVI', artist:'akiaura, LONOWN', early:true, margin:'+8M' },
+    ];
+  }
+
+  renderVals() {
+    const claimedDefault = this.props.claimed !== false;
+    const claimed = this.state.claimed === null ? claimedDefault : this.state.claimed;
+    const playing = this.state.playing;
+
+    const cover = this.applyCover({ title:'Make Love', artist:'Daft Punk' }, '46px', '12px');
+    const player = this.applyCover({ title:'Make Love', artist:'Daft Punk' }, 'clamp(40px,6vw,72px)', '13px');
+    const related = this.relatedData().map(r => this.applyCover(Object.assign({}, r), '20px', '9px'));
+
+    return {
+      cover, player, related,
+      showTimeline: this.props.showTimeline !== false,
+
+      claimed,
+      claimLabel: claimed ? 'Reivindicada · #1' : 'Reivindicar',
+      claimIcon: claimed ? '✓' : '♥',
+      claimBtnStyle: claimed
+        ? { cursor:'pointer', height:'46px', padding:'0 22px', borderRadius:'999px', fontFamily:'Archivo', fontWeight:'700', fontSize:'15px', background:'transparent', color:'rgba(236,227,210,.85)', border:'1.5px solid rgba(236,227,210,.3)', display:'flex', alignItems:'center', justifyContent:'center', gap:'9px' }
+        : { cursor:'pointer', height:'46px', padding:'0 24px', borderRadius:'999px', fontFamily:'Archivo', fontWeight:'700', fontSize:'15px', background:'#cdef36', color:'#16120c', border:'none', display:'flex', alignItems:'center', justifyContent:'center', gap:'9px' },
+      toggleClaim: () => this.setState(s => ({ claimed: !(s.claimed === null ? claimedDefault : s.claimed) })),
+      proofText: claimed
+        ? 'Você é o 1º a reivindicar · entrou pra história dessa faixa'
+        : 'A janela fechou — mas você ainda pode registrar que conhecia',
+
+      playIcon: playing ? '❚❚' : '▶',
+      playing: playing ? 'tocando prévia' : 'prévia · 30s',
+      progressStyle: { height:'100%', width: playing ? '17%' : '0%', background:'#cdef36', borderRadius:'3px', transition:'width .3s' },
+      togglePlay: () => this.setState(s => ({ playing: !s.playing })),
+
+      specs: [
+        { k:'Gênero', v:'French House · Electro' },
+        { k:'Álbum', v:'Human After All' },
+        { k:'Gravadora', v:'Virgin' },
+        { k:'Produção', v:'Daft Punk' },
+        { k:'BPM', v:'109' },
+        { k:'Tom', v:'Mi menor' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

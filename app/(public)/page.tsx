@@ -133,7 +133,9 @@ export default async function HomePage() {
                             <Glyph /> mirsui
                         </Link>
                         <div className="links">
-                            <a href="#cena">A cena</a>
+                            <a href="#cena" className="active">
+                                A cena
+                            </a>
                             <a href="#manifesto">Sobre</a>
                         </div>
                         <div className="nav-right">
@@ -151,9 +153,11 @@ export default async function HomePage() {
                     <span className="hero-kick">
                         <span className="live-dot" /> A cena, ao vivo
                     </span>
-                    <h1>mir? sui.</h1>
+                    <h1>
+                        mir? sui<span className="dot">.</span>
+                    </h1>
                     <p className="hero-sub">
-                        Você vai entender daqui 6 meses.
+                        Você vai entender <em>daqui 6 meses</em>.
                     </p>
                     <div className="hero-cta">
                         <AuthModalTrigger className="b b-acc" mode="signup">
@@ -162,6 +166,9 @@ export default async function HomePage() {
                         <AuthModalTrigger className="b b-light" mode="login">
                             Já tenho conta
                         </AuthModalTrigger>
+                    </div>
+                    <div className="hero-fine">
+                        ARQUIVO MUSICAL CURATORIAL · Nº 047 · 12 JANELAS ABERTAS
                     </div>
                 </div>
 

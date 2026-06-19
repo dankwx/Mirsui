@@ -2,7 +2,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -12,7 +11,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-import { Pencil, Share2, Check, ImageIcon } from 'lucide-react'
+import { Pencil, Check, ImageIcon, ArrowUpRight } from 'lucide-react'
 import ModalChangeAvatar from '../ModalChangeAvatar/ModalChangeAvatar'
 import FollowersFollowingSection from './UserFollowers'
 import FollowButton from './FollowButton'
@@ -35,6 +34,38 @@ interface ProfilePageProps {
     stats: ProfileStats
     isLoggedIn: boolean
     isOwnProfile: boolean
+    profileNo: string
+    edition: string
+    memberSince: number
+    faroTop: number
+}
+
+const AVATAR_GRADIENT =
+    'radial-gradient(130% 130% at 30% 22%,#f3ecdb 0%,#cdef36 20%,#c14a26 52%,#16120c 88%)'
+
+function Stat({
+    value,
+    label,
+    accent = false,
+}: {
+    value: number | string
+    label: string
+    accent?: boolean
+}) {
+    return (
+        <div>
+            <div
+                className={`text-[28px] font-extrabold leading-none tracking-[-0.03em] tabular-nums sm:text-[32px] ${
+                    accent ? 'text-[#cdef36]' : 'text-[#ece3d2]'
+                }`}
+            >
+                {value}
+            </div>
+            <div className="mt-[5px] font-mono text-[10px] uppercase tracking-[0.14em] text-[#ece3d2]/45">
+                {label}
+            </div>
+        </div>
+    )
 }
 
 export default function ProfilePage({
@@ -42,6 +73,10 @@ export default function ProfilePage({
     stats,
     isLoggedIn,
     isOwnProfile,
+    profileNo,
+    edition,
+    memberSince,
+    faroTop,
 }: ProfilePageProps) {
     const [showAvatarModal, setShowAvatarModal] = useState(false)
     const [openEdit, setOpenEdit] = useState(false)
@@ -55,10 +90,6 @@ export default function ProfilePage({
     )
 
     const canEdit = isOwnProfile && isLoggedIn
-
-    const initials = (currentDisplayName || userData.username || 'U')
-        .slice(0, 2)
-        .toLowerCase()
 
     const handleEditSubmit = async (formData: FormData) => {
         if (!canEdit) return
@@ -94,107 +125,128 @@ export default function ProfilePage({
     }
 
     return (
-        <header className="flex flex-col gap-6 pb-9 pt-10 sm:flex-row sm:items-center sm:gap-9">
-            <Avatar
-                className={`h-[132px] w-[132px] flex-none rounded-full border border-mir-line2 bg-mir-card ${
-                    canEdit ? 'cursor-pointer transition hover:brightness-110' : ''
-                }`}
-                onClick={canEdit ? () => setShowAvatarModal(true) : undefined}
-            >
-                <AvatarImage
-                    src={userData.avatar_url || undefined}
-                    className="rounded-full object-cover"
-                />
-                <AvatarFallback className="rounded-full bg-[radial-gradient(120%_120%_at_30%_22%,#322c22,#1b1813)] text-[44px] font-extrabold tracking-tight text-mir-text">
-                    {initials}
-                </AvatarFallback>
-            </Avatar>
-
-            <div className="min-w-0 flex-1">
-                <h1 className="text-[clamp(30px,4.4vw,42px)] font-extrabold leading-none tracking-tight text-mir-text">
-                    {currentDisplayName}{' '}
-                    <span className="ml-1 font-mono text-[13px] font-medium tracking-normal text-mir-text3">
-                        @{userData.username}
-                    </span>
-                </h1>
-
-                {currentDescription && (
-                    <p className="mt-3 max-w-[54ch] text-[15px] leading-normal text-mir-text2">
-                        {currentDescription}
-                    </p>
-                )}
-
-                <div className="mt-5 flex flex-wrap gap-8">
-                    <div className="flex flex-col gap-1">
-                        <span className="text-[22px] font-extrabold leading-none tracking-tight tabular-nums text-mir-text">
-                            {stats.tracks}
-                        </span>
-                        <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-mir-text3">
-                            faixas
-                        </span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-[22px] font-extrabold leading-none tracking-tight tabular-nums text-mir-acc">
-                            {stats.early}
-                        </span>
-                        <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-mir-text3">
-                            antecipadas
-                        </span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-[22px] font-extrabold leading-none tracking-tight tabular-nums text-mir-text">
-                            {stats.artists}
-                        </span>
-                        <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-mir-text3">
-                            artistas
-                        </span>
-                    </div>
-
-                    <FollowersFollowingSection
-                        followers={userData.totalFollowers}
-                        following={userData.totalFollowing}
-                        rating={userData.rating}
-                        isOwnProfile={isOwnProfile}
-                        isLoggedIn={isLoggedIn}
-                        currentUserId={userData.id}
-                    />
+        <section className="w-full border-b border-[#ece3d2]/10 bg-[#16120c]">
+            <div className="mx-auto w-full max-w-[1200px] px-5 sm:px-8">
+                {/* edition strip */}
+                <div className="flex items-baseline justify-between pt-5 font-mono text-[11px] tracking-[0.16em] text-[#ece3d2]/40">
+                    <span>PERFIL Nº {profileNo}</span>
+                    <span>EDIÇÃO {edition}</span>
                 </div>
-            </div>
 
-            <div className="flex flex-row gap-2.5 self-stretch sm:flex-col sm:self-start sm:pt-1.5">
-                {canEdit ? (
-                    <button
-                        onClick={() => setOpenEdit(true)}
-                        className="inline-flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-[9px] bg-mir-acc px-[18px] py-[9px] text-[13.5px] font-semibold text-mir-on-acc transition hover:brightness-105 active:translate-y-px sm:flex-none"
-                    >
-                        <Pencil className="h-[15px] w-[15px]" />
-                        Editar perfil
-                    </button>
-                ) : (
-                    isLoggedIn && (
-                        <FollowButton
-                            followingId={userData.id}
-                            initialIsFollowing={userData.isFollowing || false}
-                            type="text"
-                        />
-                    )
-                )}
-                <button
-                    onClick={handleShare}
-                    className="inline-flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-[9px] border border-mir-line2 px-[18px] py-[9px] text-[13.5px] font-semibold text-mir-text2 transition hover:border-mir-text3 hover:bg-mir-fill1 hover:text-mir-text active:translate-y-px sm:flex-none"
-                >
-                    {copied ? (
-                        <>
-                            <Check className="h-[15px] w-[15px] text-mir-acc" />
-                            Copiado!
-                        </>
-                    ) : (
-                        <>
-                            <Share2 className="h-[15px] w-[15px]" />
-                            Compartilhar
-                        </>
-                    )}
-                </button>
+                <header className="flex flex-col gap-9 pb-14 pt-7 sm:flex-row sm:items-start sm:gap-12">
+                    {/* avatar + faro sticker */}
+                    <div className="relative flex-none self-center sm:self-start">
+                        <div
+                            onClick={
+                                canEdit ? () => setShowAvatarModal(true) : undefined
+                            }
+                            className={`h-[150px] w-[150px] overflow-hidden rounded-full sm:h-[172px] sm:w-[172px] ${
+                                canEdit
+                                    ? 'cursor-pointer transition hover:brightness-110'
+                                    : ''
+                            }`}
+                            style={{
+                                background: userData.avatar_url
+                                    ? '#16120c'
+                                    : AVATAR_GRADIENT,
+                                boxShadow:
+                                    '0 0 0 7px #16120c, 0 0 0 8px rgba(205,239,54,0.45)',
+                            }}
+                        >
+                            {userData.avatar_url && (
+                                <img
+                                    src={userData.avatar_url}
+                                    alt={currentDisplayName}
+                                    className="h-full w-full rounded-full object-cover"
+                                />
+                            )}
+                        </div>
+                        <div className="absolute -bottom-1.5 -right-4 rotate-[-8deg] rounded-[4px] border-2 border-[#16120c] bg-[#cdef36] px-[11px] py-1.5 text-center font-mono text-[11px] font-bold leading-[1.25] tracking-[0.08em] text-[#16120c]">
+                            FARO
+                            <br />
+                            TOP {faroTop}%
+                        </div>
+                    </div>
+
+                    {/* identity */}
+                    <div className="min-w-0 flex-1">
+                        <div className="mb-2.5 font-mono text-[11px] tracking-[0.18em] text-[#cdef36]">
+                            OUVINTE ANTECIPADO · DESDE {memberSince}
+                        </div>
+
+                        <h1 className="m-0 break-words text-[clamp(56px,11vw,104px)] font-extrabold leading-[0.82] tracking-[-0.05em] text-[#ece3d2]">
+                            {currentDisplayName}
+                        </h1>
+
+                        <div className="mt-3.5 flex flex-wrap items-center gap-3.5">
+                            <span className="font-mono text-[14px] text-[#ece3d2]/60">
+                                @{userData.username}
+                            </span>
+                            {currentDescription && (
+                                <>
+                                    <span className="h-[5px] w-[5px] rounded-full bg-[#ece3d2]/30" />
+                                    <span className="text-[15px] text-[#ece3d2]/[0.78]">
+                                        {currentDescription}
+                                    </span>
+                                </>
+                            )}
+                        </div>
+
+                        {/* stats */}
+                        <div className="mb-6 mt-[18px] flex flex-wrap gap-x-9 gap-y-5 border-y border-[#ece3d2]/10 py-[22px]">
+                            <Stat value={stats.tracks} label="FAIXAS" />
+                            <Stat value={stats.early} label="ANTECIPADAS" accent />
+                            <Stat value={stats.artists} label="ARTISTAS" />
+                            <FollowersFollowingSection
+                                followers={userData.totalFollowers}
+                                following={userData.totalFollowing}
+                                rating={userData.rating}
+                                isOwnProfile={isOwnProfile}
+                                isLoggedIn={isLoggedIn}
+                                currentUserId={userData.id}
+                            />
+                        </div>
+
+                        {/* actions */}
+                        <div className="flex flex-wrap gap-3">
+                            {canEdit ? (
+                                <button
+                                    onClick={() => setOpenEdit(true)}
+                                    className="inline-flex items-center gap-2 rounded-full bg-[#cdef36] px-[22px] py-3 text-[14px] font-bold text-[#16120c] transition hover:brightness-105 active:translate-y-px"
+                                >
+                                    <Pencil className="h-[15px] w-[15px]" />
+                                    Editar perfil
+                                </button>
+                            ) : (
+                                isLoggedIn && (
+                                    <FollowButton
+                                        followingId={userData.id}
+                                        initialIsFollowing={
+                                            userData.isFollowing || false
+                                        }
+                                        type="text"
+                                    />
+                                )
+                            )}
+                            <button
+                                onClick={handleShare}
+                                className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-[#ece3d2]/30 px-[22px] py-3 text-[14px] font-bold text-[#ece3d2] transition hover:border-[#cdef36] hover:text-[#cdef36] active:translate-y-px"
+                            >
+                                {copied ? (
+                                    <>
+                                        <Check className="h-[15px] w-[15px] text-[#cdef36]" />
+                                        Copiado!
+                                    </>
+                                ) : (
+                                    <>
+                                        <ArrowUpRight className="h-[15px] w-[15px]" />
+                                        Compartilhar perfil
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </header>
             </div>
 
             {canEdit && (
@@ -264,6 +316,6 @@ export default function ProfilePage({
                     onAvatarClick={setShowAvatarModal}
                 />
             )}
-        </header>
+        </section>
     )
 }

@@ -6,7 +6,6 @@ import {
     HeartIcon,
     TrashIcon,
     ImageIcon,
-    PlayIcon,
     FlagIcon,
     ChevronDownIcon,
 } from 'lucide-react'
@@ -58,25 +57,39 @@ const savedWhen = (claimedat: string | null) => {
     return `salvo ${MONTHS[d.getMonth()]} ${d.getFullYear()}`
 }
 
-// tom estável a partir do nome do artista (fallback sem thumbnail)
-const TONES = ['#241f1a', '#1c2320', '#27201f', '#1b2026', '#231d27', '#202420', '#2a201b', '#1a2326', '#25211c', '#1d2126', '#26211f', '#1f231d']
-const tone = (artist: string) => {
+const hashStr = (s: string) => {
     let h = 0
-    for (let i = 0; i < artist.length; i++) h = (h * 31 + artist.charCodeAt(i)) >>> 0
-    return TONES[h % TONES.length]
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
+    return h
 }
 
-const artistInitials = (artist: string) =>
-    artist
-        .split(',')[0]
-        .trim()
-        .split(/\s+/)
-        .map((w) => w[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase()
+// margem antecipada (mock determinístico) — meses antes do pico
+const earlyMargin = (song: Song) =>
+    `+${(hashStr(song.track_title + '|' + song.artist_name) % 11) + 2} meses`
 
-const Cover = ({ song, className = '' }: { song: Song; className?: string }) => {
+// paleta tipográfica das capas (espelha a referência editorial)
+type Palette = { bg: string; fg: string; mut: string }
+const PALETTES: Palette[] = [
+    { bg: '#cdef36', fg: '#16120c', mut: 'rgba(22,18,12,0.6)' },
+    { bg: '#16120c', fg: '#ece3d2', mut: 'rgba(236,227,210,0.5)' },
+    { bg: '#c14a26', fg: '#f7ead7', mut: 'rgba(247,234,215,0.62)' },
+    { bg: '#e3d8c1', fg: '#16120c', mut: 'rgba(22,18,12,0.5)' },
+    { bg: '#27203a', fg: '#e7ddff', mut: 'rgba(231,221,255,0.55)' },
+    { bg: '#173a4a', fg: '#dcf0fb', mut: 'rgba(220,240,251,0.55)' },
+    { bg: '#3f3f17', fg: '#eef36a', mut: 'rgba(238,243,106,0.6)' },
+]
+const paletteFor = (song: Song) =>
+    PALETTES[hashStr(song.track_title + '|' + song.artist_name) % PALETTES.length]
+
+const Cover = ({
+    song,
+    big = false,
+    className = '',
+}: {
+    song: Song
+    big?: boolean
+    className?: string
+}) => {
     if (song.track_thumbnail) {
         return (
             <img
@@ -86,14 +99,30 @@ const Cover = ({ song, className = '' }: { song: Song; className?: string }) => 
             />
         )
     }
+    const p = paletteFor(song)
     return (
         <div
-            className={`mir-cover aspect-square w-full ${className}`}
-            style={{ '--tone': tone(song.artist_name) } as React.CSSProperties}
+            className={`flex aspect-square w-full flex-col justify-end overflow-hidden ${
+                big ? 'p-[18px]' : 'p-3'
+            } ${className}`}
+            style={{ background: p.bg }}
         >
-            <span className="absolute bottom-0.5 left-2.5 select-none text-[46px] font-extrabold leading-[0.8] tracking-tighter text-white/[0.07]">
-                {artistInitials(song.artist_name)}
-            </span>
+            <div
+                className={`mb-[5px] w-full truncate font-mono ${
+                    big ? 'text-[10px]' : 'text-[9.5px]'
+                } uppercase tracking-[0.13em]`}
+                style={{ color: p.mut }}
+            >
+                {song.artist_name}
+            </div>
+            <div
+                className={`font-extrabold leading-[0.96] tracking-[-0.025em] ${
+                    big ? 'text-[30px]' : 'text-[18px]'
+                }`}
+                style={{ color: p.fg }}
+            >
+                {song.track_title}
+            </div>
         </div>
     )
 }
@@ -190,7 +219,7 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
         }
     }
 
-    const OwnerMenu = ({ song }: { song: Song }) => (
+    const OwnerMenu = ({ song, dark = true }: { song: Song; dark?: boolean }) => (
         <div
             className="absolute right-2 top-2 z-10"
             onClick={(e) => e.preventDefault()}
@@ -200,7 +229,11 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 rounded-full bg-black/55 text-mir-text opacity-0 backdrop-blur-sm transition hover:bg-black/75 hover:text-mir-text group-hover:opacity-100"
+                        className={`h-8 w-8 rounded-full backdrop-blur-sm transition group-hover:opacity-100 ${
+                            dark
+                                ? 'bg-black/55 text-[#ece3d2] opacity-0 hover:bg-black/75 hover:text-[#ece3d2]'
+                                : 'bg-[#16120c]/15 text-[#16120c] opacity-0 hover:bg-[#16120c]/25 hover:text-[#16120c]'
+                        }`}
                     >
                         <MoreVerticalIcon className="h-4 w-4" />
                     </Button>
@@ -271,141 +304,157 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
 
     if (!songs.length) {
         return (
-            <div className="my-10 rounded-xl border border-dashed border-mir-line2 px-8 py-14 text-center font-mono text-[13px] text-mir-text3">
-                nenhuma faixa salva ainda
-            </div>
+            <section className="w-full bg-[#ece3d2]">
+                <div className="mx-auto w-full max-w-[1200px] px-5 py-20 sm:px-8">
+                    <div className="rounded-[5px] border border-dashed border-[#16120c]/20 px-8 py-14 text-center font-mono text-[13px] text-[#16120c]/50">
+                        nenhuma faixa salva ainda
+                    </div>
+                </div>
+            </section>
         )
     }
 
     return (
         <>
-            {/* FAVORITAS */}
+            {/* FAVORITAS — dark */}
             {favTracks.length > 0 && (
-                <section className="pt-8">
-                    <div className="mb-[18px] flex flex-wrap items-baseline gap-[11px]">
-                        <h3 className="text-[13px] font-bold uppercase tracking-[0.13em] text-mir-text2">
-                            Favoritas
-                        </h3>
-                        <span className="font-mono text-[11px] text-mir-text3">
-                            {favTracks.length} {favTracks.length === 1 ? 'faixa' : 'faixas'}
-                        </span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-5 md:grid-cols-4">
-                        {favTracks.map((song) => (
-                            <a
-                                key={song.id}
-                                href={song.track_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group"
-                            >
-                                <div className="relative">
-                                    <Cover song={song} className="rounded-[13px]" />
-                                    <div className="absolute right-[11px] top-[11px] z-[2] grid h-[27px] w-[27px] place-items-center rounded-full bg-black/50 text-mir-acc backdrop-blur-sm">
-                                        <HeartIcon className="h-[13px] w-[13px] fill-current" />
+                <section className="w-full border-t border-[#ece3d2]/10 bg-[#16120c]">
+                    <div className="mx-auto w-full max-w-[1200px] px-5 py-16 sm:px-8">
+                        <div className="mb-[30px] flex flex-wrap items-baseline justify-between gap-2.5">
+                            <h2 className="m-0 text-[clamp(30px,5vw,40px)] font-extrabold tracking-[-0.04em] text-[#ece3d2]">
+                                Favoritas
+                            </h2>
+                            <span className="font-mono text-[11px] tracking-[0.14em] text-[#ece3d2]/45">
+                                {favTracks.length} {favTracks.length === 1 ? 'FAIXA' : 'FAIXAS'} · SELEÇÃO PESSOAL
+                            </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-[18px] sm:grid-cols-4 sm:gap-[22px]">
+                            {favTracks.map((song) => (
+                                <a
+                                    key={song.id}
+                                    href={song.track_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group"
+                                >
+                                    <div className="relative overflow-hidden rounded-[5px] shadow-[0_12px_30px_-14px_rgba(0,0,0,0.7)]">
+                                        <Cover song={song} big />
+                                        <div className="absolute right-[11px] top-[11px] z-[2] grid h-[30px] w-[30px] place-items-center rounded-full bg-[#16120c]/55 text-[#cdef36] backdrop-blur-sm">
+                                            <HeartIcon className="h-[15px] w-[15px] fill-current" />
+                                        </div>
+                                        {canRemove && <OwnerMenu song={song} />}
                                     </div>
-                                    {canRemove && <OwnerMenu song={song} />}
-                                </div>
-                                <div className="mt-[11px] truncate text-[14.5px] font-semibold text-mir-text">
-                                    {song.track_title}
-                                </div>
-                                <div className="mt-0.5 truncate text-[12.5px] text-mir-text2">
-                                    {song.artist_name}
-                                </div>
-                            </a>
-                        ))}
+                                    <div className="mt-3 truncate text-[15px] font-bold text-[#ece3d2]">
+                                        {song.track_title}
+                                    </div>
+                                    <div className="mt-0.5 truncate font-mono text-[11px] text-[#ece3d2]/50">
+                                        {song.artist_name}
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
                     </div>
                 </section>
             )}
 
-            {/* ACERVO SALVO */}
-            <section className="pb-16 pt-9">
-                <div className="mb-[18px] flex flex-wrap items-baseline justify-between gap-[18px]">
-                    <div className="flex items-baseline gap-[11px]">
-                        <h3 className="whitespace-nowrap text-[13px] font-bold uppercase tracking-[0.13em] text-mir-text2">
-                            Acervo salvo
-                        </h3>
-                        <span className="font-mono text-[11px] text-mir-text3">
-                            {list.length} {list.length === 1 ? 'faixa' : 'faixas'}
-                            {filter === 'all' ? ` · ${earlyCount} antecipadas` : ''}
-                        </span>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-[11px]">
-                        <div className="flex gap-1 rounded-full border border-mir-line bg-mir-fill1 p-[3px]">
-                            {FILTERS.map((f) => (
-                                <button
-                                    key={f.id}
-                                    onClick={() => setFilter(f.id)}
-                                    className={`rounded-full px-[15px] py-[7px] text-[12.5px] font-semibold transition-colors ${
-                                        filter === f.id
-                                            ? 'bg-mir-acc text-mir-on-acc'
-                                            : 'text-mir-text2 hover:text-mir-text'
-                                    }`}
+            {/* ACERVO SALVO — paper */}
+            <section className="w-full bg-[#ece3d2] text-[#16120c]">
+                <div className="mx-auto w-full max-w-[1200px] px-5 py-16 sm:px-8">
+                    <div className="mb-[30px] flex flex-wrap items-end justify-between gap-[18px]">
+                        <div>
+                            <h2 className="m-0 mb-1.5 text-[clamp(30px,5vw,40px)] font-extrabold tracking-[-0.04em]">
+                                Acervo salvo
+                            </h2>
+                            <span className="font-mono text-[11px] tracking-[0.14em] text-[#16120c]/50">
+                                {list.length} {list.length === 1 ? 'FAIXA' : 'FAIXAS'}
+                                {filter === 'all' ? ` · ${earlyCount} ANTECIPADAS` : ''}
+                            </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3.5">
+                            <div className="flex gap-1 rounded-full bg-[#16120c]/[0.06] p-1">
+                                {FILTERS.map((f) => (
+                                    <button
+                                        key={f.id}
+                                        onClick={() => setFilter(f.id)}
+                                        className={`rounded-full px-4 py-2 font-mono text-[11px] uppercase tracking-[0.1em] transition ${
+                                            filter === f.id
+                                                ? 'bg-[#cdef36] text-[#16120c]'
+                                                : 'text-[#16120c]/45 hover:text-[#16120c]/70'
+                                        }`}
+                                    >
+                                        {f.label}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="relative flex items-center">
+                                <select
+                                    value={sort}
+                                    onChange={(e) => setSort(e.target.value as Sort)}
+                                    aria-label="Ordenar"
+                                    className="cursor-pointer appearance-none rounded-full border-[1.5px] border-[#16120c]/20 bg-transparent py-2 pl-3.5 pr-8 font-mono text-[12px] text-[#16120c] outline-none transition hover:border-[#16120c]/40"
                                 >
-                                    {f.label}
-                                </button>
-                            ))}
-                        </div>
-                        <div className="relative flex items-center">
-                            <select
-                                value={sort}
-                                onChange={(e) => setSort(e.target.value as Sort)}
-                                aria-label="Ordenar"
-                                className="cursor-pointer appearance-none rounded-full border border-mir-line bg-mir-fill1 py-2 pl-3.5 pr-8 text-[12.5px] font-semibold text-mir-text outline-none transition hover:border-mir-line2"
-                            >
-                                <option value="recent">Mais recentes</option>
-                                <option value="old">Mais antigas</option>
-                                <option value="az">Título A–Z</option>
-                                <option value="artist">Artista A–Z</option>
-                            </select>
-                            <ChevronDownIcon className="pointer-events-none absolute right-[11px] h-3.5 w-3.5 text-mir-text3" />
+                                    <option value="recent">Mais recentes</option>
+                                    <option value="old">Mais antigas</option>
+                                    <option value="az">Título A–Z</option>
+                                    <option value="artist">Artista A–Z</option>
+                                </select>
+                                <ChevronDownIcon className="pointer-events-none absolute right-[11px] h-3.5 w-3.5 text-[#16120c]/50" />
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(126px,1fr))] gap-3.5 sm:grid-cols-[repeat(auto-fill,minmax(152px,1fr))] sm:gap-[18px]">
-                    {list.length === 0 && (
-                        <div className="col-span-full rounded-[13px] border border-dashed border-mir-line2 p-[54px] text-center font-mono text-[13px] text-mir-text3">
-                            nenhuma faixa neste filtro
-                        </div>
-                    )}
-                    {list.map((song) => (
-                        <a
-                            key={song.id}
-                            href={song.track_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group"
-                        >
-                            <div className="relative">
-                                <Cover
-                                    song={song}
-                                    className="rounded-[11px] transition duration-200 ease-out group-hover:-translate-y-[5px] group-hover:shadow-[0_16px_32px_rgba(0,0,0,0.42)]"
-                                />
-                                {isEarly(song) && (
-                                    <span className="absolute left-[9px] top-[9px] z-[2] inline-flex items-center gap-[5px] rounded-md bg-mir-acc px-[7px] py-[3px] font-mono text-[9px] font-semibold uppercase tracking-[0.06em] text-mir-on-acc">
-                                        <FlagIcon className="h-[9px] w-[9px]" />
-                                        early
-                                    </span>
-                                )}
-                                <span className="absolute bottom-2.5 right-2.5 z-[2] grid h-[38px] w-[38px] translate-y-[7px] scale-90 place-items-center rounded-full bg-mir-acc text-mir-on-acc opacity-0 shadow-[0_8px_20px_rgba(0,0,0,0.45)] transition-all duration-200 group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100">
-                                    <PlayIcon className="h-4 w-4 fill-current" />
-                                </span>
-                                {canRemove && <OwnerMenu song={song} />}
+                    <div className="grid grid-cols-2 gap-x-3.5 gap-y-[22px] sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))] sm:gap-x-[18px]">
+                        {list.length === 0 && (
+                            <div className="col-span-full rounded-[5px] border border-dashed border-[#16120c]/20 p-[54px] text-center font-mono text-[13px] text-[#16120c]/50">
+                                nenhuma faixa neste filtro
                             </div>
-                            <div className="mt-2.5 truncate text-[13.5px] font-semibold text-mir-text">
-                                {song.track_title}
-                            </div>
-                            <div className="mt-px truncate text-[11.5px] text-mir-text2">
-                                {song.artist_name}
-                            </div>
-                            {savedWhen(song.claimedat) && (
-                                <div className="mt-[5px] font-mono text-[10px] text-mir-text3">
-                                    {savedWhen(song.claimedat)}
-                                </div>
-                            )}
-                        </a>
-                    ))}
+                        )}
+                        {list.map((song) => {
+                            const early = isEarly(song)
+                            return (
+                                <a
+                                    key={song.id}
+                                    href={song.track_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group"
+                                >
+                                    <div className="relative overflow-hidden rounded-[5px] shadow-[0_10px_22px_-12px_rgba(22,18,12,0.4)] transition duration-200 ease-out group-hover:-translate-y-[5px] group-hover:shadow-[0_18px_34px_-12px_rgba(22,18,12,0.5)]">
+                                        <Cover song={song} />
+                                        {early && (
+                                            <span className="absolute left-[9px] top-[9px] z-[2] inline-flex items-center gap-[5px] rounded-[3px] bg-[#cdef36] px-[7px] py-[3px] font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-[#16120c] shadow-[0_2px_6px_rgba(0,0,0,0.25)]">
+                                                <FlagIcon className="h-[9px] w-[9px]" />
+                                                early
+                                            </span>
+                                        )}
+                                        {song.is_favorited && (
+                                            <span className="absolute right-[9px] top-[9px] z-[2] grid h-6 w-6 place-items-center rounded-full bg-[#16120c]/50 text-[#cdef36] backdrop-blur-sm">
+                                                <HeartIcon className="h-3 w-3 fill-current" />
+                                            </span>
+                                        )}
+                                        {canRemove && <OwnerMenu song={song} dark={false} />}
+                                    </div>
+                                    <div className="mt-2.5 truncate text-[14px] font-bold text-[#16120c]">
+                                        {song.track_title}
+                                    </div>
+                                    <div className="mt-0.5 truncate font-mono text-[10px] text-[#16120c]/55">
+                                        {song.artist_name}
+                                    </div>
+                                    <div className="mt-2 flex items-center justify-between font-mono text-[10px]">
+                                        <span className="text-[#16120c]/42">
+                                            {savedWhen(song.claimedat)}
+                                        </span>
+                                        {early && (
+                                            <span className="flex items-center gap-1 font-bold text-[#16120c]">
+                                                <span className="inline-block h-1.5 w-1.5 bg-[#cdef36]" />
+                                                {earlyMargin(song)}
+                                            </span>
+                                        )}
+                                    </div>
+                                </a>
+                            )
+                        })}
+                    </div>
                 </div>
             </section>
         </>

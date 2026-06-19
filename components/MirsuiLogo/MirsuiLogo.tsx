@@ -13,14 +13,13 @@ export default function MirsuiLogo({ size = 38, className }: MirsuiLogoProps) {
             viewBox="0 0 100 100"
             aria-hidden="true"
         >
-            <rect width="100" height="100" rx="22" fill="#13110f" />
-            <g transform="translate(50 50) scale(0.64) translate(-50 -50)">
-                <path
-                    d="M50 10 A40 40 0 0 1 50 90 A20 20 0 0 0 50 50 A20 20 0 0 1 50 10 Z"
-                    fill="#ece8e0"
-                />
-                <circle cx="50" cy="30" r="7" fill="#84b86a" />
-            </g>
+            <circle cx="50" cy="50" r="49" fill="#16120c" />
+            <path
+                d="M50 1 a49 49 0 0 1 0 98 a24.5 24.5 0 0 1 0-49 a24.5 24.5 0 0 0 0-49z"
+                fill="#cdef36"
+            />
+            <circle cx="50" cy="25.5" r="7.2" fill="#16120c" />
+            <circle cx="50" cy="74.5" r="7.2" fill="#cdef36" />
         </svg>
     )
 }

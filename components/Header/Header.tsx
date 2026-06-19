@@ -3,7 +3,7 @@
 import SearchWithResults from '../SearchWithResults/SearchWithResults'
 import MirsuiLogo from '../MirsuiLogo/MirsuiLogo'
 import LoginModal from '../ModalLogin/ModalLogin'
-import { ChevronDown, LogOut, Settings, UserRound } from 'lucide-react'
+import { LogOut, Settings, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -42,7 +42,7 @@ const navLinks: NavLink[] = [
         match: (p) => p.startsWith('/library') || p.startsWith('/user'),
     },
     {
-        title: 'Prophet',
+        title: 'Faro',
         url: '/prophet',
         match: (p) => p.split('/').includes('prophet'),
     },
@@ -91,32 +91,14 @@ export default function Header({ userProfile }: HeaderProps) {
             document.removeEventListener('mousedown', handleClickOutside)
     }, [isMenuOpen])
 
-    const getInitials = (
-        name: string | undefined,
-        email: string | undefined
-    ) => {
-        if (name) {
-            return name
-                .split(' ')
-                .map((n) => n[0])
-                .join('')
-                .toUpperCase()
-                .slice(0, 2)
-        }
-        if (email) {
-            return email[0].toUpperCase()
-        }
-        return 'U'
-    }
-
     return (
         <header className="sticky top-0 z-40 border-b border-mir-line bg-mir-bg/85 backdrop-blur-xl">
             <nav className="mx-auto flex h-[72px] w-full max-w-[1180px] items-center gap-7 px-5 sm:px-10">
                 <Link
                     href="/"
-                    className="flex items-center gap-2.5 text-xl font-extrabold tracking-tight text-mir-text"
+                    className="flex items-center gap-2.5 text-2xl font-black tracking-[-0.04em] text-mir-text"
                 >
-                    <MirsuiLogo size={38} />
+                    <MirsuiLogo size={30} />
                     mirsui
                 </Link>
 
@@ -127,9 +109,9 @@ export default function Header({ userProfile }: HeaderProps) {
                             <Link
                                 key={link.title}
                                 href={link.url}
-                                className={`text-[15px] font-semibold transition-colors ${
+                                className={`relative text-[15px] font-semibold transition-colors ${
                                     active
-                                        ? 'text-mir-text'
+                                        ? "text-mir-text after:absolute after:-bottom-[3px] after:left-0 after:h-[2px] after:w-full after:bg-mir-acc after:content-['']"
                                         : 'text-mir-text2 hover:text-mir-text'
                                 }`}
                             >
@@ -149,29 +131,22 @@ export default function Header({ userProfile }: HeaderProps) {
                             <button
                                 type="button"
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                className="group flex items-center gap-2 rounded-full border border-mir-line bg-mir-fill1 py-1 pl-1 pr-2.5 transition-colors hover:border-mir-line2 hover:bg-mir-fill2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mir-acc/60"
+                                aria-label="Menu do perfil"
+                                className="block h-[38px] w-[38px] overflow-hidden rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mir-acc/60"
+                                style={{
+                                    background: userProfile?.avatar_url
+                                        ? '#16120c'
+                                        : 'radial-gradient(130% 130% at 32% 24%,#f3ecdb 0%,#cdef36 22%,#c14a26 54%,#16120c 88%)',
+                                    boxShadow: '0 0 0 1.5px rgba(236,227,210,0.18)',
+                                }}
                             >
-                                <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-mir-card">
-                                    {userProfile?.avatar_url ? (
-                                        <img
-                                            src={userProfile.avatar_url}
-                                            alt="User avatar"
-                                            className="h-full w-full object-cover"
-                                        />
-                                    ) : (
-                                        <span className="text-xs font-bold text-mir-text">
-                                            {getInitials(
-                                                userProfile?.display_name,
-                                                userProfile?.email
-                                            )}
-                                        </span>
-                                    )}
-                                </div>
-                                <ChevronDown
-                                    className={`h-4 w-4 text-mir-text3 transition-transform duration-200 ${
-                                        isMenuOpen ? 'rotate-180' : ''
-                                    }`}
-                                />
+                                {userProfile?.avatar_url && (
+                                    <img
+                                        src={userProfile.avatar_url}
+                                        alt="User avatar"
+                                        className="h-full w-full rounded-full object-cover"
+                                    />
+                                )}
                             </button>
 
                             {isMenuOpen && (

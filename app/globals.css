@@ -274,20 +274,21 @@
    Portado de referencia/Mirsui - Landing.html, escopado em .mir-landing
    ====================================================== */
 .mir-landing {
-  --bg: #13110f;
+  --bg: #16120c;
   --surface: #1a1714;
-  --line: rgba(236, 232, 224, 0.085);
-  --line2: rgba(236, 232, 224, 0.15);
-  --fill1: rgba(236, 232, 224, 0.035);
-  --fill2: rgba(236, 232, 224, 0.07);
-  --text: #ece8e0;
+  --line: rgba(236, 227, 210, 0.085);
+  --line2: rgba(236, 227, 210, 0.15);
+  --fill1: rgba(236, 227, 210, 0.035);
+  --fill2: rgba(236, 227, 210, 0.07);
+  --text: #ece3d2;
   --text2: #9b958b;
   --text3: #6a655c;
-  --acc: #84b86a;
-  --acc-soft: rgba(132, 184, 106, 0.14);
-  --on-acc: #0e1408;
-  --mono: var(--font-jetbrains), ui-monospace, monospace;
-  --wrap: 1180px;
+  --acc: #cdef36;
+  --acc-soft: rgba(205, 239, 54, 0.14);
+  --on-acc: #16120c;
+  --mono: var(--font-space-mono), var(--font-jetbrains), ui-monospace, monospace;
+  --display: var(--font-archivo), 'Archivo', system-ui, sans-serif;
+  --wrap: 1320px;
   --pad: clamp(20px, 5vw, 56px);
   background: var(--bg);
   color: var(--text);
@@ -374,13 +375,13 @@
 }
 @keyframes mir-pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(132, 184, 106, 0.5);
+    box-shadow: 0 0 0 0 rgba(205, 239, 54, 0.5);
   }
   70% {
-    box-shadow: 0 0 0 7px rgba(132, 184, 106, 0);
+    box-shadow: 0 0 0 7px rgba(205, 239, 54, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(132, 184, 106, 0);
+    box-shadow: 0 0 0 0 rgba(205, 239, 54, 0);
   }
 }
 
@@ -396,7 +397,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: #0c0b0a url('/assets/track-art2.png') 58% 32% / cover no-repeat;
+  background: #0c0b0a url('/assets/track-art2.png') 58% 40% / cover no-repeat;
   transform: scale(1.04);
   animation: mir-slowzoom 26s ease-in-out infinite alternate;
 }
@@ -454,10 +455,10 @@
 .mir-landing .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-weight: 800;
-  font-size: 18px;
-  letter-spacing: -0.02em;
+  gap: 11px;
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: -0.04em;
   color: var(--text);
 }
 .mir-landing .lp-nav .links {
@@ -473,6 +474,11 @@
 }
 .mir-landing .lp-nav .links a:hover {
   color: var(--text);
+}
+.mir-landing .lp-nav .links a.active {
+  color: var(--text);
+  padding-bottom: 3px;
+  border-bottom: 2px solid var(--acc);
 }
 .mir-landing .lp-nav .nav-right {
   margin-left: auto;
@@ -497,38 +503,61 @@
   align-items: center;
   gap: 9px;
   font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.18em;
+  font-size: 12px;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(236, 232, 224, 0.78);
+  color: var(--acc);
 }
 .mir-landing .hero h1 {
-  margin: 20px 0 0;
-  font-weight: 800;
-  letter-spacing: -0.045em;
-  line-height: 0.9;
-  font-size: clamp(46px, 9.2vw, 128px);
+  margin: 22px 0 0;
+  font-family: var(--display);
+  font-weight: 900;
+  letter-spacing: -0.055em;
+  line-height: 0.82;
+  font-size: clamp(56px, 11vw, 164px);
   max-width: 13ch;
   text-wrap: balance;
-  text-shadow: 0 2px 40px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 2px 40px rgba(22, 18, 12, 0.5);
+}
+.mir-landing .hero h1 .dot {
+  color: var(--acc);
 }
 .mir-landing .hero-sub {
   margin: 24px 0 0;
-  font-size: clamp(15.5px, 1.7vw, 19px);
-  line-height: 1.5;
-  color: rgba(236, 232, 224, 0.82);
+  font-size: clamp(17px, 1.7vw, 23px);
+  line-height: 1.45;
+  color: rgba(236, 227, 210, 0.82);
   max-width: 40ch;
+  text-shadow: 0 1px 18px rgba(22, 18, 12, 0.6);
+}
+.mir-landing .hero-sub em {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--acc);
 }
 .mir-landing .hero-cta {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  gap: 14px;
   margin-top: 32px;
   flex-wrap: wrap;
 }
 .mir-landing .hero-cta .b {
-  padding: 14px 24px;
-  border-radius: 12px;
-  font-size: 15px;
+  padding: 16px 28px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+}
+.mir-landing .hero-cta .b-acc {
+  box-shadow: 0 10px 30px -10px rgba(205, 239, 54, 0.5);
+}
+.mir-landing .hero-fine {
+  margin-top: 26px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(236, 227, 210, 0.5);
 }
 
 /* ticker ao vivo — base do hero */

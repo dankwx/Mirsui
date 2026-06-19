@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import '../globals.css'
 import { Toaster } from '@/components/ui/toaster'
-import Footer from '@/components/Footer/Footer'
+import LandingFooter from '@/components/Footer/LandingFooter'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -23,7 +23,7 @@ export default function DashboardFooter({
             <main className="flex-1 bg-background text-foreground">
                 {children}
             </main>
-            <Footer />
+            <LandingFooter />
         </div>
     )
 }

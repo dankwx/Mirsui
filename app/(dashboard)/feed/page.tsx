@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react'
 import { getFeedPostsWithInteractions, checkUserLikedTracks, getRecentClaims } from '@/utils/feedService.backend'
 import FeedContent from '@/components/FeedContent/FeedContent'
+import LandingFooter from '@/components/Footer/LandingFooter'
 import { FeedSkeleton } from '@/components/ui/feed-skeleton'
 import { createClient } from '@/utils/supabase/server'
 import type { Metadata } from 'next'
@@ -44,8 +45,11 @@ async function FeedData() {
 
 export default function FeedPage() {
     return (
-        <Suspense fallback={<FeedSkeleton />}>
-            <FeedData />
-        </Suspense>
+        <>
+            <Suspense fallback={<FeedSkeleton />}>
+                <FeedData />
+            </Suspense>
+            <LandingFooter />
+        </>
     )
 }

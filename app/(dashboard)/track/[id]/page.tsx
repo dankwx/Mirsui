@@ -8,10 +8,11 @@ import { getTopTrackClaimers } from '@/utils/trackPopularityService'
 import { searchYouTubeVideo } from '@/utils/youtubeService'
 import TrackActions from '@/components/TrackActions/TrackActions'
 import TrackPreviewBar from '@/components/TrackPreviewBar/TrackPreviewBar'
+import ProfileFooter from '@/components/Profile/ProfileFooter'
 import type { Metadata } from 'next'
 
 import Link from 'next/link'
-import { ArrowLeft, Clock, Crown, TrendingUp } from 'lucide-react'
+import { ArrowLeft, Clock, Crown, Flag, TrendingUp } from 'lucide-react'
 
 export async function generateMetadata({
     params,
@@ -120,6 +121,15 @@ export default async function TrackDetailsPage({
         topClaimers = await getTopTrackClaimers(trackInfo.uri, 8)
     }
 
+    const firstClaimer = topClaimers[0]
+    const firstClaimerProfile = Array.isArray(firstClaimer?.profiles)
+        ? firstClaimer?.profiles[0]
+        : firstClaimer?.profiles
+    const firstClaimerName =
+        firstClaimerProfile?.display_name ||
+        firstClaimerProfile?.username ||
+        'Alguém'
+
     // Verifica se o usuário atual já reivindicou esta faixa
     let hasUserClaimed = false
     let userClaimPosition: number | null = null
@@ -155,6 +165,13 @@ export default async function TrackDetailsPage({
 
     const coverTone = tone(artistNames + (trackInfo?.name || ''))
 
+    // Selo editorial — derivados determinísticos para o rodapé
+    let seed = 0
+    for (let i = 0; i < trackId.length; i++)
+        seed = (seed * 31 + trackId.charCodeAt(i)) >>> 0
+    const trackNo = String(seed % 1000).padStart(3, '0')
+    const footerSince = releaseYear || 2024
+
     return (
         <div>
             {/* ============ HERO ============ */}
@@ -175,18 +192,18 @@ export default async function TrackDetailsPage({
                         <ArrowLeft className="h-3.5 w-3.5" /> Voltar
                     </Link>
 
-                    <div className="flex flex-col gap-7 md:flex-row md:items-start md:gap-[38px]">
+                    <div className="flex flex-col gap-7 md:flex-row md:items-start md:gap-[46px]">
                         {/* Capa */}
-                        <div className="w-[180px] flex-none sm:w-[230px] md:w-[270px]">
+                        <div className="relative w-[200px] flex-none overflow-hidden rounded-[10px] border border-mir-line2 shadow-[0_30px_60px_-24px_rgba(0,0,0,0.7)] sm:w-[260px] md:w-[330px]">
                             {albumImageUrl ? (
                                 <img
                                     src={albumImageUrl}
                                     alt={`Capa de ${trackInfo?.album.name || 'álbum'}`}
-                                    className="aspect-square w-full rounded-2xl border border-mir-line2 object-cover shadow-[0_24px_60px_rgba(0,0,0,0.5)]"
+                                    className="aspect-square w-full object-cover"
                                 />
                             ) : (
                                 <div
-                                    className="mir-cover relative aspect-square w-full rounded-2xl border border-mir-line2 shadow-[0_24px_60px_rgba(0,0,0,0.5)]"
+                                    className="mir-cover relative aspect-square w-full"
                                     style={{ ['--tone' as string]: coverTone }}
                                 >
                                     <span className="absolute bottom-1 left-3.5 select-none text-[84px] font-extrabold leading-[0.8] tracking-[-0.05em] text-white/[0.07]">
@@ -194,12 +211,15 @@ export default async function TrackDetailsPage({
                                     </span>
                                 </div>
                             )}
+                            <span className="absolute left-3.5 top-3.5 inline-flex items-center gap-1.5 rounded-full border border-[rgba(205,239,54,0.4)] bg-[rgba(22,18,12,0.62)] px-2.5 py-1 font-mono text-[9.5px] font-bold uppercase tracking-[0.12em] text-mir-acc backdrop-blur-sm">
+                                <Flag className="h-2.5 w-2.5" /> Janela fechada
+                            </span>
                         </div>
 
                         {/* Info */}
                         <div className="min-w-0 flex-1 pt-1">
                             <div className="flex flex-wrap items-center gap-3">
-                                <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[rgba(132,184,106,0.32)] bg-mir-acc-soft py-1 pl-2 pr-2.5 text-[11px] font-bold tracking-[0.02em] text-mir-acc">
+                                <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[rgba(205,239,54,0.4)] bg-mir-acc-soft py-1 pl-2 pr-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.08em] text-mir-acc">
                                     <TrendingUp className="h-3 w-3" /> Em alta
                                 </span>
                                 <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-mir-text3">
@@ -304,111 +324,159 @@ export default async function TrackDetailsPage({
                         </dl>
                     </section>
 
-                    {/* Reivindicações */}
-                    <section className="rounded-2xl border border-mir-line bg-mir-surface px-[22px] py-5">
-                        <div className="flex items-baseline justify-between gap-2.5">
-                            <span className="text-[12.5px] font-bold uppercase tracking-[0.1em] text-mir-text2">
-                                Reivindicações
-                            </span>
-                            <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-mir-text3">
-                                {totalClaims} no total
-                            </span>
-                        </div>
-                        {topClaimers.length > 0 ? (
-                            <ol className="mt-4 flex flex-col">
-                                {topClaimers.map((claimer, index) => {
-                                    const profile = Array.isArray(claimer.profiles)
-                                        ? claimer.profiles[0]
-                                        : claimer.profiles
-                                    const name =
-                                        profile?.display_name ||
-                                        profile?.username ||
-                                        'Usuário'
-                                    const isFirst = (claimer.position ?? index + 1) === 1
-                                    return (
-                                        <li
-                                            key={claimer.user_id}
-                                            className="grid grid-cols-[24px_34px_1fr] items-center gap-3 border-b border-mir-line py-[9px] first:pt-0 last:border-b-0 last:pb-0"
-                                        >
-                                            <span
-                                                className={`grid place-items-center text-center font-mono text-[12px] tabular-nums ${
-                                                    isFirst ? 'text-mir-acc' : 'text-mir-text3'
-                                                }`}
-                                            >
-                                                {isFirst ? (
-                                                    <Crown className="h-[13px] w-[13px]" />
-                                                ) : (
-                                                    String(claimer.position ?? index + 1).padStart(2, '0')
-                                                )}
-                                            </span>
-                                            <span className="flex h-[34px] w-[34px] items-center justify-center overflow-hidden rounded-full border border-mir-line2 bg-[radial-gradient(120%_120%_at_30%_22%,#322c22,#1b1813)] text-[13px] font-bold text-mir-text">
-                                                {profile?.avatar_url ? (
-                                                    <img
-                                                        src={profile.avatar_url}
-                                                        alt={name}
-                                                        className="h-full w-full object-cover"
-                                                    />
-                                                ) : (
-                                                    name.charAt(0).toUpperCase()
-                                                )}
-                                            </span>
-                                            <Link
-                                                href={`/user/${profile?.username || claimer.user_id}`}
-                                                className="flex min-w-0 flex-col gap-0.5"
-                                            >
-                                                <span className="truncate text-[13.5px] font-semibold text-mir-text">
-                                                    {name}
-                                                </span>
-                                                <span className="font-mono text-[10.5px] text-mir-text3">
-                                                    {isFirst ? 'primeiro hipster' : 'reivindicou'} ·{' '}
-                                                    {claimWhen(claimer.claimedat)}
-                                                </span>
-                                            </Link>
-                                        </li>
-                                    )
-                                })}
-                            </ol>
-                        ) : (
-                            <p className="mt-4 py-2 text-center font-mono text-[12px] text-mir-text3">
-                                Ninguém reivindicou ainda
-                            </p>
-                        )}
-                    </section>
-
                     {/* Números */}
-                    <section className="rounded-2xl border border-mir-line bg-mir-surface px-[22px] py-5">
-                        <span className="text-[12.5px] font-bold uppercase tracking-[0.1em] text-mir-text2">
+                    <section className="rounded-xl bg-mir-acc px-[22px] py-5 text-mir-on-acc">
+                        <span className="font-mono text-[11px] font-bold uppercase tracking-[0.16em]">
                             Números
                         </span>
-                        <div className="mt-4 flex overflow-hidden rounded-xl border border-mir-line">
-                            <div className="flex flex-1 flex-col gap-1.5 border-r border-mir-line px-3.5 py-3.5">
-                                <span className="text-[22px] font-extrabold leading-none tracking-[-0.02em] tabular-nums text-mir-text">
+                        <div className="mt-3.5 grid grid-cols-3 gap-2">
+                            <div>
+                                <div className="text-[34px] font-black leading-none tracking-[-0.04em] tabular-nums">
                                     {totalClaims}
-                                </span>
-                                <span className="font-mono text-[9px] uppercase tracking-[0.08em] text-mir-text3">
-                                    reivindicações
-                                </span>
+                                </div>
+                                <div className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.1em] opacity-70">
+                                    Reivind.
+                                </div>
                             </div>
-                            <div className="flex flex-1 flex-col gap-1.5 border-r border-mir-line px-3.5 py-3.5">
-                                <span className="text-[22px] font-extrabold leading-none tracking-[-0.02em] tabular-nums text-mir-text">
+                            <div>
+                                <div className="text-[34px] font-black leading-none tracking-[-0.04em] tabular-nums">
                                     {trackInfo?.popularity ?? '—'}
-                                </span>
-                                <span className="font-mono text-[9px] uppercase tracking-[0.08em] text-mir-text3">
-                                    popularidade
-                                </span>
+                                </div>
+                                <div className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.1em] opacity-70">
+                                    Popular.
+                                </div>
                             </div>
-                            <div className="flex flex-1 flex-col gap-1.5 px-3.5 py-3.5">
-                                <span className="text-[22px] font-extrabold leading-none tracking-[-0.02em] tabular-nums text-mir-acc">
+                            <div>
+                                <div className="text-[34px] font-black leading-none tracking-[-0.04em] tabular-nums">
                                     2.1B
-                                </span>
-                                <span className="font-mono text-[9px] uppercase tracking-[0.08em] text-mir-text3">
-                                    reproduções
-                                </span>
+                                </div>
+                                <div className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.1em] opacity-70">
+                                    Plays
+                                </div>
                             </div>
                         </div>
                     </section>
                 </aside>
             </div>
+
+            {/* ============ A PROVA ============ */}
+            {topClaimers.length > 0 && (
+                <section className="bg-[#ece3d2] text-mir-bg">
+                    <div className="mx-auto w-full max-w-[1180px] px-5 py-16 sm:px-10">
+                        <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#c14a26]">
+                            ★ A prova
+                        </div>
+
+                        <div className="mt-3.5 flex flex-wrap items-end justify-between gap-4">
+                            <h2 className="m-0 max-w-[560px] text-[clamp(30px,4.5vw,52px)] font-black leading-[0.96] tracking-[-0.04em]">
+                                {firstClaimerName} ouviu{' '}
+                                <span className="text-[#c14a26]">antes</span> do mundo.
+                            </h2>
+                            <p className="m-0 max-w-[280px] font-mono text-[12px] leading-relaxed text-mir-bg/60">
+                                A janela abre quando a faixa ainda é obscura e fecha
+                                quando vira tendência. Reivindicar dentro dela é o
+                                que entra pra história.
+                            </p>
+                        </div>
+
+                        {/* Timeline */}
+                        <div className="mt-10 rounded-xl border border-mir-bg/10 bg-[#efe7d6] px-7 pb-7 pt-9">
+                            <div className="relative my-3.5 h-[3px] rounded-sm bg-mir-bg/20">
+                                <div className="absolute left-[8%] right-[24%] top-0 h-[3px] rounded-sm bg-mir-bg" />
+                                <div className="absolute left-[8%] top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-mir-bg bg-mir-acc" />
+                                <div className="absolute left-[76%] top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-mir-bg bg-[#c14a26]" />
+                            </div>
+                            <div className="flex justify-between font-mono text-[11px] tracking-[0.04em]">
+                                <div className="text-left">
+                                    <div className="font-bold text-mir-bg">
+                                        {firstClaimerName} reivindicou
+                                    </div>
+                                    <div className="mt-0.5 text-mir-bg/50">
+                                        {claimWhen(firstClaimer?.claimedat)} · obscura
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="font-bold text-[#c14a26]">
+                                        em alta agora
+                                    </div>
+                                    <div className="mt-0.5 text-mir-bg/50">
+                                        pico · {trackInfo?.popularity ?? '—'} popular.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Reivindicações */}
+                        <div className="mt-8 flex flex-wrap items-baseline justify-between gap-2">
+                            <h3 className="m-0 text-[22px] font-extrabold tracking-[-0.02em]">
+                                Reivindicações
+                            </h3>
+                            <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-mir-bg/50">
+                                {totalClaims} no total · janela fechada
+                            </span>
+                        </div>
+                        <ol className="mt-3.5 flex flex-col gap-2.5">
+                            {topClaimers.map((claimer, index) => {
+                                const profile = Array.isArray(claimer.profiles)
+                                    ? claimer.profiles[0]
+                                    : claimer.profiles
+                                const name =
+                                    profile?.display_name ||
+                                    profile?.username ||
+                                    'Usuário'
+                                const isFirst =
+                                    (claimer.position ?? index + 1) === 1
+                                return (
+                                    <li
+                                        key={claimer.user_id}
+                                        className="flex items-center gap-4 rounded-[10px] border border-mir-bg/10 bg-[#efe7d6] px-5 py-[18px]"
+                                    >
+                                        <span className="w-6 flex-none text-center font-mono text-[18px] font-bold text-[#c14a26]">
+                                            {isFirst ? (
+                                                <Crown className="mx-auto h-[18px] w-[18px]" />
+                                            ) : (
+                                                String(
+                                                    claimer.position ?? index + 1
+                                                ).padStart(2, '0')
+                                            )}
+                                        </span>
+                                        <span className="flex h-[46px] w-[46px] flex-none items-center justify-center overflow-hidden rounded-full border border-mir-bg/10 bg-[radial-gradient(130%_130%_at_30%_22%,#f3ecdb_0%,#cdef36_20%,#c14a26_52%,#16120c_88%)] text-[15px] font-bold text-mir-text">
+                                            {profile?.avatar_url ? (
+                                                <img
+                                                    src={profile.avatar_url}
+                                                    alt={name}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            ) : null}
+                                        </span>
+                                        <Link
+                                            href={`/user/${profile?.username || claimer.user_id}`}
+                                            className="min-w-0 flex-1"
+                                        >
+                                            <div className="truncate text-[18px] font-extrabold tracking-[-0.02em]">
+                                                {name}
+                                            </div>
+                                            <div className="mt-0.5 font-mono text-[11px] text-mir-bg/55">
+                                                {isFirst
+                                                    ? 'primeiro a reivindicar'
+                                                    : 'reivindicou'}{' '}
+                                                · {claimWhen(claimer.claimedat)}
+                                            </div>
+                                        </Link>
+                                        {isFirst && (
+                                            <span className="flex-none rounded-full bg-mir-bg px-[11px] py-[5px] font-mono text-[11px] font-bold uppercase tracking-[0.08em] text-mir-acc">
+                                                1º hipster
+                                            </span>
+                                        )}
+                                    </li>
+                                )
+                            })}
+                        </ol>
+                    </div>
+                </section>
+            )}
+
+            <ProfileFooter profileNo={trackNo} memberSince={footerSince} />
         </div>
     )
 }

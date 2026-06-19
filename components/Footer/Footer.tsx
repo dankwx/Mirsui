@@ -11,7 +11,7 @@ function Glyph({ size = 20 }: { size?: number }) {
                 stroke="currentColor"
                 strokeWidth="1.7"
             />
-            <circle cx="12" cy="12" r="3" fill="#84b86a" />
+            <circle cx="12" cy="12" r="3" fill="#cdef36" />
         </svg>
     )
 }

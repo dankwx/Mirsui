@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#16120c}
+::selection{background:#cdef36;color:#16120c}
+@keyframes mir-ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+html{scroll-behavior:smooth}
+</style>
+</helmet>
+
+<div style="background:#16120c;font-family:Archivo,system-ui,sans-serif;color:#ece3d2;min-height:100vh;width:100%;overflow-x:hidden;-webkit-font-smoothing:antialiased">
+
+  <!-- TICKER -->
+  <div style="background:#cdef36;color:#16120c;overflow:hidden;white-space:nowrap;border-bottom:2px solid #16120c">
+    <div style="display:inline-flex;animation:mir-ticker 38s linear infinite;will-change:transform">
+      <span style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.14em;padding:7px 0">&nbsp;&nbsp;POLÍTICA DE PRIVACIDADE&nbsp;&nbsp;✦&nbsp;&nbsp;SEUS DADOS, SUAS REGRAS&nbsp;&nbsp;✦&nbsp;&nbsp;NADA DE VENDER SEU GOSTO&nbsp;&nbsp;✦&nbsp;&nbsp;Nº 047&nbsp;&nbsp;✦&nbsp;&nbsp;CONFORME A LGPD&nbsp;&nbsp;✦&nbsp;&nbsp;</span>
+      <span style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.14em;padding:7px 0">&nbsp;&nbsp;POLÍTICA DE PRIVACIDADE&nbsp;&nbsp;✦&nbsp;&nbsp;SEUS DADOS, SUAS REGRAS&nbsp;&nbsp;✦&nbsp;&nbsp;NADA DE VENDER SEU GOSTO&nbsp;&nbsp;✦&nbsp;&nbsp;Nº 047&nbsp;&nbsp;✦&nbsp;&nbsp;CONFORME A LGPD&nbsp;&nbsp;✦&nbsp;&nbsp;</span>
+    </div>
+  </div>
+
+  <!-- MASTHEAD -->
+  <header style="border-bottom:1px solid rgba(236,227,210,.12);position:sticky;top:0;z-index:40;background:rgba(22,18,12,.82);backdrop-filter:blur(12px)">
+    <div style="max-width:1100px;margin:0 auto;padding:15px 32px;display:flex;align-items:center;gap:36px">
+      <a href="Mirsui Feed.dc.html" style="display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit">
+        <svg width="30" height="30" viewBox="0 0 100 100" style="display:block"><circle cx="50" cy="50" r="49" fill="#16120c"></circle><path d="M50 1 a49 49 0 0 1 0 98 a24.5 24.5 0 0 1 0-49 a24.5 24.5 0 0 0 0-49z" fill="#cdef36"></path><circle cx="50" cy="25.5" r="7.2" fill="#16120c"></circle><circle cx="50" cy="74.5" r="7.2" fill="#cdef36"></circle></svg>
+        <span style="font-weight:900;font-size:24px;letter-spacing:-.04em">mirsui</span>
+      </a>
+      <nav style="display:flex;align-items:center;gap:26px;font-weight:600;font-size:15px">
+        <a href="Mirsui Feed.dc.html" style="color:rgba(236,227,210,.62);text-decoration:none">Início</a>
+        <a href="Mirsui Perfil.dc.html" style="color:rgba(236,227,210,.62);text-decoration:none">Acervo</a>
+        <a href="Mirsui Faro.dc.html" style="color:rgba(236,227,210,.62);text-decoration:none">Faro</a>
+      </nav>
+      <div style="flex:1"></div>
+      <a href="Mirsui Termos.dc.html" style="display:flex;align-items:center;gap:8px;color:#ece3d2;text-decoration:none;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;border:1px solid rgba(236,227,210,.22);border-radius:999px;padding:9px 16px">TERMOS →</a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section style="border-bottom:1px solid rgba(236,227,210,.1)">
+    <div style="max-width:1100px;margin:0 auto;padding:64px 32px 44px">
+      <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;color:#cdef36;margin-bottom:18px">★ DOCUMENTO LEGAL · 02 DE 02</div>
+      <h1 style="font-weight:900;font-size:clamp(56px,9vw,116px);line-height:.84;letter-spacing:-.055em;margin:0 0 22px">Política de<br>privacidade</h1>
+      <p style="font-size:18px;line-height:1.5;max-width:580px;color:rgba(236,227,210,.74);margin:0 0 24px">Seu gosto musical é a coisa mais íntima que você nos dá. Aqui está, em português claro, o que coletamos, por que, e o controle que você tem sobre tudo.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em">
+        <span style="background:rgba(236,227,210,.07);border:1px solid rgba(236,227,210,.14);border-radius:999px;padding:7px 14px;color:rgba(236,227,210,.66)">VIGÊNCIA · 18 JUN 2026</span>
+        <span style="background:rgba(236,227,210,.07);border:1px solid rgba(236,227,210,.14);border-radius:999px;padding:7px 14px;color:rgba(236,227,210,.66)">CONFORME A LGPD</span>
+        <span style="background:rgba(205,239,54,.1);border:1px solid rgba(205,239,54,.32);border-radius:999px;padding:7px 14px;color:#cdef36">LEITURA · ~5 MIN</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROMISE STRIP -->
+  <section style="background:#ece3d2;color:#16120c">
+    <div style="max-width:1100px;margin:0 auto;padding:34px 32px">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+        <sc-for list="{{ promises }}" as="pr" hint-placeholder-count="3">
+          <div style="display:flex;gap:14px;align-items:flex-start">
+            <span style="font-family:'Space Mono',monospace;font-weight:700;font-size:13px;color:#c14a26;flex:none;padding-top:2px">{{ pr.tag }}</span>
+            <div>
+              <div style="font-weight:800;font-size:16px;letter-spacing:-.02em;margin-bottom:4px">{{ pr.title }}</div>
+              <p style="font-family:'Space Mono',monospace;font-size:11.5px;line-height:1.55;color:rgba(22,18,12,.62);margin:0">{{ pr.desc }}</p>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- BODY -->
+  <section>
+    <div style="max-width:1100px;margin:0 auto;padding:0 32px 80px;display:grid;grid-template-columns:230px 1fr;gap:56px;align-items:start">
+
+      <!-- TOC -->
+      <aside style="position:sticky;top:90px;padding-top:48px">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.18em;color:rgba(236,227,210,.4);margin-bottom:16px">NESTE DOCUMENTO</div>
+        <nav style="display:flex;flex-direction:column;gap:2px">
+          <sc-for list="{{ toc }}" as="t" hint-placeholder-count="8">
+            <a href="{{ t.href }}" style="display:flex;gap:10px;text-decoration:none;color:rgba(236,227,210,.62);font-size:13.5px;font-weight:600;padding:7px 0;border-bottom:1px solid rgba(236,227,210,.07)">
+              <span style="font-family:'Space Mono',monospace;font-size:11px;color:#cdef36;flex:none">{{ t.num }}</span>
+              <span>{{ t.label }}</span>
+            </a>
+          </sc-for>
+        </nav>
+      </aside>
+
+      <!-- ARTICLES -->
+      <div style="padding-top:48px;min-width:0">
+        <sc-for list="{{ sections }}" as="s" hint-placeholder-count="8">
+          <article id="{{ s.id }}" style="padding-bottom:42px;margin-bottom:42px;border-bottom:1px solid rgba(236,227,210,.09);scroll-margin-top:90px">
+            <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:18px">
+              <span style="font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:#cdef36;flex:none">{{ s.num }}</span>
+              <h2 style="font-weight:800;font-size:clamp(24px,3vw,32px);letter-spacing:-.03em;line-height:1.04;margin:0">{{ s.title }}</h2>
+            </div>
+            <div style="padding-left:38px">
+              <sc-for list="{{ s.paras }}" as="p" hint-placeholder-count="2">
+                <p style="font-size:16px;line-height:1.66;color:rgba(236,227,210,.78);margin:0 0 14px;text-wrap:pretty">{{ p }}</p>
+              </sc-for>
+              <sc-if value="{{ s.hasList }}" hint-placeholder-val="{{ false }}">
+                <ul style="margin:6px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+                  <sc-for list="{{ s.items }}" as="it" hint-placeholder-count="3">
+                    <li style="display:flex;gap:12px;font-size:15px;line-height:1.55;color:rgba(236,227,210,.74)">
+                      <span style="color:#cdef36;flex:none;font-weight:700">→</span>
+                      <span>{{ it }}</span>
+                    </li>
+                  </sc-for>
+                </ul>
+              </sc-if>
+            </div>
+          </article>
+        </sc-for>
+
+        <!-- RIGHTS CARD -->
+        <div style="background:#ece3d2;color:#16120c;border-radius:16px;padding:34px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px">
+          <div style="max-width:440px">
+            <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:#c14a26;margin-bottom:10px">★ QUER VER, EXPORTAR OU APAGAR?</div>
+            <h3 style="font-weight:900;font-size:26px;letter-spacing:-.03em;margin:0 0 8px;line-height:1.05">Seus dados estão a um e-mail de distância.</h3>
+            <p style="font-family:'Space Mono',monospace;font-size:12px;line-height:1.6;color:rgba(22,18,12,.64);margin:0">Pedidos de acesso, correção ou exclusão são respondidos em até 15 dias.</p>
+          </div>
+          <a href="/cdn-cgi/l/email-protection#0373716a7562606a67626766436e6a7170766a2d656e" style="flex:none;display:flex;align-items:center;gap:8px;background:#16120c;color:#cdef36;text-decoration:none;font-weight:700;font-size:15px;padding:15px 26px;border-radius:999px"><span class="__cf_email__" data-cfemail="710103180710121815101514311c18030204185f171c">[email&#160;protected]</span> →</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="border-top:2px solid #cdef36">
+    <div style="max-width:1100px;margin:0 auto;padding:46px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px">
+      <div style="display:flex;align-items:center;gap:11px">
+        <svg width="26" height="26" viewBox="0 0 100 100"><circle cx="50" cy="50" r="49" fill="#16120c"></circle><path d="M50 1 a49 49 0 0 1 0 98 a24.5 24.5 0 0 1 0-49 a24.5 24.5 0 0 0 0-49z" fill="#cdef36"></path><circle cx="50" cy="25.5" r="7.2" fill="#16120c"></circle><circle cx="50" cy="74.5" r="7.2" fill="#cdef36"></circle></svg>
+        <span style="font-weight:900;font-size:20px;letter-spacing:-.04em">mirsui</span>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:rgba(236,227,210,.4);text-align:center">ARQUIVO MUSICAL CURATORIAL · Nº 047 · DESDE 2024<br>feito por quem ouve cedo demais.</div>
+      <div style="display:flex;gap:18px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:rgba(236,227,210,.55)">
+        <a href="Mirsui Termos.dc.html" style="color:inherit;text-decoration:none">TERMOS</a>
+        <a href="Mirsui Privacidade.dc.html" style="color:#cdef36;text-decoration:none">PRIVACIDADE</a>
+        <a href="Mirsui Faro.dc.html" style="color:inherit;text-decoration:none">FARO</a>
+      </div>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const promises = [
+      { tag: '01', title: 'A gente nunca vende', desc: 'Seu gosto, suas reivindicações e seu Faro não viram produto pra terceiros. Ponto.' },
+      { tag: '02', title: 'Você no controle', desc: 'Acesse, exporte ou apague seus dados quando quiser, direto pelo perfil.' },
+      { tag: '03', title: 'Só o necessário', desc: 'Coletamos o mínimo pra cena funcionar — e nada além disso.' }
+    ];
+
+    const sections = [
+      {
+        id: 'coletamos', num: '01', title: 'O que coletamos',
+        paras: [
+          'Pra Mirsui funcionar, a gente guarda algumas informações — sempre o mínimo necessário:'
+        ],
+        hasList: true,
+        items: [
+          'Dados de conta: nome de usuário, e-mail e senha (criptografada, a gente nunca a vê).',
+          'Atividade na cena: faixas que você ouve, reivindica e salva, mais o histórico que alimenta seu Faro.',
+          'Dados técnicos: tipo de dispositivo, navegador e endereço IP, usados pra segurança e estabilidade.',
+          'Conteúdo que você cria: notas, listas e comentários publicados na plataforma.'
+        ]
+      },
+      {
+        id: 'porque', num: '02', title: 'Por que coletamos',
+        paras: [
+          'Cada dado tem um propósito claro e direto:'
+        ],
+        hasList: true,
+        items: [
+          'Manter sua conta funcionando e protegida.',
+          'Calcular o Faro, montar rankings e mostrar a cena ao vivo.',
+          'Personalizar recomendações e o acervo de acordo com sua escuta.',
+          'Detectar fraude, manipulação de Faro e abusos.'
+        ]
+      },
+      {
+        id: 'base-legal', num: '03', title: 'Base legal (LGPD)',
+        paras: [
+          'Tratamos seus dados com fundamento na execução do contrato (oferecer a plataforma), no seu consentimento (quando aplicável), no legítimo interesse (segurança e melhoria do serviço) e no cumprimento de obrigações legais.',
+          'Você pode retirar o consentimento a qualquer momento, sem que isso afete a legalidade do tratamento feito antes.'
+        ],
+        hasList: false, items: []
+      },
+      {
+        id: 'compartilhamento', num: '04', title: 'Com quem compartilhamos',
+        paras: [
+          'A gente não vende seus dados. Pessoas físicas nunca recebem suas informações sem você saber. O compartilhamento se limita ao indispensável:'
+        ],
+        hasList: true,
+        items: [
+          'Prestadores de infraestrutura (hospedagem, e-mail, análise) que operam sob contrato e sigilo.',
+          'Autoridades, quando exigido por lei ou ordem judicial.',
+          'Informações públicas por natureza — como seu nome de usuário e posição no Faro — que já são visíveis na cena.'
+        ]
+      },
+      {
+        id: 'cookies', num: '05', title: 'Cookies e rastreamento',
+        paras: [
+          'Usamos cookies essenciais pra manter você logado e lembrar suas preferências. Usamos também medições de uso, em formato agregado, pra entender o que funciona na plataforma.',
+          'Não usamos cookies de publicidade de terceiros. Você pode gerenciar cookies pelo seu navegador, mas alguns são necessários pra Mirsui funcionar.'
+        ],
+        hasList: false, items: []
+      },
+      {
+        id: 'retencao', num: '06', title: 'Por quanto tempo guardamos',
+        paras: [
+          'Mantemos seus dados enquanto sua conta existir. Se você encerrar a conta, apagamos ou anonimizamos suas informações pessoais num prazo razoável — exceto o que a lei nos obriga a reter.',
+          'Reivindicações e o histórico de Faro associados a um perfil ativo fazem parte do acervo público da cena e permanecem registrados enquanto a conta estiver ativa.'
+        ],
+        hasList: false, items: []
+      },
+      {
+        id: 'direitos', num: '07', title: 'Seus direitos',
+        paras: [
+          'Pela LGPD, você tem controle real sobre seus dados. A qualquer momento, você pode:'
+        ],
+        hasList: true,
+        items: [
+          'Confirmar a existência de tratamento e acessar seus dados.',
+          'Corrigir informações incompletas ou desatualizadas.',
+          'Solicitar a exportação ou a exclusão dos seus dados.',
+          'Revogar consentimento e se opor a determinados tratamentos.'
+        ]
+      },
+      {
+        id: 'seguranca', num: '08', title: 'Segurança e contato',
+        paras: [
+          'Protegemos seus dados com criptografia, controle de acesso e boas práticas de segurança. Nenhum sistema é 100% infalível, mas tratamos seus dados como se fossem nossos.',
+          'Dúvidas, pedidos ou denúncias relacionadas a privacidade? Fale com nosso encarregado de dados pelo e-mail privacidade@mirsui.fm. Esta política pode ser atualizada — sempre avisamos por aqui quando houver mudança relevante.'
+        ],
+        hasList: false, items: []
+      }
+    ];
+
+    const toc = sections.map(s => ({ num: s.num, label: s.title, href: '#' + s.id }));
+
+    return { promises, sections, toc };
+  }
+}
+</script>
+</body>
+</html>

@@ -4,8 +4,8 @@ import MirsuiLogo from '../MirsuiLogo/MirsuiLogo'
 const LINKS = [
     { label: 'A CENA', href: '/' },
     { label: 'SOBRE', href: '/how-it-works' },
-    { label: 'TERMOS', href: '#' },
-    { label: 'PRIVACIDADE', href: '#' },
+    { label: 'TERMOS', href: '/termos' },
+    { label: 'PRIVACIDADE', href: '/privacidade' },
 ]
 
 export default function LandingFooter() {

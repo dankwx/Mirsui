@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { login, signup } from '../../app/auth/actions'
 import { createClient } from '@/utils/supabase/client'
 
@@ -570,7 +571,14 @@ const LoginModal: React.FC<LoginModalProps> = ({
                               {isSignup && (
                                   <p className="au-fine">
                                       Ao criar conta, você concorda com os{' '}
-                                      <a>Termos</a> e a <a>Privacidade</a>.
+                                      <Link href="/termos" target="_blank">
+                                          Termos
+                                      </Link>{' '}
+                                      e a{' '}
+                                      <Link href="/privacidade" target="_blank">
+                                          Privacidade
+                                      </Link>
+                                      .
                                   </p>
                               )}
 

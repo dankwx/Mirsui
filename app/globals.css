@@ -490,6 +490,34 @@
   }
 }
 
+/* ---------- Documentos legais (Termos / Privacidade) ---------- */
+.mir-legal-promises {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+.mir-legal-body {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 32px 80px;
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  gap: 56px;
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .mir-legal-promises {
+    grid-template-columns: 1fr;
+  }
+  .mir-legal-body {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .mir-legal-toc {
+    display: none;
+  }
+}
+
 /* ---------- Seções ---------- */
 .mir-landing .sec-head {
   max-width: 60ch;

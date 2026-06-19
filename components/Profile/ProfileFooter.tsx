@@ -9,8 +9,8 @@ interface ProfileFooterProps {
 const LINKS = [
     { label: 'FARO', href: '/prophet' },
     { label: 'CLAIM', href: '/claimtrack' },
-    { label: 'TERMOS', href: '#' },
-    { label: 'PRIVACIDADE', href: '#' },
+    { label: 'TERMOS', href: '/termos' },
+    { label: 'PRIVACIDADE', href: '/privacidade' },
 ]
 
 export default function ProfileFooter({ profileNo, memberSince }: ProfileFooterProps) {

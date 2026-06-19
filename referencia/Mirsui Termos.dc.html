@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#16120c}
+::selection{background:#cdef36;color:#16120c}
+@keyframes mir-ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+html{scroll-behavior:smooth}
+</style>
+</helmet>
+
+<div style="background:#16120c;font-family:Archivo,system-ui,sans-serif;color:#ece3d2;min-height:100vh;width:100%;overflow-x:hidden;-webkit-font-smoothing:antialiased">
+
+  <!-- TICKER -->
+  <div style="background:#cdef36;color:#16120c;overflow:hidden;white-space:nowrap;border-bottom:2px solid #16120c">
+    <div style="display:inline-flex;animation:mir-ticker 38s linear infinite;will-change:transform">
+      <span style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.14em;padding:7px 0">&nbsp;&nbsp;TERMOS DE USO&nbsp;&nbsp;✦&nbsp;&nbsp;O CONTRATO ENTRE VOCÊ E A CENA&nbsp;&nbsp;✦&nbsp;&nbsp;LEIA ANTES DE REIVINDICAR&nbsp;&nbsp;✦&nbsp;&nbsp;Nº 047&nbsp;&nbsp;✦&nbsp;&nbsp;VERSÃO 2.0&nbsp;&nbsp;✦&nbsp;&nbsp;</span>
+      <span style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.14em;padding:7px 0">&nbsp;&nbsp;TERMOS DE USO&nbsp;&nbsp;✦&nbsp;&nbsp;O CONTRATO ENTRE VOCÊ E A CENA&nbsp;&nbsp;✦&nbsp;&nbsp;LEIA ANTES DE REIVINDICAR&nbsp;&nbsp;✦&nbsp;&nbsp;Nº 047&nbsp;&nbsp;✦&nbsp;&nbsp;VERSÃO 2.0&nbsp;&nbsp;✦&nbsp;&nbsp;</span>
+    </div>
+  </div>
+
+  <!-- MASTHEAD -->
+  <header style="border-bottom:1px solid rgba(236,227,210,.12);position:sticky;top:0;z-index:40;background:rgba(22,18,12,.82);backdrop-filter:blur(12px)">
+    <div style="max-width:1100px;margin:0 auto;padding:15px 32px;display:flex;align-items:center;gap:36px">
+      <a href="Mirsui Feed.dc.html" style="display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit">
+        <svg width="30" height="30" viewBox="0 0 100 100" style="display:block"><circle cx="50" cy="50" r="49" fill="#16120c"></circle><path d="M50 1 a49 49 0 0 1 0 98 a24.5 24.5 0 0 1 0-49 a24.5 24.5 0 0 0 0-49z" fill="#cdef36"></path><circle cx="50" cy="25.5" r="7.2" fill="#16120c"></circle><circle cx="50" cy="74.5" r="7.2" fill="#cdef36"></circle></svg>
+        <span style="font-weight:900;font-size:24px;letter-spacing:-.04em">mirsui</span>
+      </a>
+      <nav style="display:flex;align-items:center;gap:26px;font-weight:600;font-size:15px">
+        <a href="Mirsui Feed.dc.html" style="color:rgba(236,227,210,.62);text-decoration:none">Início</a>
+        <a href="Mirsui Perfil.dc.html" style="color:rgba(236,227,210,.62);text-decoration:none">Acervo</a>
+        <a href="Mirsui Faro.dc.html" style="color:rgba(236,227,210,.62);text-decoration:none">Faro</a>
+      </nav>
+      <div style="flex:1"></div>
+      <a href="Mirsui Privacidade.dc.html" style="display:flex;align-items:center;gap:8px;color:#ece3d2;text-decoration:none;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;border:1px solid rgba(236,227,210,.22);border-radius:999px;padding:9px 16px">PRIVACIDADE →</a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section style="border-bottom:1px solid rgba(236,227,210,.1)">
+    <div style="max-width:1100px;margin:0 auto;padding:64px 32px 44px">
+      <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;color:#cdef36;margin-bottom:18px">★ DOCUMENTO LEGAL · 01 DE 02</div>
+      <h1 style="font-weight:900;font-size:clamp(56px,9vw,116px);line-height:.84;letter-spacing:-.055em;margin:0 0 22px">Termos<br>de uso</h1>
+      <p style="font-size:18px;line-height:1.5;max-width:560px;color:rgba(236,227,210,.74);margin:0 0 24px">As regras de convivência da cena. Ao criar uma conta, ouvir, reivindicar ou disputar o Faro, você concorda com tudo que está aqui embaixo.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em">
+        <span style="background:rgba(236,227,210,.07);border:1px solid rgba(236,227,210,.14);border-radius:999px;padding:7px 14px;color:rgba(236,227,210,.66)">VIGÊNCIA · 18 JUN 2026</span>
+        <span style="background:rgba(236,227,210,.07);border:1px solid rgba(236,227,210,.14);border-radius:999px;padding:7px 14px;color:rgba(236,227,210,.66)">VERSÃO 2.0</span>
+        <span style="background:rgba(205,239,54,.1);border:1px solid rgba(205,239,54,.32);border-radius:999px;padding:7px 14px;color:#cdef36">LEITURA · ~6 MIN</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- BODY -->
+  <section>
+    <div style="max-width:1100px;margin:0 auto;padding:0 32px 80px;display:grid;grid-template-columns:230px 1fr;gap:56px;align-items:start">
+
+      <!-- TOC -->
+      <aside style="position:sticky;top:90px;padding-top:48px">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.18em;color:rgba(236,227,210,.4);margin-bottom:16px">NESTE DOCUMENTO</div>
+        <nav style="display:flex;flex-direction:column;gap:2px">
+          <sc-for list="{{ toc }}" as="t" hint-placeholder-count="9">
+            <a href="{{ t.href }}" style="display:flex;gap:10px;text-decoration:none;color:rgba(236,227,210,.62);font-size:13.5px;font-weight:600;padding:7px 0;border-bottom:1px solid rgba(236,227,210,.07)">
+              <span style="font-family:'Space Mono',monospace;font-size:11px;color:#cdef36;flex:none">{{ t.num }}</span>
+              <span>{{ t.label }}</span>
+            </a>
+          </sc-for>
+        </nav>
+      </aside>
+
+      <!-- ARTICLES -->
+      <div style="padding-top:48px;min-width:0">
+        <sc-for list="{{ sections }}" as="s" hint-placeholder-count="9">
+          <article id="{{ s.id }}" style="padding-bottom:42px;margin-bottom:42px;border-bottom:1px solid rgba(236,227,210,.09);scroll-margin-top:90px">
+            <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:18px">
+              <span style="font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:#cdef36;flex:none">{{ s.num }}</span>
+              <h2 style="font-weight:800;font-size:clamp(24px,3vw,32px);letter-spacing:-.03em;line-height:1.04;margin:0">{{ s.title }}</h2>
+            </div>
+            <div style="padding-left:38px">
+              <sc-for list="{{ s.paras }}" as="p" hint-placeholder-count="2">
+                <p style="font-size:16px;line-height:1.66;color:rgba(236,227,210,.78);margin:0 0 14px;text-wrap:pretty">{{ p }}</p>
+              </sc-for>
+              <sc-if value="{{ s.hasList }}" hint-placeholder-val="{{ false }}">
+                <ul style="margin:6px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+                  <sc-for list="{{ s.items }}" as="it" hint-placeholder-count="3">
+                    <li style="display:flex;gap:12px;font-size:15px;line-height:1.55;color:rgba(236,227,210,.74)">
+                      <span style="color:#cdef36;flex:none;font-weight:700">→</span>
+                      <span>{{ it }}</span>
+                    </li>
+                  </sc-for>
+                </ul>
+              </sc-if>
+            </div>
+          </article>
+        </sc-for>
+
+        <!-- CONTACT CARD -->
+        <div style="background:#ece3d2;color:#16120c;border-radius:16px;padding:34px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px">
+          <div style="max-width:420px">
+            <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:#c14a26;margin-bottom:10px">★ DÚVIDAS SOBRE OS TERMOS?</div>
+            <h3 style="font-weight:900;font-size:26px;letter-spacing:-.03em;margin:0 0 8px;line-height:1.05">Fala com a gente.</h3>
+            <p style="font-family:'Space Mono',monospace;font-size:12px;line-height:1.6;color:rgba(22,18,12,.64);margin:0">A cena é pequena e a porta tá aberta. Responde rápido, na real.</p>
+          </div>
+          <a href="/cdn-cgi/l/email-protection#b5dad9d4f5d8dcc7c6c0dc9bd3d8" style="flex:none;display:flex;align-items:center;gap:8px;background:#16120c;color:#cdef36;text-decoration:none;font-weight:700;font-size:15px;padding:15px 26px;border-radius:999px"><span class="__cf_email__" data-cfemail="fc93909dbc91958e8f8995d29a91">[email&#160;protected]</span> →</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="border-top:2px solid #cdef36">
+    <div style="max-width:1100px;margin:0 auto;padding:46px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px">
+      <div style="display:flex;align-items:center;gap:11px">
+        <svg width="26" height="26" viewBox="0 0 100 100"><circle cx="50" cy="50" r="49" fill="#16120c"></circle><path d="M50 1 a49 49 0 0 1 0 98 a24.5 24.5 0 0 1 0-49 a24.5 24.5 0 0 0 0-49z" fill="#cdef36"></path><circle cx="50" cy="25.5" r="7.2" fill="#16120c"></circle><circle cx="50" cy="74.5" r="7.2" fill="#cdef36"></circle></svg>
+        <span style="font-weight:900;font-size:20px;letter-spacing:-.04em">mirsui</span>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:rgba(236,227,210,.4);text-align:center">ARQUIVO MUSICAL CURATORIAL · Nº 047 · DESDE 2024<br>feito por quem ouve cedo demais.</div>
+      <div style="display:flex;gap:18px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:rgba(236,227,210,.55)">
+        <a href="Mirsui Termos.dc.html" style="color:#cdef36;text-decoration:none">TERMOS</a>
+        <a href="Mirsui Privacidade.dc.html" style="color:inherit;text-decoration:none">PRIVACIDADE</a>
+        <a href="Mirsui Faro.dc.html" style="color:inherit;text-decoration:none">FARO</a>
+      </div>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const sections = [
+      {
+        id: 'aceitacao', num: '01', title: 'Aceitação destes termos',
+        paras: [
+          'A Mirsui é um arquivo musical curatorial — um lugar pra ouvir cedo, reivindicar faixas antes da cena lotar e provar que você ouviu. Estes Termos formam o contrato entre você e a Mirsui.',
+          'Ao criar uma conta, navegar pelo acervo ou disputar o Faro, você declara que leu, entendeu e concorda com tudo o que está aqui. Se não concordar com algum ponto, simplesmente não use a plataforma.'
+        ],
+        hasList: false, items: []
+      },
+      {
+        id: 'conta', num: '02', title: 'Sua conta',
+        paras: [
+          'Você precisa ter pelo menos 16 anos para criar uma conta. Os dados que você informa no cadastro devem ser verdadeiros e mantidos atualizados.'
+        ],
+        hasList: true,
+        items: [
+          'Você é o único responsável por tudo que acontece na sua conta, inclusive por manter sua senha em segredo.',
+          'Uma conta pertence a uma pessoa — nada de perfis compartilhados pra inflar Faro.',
+          'Avise a gente na hora se desconfiar de acesso não autorizado.'
+        ]
+      },
+      {
+        id: 'reivindicar', num: '03', title: 'Reivindicações e o Faro',
+        paras: [
+          'Reivindicar uma faixa é registrar publicamente que você a ouviu enquanto a janela ainda estava aberta. O Faro é o placar que mede quão cedo e com que consistência você acerta.',
+          'O cálculo do Faro, os pesos e os critérios de ranking podem ser ajustados a qualquer momento para preservar a justiça da disputa. Reivindicações são definitivas: uma vez registrada, a antecedência fica gravada no acervo.'
+        ],
+        hasList: true,
+        items: [
+          'É proibido automatizar reivindicações com bots, scripts ou qualquer truque pra burlar o tempo.',
+          'Contas que manipulam o Faro de forma artificial podem ter pontuação zerada ou ser encerradas.',
+          'O Faro é mérito de escuta, não item negociável: não pode ser vendido, transferido ou trocado.'
+        ]
+      },
+      {
+        id: 'conteudo', num: '04', title: 'Conteúdo e curadoria',
+        paras: [
+          'A música, capas e metadados pertencem aos seus respectivos artistas, gravadoras e detentores de direitos. A Mirsui organiza, contextualiza e cura — não reivindica propriedade sobre as obras.',
+          'O que você escreve (notas, listas, comentários) continua seu. Mas, ao publicar na Mirsui, você nos dá uma licença não exclusiva pra exibir esse conteúdo dentro da plataforma.'
+        ],
+        hasList: false, items: []
+      },
+      {
+        id: 'conduta', num: '05', title: 'Conduta na cena',
+        paras: [
+          'A cena funciona porque as pessoas se respeitam. Algumas coisas não rolam aqui:'
+        ],
+        hasList: true,
+        items: [
+          'Assédio, discurso de ódio, ameaças ou qualquer forma de violência contra outros ouvintes.',
+          'Spam, propaganda não autorizada ou tentativas de desviar gente pra fora da plataforma.',
+          'Tentar invadir, sobrecarregar ou fazer engenharia reversa de qualquer parte do sistema.',
+          'Subir conteúdo que viole direitos de terceiros ou a lei.'
+        ]
+      },
+      {
+        id: 'propriedade', num: '06', title: 'Nossa propriedade intelectual',
+        paras: [
+          'A marca Mirsui, o logo, o nome, a identidade visual, a interface e o conceito de Faro são nossos. Você não pode copiar, revender ou usar comercialmente esses elementos sem autorização por escrito.',
+          'Curtir a vibe e se inspirar é uma coisa. Clonar a plataforma é outra.'
+        ],
+        hasList: false, items: []
+      },
+      {
+        id: 'encerramento', num: '07', title: 'Suspensão e encerramento',
+        paras: [
+          'Você pode encerrar sua conta quando quiser, pelas configurações do perfil. A gente pode suspender ou encerrar contas que violem estes Termos, manipulem o Faro ou ameacem a integridade da cena.',
+          'Em casos graves, o encerramento é imediato e sem aviso prévio. Nos demais, avisamos com antecedência sempre que possível.'
+        ],
+        hasList: false, items: []
+      },
+      {
+        id: 'garantias', num: '08', title: 'Garantias e responsabilidade',
+        paras: [
+          'A Mirsui é fornecida "como está". Fazemos o nosso melhor pra manter tudo no ar e funcionando, mas não garantimos que a plataforma será ininterrupta ou livre de erros.',
+          'Na máxima medida permitida pela lei, não nos responsabilizamos por danos indiretos decorrentes do uso ou da indisponibilidade do serviço.'
+        ],
+        hasList: false, items: []
+      },
+      {
+        id: 'alteracoes', num: '09', title: 'Alterações destes termos',
+        paras: [
+          'A cena muda e os Termos acompanham. Quando fizermos mudanças relevantes, avisamos por aqui ou por e-mail com antecedência razoável.',
+          'Continuar usando a Mirsui depois de uma atualização significa que você concorda com a nova versão. A data de vigência no topo sempre mostra a versão em vigor.'
+        ],
+        hasList: false, items: []
+      },
+      {
+        id: 'foro', num: '10', title: 'Lei aplicável e foro',
+        paras: [
+          'Estes Termos são regidos pelas leis da República Federativa do Brasil. Fica eleito o foro da comarca de São Paulo/SP para dirimir qualquer questão, com renúncia a qualquer outro, por mais privilegiado que seja.'
+        ],
+        hasList: false, items: []
+      }
+    ];
+
+    const toc = sections.map(s => ({ num: s.num, label: s.title, href: '#' + s.id }));
+
+    return { sections, toc };
+  }
+}
+</script>
+</body>
+</html>

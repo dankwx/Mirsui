@@ -70,70 +70,6 @@
       --sidebar-ring: 270 60% 55%;
     }
 
-    .dark {
-      /* Background & Foreground */
-      --background: 222.2 84% 4.9%;
-      --foreground: 210 40% 98%;
-
-      /* Card */
-      --card: 222.2 84% 4.9%;
-      --card-foreground: 210 40% 98%;
-
-      /* Popover */
-      --popover: 222.2 84% 4.9%;
-      --popover-foreground: 210 40% 98%;
-
-      /* Primary - Purple (roxo mais claro no dark) */
-      --primary: 270 65% 65%;  /* roxo claro para dark mode */
-      --primary-foreground: 222.2 47.4% 11.2%;
-      --primary-hover: 270 70% 70%; /* ainda mais claro ao hover */
-
-      /* Secondary - Light Purple (roxinho claro) */
-      --secondary: 280 55% 75%;
-      --secondary-foreground: 222.2 47.4% 11.2%;
-      --secondary-hover: 280 60% 80%; 
-
-      /* Accent - Deep Purple (roxo intenso) */
-      --accent: 265 75% 60%;  /* roxo escuro mais claro no dark */
-      --accent-foreground: 222.2 47.4% 11.2%;
-      --accent-hover: 265 80% 65%;
-
-      /* Tertiary - Lavender (lavanda clara) */
-      --tertiary: 250 65% 70%;
-      --tertiary-foreground: 222.2 47.4% 11.2%;
-      --tertiary-hover: 250 70% 75%;
-
-      /* Success - Green */
-      --success: 142 76% 45%;
-      --success-foreground: 0 0% 100%;
-
-      /* Warning - Orange/Yellow */
-      --warning: 25 95% 60%;
-      --warning-foreground: 222.2 47.4% 11.2%;
-
-      /* Destructive - Red */
-      --destructive: 0 62.8% 30.6%;
-      --destructive-foreground: 210 40% 98%;
-
-      /* Muted */
-      --muted: 217.2 32.6% 17.5%;
-      --muted-foreground: 215 20.2% 65.1%;
-
-      /* Border & Input */
-      --border: 217.2 32.6% 17.5%;
-      --input: 217.2 32.6% 17.5%;
-      --ring: 270 65% 65%;
-
-      /* Sidebar */
-      --sidebar-background: 240 5.9% 10%;
-      --sidebar-foreground: 240 4.8% 95.9%;
-      --sidebar-primary: 270 65% 65%;
-      --sidebar-primary-foreground: 0 0% 100%;
-      --sidebar-accent: 270 30% 20%;
-      --sidebar-accent-foreground: 240 4.8% 95.9%;
-      --sidebar-border: 240 3.7% 15.9%;
-      --sidebar-ring: 270 65% 65%;
-    }
   }
 
   @layer base {
@@ -144,91 +80,20 @@
       /* Reserva o espaço da scrollbar sempre, evitando o "pulo" de layout
          quando um modal trava o scroll do body (overflow: hidden). */
       scrollbar-gutter: stable;
+      /* Cor base do tema no próprio html/body (não só numa div aninhada do
+         layout). Sem isto, o body branco vaza por baixo durante as transições
+         de rota / streaming de Suspense, causando um "pisca branco". Todas as
+         páginas pintam o próprio fundo num wrapper min-h-screen, então isto
+         não muda o visual — só remove o flash. */
+      background-color: #16120c;
     }
     body {
-      @apply bg-background text-foreground;
+      @apply text-foreground;
+      background-color: #16120c;
     }
   }
   
-  .animatedUnderline {
-    position: relative;
-    display: inline-block;
-  }
-  
-  .animatedUnderline::after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 2px;
-    bottom: 0;
-    left: 0;
-    background-color: black;
-    animation: underlineAnimation 2s ease-in-out infinite;
-  }
-  
-  @keyframes subtle-wave {
-    0%, 100% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-  }
-  .subtle-wave-text {
-    background: linear-gradient(
-      90deg,
-      #000000 0%,
-      #1a1a1a 25%,
-      #333333 50%,
-      #21452b 75%,
-      #77ffb7 110%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    background-size: 200% 50%;
-    animation: subtle-wave 10s linear infinite;
-  }
-
-  .username-field {
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin 0.3s ease-out;
-  }
-  
-  .username-field.show {
-    max-height: 100px; /* Ajuste conforme necessário */
-    opacity: 1;
-    margin-top: 1rem; /* Ajuste conforme necessário */
-  }
-
-  
- /* :root {
-    @apply h-full;
-    overflow-y: scroll;
-} */
-
-@keyframes pulse-once {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.9;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.animate-pulse-once {
-  animation: pulse-once 0.8s ease-in-out forwards;
-}
-
-/* ---------- Mirsui (direção Acervo · warm dark) ---------- */
+  /* ---------- Mirsui (direção Acervo · warm dark) ---------- */
 .mir-grain {
   position: fixed;
   inset: 0;

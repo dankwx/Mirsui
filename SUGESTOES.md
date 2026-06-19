@@ -9,16 +9,7 @@ Contexto: a busca já segue boas práticas — debounce de 300ms no cliente
 e cache de 5 minutos no servidor via `next: { revalidate: 300 }`
 (`utils/spotifyService.ts`). As sugestões abaixo são refinamentos opcionais.
 
-### 1. Race condition de respostas fora de ordem
-
-Se o usuário digita "bea" e depois "beatles", saem duas requisições. Se a de
-"bea" demorar mais e chegar por último, ela sobrescreve os resultados de
-"beatles" na tela.
-
-**Fix sugerido:** usar `AbortController` cancelando a requisição anterior antes
-de disparar a nova, dentro de `searchSpotify` no componente.
-
-### 2. Sem cache no cliente
+### 1. Sem cache no cliente
 
 Se o usuário apaga e redigita o mesmo termo, o navegador refaz o fetch — o
 cache de 5 minutos é só no servidor, então é barato, mas ainda é uma ida ao

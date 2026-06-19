@@ -49,6 +49,7 @@ export default function SearchWithResults() {
     const searchRef = useRef<HTMLDivElement>(null)
     const filterRef = useRef<HTMLDivElement>(null)
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+    const abortRef = useRef<AbortController | null>(null)
     const router = useRouter()
 
     // Função para buscar no Spotify
@@ -59,6 +60,11 @@ export default function SearchWithResults() {
             return
         }
 
+        // Cancela a requisição anterior para evitar respostas fora de ordem
+        abortRef.current?.abort()
+        const controller = new AbortController()
+        abortRef.current = controller
+
         setIsLoading(true)
         try {
             // Ajustar parâmetros de busca baseado no filtro
@@ -67,7 +73,8 @@ export default function SearchWithResults() {
             if (searchFilter === 'artists') typeParam = 'artist'
 
             const response = await fetch(
-                `/api/search?q=${encodeURIComponent(searchQuery)}&limit=8&type=${typeParam}`
+                `/api/search?q=${encodeURIComponent(searchQuery)}&limit=8&type=${typeParam}`,
+                { signal: controller.signal }
             )
 
             if (response.ok) {
@@ -79,10 +86,17 @@ export default function SearchWithResults() {
                 setResults(null)
             }
         } catch (error) {
+            // Requisição cancelada por uma busca mais recente — ignora
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                return
+            }
             console.error('Erro ao buscar:', error)
             setResults(null)
         } finally {
-            setIsLoading(false)
+            // Só desliga o loading se esta ainda for a requisição atual
+            if (abortRef.current === controller) {
+                setIsLoading(false)
+            }
         }
     }, [searchFilter])
 
@@ -105,6 +119,7 @@ export default function SearchWithResults() {
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current)
             }
+            abortRef.current?.abort()
         }
     }, [query, searchFilter, searchSpotify]) // Adicionado searchSpotify como dependência
 

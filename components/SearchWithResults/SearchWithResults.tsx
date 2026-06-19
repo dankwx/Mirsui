@@ -39,6 +39,12 @@ interface SearchResults {
 
 type SearchFilter = 'all' | 'tracks' | 'artists'
 
+// Cache em memória no cliente: evita refazer o fetch ao redigitar o mesmo
+// termo. TTL de 5 min espelha o `revalidate: 300` do servidor. Vive em nível
+// de módulo para ser compartilhado entre montagens do componente.
+const SEARCH_CACHE_TTL = 5 * 60 * 1000
+const searchCache = new Map<string, { data: SearchResults; timestamp: number }>()
+
 export default function SearchWithResults() {
     const [query, setQuery] = useState('')
     const [results, setResults] = useState<SearchResults | null>(null)
@@ -60,6 +66,24 @@ export default function SearchWithResults() {
             return
         }
 
+        // Ajustar parâmetros de busca baseado no filtro
+        let typeParam = 'track,artist'
+        if (searchFilter === 'tracks') typeParam = 'track'
+        if (searchFilter === 'artists') typeParam = 'artist'
+
+        // Cache no cliente: se o mesmo termo+filtro já foi buscado e ainda está
+        // fresco, usa o resultado guardado sem ir ao servidor.
+        const cacheKey = `${typeParam}:${searchQuery.trim().toLowerCase()}`
+        const cached = searchCache.get(cacheKey)
+        if (cached && Date.now() - cached.timestamp < SEARCH_CACHE_TTL) {
+            abortRef.current?.abort()
+            abortRef.current = null
+            setResults(cached.data)
+            setShowResults(true)
+            setIsLoading(false)
+            return
+        }
+
         // Cancela a requisição anterior para evitar respostas fora de ordem
         abortRef.current?.abort()
         const controller = new AbortController()
@@ -67,11 +91,6 @@ export default function SearchWithResults() {
 
         setIsLoading(true)
         try {
-            // Ajustar parâmetros de busca baseado no filtro
-            let typeParam = 'track,artist'
-            if (searchFilter === 'tracks') typeParam = 'track'
-            if (searchFilter === 'artists') typeParam = 'artist'
-
             const response = await fetch(
                 `/api/search?q=${encodeURIComponent(searchQuery)}&limit=8&type=${typeParam}`,
                 { signal: controller.signal }
@@ -79,6 +98,7 @@ export default function SearchWithResults() {
 
             if (response.ok) {
                 const data = await response.json()
+                searchCache.set(cacheKey, { data, timestamp: Date.now() })
                 setResults(data)
                 setShowResults(true)
             } else {

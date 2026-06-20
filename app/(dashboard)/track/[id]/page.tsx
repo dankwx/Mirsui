@@ -151,15 +151,39 @@ export default async function TrackDetailsPage({
 
     const trackUrl = `https://open.spotify.com/track/${trackId}`
 
-    // Busca o vídeo da música no YouTube para a prévia
+    // Prévia do YouTube: consulta o cache (Spotify id -> YouTube id) antes de
+    // gastar cota da YouTube Data API (10k unidades/dia, 100 por busca). Só
+    // chama a API em cache miss, e persiste o resultado para nunca repetir.
     let youtubeVideoId: string | null = null
     if (trackInfo?.name) {
-        const youtubeUrl = await searchYouTubeVideo(trackInfo.name, artistNames)
-        if (youtubeUrl) {
-            const match = youtubeUrl.match(
-                /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/
+        const supabase = await createClient()
+        const { data: cached } = await supabase
+            .from('youtube_cache')
+            .select('youtube_video_id')
+            .eq('spotify_track_id', trackId)
+            .maybeSingle()
+
+        if (cached) {
+            youtubeVideoId = cached.youtube_video_id
+        } else {
+            const youtubeUrl = await searchYouTubeVideo(
+                trackInfo.name,
+                artistNames
             )
-            youtubeVideoId = match ? match[1] : null
+            if (youtubeUrl) {
+                const match = youtubeUrl.match(
+                    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/
+                )
+                youtubeVideoId = match ? match[1] : null
+            }
+            // Persiste apenas resultados positivos: evita envenenar o cache em
+            // falhas transitórias da API (cota estourada também retorna null).
+            if (youtubeVideoId) {
+                await supabase.rpc('cache_youtube_video', {
+                    p_spotify_id: trackId,
+                    p_video_id: youtubeVideoId,
+                })
+            }
         }
     }
 

@@ -70,10 +70,6 @@ export interface SpotifyAlbum {
     artists: { name: string; id: string }[]
 }
 
-export interface SpotifyTopTracks {
-    tracks: SpotifyTrack[]
-}
-
 // Cache do token
 let cachedSpotifyAccessToken: string | null = null
 let cachedTokenExpiryTime: number | null = null
@@ -228,15 +224,4 @@ export async function fetchSpotifyArtistTopTracks(
         86400
     )
     return data ? data.tracks || [] : null
-}
-
-export async function fetchSpotifyAlbumTracks(
-    albumId: string,
-    limit: number = 50
-): Promise<SpotifyTrack[] | null> {
-    const data = await spotifyApiFetch<{ items: SpotifyTrack[] }>(
-        `/albums/${albumId}/tracks?limit=${limit}`,
-        86400
-    )
-    return data ? data.items || [] : null
 }

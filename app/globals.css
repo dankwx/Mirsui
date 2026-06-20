@@ -91,6 +91,21 @@
       @apply text-foreground;
       background-color: #16120c;
     }
+    /* Quando um overlay do Radix (dropdown, dialog, popover) trava o scroll, a
+       lib react-remove-scroll injeta padding/margin-right no body pra compensar
+       a scrollbar que ela esconde. Mas o html acima já reserva esse espaço com
+       scrollbar-gutter: stable (que sobrevive ao overflow:hidden do lock) —
+       então a compensação vira um "empurrão" duplo: a faixa escura fica ~2x a
+       largura da scrollbar e o conteúdo desloca pra esquerda.
+       Anulamos a compensação do Radix; o gutter estável já cuida do espaço.
+       O seletor usa `html body` de propósito: precisa de especificidade MAIOR
+       que a regra `body[data-scroll-locked]` !important que a lib injeta no
+       fim do <head>, senão ela ganharia o desempate por ordem. */
+    html body[data-scroll-locked] {
+      margin-right: 0 !important;
+      padding-right: 0 !important;
+      --removed-body-scroll-bar-size: 0px !important;
+    }
   }
   
   /* ---------- Mirsui (direção Acervo · warm dark) ---------- */

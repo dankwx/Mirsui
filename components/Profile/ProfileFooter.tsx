@@ -7,7 +7,6 @@ interface ProfileFooterProps {
 }
 
 const LINKS = [
-    { label: 'FARO', href: '/prophet' },
     { label: 'CLAIM', href: '/claimtrack' },
     { label: 'TERMOS', href: '/termos' },
     { label: 'PRIVACIDADE', href: '/privacidade' },

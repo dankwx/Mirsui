@@ -7,8 +7,6 @@ export interface User {
     display_name?: string
     description?: string | null
     rating?: number
-    points?: number
-    prophet_points?: number
     // Campos legados que não existem na tabela — mantidos opcionais
     first_name?: string
     last_name?: string

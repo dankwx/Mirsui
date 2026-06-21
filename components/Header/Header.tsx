@@ -42,6 +42,11 @@ const navLinks: NavLink[] = [
         match: (p) => p.startsWith('/library') || p.startsWith('/user'),
     },
     {
+        title: 'Cravadas',
+        url: '/cravadas',
+        match: (p) => p.startsWith('/cravadas'),
+    },
+    {
         title: 'Claim',
         url: '/claimtrack',
         match: (p) => p.startsWith('/claimtrack'),

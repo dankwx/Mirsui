@@ -108,7 +108,63 @@
     }
   }
   
-  /* ---------- Mirsui (direção Acervo · warm dark) ---------- */
+  /* ---------- Mirsui · Cravadas (hero + slots + modal) ---------- */
+@keyframes mir-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+@keyframes mir-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes mir-pop {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes mir-slide {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.anim-blink {
+  animation: mir-blink 1.4s infinite;
+}
+.anim-fade {
+  animation: mir-fade 0.18s ease both;
+}
+.anim-pop {
+  animation: mir-pop 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.anim-slide {
+  animation: mir-slide 0.2s ease both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .anim-blink {
+    animation: none;
+  }
+}
+
+/* ---------- Mirsui (direção Acervo · warm dark) ---------- */
 .mir-grain {
   position: fixed;
   inset: 0;

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#16120c}
+::selection{background:#cdef36;color:#16120c}
+input::placeholder{color:rgba(236,227,210,.42)}
+@keyframes mir-ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes mir-blink{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes mir-fade{from{opacity:0}to{opacity:1}}
+@keyframes mir-pop{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes mir-slide{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+
+<div style="background:#16120c;font-family:Archivo,system-ui,sans-serif;color:#ece3d2;min-height:100vh;width:100%;overflow-x:hidden;-webkit-font-smoothing:antialiased">
+
+  <!-- TICKER -->
+  <div style="background:#cdef36;color:#16120c;overflow:hidden;white-space:nowrap;border-bottom:2px solid #16120c">
+    <div style="display:inline-flex;animation:mir-ticker 38s linear infinite;will-change:transform">
+      <span style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.14em;padding:7px 0">&nbsp;&nbsp;● CRAVE ANTES DE BOMBAR&nbsp;&nbsp;✦&nbsp;&nbsp;STRAY · MEAT COMPUTER · x3,4&nbsp;&nbsp;✦&nbsp;&nbsp;23 CRAVANDO ACHADOS RAROS AGORA&nbsp;&nbsp;✦&nbsp;&nbsp;VOCÊ TEM 1 VAGA LIVRE&nbsp;&nbsp;✦&nbsp;&nbsp;BLACK SUBIU 2 NÍVEIS&nbsp;&nbsp;✦&nbsp;&nbsp;TRAVA DE 7 DIAS&nbsp;&nbsp;✦&nbsp;&nbsp;</span>
+      <span style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.14em;padding:7px 0">&nbsp;&nbsp;● CRAVE ANTES DE BOMBAR&nbsp;&nbsp;✦&nbsp;&nbsp;STRAY · MEAT COMPUTER · x3,4&nbsp;&nbsp;✦&nbsp;&nbsp;23 CRAVANDO ACHADOS RAROS AGORA&nbsp;&nbsp;✦&nbsp;&nbsp;VOCÊ TEM 1 VAGA LIVRE&nbsp;&nbsp;✦&nbsp;&nbsp;BLACK SUBIU 2 NÍVEIS&nbsp;&nbsp;✦&nbsp;&nbsp;TRAVA DE 7 DIAS&nbsp;&nbsp;✦&nbsp;&nbsp;</span>
+    </div>
+  </div>
+
+  <!-- MASTHEAD -->
+  <header style="border-bottom:1px solid rgba(236,227,210,.12);position:sticky;top:0;z-index:40;background:rgba(22,18,12,.82);backdrop-filter:blur(12px)">
+    <div style="max-width:1200px;margin:0 auto;padding:15px 32px;display:flex;align-items:center;gap:36px">
+      <a href="Mirsui Feed.dc.html" style="display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit">
+        <svg width="30" height="30" viewBox="0 0 100 100" style="display:block"><circle cx="50" cy="50" r="49" fill="#16120c"/><path d="M50 1 a49 49 0 0 1 0 98 a24.5 24.5 0 0 1 0-49 a24.5 24.5 0 0 0 0-49z" fill="#cdef36"/><circle cx="50" cy="25.5" r="7.2" fill="#16120c"/><circle cx="50" cy="74.5" r="7.2" fill="#cdef36"/></svg>
+        <span style="font-weight:900;font-size:24px;letter-spacing:-.04em">mirsui</span>
+      </a>
+      <nav style="display:flex;align-items:center;gap:24px;font-weight:600;font-size:15px">
+        <a href="Mirsui Feed.dc.html" style="color:rgba(236,227,210,.62);text-decoration:none">Início</a>
+        <a href="Mirsui Perfil.dc.html" style="color:rgba(236,227,210,.62);text-decoration:none">Acervo</a>
+        <a href="Mirsui Faro.dc.html" style="color:rgba(236,227,210,.62);text-decoration:none">Faro</a>
+        <a href="Mirsui Cravadas.dc.html" style="color:#ece3d2;text-decoration:none;padding-bottom:3px;border-bottom:2px solid #cdef36">Cravadas</a>
+        <a href="Mirsui Claim.dc.html" style="color:rgba(236,227,210,.62);text-decoration:none">Claim</a>
+      </nav>
+      <div style="flex:1"></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="display:flex;align-items:center;gap:9px;background:#211a11;border:1px solid rgba(236,227,210,.12);border-radius:999px;padding:9px 16px;width:300px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(236,227,210,.5)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+          <input placeholder="Pesquisar artistas ou músicas" style="background:transparent;border:none;outline:none;color:#ece3d2;font-family:'Space Mono',monospace;font-size:12px;width:100%"/>
+        </div>
+        <a href="Mirsui Perfil.dc.html" style="width:38px;height:38px;border-radius:50%;background:radial-gradient(130% 130% at 32% 24%,#f3ecdb 0%,#cdef36 22%,#c14a26 54%,#16120c 88%);box-shadow:0 0 0 1.5px rgba(236,227,210,.18);text-decoration:none"></a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section>
+    <div style="max-width:1200px;margin:0 auto;padding:56px 32px 24px">
+      <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;color:#cdef36;margin-bottom:16px">CRAVE A FAIXA ANTES DELA BOMBAR</div>
+      <div style="display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap">
+        <h1 style="font-weight:900;font-size:clamp(64px,9vw,116px);line-height:.82;letter-spacing:-.055em;margin:0">Cravadas</h1>
+        <p style="font-size:18px;line-height:1.45;max-width:440px;color:rgba(236,227,210,.72);margin:0 0 12px">Você tem <b style="color:#ece3d2;font-weight:700">3 vagas</b> pra cravar faixas que acha que vão subir. Quanto mais escondida a faixa, maior o multiplicador. Seu faro, em jogo.</p>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:28px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.12em;color:rgba(236,227,210,.5)">
+        <span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:#cdef36;animation:mir-blink 1.4s infinite"></span>{{ vagasLine }}</span>
+        <span style="opacity:.4">·</span>
+        <span>TRAVA DE {{ lockDays }} DIAS</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 SLOTS -->
+  <section>
+    <div style="max-width:1200px;margin:0 auto;padding:24px 32px 80px">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:start">
+        <sc-for list="{{ slotCards }}" as="s" hint-placeholder-count="3">
+          <div style="{{ s._wrap }}">
+
+            <!-- EMPTY -->
+            <sc-if value="{{ s.empty }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ s._cravar }}" style="cursor:pointer;width:100%;min-height:300px;background:transparent;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;padding:26px;color:inherit;font-family:Archivo">
+                <div style="width:60px;height:60px;border-radius:50%;border:1.5px solid rgba(205,239,54,.5);display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:300;color:#cdef36;line-height:0;margin-bottom:12px">+</div>
+                <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:rgba(236,227,210,.45)">VAGA {{ s.vaga }} · LIVRE</div>
+                <div style="font-weight:800;font-size:21px;letter-spacing:-.03em;max-width:200px;line-height:1.1;margin-top:2px">Crave uma faixa antes dela bombar</div>
+                <span style="margin-top:16px;display:inline-flex;align-items:center;gap:7px;background:#cdef36;color:#16120c;font-weight:700;font-size:14px;padding:11px 22px;border-radius:999px">Escolher faixa →</span>
+              </button>
+            </sc-if>
+
+            <!-- FILLED (clean) -->
+            <sc-if value="{{ s.filled }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column;padding:20px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+                  <span style="{{ s._pillStyle }}"><span style="{{ s._pillDot }}"></span>{{ s.pillText }}</span>
+                  <span style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.16em;color:rgba(236,227,210,.32)">VAGA {{ s.vaga }}</span>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:15px;margin-bottom:24px">
+                  <div style="flex:none;width:62px;height:62px;position:relative;border-radius:6px;overflow:hidden;box-shadow:0 10px 20px -12px rgba(0,0,0,.7)">
+                    <div style="{{ s._surf }}"><div style="{{ s._artistS }}">{{ s.artist }}</div><div style="{{ s._titleS }}">{{ s.title }}</div></div>
+                  </div>
+                  <div style="min-width:0">
+                    <div style="font-weight:800;font-size:22px;letter-spacing:-.025em;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.title }}</div>
+                    <div style="font-family:'Space Mono',monospace;font-size:11px;color:rgba(236,227,210,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px">{{ s.artist }}</div>
+                  </div>
+                </div>
+
+                <!-- action -->
+                <sc-if value="{{ s.travada }}" hint-placeholder-val="{{ true }}">
+                  <button disabled style="width:100%;height:44px;border-radius:999px;border:1px solid rgba(236,227,210,.16);background:rgba(236,227,210,.04);color:rgba(236,227,210,.5);font-family:Archivo;font-weight:700;font-size:14px;cursor:not-allowed">Travada · {{ s.daysLeft }} dias restantes</button>
+                  <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.04em;color:rgba(236,227,210,.38);text-align:center;margin-top:9px">Recolher liberado em {{ s.recolherDate }}</div>
+                </sc-if>
+                <sc-if value="{{ s.livre }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;gap:9px">
+                    <button onClick="{{ s._recolher }}" style="flex:1;height:44px;border-radius:999px;border:none;background:#cdef36;color:#16120c;font-family:Archivo;font-weight:700;font-size:14px;cursor:pointer">Recolher</button>
+                    <button style="flex:none;padding:0 16px;height:44px;border-radius:999px;border:1px solid rgba(236,227,210,.22);background:transparent;color:rgba(236,227,210,.75);font-family:Archivo;font-weight:600;font-size:13px;cursor:pointer">Deixar correndo</button>
+                  </div>
+                  <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.04em;color:rgba(236,227,210,.38);text-align:center;margin-top:9px">Trava cumprida · recolha quando quiser</div>
+                </sc-if>
+
+                <!-- ver infos toggle -->
+                <button onClick="{{ s._toggle }}" style="margin-top:16px;width:100%;background:transparent;border:none;border-top:1px solid rgba(236,227,210,.1);padding:14px 0 0;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:rgba(236,227,210,.5)">{{ s.toggleLabel }}</button>
+
+                <sc-if value="{{ s.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:14px;display:flex;flex-direction:column;gap:14px;animation:mir-slide .2s ease both">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                      <div>
+                        <div style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:rgba(236,227,210,.4);margin-bottom:5px">MULTIPLICADOR CRAVADO</div>
+                        <div style="font-weight:900;font-size:34px;letter-spacing:-.04em;line-height:.85;color:#cdef36">{{ s.mult }}</div>
+                      </div>
+                      <span style="{{ s._chipStyle }}">{{ s.chipText }}</span>
+                    </div>
+                    <div>
+                      <div style="display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:rgba(236,227,210,.42);margin-bottom:6px">
+                        <span>POPULARIDADE QUANDO CRAVOU</span><span>{{ s.chipHint }}</span>
+                      </div>
+                      <div style="height:4px;background:rgba(236,227,210,.12);border-radius:2px;overflow:hidden"><div style="{{ s._meterFill }}"></div></div>
+                    </div>
+                    <div style="font-family:'Space Mono',monospace;font-size:11px;color:rgba(236,227,210,.55);line-height:1.45">{{ s.cravandoLine }}</div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="border-top:2px solid #cdef36">
+    <div style="max-width:1200px;margin:0 auto;padding:46px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px">
+      <div style="display:flex;align-items:center;gap:11px">
+        <svg width="26" height="26" viewBox="0 0 100 100"><circle cx="50" cy="50" r="49" fill="#16120c"/><path d="M50 1 a49 49 0 0 1 0 98 a24.5 24.5 0 0 1 0-49 a24.5 24.5 0 0 0 0-49z" fill="#cdef36"/><circle cx="50" cy="25.5" r="7.2" fill="#16120c"/><circle cx="50" cy="74.5" r="7.2" fill="#cdef36"/></svg>
+        <span style="font-weight:900;font-size:20px;letter-spacing:-.04em">mirsui</span>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:rgba(236,227,210,.4);text-align:center">ARQUIVO MUSICAL CURATORIAL · Nº 047 · DESDE 2024<br>feito por quem ouve cedo demais.</div>
+      <div style="display:flex;gap:18px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:rgba(236,227,210,.55)">
+        <a href="Mirsui Faro.dc.html" style="color:inherit;text-decoration:none">FARO</a>
+        <a href="Mirsui Cravadas.dc.html" style="color:inherit;text-decoration:none">CRAVADAS</a>
+        <a href="Mirsui Termos.dc.html" style="color:inherit;text-decoration:none">TERMOS</a>
+        <a href="Mirsui Privacidade.dc.html" style="color:inherit;text-decoration:none">PRIVACIDADE</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL -->
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeModal }}" style="position:fixed;inset:0;z-index:80;background:rgba(8,6,3,.72);backdrop-filter:blur(6px);display:flex;align-items:flex-start;justify-content:center;padding:48px 20px;overflow-y:auto;animation:mir-fade .18s ease both">
+    <div onClick="{{ stop }}" style="width:100%;max-width:560px;background:#1c160e;border:1px solid rgba(236,227,210,.14);border-radius:18px;box-shadow:0 40px 80px -30px rgba(0,0,0,.7);overflow:hidden;animation:mir-pop .24s cubic-bezier(.2,.8,.2,1) both">
+
+      <div style="padding:22px 24px;border-bottom:1px solid rgba(236,227,210,.1);display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+        <div>
+          <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.18em;color:#cdef36;margin-bottom:7px">CRAVAR NA VAGA {{ modalVaga }}</div>
+          <h3 style="font-weight:900;font-size:25px;letter-spacing:-.035em;margin:0">{{ modalTitle }}</h3>
+        </div>
+        <button onClick="{{ closeModal }}" style="flex:none;width:34px;height:34px;border-radius:50%;border:1px solid rgba(236,227,210,.18);background:transparent;color:rgba(236,227,210,.7);font-size:16px;cursor:pointer;line-height:0">✕</button>
+      </div>
+
+      <!-- SEARCH VIEW -->
+      <sc-if value="{{ searchView }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:18px 24px 8px">
+          <div style="display:flex;align-items:center;gap:10px;background:#211a11;border:1px solid rgba(236,227,210,.14);border-radius:999px;padding:13px 18px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(236,227,210,.55)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+            <input value="{{ query }}" onInput="{{ onQuery }}" placeholder="Buscar a faixa que você quer cravar" style="background:transparent;border:none;outline:none;color:#ece3d2;font-family:'Space Mono',monospace;font-size:13px;width:100%"/>
+          </div>
+        </div>
+        <div style="max-height:48vh;overflow-y:auto;padding:6px 12px 14px">
+          <sc-if value="{{ noQuery }}" hint-placeholder-val="{{ true }}">
+            <div style="text-align:center;padding:48px 24px;font-family:'Space Mono',monospace;font-size:12px;line-height:1.7;color:rgba(236,227,210,.4)">Comece a digitar pra encontrar<br>a faixa. Você vê as infos dela<br>antes de confirmar a cravada.</div>
+          </sc-if>
+          <sc-for list="{{ results }}" as="r" hint-placeholder-count="0">
+            <button onClick="{{ r._select }}" style="width:100%;text-align:left;display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:10px;border:none;border-bottom:1px solid rgba(236,227,210,.07);background:transparent;color:inherit;cursor:pointer;font-family:Archivo">
+              <div style="flex:none;width:46px;height:46px;position:relative;border-radius:5px;overflow:hidden">
+                <div style="{{ r._surf }}"><div style="{{ r._artistS }}">{{ r.artist }}</div><div style="{{ r._titleS }}">{{ r.title }}</div></div>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:700;font-size:16px;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.title }}</div>
+                <div style="font-family:'Space Mono',monospace;font-size:11px;color:rgba(236,227,210,.48);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px">{{ r.artist }}</div>
+              </div>
+              <span style="flex:none;color:rgba(236,227,210,.4);font-size:18px">→</span>
+            </button>
+          </sc-for>
+          <sc-if value="{{ emptyResults }}" hint-placeholder-val="{{ false }}">
+            <div style="text-align:center;padding:40px 20px;font-family:'Space Mono',monospace;font-size:12px;color:rgba(236,227,210,.4)">Nenhuma faixa encontrada pra "{{ query }}".</div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- DETAIL VIEW -->
+      <sc-if value="{{ detailView }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:20px 24px 24px;animation:mir-slide .2s ease both">
+          <button onClick="{{ back }}" style="background:transparent;border:none;cursor:pointer;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:rgba(236,227,210,.55);padding:0;margin-bottom:18px">← buscar outra</button>
+
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:22px">
+            <div style="flex:none;width:76px;height:76px;position:relative;border-radius:8px;overflow:hidden;box-shadow:0 14px 28px -14px rgba(0,0,0,.7)">
+              <div style="{{ detail._surf }}"><div style="{{ detail._artistS }}">{{ detail.artist }}</div><div style="{{ detail._titleS }}">{{ detail.title }}</div></div>
+            </div>
+            <div style="min-width:0">
+              <div style="font-weight:900;font-size:26px;letter-spacing:-.03em;line-height:1.02">{{ detail.title }}</div>
+              <div style="font-family:'Space Mono',monospace;font-size:12px;color:rgba(236,227,210,.55);margin-top:5px">{{ detail.artist }}</div>
+            </div>
+          </div>
+
+          <div style="background:#211a11;border:1px solid rgba(236,227,210,.1);border-radius:12px;padding:20px">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px">
+              <div>
+                <div style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:rgba(236,227,210,.42);margin-bottom:6px">MULTIPLICADOR SE CRAVAR AGORA</div>
+                <div style="font-weight:900;font-size:46px;letter-spacing:-.04em;line-height:.82;{{ detail._multColor }}">{{ detail.mult }}</div>
+              </div>
+              <span style="{{ detail._badgeStyle }}">{{ detail.badgeText }}</span>
+            </div>
+            <div style="margin-bottom:16px">
+              <div style="display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:rgba(236,227,210,.42);margin-bottom:6px">
+                <span>POPULARIDADE</span><span>{{ detail.badgeHint }}</span>
+              </div>
+              <div style="height:4px;background:rgba(236,227,210,.12);border-radius:2px;overflow:hidden"><div style="{{ detail._meterFill }}"></div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;font-size:12px;color:rgba(236,227,210,.62);border-top:1px solid rgba(236,227,210,.1);padding-top:14px">
+              <span style="font-weight:700;color:#ece3d2">{{ detail.cravando }}</span> pessoas já cravaram nessa faixa
+            </div>
+          </div>
+
+          <div style="font-family:'Space Mono',monospace;font-size:11px;line-height:1.6;color:rgba(236,227,210,.5);margin:16px 2px 18px">A trava de {{ lockDays }} dias começa assim que você cravar. O multiplicador fica fixo no valor de agora — depois é só ver a faixa subir.</div>
+
+          <button onClick="{{ detail._confirm }}" style="width:100%;height:50px;border-radius:999px;border:none;background:#cdef36;color:#16120c;font-family:Archivo;font-weight:800;font-size:16px;letter-spacing:-.01em;cursor:pointer">Cravar {{ detail.title }} · {{ detail.mult }}</button>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:1100},&quot;lockDays&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:7,&quot;min&quot;:1,&quot;max&quot;:30,&quot;tsType&quot;:&quot;number&quot;},&quot;startExpanded&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { modalSlot: null, query: '', selected: null, open: {}, slots: null };
+
+  // ---- covers ----
+  palettes() {
+    return [
+      { bg:'#cdef36', fg:'#16120c', mut:'rgba(22,18,12,.6)' },
+      { bg:'#16120c', fg:'#ece3d2', mut:'rgba(236,227,210,.5)' },
+      { bg:'#c14a26', fg:'#f7ead7', mut:'rgba(247,234,215,.62)' },
+      { bg:'#e3d8c1', fg:'#16120c', mut:'rgba(22,18,12,.5)' },
+      { bg:'#27203a', fg:'#e7ddff', mut:'rgba(231,221,255,.55)' },
+      { bg:'#173a4a', fg:'#dcf0fb', mut:'rgba(220,240,251,.55)' },
+      { bg:'#3f3f17', fg:'#eef36a', mut:'rgba(238,243,106,.6)' },
+    ];
+  }
+  hash(s) { let h = 0; for (let i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) >>> 0; } return h; }
+  coverStyles(o, size) {
+    const map = { big:{pad:'11px',t:'19px',a:'8.5px'}, slot:{pad:'10px',t:'16px',a:'8px'}, row:{pad:'8px',t:'13px',a:'7px'} };
+    const s = map[size] || map.row;
+    return {
+      _surf:{ position:'absolute', inset:'0', background:o._bg, display:'flex', flexDirection:'column', justifyContent:'flex-end', padding:s.pad, overflow:'hidden' },
+      _artistS:{ fontFamily:'"Space Mono",monospace', fontSize:s.a, letterSpacing:'.1em', textTransform:'uppercase', color:o._mut, marginBottom:'3px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', width:'100%' },
+      _titleS:{ fontFamily:'Archivo', fontWeight:'800', fontSize:s.t, lineHeight:'.95', letterSpacing:'-.025em', color:o._fg, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', width:'100%' },
+    };
+  }
+  applyCover(o, size) {
+    const p = this.palettes();
+    const c = p[this.hash(o.title + '|' + o.artist) % p.length];
+    o._bg = c.bg; o._fg = c.fg; o._mut = c.mut;
+    Object.assign(o, this.coverStyles(o, size));
+    return o;
+  }
+
+  // ---- popularity ----
+  tier(pop) { return pop < 34 ? 'BAIXA' : pop < 67 ? 'MÉDIA' : 'ALTA'; }
+  badge(pop) {
+    const t = this.tier(pop);
+    const base = { fontFamily:'"Space Mono",monospace', fontSize:'9.5px', fontWeight:'700', letterSpacing:'.1em', padding:'4px 9px', borderRadius:'4px', flex:'none', whiteSpace:'nowrap' };
+    if (t === 'BAIXA') return { tier:t, text:'ACHADO RARO', hint:'mult. alto', style:Object.assign({}, base, { background:'rgba(205,239,54,.16)', color:'#cdef36', border:'1px solid rgba(205,239,54,.4)' }), multColor:'#cdef36' };
+    if (t === 'MÉDIA') return { tier:t, text:'SUBINDO', hint:'mult. médio', style:Object.assign({}, base, { background:'rgba(236,227,210,.1)', color:'rgba(236,227,210,.82)', border:'1px solid rgba(236,227,210,.22)' }), multColor:'#cdef36' };
+    return { tier:t, text:'NA BOCA DO POVO', hint:'mult. baixo', style:Object.assign({}, base, { background:'transparent', color:'rgba(236,227,210,.5)', border:'1px solid rgba(236,227,210,.18)' }), multColor:'rgba(236,227,210,.62)' };
+  }
+
+  fmt(n) { return Math.round(n).toLocaleString('pt-BR'); }
+  lockDays() { return this.props.lockDays || 7; }
+  futureDate(n) {
+    const d = new Date(); d.setDate(d.getDate() + n);
+    const m = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    return d.getDate() + ' ' + m[d.getMonth()];
+  }
+
+  // ---- data ----
+  pool() {
+    return [
+      { id:'t1', title:'stray', artist:'meat computer', pop:16, mult:'x3,4', cravando:23 },
+      { id:'t2', title:'XVI', artist:'akiaura, LONOWN', pop:27, mult:'x3,1', cravando:41 },
+      { id:'t3', title:'Daydream', artist:'Hiko Momoji', pop:31, mult:'x2,8', cravando:58 },
+      { id:'t4', title:'Make Love', artist:'Daft Punk', pop:44, mult:'x2,4', cravando:120 },
+      { id:'t5', title:'7K', artist:'Yung Buda, Baby Gengar', pop:55, mult:'x2,0', cravando:188 },
+      { id:'t6', title:'Feel Ur Love', artist:'Emma Louise, Flume', pop:64, mult:'x1,8', cravando:305 },
+      { id:'t7', title:'PIXELATED KISSES', artist:'Joji', pop:74, mult:'x1,5', cravando:612 },
+    ];
+  }
+  defaultSlots() {
+    return [
+      { id:'stray', title:'stray', artist:'meat computer', pop:18, mult:'x3,4', cravando:35, delta:'+12 desde você cravou', daysLeft:4, recolherDate:'25 jun', status:'travada' },
+      { id:'black', title:'Black', artist:'Yung Buda', pop:58, mult:'x2,6', cravando:240, delta:'+52 desde você cravou', status:'livre' },
+      null,
+    ];
+  }
+  slots() { return this.state.slots || this.defaultSlots(); }
+  isOpen(i) { return this.state.open[i] !== undefined ? this.state.open[i] : !!this.props.startExpanded; }
+
+  // ---- actions ----
+  openModal(i) { this.setState({ modalSlot: i, query: '', selected: null }); }
+  closeModal() { this.setState({ modalSlot: null, query: '', selected: null }); }
+  stop(e) { e.stopPropagation(); }
+  onQuery(e) { this.setState({ query: e.target.value }); }
+  selectTrack(id) { this.setState({ selected: id }); }
+  back() { this.setState({ selected: null }); }
+  toggleInfo(i) { const cur = this.isOpen(i); this.setState({ open: Object.assign({}, this.state.open, { [i]: !cur }) }); }
+  recolher(i) { const s = this.slots().slice(); s[i] = null; this.setState({ slots: s, open: Object.assign({}, this.state.open, { [i]: false }) }); }
+  fillSlot(t) {
+    const i = this.state.modalSlot;
+    if (i == null) return;
+    const s = this.slots().slice();
+    s[i] = { id:'s-'+t.id, title:t.title, artist:t.artist, pop:t.pop, mult:t.mult, cravando:t.cravando + 1, delta:'você acabou de cravar', daysLeft:this.lockDays(), recolherDate:this.futureDate(this.lockDays()), status:'travada' };
+    this.setState({ slots: s, modalSlot: null, query: '', selected: null });
+  }
+
+  renderVals() {
+    const slots = this.slots();
+
+    const slotCards = slots.map((s, i) => {
+      const vaga = '0' + (i + 1);
+      if (!s) {
+        return {
+          empty:true, filled:false, vaga,
+          _wrap:{ minWidth:'0', borderRadius:'16px', border:'1.5px dashed rgba(205,239,54,.32)', background:'rgba(205,239,54,.03)', display:'flex' },
+          _cravar:() => this.openModal(i),
+        };
+      }
+      const o = this.applyCover({ title:s.title, artist:s.artist }, 'slot');
+      const b = this.badge(s.pop);
+      const travada = s.status === 'travada';
+      const open = this.isOpen(i);
+      return {
+        empty:false, filled:true, vaga,
+        title:s.title, artist:s.artist,
+        _surf:o._surf, _artistS:o._artistS, _titleS:o._titleS,
+        mult:s.mult,
+        travada, livre:!travada, daysLeft:s.daysLeft, recolherDate:s.recolherDate,
+        open, toggleLabel: open ? 'esconder infos da cravada ⌃' : 'ver infos da cravada ⌄',
+        pillText: travada ? ('TRAVADA · ' + s.daysLeft + 'D') : 'LIVRE PRA RECOLHER',
+        _pillStyle: {
+          display:'inline-flex', alignItems:'center', gap:'7px',
+          fontFamily:'"Space Mono",monospace', fontSize:'10px', fontWeight:'700', letterSpacing:'.12em',
+          padding:'5px 11px', borderRadius:'999px',
+          background: travada ? 'rgba(236,227,210,.06)' : 'rgba(205,239,54,.14)',
+          color: travada ? 'rgba(236,227,210,.72)' : '#cdef36',
+          border: travada ? '1px solid rgba(236,227,210,.14)' : '1px solid rgba(205,239,54,.4)',
+        },
+        _pillDot: { width:'7px', height:'7px', borderRadius:'50%', flex:'none', background: travada ? '#e0a84a' : '#cdef36' },
+        chipText:b.text, _chipStyle:b.style, chipHint:b.hint,
+        _meterFill:{ width:s.pop + '%', height:'100%', background:'rgba(236,227,210,.55)', borderRadius:'2px' },
+        cravandoLine: this.fmt(s.cravando) + ' pessoas cravaram · ' + s.delta,
+        _toggle:() => this.toggleInfo(i),
+        _recolher:() => this.recolher(i),
+        _wrap:{ minWidth:'0', borderRadius:'16px', background:'#1c160e', border: travada ? '1px solid rgba(236,227,210,.12)' : '1.5px solid rgba(205,239,54,.4)', display:'flex', boxShadow: travada ? 'none' : '0 20px 44px -24px rgba(205,239,54,.32)' },
+      };
+    });
+
+    // modal
+    const mi = this.state.modalSlot;
+    const q = (this.state.query || '').trim().toLowerCase();
+    const filtered = q ? this.pool().filter(t => (t.title + ' ' + t.artist).toLowerCase().includes(q)) : [];
+    const results = filtered.map(t => {
+      const o = this.applyCover({ title:t.title, artist:t.artist }, 'row');
+      return Object.assign({}, t, { _surf:o._surf, _artistS:o._artistS, _titleS:o._titleS, _select:() => this.selectTrack(t.id) });
+    });
+
+    const sel = this.state.selected ? this.pool().find(t => t.id === this.state.selected) : null;
+    let detail = null;
+    if (sel) {
+      const o = this.applyCover({ title:sel.title, artist:sel.artist }, 'big');
+      const b = this.badge(sel.pop);
+      detail = Object.assign({}, sel, {
+        _surf:o._surf, _artistS:o._artistS, _titleS:o._titleS,
+        badgeText:b.text, badgeHint:b.hint, _badgeStyle:b.style, _multColor:{ color:b.multColor },
+        _meterFill:{ width:sel.pop + '%', height:'100%', background:'rgba(236,227,210,.5)', borderRadius:'2px' },
+        cravando:this.fmt(sel.cravando),
+        _confirm:() => this.fillSlot(sel),
+      });
+    }
+
+    const used = slots.filter(Boolean).length;
+
+    return {
+      slotCards,
+      vagasLine: used + ' DE 3 VAGAS EM JOGO',
+      lockDays: this.lockDays(),
+      modalOpen: mi != null,
+      modalVaga: mi != null ? '0' + (mi + 1) : '',
+      modalTitle: sel ? 'Confira e crave' : 'Buscar faixa',
+      searchView: mi != null && !sel,
+      detailView: mi != null && !!sel,
+      noQuery: !q,
+      results,
+      emptyResults: !!q && results.length === 0,
+      detail,
+      query: this.state.query || '',
+      closeModal:() => this.closeModal(),
+      stop:(e) => this.stop(e),
+      onQuery:(e) => this.onQuery(e),
+      back:() => this.back(),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -115,7 +115,7 @@ const SECTIONS: LegalSection[] = [
         title: 'Segurança e contato',
         paras: [
             'Protegemos seus dados com criptografia, controle de acesso e boas práticas de segurança. Nenhum sistema é 100% infalível, mas tratamos seus dados como se fossem nossos.',
-            'Dúvidas, pedidos ou denúncias relacionadas a privacidade? Fale com nosso encarregado de dados pelo e-mail privacidade@mirsui.fm. Esta política pode ser atualizada — sempre avisamos por aqui quando houver mudança relevante.',
+            'Dúvidas, pedidos ou denúncias relacionadas a privacidade? Fale com nosso encarregado de dados pelo e-mail privacidade@mirsui.com. Esta política pode ser atualizada — sempre avisamos por aqui quando houver mudança relevante.',
         ],
     },
 ]
@@ -142,7 +142,7 @@ export default function PrivacidadePage() {
                 eyebrow: 'QUER VER, EXPORTAR OU APAGAR?',
                 title: 'Seus dados estão a um e-mail de distância.',
                 desc: 'Pedidos de acesso, correção ou exclusão são respondidos em até 15 dias.',
-                email: 'privacidade@mirsui.fm',
+                email: 'privacidade@mirsui.com',
             }}
         />
     )

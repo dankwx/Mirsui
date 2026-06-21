@@ -135,7 +135,7 @@ export default function TermosPage() {
                 eyebrow: 'DÚVIDAS SOBRE OS TERMOS?',
                 title: 'Fala com a gente.',
                 desc: 'A cena é pequena e a porta tá aberta. Responde rápido, na real.',
-                email: 'contato@mirsui.fm',
+                email: 'contato@mirsui.com',
             }}
         />
     )

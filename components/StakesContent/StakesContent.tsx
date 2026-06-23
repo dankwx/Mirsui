@@ -414,7 +414,8 @@ export default function StakesContent({
                     trackTitle: selected.title,
                     artistName: selected.artist,
                     albumName: selected.albumName ?? undefined,
-                    trackThumbnail: selected.thumbnail ?? undefined,
+                    trackThumbnail:
+                        selected.cover ?? selected.thumbnail ?? undefined,
                     isrc: selected.isrc ?? undefined,
                 }),
             })
@@ -604,33 +605,51 @@ export default function StakesContent({
                             return (
                                 <div
                                     key={s.id}
-                                    className="flex min-w-0 rounded-2xl bg-mir-surface"
+                                    className="flex min-w-0 flex-col overflow-hidden rounded-2xl bg-mir-surface"
                                     style={{
                                         border,
                                         boxShadow: shadow,
                                         opacity: removida ? 0.55 : 1,
                                     }}
                                 >
-                                    <div className="flex w-full flex-col p-5">
-                                        <div className="mb-5 flex items-center justify-between">
+                                    {/* CAPA EM DESTAQUE */}
+                                    <div
+                                        className="relative aspect-square w-full flex-none overflow-hidden"
+                                        style={{
+                                            filter: removida ? 'grayscale(1)' : 'none',
+                                        }}
+                                    >
+                                        <CoverImage
+                                            src={s.track_thumbnail}
+                                            track={{
+                                                title: s.track_title,
+                                                artist: s.artist_name,
+                                            }}
+                                            size="big"
+                                        />
+                                        {/* gradiente pra leitura do título e blend com o card */}
+                                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-mir-surface via-mir-surface/60 to-transparent" />
+
+                                        {/* topo: status + vaga */}
+                                        <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-4">
                                             <span
-                                                className="inline-flex items-center gap-[7px] rounded-full px-[11px] py-[5px] font-mono text-[10px] font-bold tracking-[0.12em]"
+                                                className="inline-flex items-center gap-[7px] rounded-full px-[11px] py-[5px] font-mono text-[10px] font-bold tracking-[0.12em] backdrop-blur-md"
                                                 style={{
                                                     background: removida
                                                         ? 'rgba(236,227,210,.05)'
                                                         : podeColetar
-                                                          ? 'rgba(205,239,54,.14)'
-                                                          : 'rgba(236,227,210,.06)',
+                                                          ? 'rgba(205,239,54,.16)'
+                                                          : 'rgba(22,18,12,.55)',
                                                     color: removida
                                                         ? 'rgba(236,227,210,.5)'
                                                         : podeColetar
                                                           ? '#cdef36'
-                                                          : 'rgba(236,227,210,.72)',
+                                                          : 'rgba(236,227,210,.82)',
                                                     border: removida
                                                         ? '1px solid rgba(236,227,210,.12)'
                                                         : podeColetar
                                                           ? '1px solid rgba(205,239,54,.4)'
-                                                          : '1px solid rgba(236,227,210,.14)',
+                                                          : '1px solid rgba(236,227,210,.18)',
                                                 }}
                                             >
                                                 <span
@@ -649,46 +668,31 @@ export default function StakesContent({
                                                       ? 'LIVRE PRA RECOLHER'
                                                       : 'SEGURANDO · ' + s.days_held + 'D'}
                                             </span>
-                                            <span className="font-mono text-[10px] tracking-[0.16em] text-mir-text2/[0.32]">
+                                            <span className="flex-none rounded-full bg-black/30 px-[9px] py-[5px] font-mono text-[10px] tracking-[0.16em] text-mir-text2/70 backdrop-blur-md">
                                                 VAGA {vaga}
                                             </span>
                                         </div>
 
-                                        <div className="mb-6 flex items-center gap-[15px]">
-                                            <div
-                                                className="relative h-[62px] w-[62px] flex-none overflow-hidden rounded-md shadow-[0_10px_20px_-12px_rgba(0,0,0,.7)]"
-                                                style={{
-                                                    filter: removida
-                                                        ? 'grayscale(1)'
-                                                        : 'none',
-                                                }}
-                                            >
-                                                <CoverImage
-                                                    src={s.track_thumbnail}
-                                                    track={{
-                                                        title: s.track_title,
-                                                        artist: s.artist_name,
-                                                    }}
-                                                    size="slot"
-                                                />
+                                        {/* base: título + artista sobre a capa */}
+                                        <div className="absolute inset-x-0 bottom-0 p-5 pt-12">
+                                            <div className="flex items-center gap-2">
+                                                <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[25px] font-extrabold leading-[1.05] tracking-[-0.03em] text-mir-text">
+                                                    {s.track_title}
+                                                </div>
+                                                {!removida && s.last_day_gain > 0 && (
+                                                    <span className="flex-none rounded-full bg-mir-acc/20 px-2 py-[3px] font-mono text-[10px] font-bold text-mir-acc">
+                                                        +{fmt(s.last_day_gain)}
+                                                    </span>
+                                                )}
                                             </div>
-                                            <div className="min-w-0 flex-1">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[22px] font-extrabold leading-[1.05] tracking-[-0.025em]">
-                                                        {s.track_title}
-                                                    </div>
-                                                    {!removida && s.last_day_gain > 0 && (
-                                                        <span className="flex-none rounded-full bg-mir-acc/15 px-2 py-[3px] font-mono text-[10px] font-bold text-mir-acc">
-                                                            +{fmt(s.last_day_gain)}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <div className="mt-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[11px] text-mir-text2/80">
-                                                    {s.artist_name}
-                                                </div>
+                                            <div className="mt-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[11.5px] text-mir-text2/85">
+                                                {s.artist_name}
                                             </div>
                                         </div>
+                                    </div>
 
+                                    {/* CONTEÚDO */}
+                                    <div className="flex flex-col p-5 pt-[18px]">
                                         {/* action */}
                                         {removida ? (
                                             <>

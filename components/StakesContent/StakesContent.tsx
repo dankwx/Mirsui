@@ -21,7 +21,7 @@ type Palette = { bg: string; fg: string; mut: string }
 type CoverSize = 'big' | 'slot' | 'row'
 
 // Stake vindo do backend (GET /stakes)
-type Stake = {
+export type Stake = {
     id: string
     track_id: string
     track_uri: string
@@ -257,10 +257,18 @@ function CoverImage({
     return <Cover track={track} size={size} />
 }
 
-export default function StakesContent() {
-    const [stakes, setStakes] = useState<Stake[]>([])
-    const [loading, setLoading] = useState(true)
-    const [points, setPoints] = useState<number | null>(null)
+export default function StakesContent({
+    initialStakes = [],
+    initialPoints = null,
+}: {
+    initialStakes?: Stake[]
+    initialPoints?: number | null
+} = {}) {
+    const [stakes, setStakes] = useState<Stake[]>(initialStakes)
+    // Dados já chegam do servidor (render do page.tsx), então não há "loading"
+    // inicial: a lista aparece instantânea, igual ao perfil no header.
+    const [loading, setLoading] = useState(false)
+    const [points, setPoints] = useState<number | null>(initialPoints)
 
     const [modalSlot, setModalSlot] = useState<number | null>(null)
     const [query, setQuery] = useState('')
@@ -306,10 +314,8 @@ export default function StakesContent() {
         }
     }, [])
 
-    useEffect(() => {
-        loadStakes()
-        loadPoints()
-    }, [loadStakes, loadPoints])
+    // Sem fetch na montagem: os dados iniciais vêm do servidor (page.tsx).
+    // loadStakes/loadPoints ficam só pra revalidar após dar/recolher stake.
 
     // ---- busca no Spotify (debounce) ----
     useEffect(() => {

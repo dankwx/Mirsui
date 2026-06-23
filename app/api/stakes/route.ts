@@ -3,7 +3,7 @@ import { getAccessToken } from '@/utils/supabase/get-access-token'
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
 
-// GET /api/cravadas → lista as cravadas do usuário (proxy autenticado p/ backend)
+// GET /api/stakes → lista os stakes do usuário (proxy autenticado p/ backend)
 export async function GET() {
     const token = await getAccessToken()
     if (!token) {
@@ -11,19 +11,19 @@ export async function GET() {
     }
 
     try {
-        const response = await fetch(`${BACKEND_URL}/cravadas`, {
+        const response = await fetch(`${BACKEND_URL}/stakes`, {
             headers: { Authorization: `Bearer ${token}` },
             cache: 'no-store',
         })
         const data = await response.json()
         return NextResponse.json(data, { status: response.status })
     } catch (error) {
-        console.error('Erro ao buscar cravadas:', error)
-        return NextResponse.json({ error: 'Erro ao buscar cravadas' }, { status: 500 })
+        console.error('Erro ao buscar stakes:', error)
+        return NextResponse.json({ error: 'Erro ao buscar stakes' }, { status: 500 })
     }
 }
 
-// POST /api/cravadas → crava uma faixa
+// POST /api/stakes → dá stake numa faixa
 export async function POST(request: NextRequest) {
     const token = await getAccessToken()
     if (!token) {
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     try {
         const body = await request.json()
-        const response = await fetch(`${BACKEND_URL}/cravadas`, {
+        const response = await fetch(`${BACKEND_URL}/stakes`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         const data = await response.json()
         return NextResponse.json(data, { status: response.status })
     } catch (error) {
-        console.error('Erro ao cravar faixa:', error)
-        return NextResponse.json({ error: 'Erro ao cravar faixa' }, { status: 500 })
+        console.error('Erro ao dar stake na faixa:', error)
+        return NextResponse.json({ error: 'Erro ao dar stake na faixa' }, { status: 500 })
     }
 }

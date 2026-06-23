@@ -98,7 +98,7 @@ export default function TrackActions({
             setMessage('')
             toast({
                 title: 'Faixa reivindicada!',
-                description: `Você é o #${data.position} a cravar "${trackTitle}".`,
+                description: `Você é o #${data.position} a reivindicar "${trackTitle}".`,
             })
         } catch (error) {
             toast({
@@ -182,7 +182,7 @@ export default function TrackActions({
                 <div className="mt-3 rounded-xl border border-mir-line bg-mir-surface p-3">
                     <div className="mb-2 flex items-center justify-between">
                         <span className="text-[12.5px] font-semibold text-mir-text">
-                            Deixe uma nota ao cravar (opcional)
+                            Deixe uma nota ao reivindicar (opcional)
                         </span>
                         <button
                             onClick={() => setShowMessage(false)}

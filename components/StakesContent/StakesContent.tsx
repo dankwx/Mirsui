@@ -8,9 +8,9 @@ import {
     type CSSProperties,
 } from 'react'
 import { useToast } from '@/components/ui/use-toast'
-import { formatMultiplier } from '@/utils/cravadaMultiplier'
+import { formatMultiplier } from '@/utils/stakeMultiplier'
 
-// Regras da feature (ver Cravada.md): 3 vagas, e só dá pra COLETAR os pontos
+// Regras da feature (ver Stake.md): 3 vagas, e só dá pra COLETAR os pontos
 // depois de 7 dias. Remover antes disso é permitido, mas zera os pontos.
 const MAX_SLOTS = 3
 const MIN_DAYS = 7
@@ -19,8 +19,8 @@ const START_EXPANDED = false
 type Palette = { bg: string; fg: string; mut: string }
 type CoverSize = 'big' | 'slot' | 'row'
 
-// Cravada vinda do backend (GET /cravadas)
-type Cravada = {
+// Stake vindo do backend (GET /stakes)
+type Stake = {
     id: string
     track_id: string
     track_uri: string
@@ -36,11 +36,11 @@ type Cravada = {
     last_popularity: number
     last_day_gain: number
     status: 'ativa' | 'removida' | 'coletada'
-    craved_at: string
+    staked_at: string
     days_held: number
     days_to_collect: number
     can_collect: boolean
-    pessoas_cravaram: number
+    pessoas_deram_stake: number
 }
 
 // Resultado de busca do Spotify mapeado para a UI
@@ -253,8 +253,8 @@ function CoverImage({
     return <Cover track={track} size={size} />
 }
 
-export default function CravadasContent() {
-    const [cravadas, setCravadas] = useState<Cravada[]>([])
+export default function StakesContent() {
+    const [stakes, setStakes] = useState<Stake[]>([])
     const [loading, setLoading] = useState(true)
     const [points, setPoints] = useState<number | null>(null)
 
@@ -266,25 +266,25 @@ export default function CravadasContent() {
     const [previewMult, setPreviewMult] = useState<number | null>(null)
     const [previewPop, setPreviewPop] = useState<number | null>(null)
     const [previewing, setPreviewing] = useState(false)
-    const [craving, setCraving] = useState(false)
+    const [staking, setStaking] = useState(false)
     const [busyId, setBusyId] = useState<string | null>(null)
     const [open, setOpen] = useState<Record<string, boolean>>({})
 
     const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
     const { toast } = useToast()
 
-    // ---- carregar cravadas + total de pontos ----
-    const loadCravadas = useCallback(async () => {
+    // ---- carregar stakes + total de pontos ----
+    const loadStakes = useCallback(async () => {
         try {
-            const res = await fetch('/api/cravadas', { cache: 'no-store' })
+            const res = await fetch('/api/stakes', { cache: 'no-store' })
             if (res.ok) {
                 const data = await res.json()
-                setCravadas(Array.isArray(data.cravadas) ? data.cravadas : [])
+                setStakes(Array.isArray(data.stakes) ? data.stakes : [])
             } else {
-                setCravadas([])
+                setStakes([])
             }
         } catch {
-            setCravadas([])
+            setStakes([])
         } finally {
             setLoading(false)
         }
@@ -292,7 +292,7 @@ export default function CravadasContent() {
 
     const loadPoints = useCallback(async () => {
         try {
-            const res = await fetch('/api/cravadas/points', { cache: 'no-store' })
+            const res = await fetch('/api/stakes/points', { cache: 'no-store' })
             if (res.ok) {
                 const data = await res.json()
                 setPoints(typeof data.total === 'number' ? data.total : 0)
@@ -303,9 +303,9 @@ export default function CravadasContent() {
     }, [])
 
     useEffect(() => {
-        loadCravadas()
+        loadStakes()
         loadPoints()
-    }, [loadCravadas, loadPoints])
+    }, [loadStakes, loadPoints])
 
     // ---- busca no Spotify (debounce) ----
     useEffect(() => {
@@ -371,7 +371,7 @@ export default function CravadasContent() {
         try {
             const qs = new URLSearchParams({ artist: t.artist, title: t.title })
             if (t.isrc) qs.set('isrc', t.isrc)
-            const res = await fetch(`/api/cravadas/preview?${qs.toString()}`)
+            const res = await fetch(`/api/stakes/preview?${qs.toString()}`)
             if (res.ok) {
                 const data = await res.json()
                 if (data.matched) {
@@ -384,17 +384,17 @@ export default function CravadasContent() {
                 }
             }
         } catch {
-            // sem prévia: o multiplicador real é calculado ao cravar
+            // sem prévia: o multiplicador real é calculado ao dar stake
         } finally {
             setPreviewing(false)
         }
     }
 
-    const crave = async () => {
+    const placeStake = async () => {
         if (!selected || modalSlot == null) return
-        setCraving(true)
+        setStaking(true)
         try {
-            const res = await fetch('/api/cravadas', {
+            const res = await fetch('/api/stakes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -408,36 +408,36 @@ export default function CravadasContent() {
                 }),
             })
             const data = await res.json()
-            if (res.ok && data.cravada) {
+            if (res.ok && data.stake) {
                 toast({
-                    title: 'Cravada feita!',
+                    title: 'Stake feito!',
                     description: `"${selected.title}" · multiplicador ${formatMultiplier(
-                        Number(data.cravada.multiplier)
+                        Number(data.stake.multiplier)
                     )}`,
                 })
-                await loadCravadas()
+                await loadStakes()
                 closeModal()
             } else {
                 toast({
-                    title: 'Não foi possível cravar',
+                    title: 'Não foi possível dar stake',
                     description: data.error ?? 'Tente novamente',
                     variant: 'destructive',
                 })
             }
         } catch {
             toast({
-                title: 'Erro ao cravar a faixa',
+                title: 'Erro ao dar stake na faixa',
                 variant: 'destructive',
             })
         } finally {
-            setCraving(false)
+            setStaking(false)
         }
     }
 
-    const recolher = async (c: Cravada) => {
+    const recolher = async (c: Stake) => {
         setBusyId(c.id)
         try {
-            const res = await fetch(`/api/cravadas/${c.id}/recolher`, {
+            const res = await fetch(`/api/stakes/${c.id}/recolher`, {
                 method: 'POST',
             })
             const data = await res.json()
@@ -451,7 +451,7 @@ export default function CravadasContent() {
                     toast({ description: 'Vaga liberada' })
                 }
                 setOpen((prev) => ({ ...prev, [c.id]: false }))
-                await Promise.all([loadCravadas(), loadPoints()])
+                await Promise.all([loadStakes(), loadPoints()])
             } else {
                 toast({
                     title: 'Erro ao recolher',
@@ -467,8 +467,8 @@ export default function CravadasContent() {
     }
 
     // ---- derived ----
-    const slots: (Cravada | null)[] = [0, 1, 2].map((i) => cravadas[i] ?? null)
-    const used = Math.min(cravadas.length, MAX_SLOTS)
+    const slots: (Stake | null)[] = [0, 1, 2].map((i) => stakes[i] ?? null)
+    const used = Math.min(stakes.length, MAX_SLOTS)
 
     const modalOpen = modalSlot != null
     const searchView = modalOpen && !selected
@@ -480,11 +480,11 @@ export default function CravadasContent() {
             <section>
                 <div className="mx-auto max-w-[1200px] px-5 pb-6 pt-14 sm:px-8">
                     <div className="mb-4 font-mono text-[11px] tracking-[0.2em] text-mir-acc">
-                        CRAVE A FAIXA ANTES DELA BOMBAR
+                        DÊ STAKE NA FAIXA ANTES DELA BOMBAR
                     </div>
                     <div className="flex flex-wrap items-end gap-6">
                         <h1 className="m-0 text-[clamp(64px,9vw,116px)] font-black leading-[0.82] tracking-[-0.055em]">
-                            Cravadas
+                            Stakes
                         </h1>
                         <p className="m-0 mb-3 max-w-[440px] text-[18px] leading-[1.45] text-mir-text2">
                             Você tem{' '}
@@ -492,8 +492,8 @@ export default function CravadasContent() {
                                 {MAX_SLOTS - used}{' '}
                                 {MAX_SLOTS - used === 1 ? 'vaga' : 'vagas'}
                             </b>{' '}
-                            pra cravar faixas que acha que vão subir. Quanto mais
-                            escondida a faixa, maior o multiplicador. Seu faro,
+                            pra dar stake em faixas que acha que vão subir. Quanto
+                            mais escondida a faixa, maior o multiplicador. Seu faro,
                             em jogo.
                         </p>
                     </div>
@@ -540,7 +540,7 @@ export default function CravadasContent() {
                                                 VAGA {vaga} · LIVRE
                                             </div>
                                             <div className="mt-0.5 max-w-[200px] text-[21px] font-extrabold leading-[1.1] tracking-[-0.03em]">
-                                                Crave uma faixa antes dela bombar
+                                                Dê stake numa faixa antes dela bombar
                                             </div>
                                             <span className="mt-4 inline-flex items-center gap-[7px] rounded-full bg-mir-acc px-[22px] py-[11px] text-sm font-bold text-mir-on-acc">
                                                 {loading ? 'Carregando…' : 'Escolher faixa →'}
@@ -726,8 +726,8 @@ export default function CravadasContent() {
                                             className="mt-4 flex w-full cursor-pointer items-center justify-center gap-[7px] border-none border-t border-t-mir-line bg-transparent pt-3.5 font-mono text-[10.5px] tracking-[0.1em] text-mir-text2/80"
                                         >
                                             {opened
-                                                ? 'esconder infos da cravada ⌃'
-                                                : 'ver infos da cravada ⌄'}
+                                                ? 'esconder infos do stake ⌃'
+                                                : 'ver infos do stake ⌄'}
                                         </button>
 
                                         {opened && (
@@ -735,7 +735,7 @@ export default function CravadasContent() {
                                                 <div className="flex items-start justify-between gap-3">
                                                     <div>
                                                         <div className="mb-[5px] font-mono text-[9.5px] tracking-[0.14em] text-mir-text2/[0.66]">
-                                                            MULTIPLICADOR CRAVADO
+                                                            MULTIPLICADOR DO STAKE
                                                         </div>
                                                         <div className="text-[34px] font-black leading-[0.85] tracking-[-0.04em] text-mir-acc">
                                                             {formatMultiplier(mult)}
@@ -748,7 +748,7 @@ export default function CravadasContent() {
                                                 <div>
                                                     <div className="mb-1.5 flex justify-between font-mono text-[9.5px] tracking-[0.1em] text-mir-text2/[0.7]">
                                                         <span>
-                                                            POPULARIDADE QUANDO CRAVOU
+                                                            POPULARIDADE QUANDO DEU STAKE
                                                         </span>
                                                         <span>
                                                             agora {s.last_popularity}
@@ -766,10 +766,10 @@ export default function CravadasContent() {
                                                     </div>
                                                 </div>
                                                 <div className="font-mono text-[11px] leading-[1.45] text-mir-text2/[0.9]">
-                                                    {fmt(s.pessoas_cravaram)}{' '}
-                                                    {s.pessoas_cravaram === 1
-                                                        ? 'pessoa cravou'
-                                                        : 'pessoas cravaram'}{' '}
+                                                    {fmt(s.pessoas_deram_stake)}{' '}
+                                                    {s.pessoas_deram_stake === 1
+                                                        ? 'pessoa deu stake'
+                                                        : 'pessoas deram stake'}{' '}
                                                     · {fmt(s.accumulated_points)} pontos
                                                     acumulados
                                                     {!removida && s.last_day_gain > 0
@@ -799,11 +799,11 @@ export default function CravadasContent() {
                         <div className="flex items-start justify-between gap-4 border-b border-mir-line px-6 py-[22px]">
                             <div>
                                 <div className="mb-[7px] font-mono text-[10px] tracking-[0.18em] text-mir-acc">
-                                    CRAVAR NA VAGA{' '}
+                                    DAR STAKE NA VAGA{' '}
                                     {modalSlot != null ? '0' + (modalSlot + 1) : ''}
                                 </div>
                                 <h3 className="m-0 text-[25px] font-black tracking-[-0.035em]">
-                                    {selected ? 'Confira e crave' : 'Buscar faixa'}
+                                    {selected ? 'Confira e dê stake' : 'Buscar faixa'}
                                 </h3>
                             </div>
                             <button
@@ -834,7 +834,7 @@ export default function CravadasContent() {
                                             value={query}
                                             onChange={(e) => setQuery(e.target.value)}
                                             autoFocus
-                                            placeholder="Buscar a faixa que você quer cravar"
+                                            placeholder="Buscar a faixa que você quer dar stake"
                                             className="w-full border-none bg-transparent font-mono text-[13px] text-mir-text outline-none placeholder:text-mir-text3"
                                         />
                                     </div>
@@ -845,7 +845,7 @@ export default function CravadasContent() {
                                             Comece a digitar pra encontrar
                                             <br />a faixa. Você vê as infos dela
                                             <br />
-                                            antes de confirmar a cravada.
+                                            antes de confirmar o stake.
                                         </div>
                                     )}
                                     {searching && (
@@ -899,9 +899,9 @@ export default function CravadasContent() {
                                 previewMult={previewMult}
                                 previewPop={previewPop}
                                 previewing={previewing}
-                                craving={craving}
+                                staking={staking}
                                 onBack={resetPreview}
-                                onConfirm={crave}
+                                onConfirm={placeStake}
                             />
                         )}
                     </div>
@@ -916,7 +916,7 @@ function DetailView({
     previewMult,
     previewPop,
     previewing,
-    craving,
+    staking,
     onBack,
     onConfirm,
 }: {
@@ -924,7 +924,7 @@ function DetailView({
     previewMult: number | null
     previewPop: number | null
     previewing: boolean
-    craving: boolean
+    staking: boolean
     onBack: () => void
     onConfirm: () => void
 }) {
@@ -962,7 +962,7 @@ function DetailView({
                 <div className="mb-[18px] flex items-start justify-between gap-3">
                     <div>
                         <div className="mb-1.5 font-mono text-[9.5px] tracking-[0.14em] text-mir-text2/[0.7]">
-                            MULTIPLICADOR SE CRAVAR AGORA
+                            MULTIPLICADOR SE DER STAKE AGORA
                         </div>
                         <div
                             className="text-[46px] font-black leading-[0.82] tracking-[-0.04em]"
@@ -1002,10 +1002,10 @@ function DetailView({
 
             <button
                 onClick={onConfirm}
-                disabled={craving || previewing}
+                disabled={staking || previewing}
                 className="h-[50px] w-full cursor-pointer rounded-full border-none bg-mir-acc text-base font-extrabold tracking-[-0.01em] text-mir-on-acc disabled:opacity-60"
             >
-                {craving ? 'Cravando…' : `Cravar ${track.title} · ${multLabel}`}
+                {staking ? 'Dando stake…' : `Dar stake em ${track.title} · ${multLabel}`}
             </button>
         </div>
     )

@@ -3,7 +3,7 @@ import { getAccessToken } from '@/utils/supabase/get-access-token'
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
 
-// GET /api/cravadas/points → total de pontos do sistema isolado de Cravadas
+// GET /api/stakes/points → total de pontos do sistema isolado de Stakes
 export async function GET() {
     const token = await getAccessToken()
     if (!token) {
@@ -11,7 +11,7 @@ export async function GET() {
     }
 
     try {
-        const response = await fetch(`${BACKEND_URL}/cravadas/points`, {
+        const response = await fetch(`${BACKEND_URL}/stakes/points`, {
             headers: { Authorization: `Bearer ${token}` },
             cache: 'no-store',
         })

@@ -3,7 +3,7 @@ import { getAccessToken } from '@/utils/supabase/get-access-token'
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
 
-// POST /api/cravadas/[id]/recolher → recolhe (coleta pontos se >= 7 dias, senão só remove)
+// POST /api/stakes/[id]/recolher → recolhe (coleta pontos se >= 7 dias, senão só remove)
 export async function POST(
     _request: NextRequest,
     { params }: { params: { id: string } }
@@ -15,7 +15,7 @@ export async function POST(
 
     try {
         const response = await fetch(
-            `${BACKEND_URL}/cravadas/${params.id}/recolher`,
+            `${BACKEND_URL}/stakes/${params.id}/recolher`,
             {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` },
@@ -25,7 +25,7 @@ export async function POST(
         const data = await response.json()
         return NextResponse.json(data, { status: response.status })
     } catch (error) {
-        console.error('Erro ao recolher cravada:', error)
-        return NextResponse.json({ error: 'Erro ao recolher cravada' }, { status: 500 })
+        console.error('Erro ao recolher stake:', error)
+        return NextResponse.json({ error: 'Erro ao recolher stake' }, { status: 500 })
     }
 }

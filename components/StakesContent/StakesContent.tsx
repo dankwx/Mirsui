@@ -844,42 +844,89 @@ export default function StakesContent() {
                         {/* SEARCH VIEW */}
                         {searchView && (
                             <>
-                                <div className="px-6 pb-2 pt-[18px]">
-                                    <div className="flex items-center gap-2.5 rounded-full border border-mir-line2/90 bg-[#211a11] px-[18px] py-[13px]">
+                                <div className="px-6 pb-3 pt-5">
+                                    <div className="group flex items-center gap-3 rounded-2xl border border-mir-line2/70 bg-[#241c12] px-[18px] py-[15px] transition-colors duration-150 focus-within:border-mir-acc/60 focus-within:bg-[#2a2114] focus-within:shadow-[0_0_0_3px_rgba(205,239,54,.1)]">
                                         <svg
-                                            width="16"
-                                            height="16"
+                                            width="20"
+                                            height="20"
                                             viewBox="0 0 24 24"
                                             fill="none"
-                                            stroke="rgba(236,227,210,.55)"
+                                            stroke="currentColor"
                                             strokeWidth="2"
+                                            strokeLinecap="round"
+                                            className="flex-none text-mir-text2/50 transition-colors duration-150 group-focus-within:text-mir-acc"
                                         >
                                             <circle cx="11" cy="11" r="7" />
-                                            <path d="M21 21l-4-4" />
+                                            <path d="M21 21l-3.5-3.5" />
                                         </svg>
                                         <input
                                             value={query}
                                             onChange={(e) => setQuery(e.target.value)}
                                             autoFocus
-                                            placeholder="Buscar a faixa que você quer dar stake"
-                                            className="w-full border-none bg-transparent font-mono text-[13px] text-mir-text outline-none placeholder:text-mir-text3"
+                                            placeholder="Nome da faixa ou artista…"
+                                            className="w-full border-none bg-transparent text-[16px] font-medium tracking-[-0.01em] text-mir-text outline-none placeholder:font-normal placeholder:text-mir-text3"
                                         />
+                                        {query && (
+                                            <button
+                                                onClick={() => setQuery('')}
+                                                aria-label="Limpar busca"
+                                                className="flex h-[22px] w-[22px] flex-none cursor-pointer items-center justify-center rounded-full border-none bg-mir-text2/12 text-[11px] leading-[0] text-mir-text2/70 transition-colors hover:bg-mir-text2/20 hover:text-mir-text"
+                                            >
+                                                ✕
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="max-h-[48vh] overflow-y-auto px-3 pb-3.5 pt-1.5">
                                     {query.trim().length < 2 && (
-                                        <div className="px-6 py-12 text-center font-mono text-[12px] leading-[1.7] text-mir-text2/[0.66]">
-                                            Comece a digitar pra encontrar
-                                            <br />a faixa. Você vê as infos dela
-                                            <br />
-                                            antes de confirmar o stake.
+                                        <div className="flex flex-col items-center px-6 py-12 text-center">
+                                            <div className="mb-4 flex h-[58px] w-[58px] items-center justify-center rounded-full border border-mir-acc/30 bg-mir-acc/[0.07] text-mir-acc">
+                                                <svg
+                                                    width="26"
+                                                    height="26"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="1.8"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                >
+                                                    <circle cx="11" cy="11" r="7" />
+                                                    <path d="M21 21l-3.5-3.5" />
+                                                </svg>
+                                            </div>
+                                            <div className="text-[16px] font-extrabold tracking-[-0.02em] text-mir-text">
+                                                Busque a faixa que vai bombar
+                                            </div>
+                                            <div className="mt-1.5 max-w-[280px] font-mono text-[12px] leading-[1.6] text-mir-text2/[0.66]">
+                                                Comece a digitar o nome. Você confere as
+                                                infos dela antes de confirmar o stake.
+                                            </div>
                                         </div>
                                     )}
-                                    {searching && (
-                                        <div className="px-6 py-8 text-center font-mono text-[12px] text-mir-text2/[0.66]">
-                                            Buscando…
-                                        </div>
-                                    )}
+                                    {searching &&
+                                        Array.from({ length: 5 }).map((_, i) => (
+                                            <div
+                                                key={i}
+                                                className="flex w-full items-center gap-4 px-3.5 py-[14px]"
+                                                style={{
+                                                    opacity: 1 - i * 0.16,
+                                                    animationDelay: `${i * 90}ms`,
+                                                }}
+                                            >
+                                                <div className="anim-pulse h-[58px] w-[58px] flex-none rounded-md bg-mir-text2/10" />
+                                                <div className="min-w-0 flex-1">
+                                                    <div
+                                                        className="anim-pulse h-[15px] rounded bg-mir-text2/10"
+                                                        style={{ width: `${72 - i * 9}%` }}
+                                                    />
+                                                    <div
+                                                        className="anim-pulse mt-2.5 h-[11px] rounded bg-mir-text2/10"
+                                                        style={{ width: `${44 - i * 5}%` }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
                                     {!searching &&
                                         results.map((r) => (
                                             <button

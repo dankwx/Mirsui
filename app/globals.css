@@ -164,8 +164,21 @@
 .anim-slide {
   animation: mir-slide 0.2s ease both;
 }
+@keyframes mir-skeleton {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.anim-pulse {
+  animation: mir-skeleton 1.2s ease-in-out infinite;
+}
 @media (prefers-reduced-motion: reduce) {
-  .anim-blink {
+  .anim-blink,
+  .anim-pulse {
     animation: none;
   }
 }

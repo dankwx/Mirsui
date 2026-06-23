@@ -602,6 +602,18 @@ export default function StakesContent({
                                     ? '0 20px 44px -24px rgba(205,239,54,.32)'
                                     : 'none'
 
+                            // status sobre a capa: ponto + texto limpo (sem pill)
+                            const statusDot = removida
+                                ? '#8a8175'
+                                : podeColetar
+                                  ? '#cdef36'
+                                  : '#e0a84a'
+                            const statusLabel = removida
+                                ? 'Removida do Spotify'
+                                : podeColetar
+                                  ? 'Livre pra recolher'
+                                  : `Segurando há ${s.days_held}d`
+
                             return (
                                 <div
                                     key={s.id}
@@ -630,45 +642,31 @@ export default function StakesContent({
                                         {/* gradiente pra leitura do título e blend com o card */}
                                         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-mir-surface via-mir-surface/60 to-transparent" />
 
-                                        {/* topo: status + vaga */}
-                                        <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-4">
+                                        {/* gradiente do topo pra leitura do status */}
+                                        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/55 to-transparent" />
+
+                                        {/* topo: status + vaga (texto limpo, sem pill) */}
+                                        <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-2 px-5 pt-[18px]">
                                             <span
-                                                className="inline-flex items-center gap-[7px] rounded-full px-[11px] py-[5px] font-mono text-[10px] font-bold tracking-[0.12em] backdrop-blur-md"
+                                                className="inline-flex items-center gap-[9px] text-[14px] font-bold leading-none tracking-[-0.01em] [text-shadow:0_1px_4px_rgba(0,0,0,.55)]"
                                                 style={{
-                                                    background: removida
-                                                        ? 'rgba(236,227,210,.05)'
-                                                        : podeColetar
-                                                          ? 'rgba(205,239,54,.16)'
-                                                          : 'rgba(22,18,12,.55)',
                                                     color: removida
-                                                        ? 'rgba(236,227,210,.5)'
-                                                        : podeColetar
-                                                          ? '#cdef36'
-                                                          : 'rgba(236,227,210,.82)',
-                                                    border: removida
-                                                        ? '1px solid rgba(236,227,210,.12)'
-                                                        : podeColetar
-                                                          ? '1px solid rgba(205,239,54,.4)'
-                                                          : '1px solid rgba(236,227,210,.18)',
+                                                        ? 'rgba(236,227,210,.6)'
+                                                        : '#f3ead6',
                                                 }}
                                             >
                                                 <span
-                                                    className="h-[7px] w-[7px] flex-none rounded-full"
+                                                    className="h-[8px] w-[8px] flex-none rounded-full"
                                                     style={{
-                                                        background: removida
-                                                            ? '#8a8175'
-                                                            : podeColetar
-                                                              ? '#cdef36'
-                                                              : '#e0a84a',
+                                                        background: statusDot,
+                                                        boxShadow: removida
+                                                            ? 'none'
+                                                            : `0 0 8px ${statusDot}`,
                                                     }}
                                                 />
-                                                {removida
-                                                    ? 'REMOVIDA DO SPOTIFY'
-                                                    : podeColetar
-                                                      ? 'LIVRE PRA RECOLHER'
-                                                      : 'SEGURANDO · ' + s.days_held + 'D'}
+                                                {statusLabel}
                                             </span>
-                                            <span className="flex-none rounded-full bg-black/30 px-[9px] py-[5px] font-mono text-[10px] tracking-[0.16em] text-mir-text2/70 backdrop-blur-md">
+                                            <span className="flex-none font-mono text-[10px] tracking-[0.18em] text-white/55 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">
                                                 VAGA {vaga}
                                             </span>
                                         </div>
@@ -760,11 +758,22 @@ export default function StakesContent({
                                         {/* ver infos toggle */}
                                         <button
                                             onClick={() => toggleInfo(s.id)}
-                                            className="mt-4 flex w-full cursor-pointer items-center justify-center gap-[7px] border-none border-t border-t-mir-line bg-transparent pt-3.5 font-mono text-[10.5px] tracking-[0.1em] text-mir-text2/80"
+                                            className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 border-t border-t-mir-line bg-transparent pt-3.5 font-mono text-[11px] tracking-[0.04em] text-mir-text2/70 transition-colors hover:text-mir-text2"
                                         >
-                                            {opened
-                                                ? 'esconder infos do stake ⌃'
-                                                : 'ver infos do stake ⌄'}
+                                            {opened ? 'esconder infos' : 'ver infos do stake'}
+                                            <svg
+                                                width="11"
+                                                height="11"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2.5"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                className={`transition-transform duration-200 ${opened ? 'rotate-180' : ''}`}
+                                            >
+                                                <path d="M6 9l6 6 6-6" />
+                                            </svg>
                                         </button>
 
                                         {opened && (

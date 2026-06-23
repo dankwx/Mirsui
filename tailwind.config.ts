@@ -20,7 +20,7 @@ const config = {
     	extend: {
     		fontFamily: {
     			sans: ['var(--font-hanken)', 'system-ui', 'sans-serif'],
-    			mono: ['var(--font-jetbrains)', 'ui-monospace', 'monospace']
+    			mono: ['var(--font-space-grotesk)', 'Space Grotesk', 'system-ui', 'sans-serif']
     		},
     		colors: {
     			mir: {

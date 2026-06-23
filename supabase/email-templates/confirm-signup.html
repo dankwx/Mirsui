@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="supported-color-schemes" content="dark">
+  <title>Confirme seu cadastro</title>
+</head>
+<body style="margin:0; padding:0; background-color:#16120c; font-family:'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing:antialiased;">
+
+  <!-- preheader (oculto) -->
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:#16120c;">
+    Falta um clique pra entrar no ar. Confirme seu email e comece a descobrir antes de todo mundo.
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#16120c;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px; max-width:100%; background-color:#1c1710; border:1px solid rgba(236,227,210,0.12); border-radius:18px; overflow:hidden;">
+
+          <!-- ===== Header ===== -->
+          <tr>
+            <td style="padding:22px 32px; border-bottom:1px solid rgba(236,227,210,0.12); background-color:#16120c;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="left" style="vertical-align:middle;">
+                    <span style="font-size:22px; font-weight:900; letter-spacing:-0.04em; color:#ece3d2;">
+                      Mirsui<span style="color:#cdef36;">.</span>
+                    </span>
+                  </td>
+                  <td align="right" style="vertical-align:middle;">
+                    <!-- badge LIVE estilo Twitch -->
+                    <span style="display:inline-block; padding:5px 11px 5px 9px; background-color:rgba(205,239,54,0.14); border:1px solid rgba(205,239,54,0.30); border-radius:999px; font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#cdef36;">
+                      <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background-color:#cdef36; vertical-align:middle; margin-right:6px;"></span>NO AR
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ===== Conteúdo ===== -->
+          <tr>
+            <td style="padding:44px 32px 12px;">
+
+              <p style="margin:0 0 14px; font-family:'Space Grotesk', monospace; font-size:11px; letter-spacing:0.22em; text-transform:uppercase; color:#6a655c;">
+                Confirmação de cadastro
+              </p>
+
+              <h1 style="margin:0 0 18px; font-size:32px; line-height:1.05; font-weight:900; letter-spacing:-0.045em; color:#ece3d2;">
+                Falta um clique pra<br>você entrar no ar.
+              </h1>
+
+              <p style="margin:0 0 28px; font-size:16px; line-height:1.6; color:#9b958b;">
+                Bem-vindo ao Mirsui. Confirme seu email pra ativar sua conta e começar a descobrir as faixas <span style="color:#cdef36; font-weight:600;">antes de todo mundo</span>.
+              </p>
+
+              <!-- Botão CTA -->
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:6px 0 8px;">
+                <tr>
+                  <td style="border-radius:999px; background-color:#cdef36;">
+                    <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup"
+                       style="display:inline-block; padding:16px 40px; font-size:16px; font-weight:700; letter-spacing:-0.01em; color:#16120c; text-decoration:none; border-radius:999px;">
+                      Confirmar email &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:26px 0 8px; font-size:13px; line-height:1.6; color:#6a655c;">
+                Ou cole este link no seu navegador:
+              </p>
+              <p style="margin:0; font-size:13px; line-height:1.6; color:#cdef36; word-break:break-all;">
+                {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup
+              </p>
+
+              <!-- nota de segurança -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:32px 0 8px;">
+                <tr>
+                  <td style="padding:16px 18px; background-color:#231c12; border:1px solid rgba(236,227,210,0.12); border-left:3px solid #cdef36; border-radius:10px;">
+                    <p style="margin:0; font-size:13.5px; line-height:1.6; color:#9b958b;">
+                      <strong style="color:#ece3d2;">Segurança:</strong> se não foi você que criou esta conta, é só ignorar este email. O link expira em 24 horas.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- ===== Footer ===== -->
+          <tr>
+            <td style="padding:28px 32px; background-color:#16120c; border-top:1px solid rgba(236,227,210,0.12);">
+              <p style="margin:0 0 10px; font-size:13px; font-weight:700; letter-spacing:-0.02em; color:#ece3d2;">
+                Mir-sui? I heard it first.
+              </p>
+              <p style="margin:0 0 16px; font-size:12px; line-height:1.6; color:#6a655c;">
+                Você recebeu este email porque criou uma conta no Mirsui.
+              </p>
+              <p style="margin:0 0 16px;">
+                <a href="{{ .SiteURL }}/legal/privacidade" style="font-size:12px; color:#9b958b; text-decoration:none;">Política de Privacidade</a>
+                <span style="color:#3a352e; padding:0 8px;">&middot;</span>
+                <a href="{{ .SiteURL }}/legal/termos" style="font-size:12px; color:#9b958b; text-decoration:none;">Termos de Serviço</a>
+              </p>
+              <p style="margin:0; font-size:11px; color:#4a443c;">
+                &copy; 2025 Mirsui
+              </p>
+            </td>
+          </tr>
+
+        </table>
+
+        <p style="margin:18px 0 0; font-size:11px; color:#4a443c; font-family:'Space Grotesk', monospace; letter-spacing:0.1em; text-transform:uppercase;">
+          Descubra antes &middot; Mirsui
+        </p>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

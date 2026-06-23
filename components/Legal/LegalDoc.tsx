@@ -2,7 +2,7 @@ import Link from 'next/link'
 import MirsuiLogo from '../MirsuiLogo/MirsuiLogo'
 
 const ARCHIVO = 'var(--font-archivo), system-ui, sans-serif'
-const MONO = 'var(--font-space-mono), ui-monospace, monospace'
+const MONO = "var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif"
 
 export interface LegalSection {
     id: string

@@ -22,7 +22,7 @@ const AUTH_CSS = `
   --fill1:rgba(236,232,224,.035); --fill2:rgba(236,232,224,.07);
   --text:#ece8e0; --text2:#9b958b; --text3:#6a655c;
   --acc:#84b86a; --acc-soft:rgba(132,184,106,.14); --on-acc:#0e1408;
-  --mono:var(--font-jetbrains),ui-monospace,monospace;
+  --mono:var(--font-space-grotesk),'Space Grotesk',system-ui,sans-serif;
   position:fixed; inset:0; z-index:200; display:grid; place-items:center;
   padding:24px; overflow:auto;
   background:rgba(8,7,6,0); backdrop-filter:blur(0px);

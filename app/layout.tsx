@@ -1,6 +1,6 @@
 // app/layout.tsx (Layout raiz - SEM 'use client')
 import type { Metadata } from 'next'
-import { Archivo, Hanken_Grotesk, JetBrains_Mono, Space_Mono } from 'next/font/google'
+import { Archivo, Hanken_Grotesk, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
 import Footer from '@/components/Footer/Footer'
@@ -11,20 +11,19 @@ const hanken = Hanken_Grotesk({
     subsets: ['latin'],
     variable: '--font-hanken',
 })
-const jetbrains = JetBrains_Mono({
-    subsets: ['latin'],
-    weight: ['400', '500', '600'],
-    variable: '--font-jetbrains',
-})
 const archivo = Archivo({
     subsets: ['latin'],
     weight: ['400', '500', '600', '700', '800', '900'],
     variable: '--font-archivo',
 })
-const spaceMono = Space_Mono({
+// Grotesk proporcional e elegante que substitui as antigas monoespaçadas
+// (JetBrains Mono / Space Mono) usadas em rótulos, eyebrows, tickers e números.
+// Exposta nas variáveis legadas (--font-jetbrains / --font-space-mono) para que
+// todas as referências existentes resolvam automaticamente.
+const spaceGrotesk = Space_Grotesk({
     subsets: ['latin'],
-    weight: ['400', '700'],
-    variable: '--font-space-mono',
+    weight: ['400', '500', '600', '700'],
+    variable: '--font-space-grotesk',
 })
 
 export const metadata: Metadata = {
@@ -40,7 +39,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={`${hanken.variable} ${jetbrains.variable} ${archivo.variable} ${spaceMono.variable} ${hanken.className}`}>
+            <body className={`${hanken.variable} ${archivo.variable} ${spaceGrotesk.variable} ${hanken.className}`}>
                 <GoogleAnalytics />
                 <AnalyticsProvider>
                     {children}

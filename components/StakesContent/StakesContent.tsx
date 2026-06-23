@@ -94,7 +94,7 @@ function coverStyles(p: Palette, size: CoverSize): CoverStyles {
             overflow: 'hidden',
         },
         artistS: {
-            fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+            fontFamily: "var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
             fontSize: s.a,
             letterSpacing: '.1em',
             textTransform: 'uppercase',
@@ -153,7 +153,7 @@ type Badge = {
 function badge(pop: number): Badge {
     const t = tier(pop)
     const base: CSSProperties = {
-        fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+        fontFamily: "var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
         fontSize: '9.5px',
         fontWeight: 700,
         letterSpacing: '.1em',

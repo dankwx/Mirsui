@@ -90,6 +90,12 @@
     body {
       @apply text-foreground;
       background-color: #16120c;
+      /* As antigas fontes monoespaçadas foram trocadas por Space Grotesk
+         (grotesk proporcional e elegante). Mantemos os nomes de variável
+         legados como alias para que qualquer referência a --font-jetbrains /
+         --font-space-mono resolva para a nova fonte sem editar cada componente. */
+      --font-jetbrains: var(--font-space-grotesk);
+      --font-space-mono: var(--font-space-grotesk);
     }
     /* Quando um overlay do Radix (dropdown, dialog, popover) trava o scroll, a
        lib react-remove-scroll injeta padding/margin-right no body pra compensar
@@ -222,7 +228,7 @@
   --acc: #cdef36;
   --acc-soft: rgba(205, 239, 54, 0.14);
   --on-acc: #16120c;
-  --mono: var(--font-space-mono), var(--font-jetbrains), ui-monospace, monospace;
+  --mono: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
   --display: var(--font-archivo), 'Archivo', system-ui, sans-serif;
   --wrap: 1320px;
   --pad: clamp(20px, 5vw, 56px);

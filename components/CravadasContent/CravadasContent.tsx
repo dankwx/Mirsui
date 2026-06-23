@@ -1,34 +1,57 @@
 'use client'
 
-import { useState, type CSSProperties } from 'react'
+import {
+    useState,
+    useEffect,
+    useRef,
+    useCallback,
+    type CSSProperties,
+} from 'react'
+import { useToast } from '@/components/ui/use-toast'
+import { formatMultiplier } from '@/utils/cravadaMultiplier'
 
-// Trava padrão (em dias) e estado inicial dos slots expandidos.
-const LOCK_DAYS = 7
+// Regras da feature (ver Cravada.md): 3 vagas, e só dá pra COLETAR os pontos
+// depois de 7 dias. Remover antes disso é permitido, mas zera os pontos.
+const MAX_SLOTS = 3
+const MIN_DAYS = 7
 const START_EXPANDED = false
 
 type Palette = { bg: string; fg: string; mut: string }
 type CoverSize = 'big' | 'slot' | 'row'
 
-type Track = {
+// Cravada vinda do backend (GET /cravadas)
+type Cravada = {
     id: string
-    title: string
-    artist: string
-    pop: number
-    mult: string
-    cravando: number
+    track_id: string
+    track_uri: string
+    track_title: string
+    artist_name: string
+    artist_id: string | null
+    album_name: string | null
+    track_thumbnail: string | null
+    baseline_popularity: number
+    artist_popularity: number
+    multiplier: number | string
+    accumulated_points: number
+    last_popularity: number
+    last_day_gain: number
+    status: 'ativa' | 'removida' | 'coletada'
+    craved_at: string
+    days_held: number
+    days_to_collect: number
+    can_collect: boolean
+    pessoas_cravaram: number
 }
 
-type Slot = {
+// Resultado de busca do Spotify mapeado para a UI
+type SearchTrack = {
     id: string
     title: string
     artist: string
-    pop: number
-    mult: string
-    cravando: number
-    delta: string
-    daysLeft?: number
-    recolherDate?: string
-    status: 'travada' | 'livre'
+    uri: string
+    isrc: string | null
+    albumName: string | null
+    thumbnail: string | null
 }
 
 // ---- covers ----
@@ -183,117 +206,273 @@ function fmt(n: number): string {
     return Math.round(n).toLocaleString('pt-BR')
 }
 
-function futureDate(n: number): string {
-    const d = new Date()
-    d.setDate(d.getDate() + n)
-    const m = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
-    return d.getDate() + ' ' + m[d.getMonth()]
-}
-
-// ---- data ----
-const POOL: Track[] = [
-    { id: 't1', title: 'stray', artist: 'meat computer', pop: 16, mult: 'x3,4', cravando: 23 },
-    { id: 't2', title: 'XVI', artist: 'akiaura, LONOWN', pop: 27, mult: 'x3,1', cravando: 41 },
-    { id: 't3', title: 'Daydream', artist: 'Hiko Momoji', pop: 31, mult: 'x2,8', cravando: 58 },
-    { id: 't4', title: 'Make Love', artist: 'Daft Punk', pop: 44, mult: 'x2,4', cravando: 120 },
-    { id: 't5', title: '7K', artist: 'Yung Buda, Baby Gengar', pop: 55, mult: 'x2,0', cravando: 188 },
-    { id: 't6', title: 'Feel Ur Love', artist: 'Emma Louise, Flume', pop: 64, mult: 'x1,8', cravando: 305 },
-    { id: 't7', title: 'PIXELATED KISSES', artist: 'Joji', pop: 74, mult: 'x1,5', cravando: 612 },
-]
-
-function defaultSlots(): (Slot | null)[] {
-    return [
-        {
-            id: 'stray',
-            title: 'stray',
-            artist: 'meat computer',
-            pop: 18,
-            mult: 'x3,4',
-            cravando: 35,
-            delta: '+12 desde você cravou',
-            daysLeft: 4,
-            recolherDate: '25 jun',
-            status: 'travada',
-        },
-        {
-            id: 'black',
-            title: 'Black',
-            artist: 'Yung Buda',
-            pop: 58,
-            mult: 'x2,6',
-            cravando: 240,
-            delta: '+52 desde você cravou',
-            status: 'livre',
-        },
-        null,
-    ]
-}
-
 const monoFont = 'font-mono'
 
+function mapSearchTrack(t: {
+    id: string
+    name: string
+    uri: string
+    external_ids?: { isrc?: string }
+    artists?: { name: string }[]
+    album?: { name?: string; images?: { url: string }[] }
+}): SearchTrack {
+    const artists = t.artists ?? []
+    const images = t.album?.images ?? []
+    return {
+        id: t.id,
+        title: t.name,
+        artist: artists.map((a) => a.name).join(', ') || '—',
+        uri: t.uri,
+        isrc: t.external_ids?.isrc ?? null,
+        albumName: t.album?.name ?? null,
+        // imagem menor (última) costuma ser ~64px, ideal para os covers da lista
+        thumbnail: images[images.length - 1]?.url ?? images[0]?.url ?? null,
+    }
+}
+
+// Mostra a capa real (Spotify) quando existe; senão cai no cover gerado.
+function CoverImage({
+    src,
+    track,
+    size,
+}: {
+    src: string | null
+    track: { title: string; artist: string }
+    size: CoverSize
+}) {
+    if (src) {
+        return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+                src={src}
+                alt={track.title}
+                className="absolute inset-0 h-full w-full object-cover"
+            />
+        )
+    }
+    return <Cover track={track} size={size} />
+}
+
 export default function CravadasContent() {
-    const [slots, setSlots] = useState<(Slot | null)[]>(defaultSlots)
+    const [cravadas, setCravadas] = useState<Cravada[]>([])
+    const [loading, setLoading] = useState(true)
+    const [points, setPoints] = useState<number | null>(null)
+
     const [modalSlot, setModalSlot] = useState<number | null>(null)
     const [query, setQuery] = useState('')
-    const [selected, setSelected] = useState<string | null>(null)
-    const [open, setOpen] = useState<Record<number, boolean>>({})
+    const [results, setResults] = useState<SearchTrack[]>([])
+    const [searching, setSearching] = useState(false)
+    const [selected, setSelected] = useState<SearchTrack | null>(null)
+    const [previewMult, setPreviewMult] = useState<number | null>(null)
+    const [previewPop, setPreviewPop] = useState<number | null>(null)
+    const [previewing, setPreviewing] = useState(false)
+    const [craving, setCraving] = useState(false)
+    const [busyId, setBusyId] = useState<string | null>(null)
+    const [open, setOpen] = useState<Record<string, boolean>>({})
 
-    const isOpen = (i: number) => (open[i] !== undefined ? open[i] : START_EXPANDED)
+    const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const { toast } = useToast()
 
-    // ---- actions ----
+    // ---- carregar cravadas + total de pontos ----
+    const loadCravadas = useCallback(async () => {
+        try {
+            const res = await fetch('/api/cravadas', { cache: 'no-store' })
+            if (res.ok) {
+                const data = await res.json()
+                setCravadas(Array.isArray(data.cravadas) ? data.cravadas : [])
+            } else {
+                setCravadas([])
+            }
+        } catch {
+            setCravadas([])
+        } finally {
+            setLoading(false)
+        }
+    }, [])
+
+    const loadPoints = useCallback(async () => {
+        try {
+            const res = await fetch('/api/cravadas/points', { cache: 'no-store' })
+            if (res.ok) {
+                const data = await res.json()
+                setPoints(typeof data.total === 'number' ? data.total : 0)
+            }
+        } catch {
+            // silencioso — o total é secundário
+        }
+    }, [])
+
+    useEffect(() => {
+        loadCravadas()
+        loadPoints()
+    }, [loadCravadas, loadPoints])
+
+    // ---- busca no Spotify (debounce) ----
+    useEffect(() => {
+        if (searchTimeout.current) clearTimeout(searchTimeout.current)
+        const q = query.trim()
+        if (q.length < 2) {
+            setResults([])
+            setSearching(false)
+            return
+        }
+        setSearching(true)
+        searchTimeout.current = setTimeout(async () => {
+            try {
+                const res = await fetch(
+                    `/api/search?q=${encodeURIComponent(q)}&limit=10&type=track`
+                )
+                if (res.ok) {
+                    const data = await res.json()
+                    const items = (data.tracks?.items ?? []).map(mapSearchTrack)
+                    setResults(items)
+                } else {
+                    setResults([])
+                }
+            } catch {
+                setResults([])
+            } finally {
+                setSearching(false)
+            }
+        }, 300)
+        return () => {
+            if (searchTimeout.current) clearTimeout(searchTimeout.current)
+        }
+    }, [query])
+
+    // ---- ações ----
+    const isOpen = (id: string) => (open[id] !== undefined ? open[id] : START_EXPANDED)
+    const toggleInfo = (id: string) =>
+        setOpen((prev) => ({ ...prev, [id]: !isOpen(id) }))
+
+    const resetPreview = () => {
+        setSelected(null)
+        setPreviewMult(null)
+        setPreviewPop(null)
+    }
     const openModal = (i: number) => {
         setModalSlot(i)
         setQuery('')
-        setSelected(null)
+        setResults([])
+        resetPreview()
     }
     const closeModal = () => {
         setModalSlot(null)
         setQuery('')
-        setSelected(null)
-    }
-    const toggleInfo = (i: number) =>
-        setOpen((prev) => ({ ...prev, [i]: !isOpen(i) }))
-    const recolher = (i: number) => {
-        setSlots((prev) => {
-            const next = prev.slice()
-            next[i] = null
-            return next
-        })
-        setOpen((prev) => ({ ...prev, [i]: false }))
-    }
-    const fillSlot = (t: Track) => {
-        if (modalSlot == null) return
-        const i = modalSlot
-        setSlots((prev) => {
-            const next = prev.slice()
-            next[i] = {
-                id: 's-' + t.id,
-                title: t.title,
-                artist: t.artist,
-                pop: t.pop,
-                mult: t.mult,
-                cravando: t.cravando + 1,
-                delta: 'você acabou de cravar',
-                daysLeft: LOCK_DAYS,
-                recolherDate: futureDate(LOCK_DAYS),
-                status: 'travada',
-            }
-            return next
-        })
-        closeModal()
+        setResults([])
+        resetPreview()
     }
 
-    // ---- derived (modal) ----
-    const q = query.trim().toLowerCase()
-    const results = q
-        ? POOL.filter((t) => (t.title + ' ' + t.artist).toLowerCase().includes(q))
-        : []
-    const sel = selected ? POOL.find((t) => t.id === selected) ?? null : null
-    const used = slots.filter(Boolean).length
+    const selectTrack = async (t: SearchTrack) => {
+        setSelected(t)
+        setPreviewMult(null)
+        setPreviewPop(null)
+        setPreviewing(true)
+        try {
+            const qs = new URLSearchParams({ artist: t.artist, title: t.title })
+            if (t.isrc) qs.set('isrc', t.isrc)
+            const res = await fetch(`/api/cravadas/preview?${qs.toString()}`)
+            if (res.ok) {
+                const data = await res.json()
+                if (data.matched) {
+                    setPreviewMult(
+                        typeof data.multiplier === 'number' ? data.multiplier : null
+                    )
+                    setPreviewPop(
+                        typeof data.popularity === 'number' ? data.popularity : null
+                    )
+                }
+            }
+        } catch {
+            // sem prévia: o multiplicador real é calculado ao cravar
+        } finally {
+            setPreviewing(false)
+        }
+    }
+
+    const crave = async () => {
+        if (!selected || modalSlot == null) return
+        setCraving(true)
+        try {
+            const res = await fetch('/api/cravadas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    trackId: selected.id,
+                    trackUri: selected.uri,
+                    trackTitle: selected.title,
+                    artistName: selected.artist,
+                    albumName: selected.albumName ?? undefined,
+                    trackThumbnail: selected.thumbnail ?? undefined,
+                    isrc: selected.isrc ?? undefined,
+                }),
+            })
+            const data = await res.json()
+            if (res.ok && data.cravada) {
+                toast({
+                    title: 'Cravada feita!',
+                    description: `"${selected.title}" · multiplicador ${formatMultiplier(
+                        Number(data.cravada.multiplier)
+                    )}`,
+                })
+                await loadCravadas()
+                closeModal()
+            } else {
+                toast({
+                    title: 'Não foi possível cravar',
+                    description: data.error ?? 'Tente novamente',
+                    variant: 'destructive',
+                })
+            }
+        } catch {
+            toast({
+                title: 'Erro ao cravar a faixa',
+                variant: 'destructive',
+            })
+        } finally {
+            setCraving(false)
+        }
+    }
+
+    const recolher = async (c: Cravada) => {
+        setBusyId(c.id)
+        try {
+            const res = await fetch(`/api/cravadas/${c.id}/recolher`, {
+                method: 'POST',
+            })
+            const data = await res.json()
+            if (res.ok) {
+                if (data.collected) {
+                    toast({
+                        title: 'Recolhido!',
+                        description: `+${fmt(data.points)} pontos pra sua conta`,
+                    })
+                } else {
+                    toast({ description: 'Vaga liberada' })
+                }
+                setOpen((prev) => ({ ...prev, [c.id]: false }))
+                await Promise.all([loadCravadas(), loadPoints()])
+            } else {
+                toast({
+                    title: 'Erro ao recolher',
+                    description: data.error ?? 'Tente novamente',
+                    variant: 'destructive',
+                })
+            }
+        } catch {
+            toast({ title: 'Erro ao recolher', variant: 'destructive' })
+        } finally {
+            setBusyId(null)
+        }
+    }
+
+    // ---- derived ----
+    const slots: (Cravada | null)[] = [0, 1, 2].map((i) => cravadas[i] ?? null)
+    const used = Math.min(cravadas.length, MAX_SLOTS)
 
     const modalOpen = modalSlot != null
-    const searchView = modalOpen && !sel
-    const detailView = modalOpen && !!sel
+    const searchView = modalOpen && !selected
+    const detailView = modalOpen && !!selected
 
     return (
         <>
@@ -310,7 +489,8 @@ export default function CravadasContent() {
                         <p className="m-0 mb-3 max-w-[440px] text-[18px] leading-[1.45] text-mir-text2">
                             Você tem{' '}
                             <b className="font-bold text-mir-text">
-                                {3 - used} {3 - used === 1 ? 'vaga' : 'vagas'}
+                                {MAX_SLOTS - used}{' '}
+                                {MAX_SLOTS - used === 1 ? 'vaga' : 'vagas'}
                             </b>{' '}
                             pra cravar faixas que acha que vão subir. Quanto mais
                             escondida a faixa, maior o multiplicador. Seu faro,
@@ -321,10 +501,16 @@ export default function CravadasContent() {
                     <div className="mt-7 flex flex-wrap items-center gap-[18px] font-mono text-[11px] tracking-[0.12em] text-mir-text2/80">
                         <span className="flex items-center gap-2">
                             <span className="anim-blink h-2 w-2 rounded-full bg-mir-acc" />
-                            {used} DE 3 VAGAS EM JOGO
+                            {used} DE {MAX_SLOTS} VAGAS EM JOGO
                         </span>
                         <span className="opacity-40">·</span>
-                        <span>TRAVA DE {LOCK_DAYS} DIAS</span>
+                        <span>COLETA LIBERA EM {MIN_DAYS} DIAS</span>
+                        {points != null && (
+                            <>
+                                <span className="opacity-40">·</span>
+                                <span>{fmt(points)} PONTOS RECOLHIDOS</span>
+                            </>
+                        )}
                     </div>
                 </div>
             </section>
@@ -344,7 +530,8 @@ export default function CravadasContent() {
                                     >
                                         <button
                                             onClick={() => openModal(i)}
-                                            className="flex min-h-[300px] w-full cursor-pointer flex-col items-center justify-center gap-1.5 border-none bg-transparent p-[26px] text-center text-inherit"
+                                            disabled={loading}
+                                            className="flex min-h-[300px] w-full cursor-pointer flex-col items-center justify-center gap-1.5 border-none bg-transparent p-[26px] text-center text-inherit disabled:opacity-50"
                                         >
                                             <div className="mb-3 flex h-[60px] w-[60px] items-center justify-center rounded-full border-[1.5px] border-mir-acc/50 text-[34px] font-light leading-[0] text-mir-acc">
                                                 +
@@ -356,28 +543,39 @@ export default function CravadasContent() {
                                                 Crave uma faixa antes dela bombar
                                             </div>
                                             <span className="mt-4 inline-flex items-center gap-[7px] rounded-full bg-mir-acc px-[22px] py-[11px] text-sm font-bold text-mir-on-acc">
-                                                Escolher faixa →
+                                                {loading ? 'Carregando…' : 'Escolher faixa →'}
                                             </span>
                                         </button>
                                     </div>
                                 )
                             }
 
-                            const b = badge(s.pop)
-                            const travada = s.status === 'travada'
-                            const opened = isOpen(i)
+                            const removida = s.status === 'removida'
+                            const podeColetar = s.can_collect
+                            const b = badge(s.baseline_popularity)
+                            const opened = isOpen(s.id)
+                            const mult = Number(s.multiplier)
+                            const busy = busyId === s.id
+
+                            // estilo da borda: removida = apagado, livre = destaque, segurando = neutro
+                            const border = removida
+                                ? '1px solid rgba(236,227,210,.08)'
+                                : podeColetar
+                                  ? '1.5px solid rgba(205,239,54,.4)'
+                                  : '1px solid rgba(236,227,210,.12)'
+                            const shadow =
+                                !removida && podeColetar
+                                    ? '0 20px 44px -24px rgba(205,239,54,.32)'
+                                    : 'none'
 
                             return (
                                 <div
-                                    key={i}
+                                    key={s.id}
                                     className="flex min-w-0 rounded-2xl bg-mir-surface"
                                     style={{
-                                        border: travada
-                                            ? '1px solid rgba(236,227,210,.12)'
-                                            : '1.5px solid rgba(205,239,54,.4)',
-                                        boxShadow: travada
-                                            ? 'none'
-                                            : '0 20px 44px -24px rgba(205,239,54,.32)',
+                                        border,
+                                        boxShadow: shadow,
+                                        opacity: removida ? 0.55 : 1,
                                     }}
                                 >
                                     <div className="flex w-full flex-col p-5">
@@ -385,28 +583,38 @@ export default function CravadasContent() {
                                             <span
                                                 className="inline-flex items-center gap-[7px] rounded-full px-[11px] py-[5px] font-mono text-[10px] font-bold tracking-[0.12em]"
                                                 style={{
-                                                    background: travada
-                                                        ? 'rgba(236,227,210,.06)'
-                                                        : 'rgba(205,239,54,.14)',
-                                                    color: travada
-                                                        ? 'rgba(236,227,210,.72)'
-                                                        : '#cdef36',
-                                                    border: travada
-                                                        ? '1px solid rgba(236,227,210,.14)'
-                                                        : '1px solid rgba(205,239,54,.4)',
+                                                    background: removida
+                                                        ? 'rgba(236,227,210,.05)'
+                                                        : podeColetar
+                                                          ? 'rgba(205,239,54,.14)'
+                                                          : 'rgba(236,227,210,.06)',
+                                                    color: removida
+                                                        ? 'rgba(236,227,210,.5)'
+                                                        : podeColetar
+                                                          ? '#cdef36'
+                                                          : 'rgba(236,227,210,.72)',
+                                                    border: removida
+                                                        ? '1px solid rgba(236,227,210,.12)'
+                                                        : podeColetar
+                                                          ? '1px solid rgba(205,239,54,.4)'
+                                                          : '1px solid rgba(236,227,210,.14)',
                                                 }}
                                             >
                                                 <span
                                                     className="h-[7px] w-[7px] flex-none rounded-full"
                                                     style={{
-                                                        background: travada
-                                                            ? '#e0a84a'
-                                                            : '#cdef36',
+                                                        background: removida
+                                                            ? '#8a8175'
+                                                            : podeColetar
+                                                              ? '#cdef36'
+                                                              : '#e0a84a',
                                                     }}
                                                 />
-                                                {travada
-                                                    ? 'TRAVADA · ' + s.daysLeft + 'D'
-                                                    : 'LIVRE PRA RECOLHER'}
+                                                {removida
+                                                    ? 'REMOVIDA DO SPOTIFY'
+                                                    : podeColetar
+                                                      ? 'LIVRE PRA RECOLHER'
+                                                      : 'SEGURANDO · ' + s.days_held + 'D'}
                                             </span>
                                             <span className="font-mono text-[10px] tracking-[0.16em] text-mir-text2/[0.32]">
                                                 VAGA {vaga}
@@ -414,57 +622,107 @@ export default function CravadasContent() {
                                         </div>
 
                                         <div className="mb-6 flex items-center gap-[15px]">
-                                            <div className="relative h-[62px] w-[62px] flex-none overflow-hidden rounded-md shadow-[0_10px_20px_-12px_rgba(0,0,0,.7)]">
-                                                <Cover track={s} size="slot" />
+                                            <div
+                                                className="relative h-[62px] w-[62px] flex-none overflow-hidden rounded-md shadow-[0_10px_20px_-12px_rgba(0,0,0,.7)]"
+                                                style={{
+                                                    filter: removida
+                                                        ? 'grayscale(1)'
+                                                        : 'none',
+                                                }}
+                                            >
+                                                <CoverImage
+                                                    src={s.track_thumbnail}
+                                                    track={{
+                                                        title: s.track_title,
+                                                        artist: s.artist_name,
+                                                    }}
+                                                    size="slot"
+                                                />
                                             </div>
-                                            <div className="min-w-0">
-                                                <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[22px] font-extrabold leading-[1.05] tracking-[-0.025em]">
-                                                    {s.title}
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[22px] font-extrabold leading-[1.05] tracking-[-0.025em]">
+                                                        {s.track_title}
+                                                    </div>
+                                                    {!removida && s.last_day_gain > 0 && (
+                                                        <span className="flex-none rounded-full bg-mir-acc/15 px-2 py-[3px] font-mono text-[10px] font-bold text-mir-acc">
+                                                            +{fmt(s.last_day_gain)}
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <div className="mt-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[11px] text-mir-text2/80">
-                                                    {s.artist}
+                                                    {s.artist_name}
                                                 </div>
                                             </div>
                                         </div>
 
                                         {/* action */}
-                                        {travada ? (
+                                        {removida ? (
+                                            <>
+                                                <button
+                                                    onClick={() => recolher(s)}
+                                                    disabled={busy}
+                                                    className="h-11 w-full cursor-pointer rounded-full border border-mir-line2 bg-transparent text-sm font-bold text-mir-text/75 disabled:opacity-50"
+                                                >
+                                                    {busy ? 'Esvaziando…' : 'Esvaziar vaga'}
+                                                </button>
+                                                <div className="mt-[9px] text-center font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55]">
+                                                    Faixa saiu do Spotify · não vale mais
+                                                </div>
+                                            </>
+                                        ) : podeColetar ? (
+                                            <>
+                                                <div className="flex gap-[9px]">
+                                                    <button
+                                                        onClick={() => recolher(s)}
+                                                        disabled={busy}
+                                                        className="h-11 flex-1 cursor-pointer rounded-full border-none bg-mir-acc text-sm font-bold text-mir-on-acc disabled:opacity-60"
+                                                    >
+                                                        {busy
+                                                            ? 'Recolhendo…'
+                                                            : 'Recolher · ' +
+                                                              fmt(s.accumulated_points) +
+                                                              ' pts'}
+                                                    </button>
+                                                </div>
+                                                <div className="mt-[9px] text-center font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55]">
+                                                    Trava cumprida · recolha quando quiser
+                                                </div>
+                                            </>
+                                        ) : (
                                             <>
                                                 <button
                                                     disabled
                                                     className="h-11 w-full cursor-not-allowed rounded-full border border-mir-line2/80 bg-mir-fill1 text-sm font-bold text-mir-text2"
                                                 >
-                                                    Travada · {s.daysLeft} dias
-                                                    restantes
+                                                    {s.accumulated_points > 0
+                                                        ? fmt(s.accumulated_points) +
+                                                          ' pts acumulados'
+                                                        : 'Acumulando pontos…'}
                                                 </button>
-                                                <div className="mt-[9px] text-center font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55]">
-                                                    Recolher liberado em{' '}
-                                                    {s.recolherDate}
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <div className="flex gap-[9px]">
+                                                <div className="mt-[9px] flex items-center justify-center gap-2 text-center font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55]">
+                                                    <span>
+                                                        Recolher libera em{' '}
+                                                        {s.days_to_collect}{' '}
+                                                        {s.days_to_collect === 1
+                                                            ? 'dia'
+                                                            : 'dias'}
+                                                    </span>
+                                                    <span className="opacity-40">·</span>
                                                     <button
-                                                        onClick={() => recolher(i)}
-                                                        className="h-11 flex-1 cursor-pointer rounded-full border-none bg-mir-acc text-sm font-bold text-mir-on-acc"
+                                                        onClick={() => recolher(s)}
+                                                        disabled={busy}
+                                                        className="cursor-pointer border-none bg-transparent p-0 font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55] underline disabled:opacity-50"
                                                     >
-                                                        Recolher
+                                                        {busy ? 'removendo…' : 'remover assim mesmo'}
                                                     </button>
-                                                    <button className="h-11 flex-none cursor-pointer rounded-full border border-mir-line2 bg-transparent px-4 text-[13px] font-semibold text-mir-text/75">
-                                                        Deixar correndo
-                                                    </button>
-                                                </div>
-                                                <div className="mt-[9px] text-center font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55]">
-                                                    Trava cumprida · recolha
-                                                    quando quiser
                                                 </div>
                                             </>
                                         )}
 
                                         {/* ver infos toggle */}
                                         <button
-                                            onClick={() => toggleInfo(i)}
+                                            onClick={() => toggleInfo(s.id)}
                                             className="mt-4 flex w-full cursor-pointer items-center justify-center gap-[7px] border-none border-t border-t-mir-line bg-transparent pt-3.5 font-mono text-[10.5px] tracking-[0.1em] text-mir-text2/80"
                                         >
                                             {opened
@@ -480,7 +738,7 @@ export default function CravadasContent() {
                                                             MULTIPLICADOR CRAVADO
                                                         </div>
                                                         <div className="text-[34px] font-black leading-[0.85] tracking-[-0.04em] text-mir-acc">
-                                                            {s.mult}
+                                                            {formatMultiplier(mult)}
                                                         </div>
                                                     </div>
                                                     <span style={b.style}>
@@ -490,23 +748,33 @@ export default function CravadasContent() {
                                                 <div>
                                                     <div className="mb-1.5 flex justify-between font-mono text-[9.5px] tracking-[0.1em] text-mir-text2/[0.7]">
                                                         <span>
-                                                            POPULARIDADE QUANDO
-                                                            CRAVOU
+                                                            POPULARIDADE QUANDO CRAVOU
                                                         </span>
-                                                        <span>{b.hint}</span>
+                                                        <span>
+                                                            agora {s.last_popularity}
+                                                        </span>
                                                     </div>
                                                     <div className="h-1 overflow-hidden rounded-sm bg-mir-text2/20">
                                                         <div
                                                             className="h-full rounded-sm bg-mir-text2/[0.9]"
                                                             style={{
-                                                                width: s.pop + '%',
+                                                                width:
+                                                                    s.baseline_popularity +
+                                                                    '%',
                                                             }}
                                                         />
                                                     </div>
                                                 </div>
                                                 <div className="font-mono text-[11px] leading-[1.45] text-mir-text2/[0.9]">
-                                                    {fmt(s.cravando)} pessoas
-                                                    cravaram · {s.delta}
+                                                    {fmt(s.pessoas_cravaram)}{' '}
+                                                    {s.pessoas_cravaram === 1
+                                                        ? 'pessoa cravou'
+                                                        : 'pessoas cravaram'}{' '}
+                                                    · {fmt(s.accumulated_points)} pontos
+                                                    acumulados
+                                                    {!removida && s.last_day_gain > 0
+                                                        ? ` · +${fmt(s.last_day_gain)} na última medição`
+                                                        : ''}
                                                 </div>
                                             </div>
                                         )}
@@ -535,7 +803,7 @@ export default function CravadasContent() {
                                     {modalSlot != null ? '0' + (modalSlot + 1) : ''}
                                 </div>
                                 <h3 className="m-0 text-[25px] font-black tracking-[-0.035em]">
-                                    {sel ? 'Confira e crave' : 'Buscar faixa'}
+                                    {selected ? 'Confira e crave' : 'Buscar faixa'}
                                 </h3>
                             </div>
                             <button
@@ -564,9 +832,7 @@ export default function CravadasContent() {
                                         </svg>
                                         <input
                                             value={query}
-                                            onChange={(e) =>
-                                                setQuery(e.target.value)
-                                            }
+                                            onChange={(e) => setQuery(e.target.value)}
                                             autoFocus
                                             placeholder="Buscar a faixa que você quer cravar"
                                             className="w-full border-none bg-transparent font-mono text-[13px] text-mir-text outline-none placeholder:text-mir-text3"
@@ -574,7 +840,7 @@ export default function CravadasContent() {
                                     </div>
                                 </div>
                                 <div className="max-h-[48vh] overflow-y-auto px-3 pb-3.5 pt-1.5">
-                                    {!q && (
+                                    {query.trim().length < 2 && (
                                         <div className="px-6 py-12 text-center font-mono text-[12px] leading-[1.7] text-mir-text2/[0.66]">
                                             Comece a digitar pra encontrar
                                             <br />a faixa. Você vê as infos dela
@@ -582,44 +848,60 @@ export default function CravadasContent() {
                                             antes de confirmar a cravada.
                                         </div>
                                     )}
-                                    {results.map((r) => (
-                                        <button
-                                            key={r.id}
-                                            onClick={() => setSelected(r.id)}
-                                            className="flex w-full cursor-pointer items-center gap-3.5 rounded-[10px] border-none border-b border-b-mir-line bg-transparent px-3.5 py-3 text-left text-inherit"
-                                        >
-                                            <div className="relative h-[46px] w-[46px] flex-none overflow-hidden rounded-[5px]">
-                                                <Cover track={r} size="row" />
-                                            </div>
-                                            <div className="min-w-0 flex-1">
-                                                <div className="overflow-hidden text-ellipsis whitespace-nowrap text-base font-bold tracking-[-0.02em]">
-                                                    {r.title}
-                                                </div>
-                                                <div className="mt-[3px] overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[11px] text-mir-text2/[0.8]">
-                                                    {r.artist}
-                                                </div>
-                                            </div>
-                                            <span className="flex-none text-lg text-mir-text2/[0.66]">
-                                                →
-                                            </span>
-                                        </button>
-                                    ))}
-                                    {!!q && results.length === 0 && (
-                                        <div className="px-5 py-10 text-center font-mono text-[12px] text-mir-text2/[0.66]">
-                                            Nenhuma faixa encontrada pra &quot;
-                                            {query}&quot;.
+                                    {searching && (
+                                        <div className="px-6 py-8 text-center font-mono text-[12px] text-mir-text2/[0.66]">
+                                            Buscando…
                                         </div>
                                     )}
+                                    {!searching &&
+                                        results.map((r) => (
+                                            <button
+                                                key={r.id}
+                                                onClick={() => selectTrack(r)}
+                                                className="flex w-full cursor-pointer items-center gap-3.5 rounded-[10px] border-none border-b border-b-mir-line bg-transparent px-3.5 py-3 text-left text-inherit"
+                                            >
+                                                <div className="relative h-[46px] w-[46px] flex-none overflow-hidden rounded-[5px]">
+                                                    <CoverImage
+                                                        src={r.thumbnail}
+                                                        track={r}
+                                                        size="row"
+                                                    />
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="overflow-hidden text-ellipsis whitespace-nowrap text-base font-bold tracking-[-0.02em]">
+                                                        {r.title}
+                                                    </div>
+                                                    <div className="mt-[3px] overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[11px] text-mir-text2/[0.8]">
+                                                        {r.artist}
+                                                    </div>
+                                                </div>
+                                                <span className="flex-none text-lg text-mir-text2/[0.66]">
+                                                    →
+                                                </span>
+                                            </button>
+                                        ))}
+                                    {!searching &&
+                                        query.trim().length >= 2 &&
+                                        results.length === 0 && (
+                                            <div className="px-5 py-10 text-center font-mono text-[12px] text-mir-text2/[0.66]">
+                                                Nenhuma faixa encontrada pra &quot;
+                                                {query}&quot;.
+                                            </div>
+                                        )}
                                 </div>
                             </>
                         )}
 
                         {/* DETAIL VIEW */}
-                        {detailView && sel && (
+                        {detailView && selected && (
                             <DetailView
-                                track={sel}
-                                onBack={() => setSelected(null)}
-                                onConfirm={() => fillSlot(sel)}
+                                track={selected}
+                                previewMult={previewMult}
+                                previewPop={previewPop}
+                                previewing={previewing}
+                                craving={craving}
+                                onBack={resetPreview}
+                                onConfirm={crave}
                             />
                         )}
                     </div>
@@ -631,14 +913,28 @@ export default function CravadasContent() {
 
 function DetailView({
     track,
+    previewMult,
+    previewPop,
+    previewing,
+    craving,
     onBack,
     onConfirm,
 }: {
-    track: Track
+    track: SearchTrack
+    previewMult: number | null
+    previewPop: number | null
+    previewing: boolean
+    craving: boolean
     onBack: () => void
     onConfirm: () => void
 }) {
-    const b = badge(track.pop)
+    const pop = previewPop ?? 0
+    const b = badge(pop)
+    const multLabel = previewing
+        ? '…'
+        : previewMult != null
+          ? formatMultiplier(previewMult)
+          : '—'
     return (
         <div className="anim-slide px-6 pb-6 pt-5">
             <button
@@ -650,7 +946,7 @@ function DetailView({
 
             <div className="mb-[22px] flex items-center gap-4">
                 <div className="relative h-[76px] w-[76px] flex-none overflow-hidden rounded-lg shadow-[0_14px_28px_-14px_rgba(0,0,0,.7)]">
-                    <Cover track={track} size="big" />
+                    <CoverImage src={track.thumbnail} track={track} size="big" />
                 </div>
                 <div className="min-w-0">
                     <div className="text-[26px] font-black leading-[1.02] tracking-[-0.03em]">
@@ -672,7 +968,7 @@ function DetailView({
                             className="text-[46px] font-black leading-[0.82] tracking-[-0.04em]"
                             style={{ color: b.multColor }}
                         >
-                            {track.mult}
+                            {multLabel}
                         </div>
                     </div>
                     <span style={b.style}>{b.text}</span>
@@ -685,29 +981,31 @@ function DetailView({
                     <div className="h-1 overflow-hidden rounded-sm bg-mir-text2/20">
                         <div
                             className="h-full rounded-sm bg-mir-text2/[0.8]"
-                            style={{ width: track.pop + '%' }}
+                            style={{ width: pop + '%' }}
                         />
                     </div>
                 </div>
                 <div className="flex items-center gap-[9px] border-t border-mir-line pt-3.5 font-mono text-[12px] text-mir-text2/[0.85]">
+                    Popularidade atual da faixa:{' '}
                     <span className="font-bold text-mir-text">
-                        {fmt(track.cravando)}
+                        {previewing ? '…' : pop}
                     </span>{' '}
-                    pessoas já cravaram nessa faixa
+                    / 100
                 </div>
             </div>
 
             <div className="mx-0.5 mb-[18px] mt-4 font-mono text-[11px] leading-[1.6] text-mir-text2/[0.66]">
-                A trava de {LOCK_DAYS} dias começa assim que você cravar. O
-                multiplicador fica fixo no valor de agora — depois é só ver a
-                faixa subir.
+                O multiplicador trava no valor de agora e não muda mais. A partir
+                de {MIN_DAYS} dias você pode recolher os pontos — antes disso dá pra
+                remover, mas zera.
             </div>
 
             <button
                 onClick={onConfirm}
-                className="h-[50px] w-full cursor-pointer rounded-full border-none bg-mir-acc text-base font-extrabold tracking-[-0.01em] text-mir-on-acc"
+                disabled={craving || previewing}
+                className="h-[50px] w-full cursor-pointer rounded-full border-none bg-mir-acc text-base font-extrabold tracking-[-0.01em] text-mir-on-acc disabled:opacity-60"
             >
-                Cravar {track.title} · {track.mult}
+                {craving ? 'Cravando…' : `Cravar ${track.title} · ${multLabel}`}
             </button>
         </div>
     )

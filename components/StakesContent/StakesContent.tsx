@@ -53,6 +53,7 @@ type SearchTrack = {
     isrc: string | null
     albumName: string | null
     thumbnail: string | null
+    cover: string | null
 }
 
 // ---- covers ----
@@ -228,6 +229,8 @@ function mapSearchTrack(t: {
         albumName: t.album?.name ?? null,
         // imagem menor (última) costuma ser ~64px, ideal para os covers da lista
         thumbnail: images[images.length - 1]?.url ?? images[0]?.url ?? null,
+        // imagem maior (primeira) costuma ser ~640px, pro hero em destaque
+        cover: images[0]?.url ?? images[images.length - 1]?.url ?? null,
     }
 }
 
@@ -963,62 +966,58 @@ function DetailView({
         <div className="anim-slide px-6 pb-6 pt-5">
             <button
                 onClick={onBack}
-                className={`mb-[18px] cursor-pointer border-none bg-transparent p-0 ${monoFont} text-[11px] tracking-[0.1em] text-mir-text2/[0.7]`}
+                className={`mb-5 cursor-pointer border-none bg-transparent p-0 ${monoFont} text-[12px] tracking-[0.1em] text-mir-text2/[0.7]`}
             >
                 ← buscar outra
             </button>
 
-            <div className="mb-[22px] flex items-center gap-4">
-                <div className="relative h-[76px] w-[76px] flex-none overflow-hidden rounded-lg shadow-[0_14px_28px_-14px_rgba(0,0,0,.7)]">
-                    <CoverImage src={track.thumbnail} track={track} size="big" />
+            {/* HERO — capa em destaque (estilo Shazam) */}
+            <div className="flex flex-col items-center text-center">
+                <div className="relative aspect-square w-[240px] max-w-full flex-none overflow-hidden rounded-2xl shadow-[0_28px_56px_-20px_rgba(0,0,0,.8)]">
+                    <CoverImage src={track.cover ?? track.thumbnail} track={track} size="big" />
                 </div>
-                <div className="min-w-0">
-                    <div className="text-[26px] font-black leading-[1.02] tracking-[-0.03em]">
+                <div className="mt-5 max-w-full px-1">
+                    <div className="text-[30px] font-black leading-[1.04] tracking-[-0.03em]">
                         {track.title}
                     </div>
-                    <div className="mt-[5px] font-mono text-[12px] text-mir-text2/[0.7]">
+                    <div className="mt-2 font-mono text-[14px] text-mir-text2/[0.8]">
                         {track.artist}
                     </div>
                 </div>
             </div>
 
-            <div className="rounded-xl border border-mir-line bg-[#211a11] p-5">
-                <div className="mb-[18px] flex items-start justify-between gap-3">
-                    <div>
-                        <div className="mb-1.5 font-mono text-[9.5px] tracking-[0.14em] text-mir-text2/[0.7]">
-                            MULTIPLICADOR SE DER STAKE AGORA
-                        </div>
-                        <div
-                            className="text-[46px] font-black leading-[0.82] tracking-[-0.04em]"
-                            style={{ color: b.multColor }}
-                        >
-                            {multLabel}
-                        </div>
+            {/* stats discretos — multiplicador + popularidade */}
+            <div className="mt-7 flex items-stretch gap-2.5">
+                <div className="flex-1 rounded-xl border border-mir-line bg-mir-fill1/40 px-4 py-3.5">
+                    <div className="font-mono text-[10px] tracking-[0.12em] text-mir-text2/[0.6]">
+                        MULTIPLICADOR
                     </div>
-                    <span style={b.style}>{b.text}</span>
+                    <div
+                        className="mt-1 text-[22px] font-black leading-none tracking-[-0.03em]"
+                        style={{ color: b.multColor }}
+                    >
+                        {multLabel}
+                    </div>
                 </div>
-                <div className="mb-4">
-                    <div className="mb-1.5 flex justify-between font-mono text-[9.5px] tracking-[0.1em] text-mir-text2/[0.7]">
-                        <span>POPULARIDADE</span>
-                        <span>{b.hint}</span>
+                <div className="flex-1 rounded-xl border border-mir-line bg-mir-fill1/40 px-4 py-3.5">
+                    <div className="flex items-center justify-between">
+                        <span className="font-mono text-[10px] tracking-[0.12em] text-mir-text2/[0.6]">
+                            POPULARIDADE
+                        </span>
+                        <span className="font-mono text-[13px] font-bold text-mir-text">
+                            {previewing ? '…' : pop}
+                        </span>
                     </div>
-                    <div className="h-1 overflow-hidden rounded-sm bg-mir-text2/20">
+                    <div className="mt-2.5 h-1 overflow-hidden rounded-sm bg-mir-text2/20">
                         <div
                             className="h-full rounded-sm bg-mir-text2/[0.8]"
                             style={{ width: pop + '%' }}
                         />
                     </div>
                 </div>
-                <div className="flex items-center gap-[9px] border-t border-mir-line pt-3.5 font-mono text-[12px] text-mir-text2/[0.85]">
-                    Popularidade atual da faixa:{' '}
-                    <span className="font-bold text-mir-text">
-                        {previewing ? '…' : pop}
-                    </span>{' '}
-                    / 100
-                </div>
             </div>
 
-            <div className="mx-0.5 mb-[18px] mt-4 font-mono text-[11px] leading-[1.6] text-mir-text2/[0.66]">
+            <div className="mx-0.5 mb-5 mt-4 font-mono text-[12px] leading-[1.6] text-mir-text2/[0.7]">
                 O multiplicador trava no valor de agora e não muda mais. A partir
                 de {MIN_DAYS} dias você pode recolher os pontos — antes disso dá pra
                 remover, mas zera.
@@ -1027,9 +1026,9 @@ function DetailView({
             <button
                 onClick={onConfirm}
                 disabled={staking || previewing}
-                className="h-[50px] w-full cursor-pointer rounded-full border-none bg-mir-acc text-base font-extrabold tracking-[-0.01em] text-mir-on-acc disabled:opacity-60"
+                className="h-[52px] w-full cursor-pointer rounded-full border-none bg-mir-acc text-base font-extrabold tracking-[-0.01em] text-mir-on-acc disabled:opacity-60"
             >
-                {staking ? 'Dando stake…' : `Dar stake em ${track.title} · ${multLabel}`}
+                {staking ? 'Dando stake…' : `Dar stake · ${multLabel}`}
             </button>
         </div>
     )

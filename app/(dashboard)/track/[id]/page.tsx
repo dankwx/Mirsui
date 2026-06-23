@@ -2,11 +2,17 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { fetchAuthData } from '@/utils/profileService'
-import { fetchSpotifyTrackInfo, SpotifyTrack } from '@/utils/spotifyService'
+import {
+    fetchSpotifyTrackInfo,
+    fetchSpotifyArtistInfo,
+    SpotifyTrack,
+} from '@/utils/spotifyService'
+import { fetchDeezerGenresByISRC } from '@/utils/deezerService'
 import { countTrackOccurrences } from '@/utils/fetchTrackInfo'
 import { getTopTrackClaimers } from '@/utils/trackPopularityService'
 import { searchYouTubeVideo } from '@/utils/youtubeService'
 import TrackActions from '@/components/TrackActions/TrackActions'
+import TrackSelo from '@/components/TrackSelo/TrackSelo'
 import TrackPreviewBar from '@/components/TrackPreviewBar/TrackPreviewBar'
 import ProfileFooter from '@/components/Profile/ProfileFooter'
 import type { Metadata } from 'next'
@@ -57,6 +63,41 @@ function initials(name: string) {
         .slice(0, 2)
 }
 const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+// Formata a data de lançamento respeitando a precisão do Spotify
+// (ano / ano-mês / ano-mês-dia)
+function formatReleaseDate(date?: string) {
+    if (!date) return null
+    const [y, m, d] = date.split('-')
+    if (d) return `${parseInt(d, 10)} ${MONTHS[parseInt(m, 10) - 1]} ${y}`
+    if (m) return `${MONTHS[parseInt(m, 10) - 1]} ${y}`
+    return y
+}
+// Gêneros do Spotify vêm em minúsculas ("canadian contemporary r&b").
+// Pega os 2 primeiros e capitaliza cada palavra para exibição.
+function formatGenres(genres?: string[] | null) {
+    if (!genres || genres.length === 0) return null
+    return genres
+        .slice(0, 2)
+        .map((g) =>
+            g
+                .split(' ')
+                .map((w) =>
+                    w === 'r&b' ? 'R&B' : w.charAt(0).toUpperCase() + w.slice(1)
+                )
+                .join(' ')
+        )
+        .join(' · ')
+}
+// Seguidores do artista, formatado em pt-BR (1,2 mi · 340 mil · 8.450)
+function formatFollowers(n?: number) {
+    if (n == null) return null
+    if (n >= 1_000_000) {
+        const m = (n / 1_000_000).toFixed(1).replace('.', ',').replace(',0', '')
+        return `${m} mi`
+    }
+    if (n >= 1_000) return `${Math.round(n / 1000)} mil`
+    return n.toLocaleString('pt-BR')
+}
 function claimWhen(ts: string | null) {
     if (!ts) return ''
     const d = new Date(ts)
@@ -67,15 +108,6 @@ function claimWhen(ts: string | null) {
     if (months < 12) return months === 1 ? 'há 1 mês' : `há ${months} meses`
     return `${MONTHS[d.getMonth()]} ${d.getFullYear()}`
 }
-
-// Ficha técnica (dados estáticos — ainda não vêm da API)
-const SPEC = [
-    { k: 'Gênero', v: 'Synthpop · R&B' },
-    { k: 'Gravadora', v: 'XO, Republic' },
-    { k: 'Produção', v: 'The Weeknd, Max Martin' },
-    { k: 'BPM', v: '171' },
-    { k: 'Tom', v: 'F♯ menor' },
-]
 
 export default async function TrackDetailsPage({
     params,
@@ -110,6 +142,34 @@ export default async function TrackDetailsPage({
               .toString()
               .padStart(2, '0')}`
         : '0:00'
+
+    // Gênero não vem na track — buscamos no artista principal
+    let genre: string | null = null
+    let followers: number | undefined
+    const primaryArtistId = trackInfo?.artists?.[0]?.id
+    if (primaryArtistId) {
+        const artistInfo = await fetchSpotifyArtistInfo(String(primaryArtistId))
+        genre = formatGenres(artistInfo?.genres)
+        followers = artistInfo?.followers?.total
+    }
+    // Spotify costuma deixar genres vazio p/ artistas BR/indie — cai no Deezer
+    const isrc = trackInfo?.external_ids?.isrc || null
+    if (!genre && isrc) {
+        genre = formatGenres(await fetchDeezerGenresByISRC(isrc))
+    }
+
+    // Ficha técnica — dados reais (Spotify + fallback Deezer)
+    const specs = [
+        genre && { k: 'Gênero', v: genre },
+        trackInfo?.album.release_date && {
+            k: 'Lançamento',
+            v: formatReleaseDate(trackInfo.album.release_date),
+        },
+        followers != null && {
+            k: 'Ouvintes',
+            v: `${formatFollowers(followers)} seguidores`,
+        },
+    ].filter(Boolean) as { k: string; v: string }[]
 
     let totalClaims = 0
     if (trackInfo?.uri) {
@@ -246,9 +306,11 @@ export default async function TrackDetailsPage({
                                 <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[rgba(205,239,54,0.4)] bg-mir-acc-soft py-1 pl-2 pr-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.08em] text-mir-acc">
                                     <TrendingUp className="h-3 w-3" /> Em alta
                                 </span>
-                                <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-mir-text3">
-                                    {SPEC[0].v}
-                                </span>
+                                {genre && (
+                                    <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-mir-text3">
+                                        {genre}
+                                    </span>
+                                )}
                             </div>
 
                             <h1 className="mt-3.5 text-[clamp(38px,6vw,68px)] font-extrabold leading-[0.94] tracking-[-0.04em] text-mir-text">
@@ -306,9 +368,28 @@ export default async function TrackDetailsPage({
                 </div>
             </header>
 
-            <div className="mx-auto w-full max-w-[1180px] px-5 sm:px-10">
-                <div className="h-px bg-mir-line" />
-            </div>
+            {/* ===== Ficha técnica — faixa full-bleed (sem card) ===== */}
+            {specs.length > 0 && (
+                <section className="border-y border-mir-line">
+                    <div className="mx-auto w-full max-w-[1180px] px-5 sm:px-10">
+                        <dl className="flex flex-wrap">
+                            {specs.map((s) => (
+                                <div
+                                    key={s.k}
+                                    className="min-w-[128px] flex-1 border-mir-line py-[18px] pr-7 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-7"
+                                >
+                                    <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-mir-text3">
+                                        {s.k}
+                                    </dt>
+                                    <dd className="mt-2 text-[15px] font-semibold tracking-[-0.01em] text-mir-text">
+                                        {s.v}
+                                    </dd>
+                                </div>
+                            ))}
+                        </dl>
+                    </div>
+                </section>
+            )}
 
             {/* ============ CORPO ============ */}
             <div className="mx-auto grid w-full max-w-[1180px] grid-cols-1 items-start gap-9 px-5 pb-[72px] pt-[34px] sm:px-10 lg:grid-cols-[minmax(0,1fr)_330px] lg:gap-[44px]">
@@ -326,60 +407,19 @@ export default async function TrackDetailsPage({
 
                 {/* Rail */}
                 <aside className="flex flex-col gap-[18px] lg:sticky lg:top-[84px]">
-                    {/* Ficha técnica */}
-                    <section className="rounded-2xl border border-mir-line bg-mir-surface px-[22px] py-5">
-                        <span className="text-[12.5px] font-bold uppercase tracking-[0.1em] text-mir-text2">
-                            Ficha técnica
-                        </span>
-                        <dl className="mt-4 flex flex-col">
-                            {SPEC.map((s) => (
-                                <div
-                                    key={s.k}
-                                    className="flex items-baseline justify-between gap-4 border-b border-mir-line py-[11px] last:border-b-0 last:pb-0"
-                                >
-                                    <dt className="whitespace-nowrap text-[12.5px] text-mir-text3">
-                                        {s.k}
-                                    </dt>
-                                    <dd className="text-right text-[13px] font-semibold text-mir-text">
-                                        {s.v}
-                                    </dd>
-                                </div>
-                            ))}
-                        </dl>
-                    </section>
-
-                    {/* Números */}
-                    <section className="rounded-xl bg-mir-acc px-[22px] py-5 text-mir-on-acc">
-                        <span className="font-mono text-[11px] font-bold uppercase tracking-[0.16em]">
-                            Números
-                        </span>
-                        <div className="mt-3.5 grid grid-cols-3 gap-2">
-                            <div>
-                                <div className="text-[34px] font-black leading-none tracking-[-0.04em] tabular-nums">
-                                    {totalClaims}
-                                </div>
-                                <div className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.1em] opacity-70">
-                                    Reivind.
-                                </div>
-                            </div>
-                            <div>
-                                <div className="text-[34px] font-black leading-none tracking-[-0.04em] tabular-nums">
-                                    {trackInfo?.popularity ?? '—'}
-                                </div>
-                                <div className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.1em] opacity-70">
-                                    Popular.
-                                </div>
-                            </div>
-                            <div>
-                                <div className="text-[34px] font-black leading-none tracking-[-0.04em] tabular-nums">
-                                    2.1B
-                                </div>
-                                <div className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.1em] opacity-70">
-                                    Plays
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+                    {trackInfo && (
+                        <TrackSelo
+                            trackUri={trackInfo.uri}
+                            trackTitle={trackInfo.name}
+                            artistName={artistNames}
+                            albumImageUrl={albumImageUrl}
+                            claimed={hasUserClaimed}
+                            position={userClaimPosition}
+                            year={releaseYear}
+                            totalClaims={totalClaims}
+                            isLoggedIn={isLoggedIn}
+                        />
+                    )}
                 </aside>
             </div>
 

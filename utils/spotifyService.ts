@@ -10,9 +10,12 @@ interface SpotifyTokenResponse {
 
 export interface SpotifyTrack {
     album: {
+        id: string
         name: string
         images: { url: string }[]
         release_date: string
+        release_date_precision?: string
+        total_tracks: number
     }
     artists: { name: string; id: number }[]
     name: string
@@ -20,6 +23,9 @@ export interface SpotifyTrack {
     uri: string
     duration_ms: number
     id: string
+    explicit: boolean
+    track_number: number
+    external_ids?: { isrc?: string }
 }
 
 export interface SpotifySearchResponse {

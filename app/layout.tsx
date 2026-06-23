@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster'
 import Footer from '@/components/Footer/Footer'
 import GoogleAnalytics from '@/components/GoogleAnalytics/GoogleAnalytics'
 import AnalyticsProvider from '@/components/AnalyticsProvider/AnalyticsProvider'
+import PostHogProvider from '@/components/PostHogProvider/PostHogProvider'
 
 const hanken = Hanken_Grotesk({
     subsets: ['latin'],
@@ -41,10 +42,12 @@ export default function RootLayout({
         <html lang="en">
             <body className={`${hanken.variable} ${archivo.variable} ${spaceGrotesk.variable} ${hanken.className}`}>
                 <GoogleAnalytics />
-                <AnalyticsProvider>
-                    {children}
-                    <Toaster />
-                </AnalyticsProvider>
+                <PostHogProvider>
+                    <AnalyticsProvider>
+                        {children}
+                        <Toaster />
+                    </AnalyticsProvider>
+                </PostHogProvider>
             </body>
         </html>
     )

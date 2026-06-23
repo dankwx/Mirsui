@@ -9,6 +9,7 @@ import {
 } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 import { formatMultiplier } from '@/utils/stakeMultiplier'
+import { capture } from '@/lib/posthog'
 
 // Regras da feature (ver Stake.md): 3 vagas, e só dá pra COLETAR os pontos
 // depois de 7 dias. Remover antes disso é permitido, mas zera os pontos.
@@ -355,6 +356,7 @@ export default function StakesContent() {
         setQuery('')
         setResults([])
         resetPreview()
+        capture('stake_modal_opened', { slot: i + 1 })
     }
     const closeModal = () => {
         setModalSlot(null)
@@ -409,6 +411,14 @@ export default function StakesContent() {
             })
             const data = await res.json()
             if (res.ok && data.stake) {
+                capture('stake_placed', {
+                    slot: modalSlot + 1,
+                    track_id: selected.id,
+                    track_title: selected.title,
+                    artist_name: selected.artist,
+                    multiplier: Number(data.stake.multiplier),
+                    popularity: previewPop,
+                })
                 toast({
                     title: 'Stake feito!',
                     description: `"${selected.title}" · multiplicador ${formatMultiplier(
@@ -418,6 +428,10 @@ export default function StakesContent() {
                 await loadStakes()
                 closeModal()
             } else {
+                capture('stake_failed', {
+                    track_id: selected.id,
+                    error: data.error ?? 'unknown',
+                })
                 toast({
                     title: 'Não foi possível dar stake',
                     description: data.error ?? 'Tente novamente',
@@ -442,6 +456,16 @@ export default function StakesContent() {
             })
             const data = await res.json()
             if (res.ok) {
+                capture('stake_collected', {
+                    stake_id: c.id,
+                    track_id: c.track_id,
+                    track_title: c.track_title,
+                    artist_name: c.artist_name,
+                    collected: !!data.collected,
+                    points: data.collected ? data.points : 0,
+                    days_held: c.days_held,
+                    status: c.status,
+                })
                 if (data.collected) {
                     toast({
                         title: 'Recolhido!',

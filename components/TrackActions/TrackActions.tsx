@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Heart, MessageCircle, Share2, Send, X, Loader2 } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
+import { capture } from '@/lib/posthog'
 
 interface TrackActionsProps {
     trackUri: string
@@ -91,6 +92,14 @@ export default function TrackActions({
                 throw new Error(data.error || 'Erro ao reivindicar faixa')
             }
 
+            capture('track_claimed', {
+                track_uri: trackUri,
+                track_title: trackTitle,
+                artist_name: artistName,
+                position: data.position,
+                with_message: message.trim().length > 0,
+                popularity,
+            })
             setIsClaimed(true)
             setPosition(data.position)
             setTotal((t) => t + 1)
@@ -123,8 +132,10 @@ export default function TrackActions({
         try {
             if (navigator.share) {
                 await navigator.share(shareData)
+                capture('track_shared', { track_uri: trackUri, method: 'native' })
             } else {
                 await navigator.clipboard.writeText(trackUrl)
+                capture('track_shared', { track_uri: trackUri, method: 'clipboard' })
                 toast({
                     title: 'Link copiado!',
                     description: 'O link da faixa foi copiado.',

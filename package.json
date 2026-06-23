@@ -27,6 +27,7 @@
     "html2canvas": "^1.4.1",
     "lucide-react": "^0.396.0",
     "next": "14.2.4",
+    "posthog-js": "^1.392.0",
     "react": "^18",
     "react-dom": "^18",
     "sonner": "^2.0.7",

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { toggleFollow } from './actions'
 import { UserPlus, UserMinus, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { capture } from '@/lib/posthog'
 
 type ButtonType = 'icon' | 'text'
 
@@ -32,6 +33,10 @@ export default function FollowButton({
             const result = await toggleFollow(followingId)
             if (result.success && typeof result.isFollowing === 'boolean') {
                 setIsFollowing(result.isFollowing)
+                capture(
+                    result.isFollowing ? 'user_followed' : 'user_unfollowed',
+                    { following_id: followingId }
+                )
             }
         } catch (error) {
             console.error('Error toggling follow:', error)

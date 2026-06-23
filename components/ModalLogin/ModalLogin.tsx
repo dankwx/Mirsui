@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { login, signup } from '../../app/auth/actions'
 import { createClient } from '@/utils/supabase/client'
+import { capture } from '@/lib/posthog'
 
 type AuthMode = 'login' | 'signup'
 
@@ -381,6 +382,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 if (result?.error) {
                     setError(result.error)
                 } else {
+                    capture('user_signed_up', { method: 'email' })
                     router.push(
                         `/auth/check-email?email=${encodeURIComponent(email)}`
                     )
@@ -393,6 +395,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
             if (result?.error) {
                 setError(result.error)
             } else {
+                capture('user_logged_in', { method: 'email' })
                 onLogin?.(email, password)
                 setStatus('Login realizado com sucesso.')
                 close()

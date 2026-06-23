@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useEffect, useState, ReactNode } from 'react'
+import { identify, resetIdentity } from '@/lib/posthog'
 
 interface User {
   id: string
@@ -33,8 +34,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         if (data.authenticated && data.user) {
           setUser(data.user)
+          // Vincula os eventos do PostHog a este usuário.
+          identify(data.user.id, {
+            email: data.user.email,
+            username: data.profile?.username,
+          })
         } else {
           setUser(null)
+          resetIdentity()
         }
       } catch (error) {
         console.error('Erro ao verificar usuário:', error)

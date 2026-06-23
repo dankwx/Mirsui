@@ -33,6 +33,7 @@ type NavLink = {
 const navLinks: NavLink[] = [
     {
         title: 'Início',
+        // url base; é sobrescrita em runtime por homeUrl (ver componente).
         url: '/',
         match: (p) => p === '/' || p.startsWith('/feed'),
     },
@@ -59,6 +60,12 @@ export default function Header({ userProfile }: HeaderProps) {
     const pathname = usePathname()
     const router = useRouter()
     const [isSigningOut, startSignOut] = useTransition()
+
+    // Logado → "/feed" direto. Logado indo para "/" cairia no redirect do
+    // server (em (public)), que cruza grupos de layout e mostra o <main>
+    // branco + footer por um instante antes de chegar no feed. Deslogado →
+    // "/" (landing) é o destino real, então não há flash.
+    const homeUrl = userProfile ? '/feed' : '/'
 
     const handleSignOut = () => {
         setIsMenuOpen(false)
@@ -95,7 +102,7 @@ export default function Header({ userProfile }: HeaderProps) {
         <header className="sticky top-0 z-40 border-b border-mir-line bg-mir-bg/85 backdrop-blur-xl">
             <nav className="mx-auto flex h-[72px] w-full max-w-[1180px] items-center gap-7 px-5 sm:px-10">
                 <Link
-                    href="/"
+                    href={homeUrl}
                     className="flex items-center gap-2.5 text-2xl font-black tracking-[-0.04em] text-mir-text"
                 >
                     <MirsuiLogo size={30} />
@@ -105,10 +112,11 @@ export default function Header({ userProfile }: HeaderProps) {
                 <div className="hidden items-center gap-7 md:flex">
                     {navLinks.map((link) => {
                         const active = link.match(pathname)
+                        const href = link.title === 'Início' ? homeUrl : link.url
                         return (
                             <Link
                                 key={link.title}
-                                href={link.url}
+                                href={href}
                                 className={`relative text-[15px] font-semibold transition-colors ${
                                     active
                                         ? "text-mir-text after:absolute after:-bottom-[3px] after:left-0 after:h-[2px] after:w-full after:bg-mir-acc after:content-['']"

@@ -814,7 +814,7 @@ export default function StakesContent() {
             {modalOpen && (
                 <div
                     onClick={closeModal}
-                    className="anim-fade fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-[rgba(8,6,3,0.72)] px-5 py-12 backdrop-blur-md"
+                    className="anim-fade fixed inset-0 z-[80] flex items-center justify-center overflow-y-auto bg-[rgba(8,6,3,0.72)] px-5 py-12 backdrop-blur-md"
                 >
                     <div
                         onClick={(e) => e.stopPropagation()}
@@ -882,20 +882,20 @@ export default function StakesContent() {
                                             <button
                                                 key={r.id}
                                                 onClick={() => selectTrack(r)}
-                                                className="flex w-full cursor-pointer items-center gap-3.5 rounded-[10px] border-none border-b border-b-mir-line bg-transparent px-3.5 py-3 text-left text-inherit"
+                                                className="flex w-full cursor-pointer items-center gap-4 rounded-[10px] border-none border-b border-b-mir-line bg-transparent px-3.5 py-[14px] text-left text-inherit"
                                             >
-                                                <div className="relative h-[46px] w-[46px] flex-none overflow-hidden rounded-[5px]">
+                                                <div className="relative h-[58px] w-[58px] flex-none overflow-hidden rounded-md">
                                                     <CoverImage
                                                         src={r.thumbnail}
                                                         track={r}
-                                                        size="row"
+                                                        size="slot"
                                                     />
                                                 </div>
                                                 <div className="min-w-0 flex-1">
-                                                    <div className="overflow-hidden text-ellipsis whitespace-nowrap text-base font-bold tracking-[-0.02em]">
+                                                    <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[18px] font-bold tracking-[-0.02em]">
                                                         {r.title}
                                                     </div>
-                                                    <div className="mt-[3px] overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[11px] text-mir-text2/[0.8]">
+                                                    <div className="mt-[4px] overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12px] text-mir-text2/[0.8]">
                                                         {r.artist}
                                                     </div>
                                                 </div>

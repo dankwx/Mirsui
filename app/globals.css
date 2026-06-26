@@ -352,7 +352,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: #0c0b0a url('/assets/track-art2.png') 58% 40% / cover no-repeat;
+  background: #0c0b0a url('/assets/track-art2.webp') 58% 40% / cover no-repeat;
   transform: scale(1.04);
   animation: mir-slowzoom 26s ease-in-out infinite alternate;
 }

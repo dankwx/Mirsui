@@ -22,6 +22,9 @@ type Props = {
     current: number
     multiplier: number
     accumulatedPoints: number
+    // série já carregada (vem do GET /stakes). Se vier, abre instantâneo;
+    // se for undefined, o modal busca sozinho (fallback).
+    initialSnapshots?: Snapshot[]
     onClose: () => void
 }
 
@@ -47,9 +50,12 @@ export default function StakeChartModal({
     current,
     multiplier,
     accumulatedPoints,
+    initialSnapshots,
     onClose,
 }: Props) {
-    const [snaps, setSnaps] = useState<Snapshot[] | null>(null)
+    const [snaps, setSnaps] = useState<Snapshot[] | null>(
+        initialSnapshots ?? null
+    )
     const [error, setError] = useState(false)
     const [hover, setHover] = useState<number | null>(null)
 
@@ -61,6 +67,9 @@ export default function StakeChartModal({
     }, [onClose])
 
     useEffect(() => {
+        // já temos a série (veio do GET /stakes): nada a buscar, abre instantâneo
+        if (initialSnapshots !== undefined) return
+
         let alive = true
         setSnaps(null)
         setError(false)
@@ -74,7 +83,7 @@ export default function StakeChartModal({
         return () => {
             alive = false
         }
-    }, [stakeId])
+    }, [stakeId, initialSnapshots])
 
     // domínio do eixo Y com auto-zoom (estilo Apple Health): aperta na faixa
     // real dos dados pra mostrar movimento, mas com rótulos honestos 0–100.

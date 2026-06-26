@@ -43,6 +43,13 @@ export type Stake = {
     days_to_collect: number
     can_collect: boolean
     pessoas_deram_stake: number
+    // série diária pro gráfico (vem junto do GET /stakes → abre instantâneo)
+    snapshots?: {
+        date: string
+        popularity: number
+        dayGain: number
+        pointsGain: number
+    }[]
 }
 
 // Resultado de busca do Spotify mapeado para a UI
@@ -1161,6 +1168,7 @@ export default function StakesContent({
                     current={chartStake.last_popularity}
                     multiplier={Number(chartStake.multiplier)}
                     accumulatedPoints={chartStake.accumulated_points}
+                    initialSnapshots={chartStake.snapshots}
                     onClose={() => setChartStake(null)}
                 />
             )}

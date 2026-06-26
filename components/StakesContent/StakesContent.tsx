@@ -10,6 +10,7 @@ import {
 import { useToast } from '@/components/ui/use-toast'
 import { formatMultiplier } from '@/utils/stakeMultiplier'
 import { capture } from '@/lib/posthog'
+import StakeChartModal from './StakeChartModal'
 
 // Regras da feature (ver Stake.md): 3 vagas, e só dá pra COLETAR os pontos
 // depois de 7 dias. Remover antes disso é permitido, mas zera os pontos.
@@ -340,6 +341,7 @@ export default function StakesContent({
     const [staking, setStaking] = useState(false)
     const [busyId, setBusyId] = useState<string | null>(null)
     const [open, setOpen] = useState<Record<string, boolean>>({})
+    const [chartStake, setChartStake] = useState<Stake | null>(null)
 
     const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
     const { toast } = useToast()
@@ -751,9 +753,19 @@ export default function StakesContent({
 
                                     {/* CONTEÚDO */}
                                     <div className="flex flex-col p-5 pt-[18px]">
-                                        {/* movimento: por que deu (ou não) pontos */}
+                                        {/* movimento: por que deu (ou não) pontos.
+                                            Clicável → abre o gráfico de evolução. */}
                                         {mv && (
-                                            <div className="mb-4 flex items-center gap-3 rounded-xl border border-mir-line bg-mir-fill1/40 px-3.5 py-3">
+                                            <button
+                                                onClick={() => {
+                                                    setChartStake(s)
+                                                    capture('stake_chart_opened', {
+                                                        stake_id: s.id,
+                                                        track_title: s.track_title,
+                                                    })
+                                                }}
+                                                className="group mb-4 flex w-full cursor-pointer items-center gap-3 rounded-xl border border-mir-line bg-mir-fill1/40 px-3.5 py-3 text-left transition-colors hover:border-mir-line2 hover:bg-mir-fill1"
+                                            >
                                                 <div
                                                     className="flex h-9 w-9 flex-none items-center justify-center rounded-lg text-[16px] font-bold leading-none"
                                                     style={{
@@ -788,7 +800,24 @@ export default function StakesContent({
                                                         {mv.delta}
                                                     </span>
                                                 )}
-                                            </div>
+                                                {/* ícone de gráfico: sinaliza que dá pra abrir */}
+                                                <svg
+                                                    width="15"
+                                                    height="15"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2.2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    className="flex-none text-mir-text2/40 transition-colors group-hover:text-mir-text2/75"
+                                                >
+                                                    <path d="M3 3v18h18" />
+                                                    <rect x="7" y="12" width="3" height="5" />
+                                                    <rect x="12" y="8" width="3" height="9" />
+                                                    <rect x="17" y="5" width="3" height="12" />
+                                                </svg>
+                                            </button>
                                         )}
 
                                         {/* action */}
@@ -1120,6 +1149,20 @@ export default function StakesContent({
                         )}
                     </div>
                 </div>
+            )}
+
+            {/* MODAL DO GRÁFICO */}
+            {chartStake && (
+                <StakeChartModal
+                    stakeId={chartStake.id}
+                    title={chartStake.track_title}
+                    artist={chartStake.artist_name}
+                    baseline={chartStake.baseline_popularity}
+                    current={chartStake.last_popularity}
+                    multiplier={Number(chartStake.multiplier)}
+                    accumulatedPoints={chartStake.accumulated_points}
+                    onClose={() => setChartStake(null)}
+                />
             )}
         </>
     )

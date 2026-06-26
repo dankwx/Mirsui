@@ -1,6 +1,5 @@
 // utils/feedService.backend.ts - Service para buscar dados do feed via backend
-import { cookies } from 'next/headers'
-import { getSupabaseCookieName } from '@/utils/supabase/cookie-helper'
+import { getAccessToken } from '@/utils/supabase/get-access-token'
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
 
@@ -33,23 +32,6 @@ export interface RecentClaim {
     track_thumbnail: string
     track_url: string
     claimedat: string
-}
-
-// Função auxiliar para pegar o token do cookie
-function getAccessToken(): string | null {
-    try {
-        const cookieStore = cookies()
-        const cookieName = getSupabaseCookieName()
-        const cookieValue = cookieStore.get(cookieName)?.value
-
-        if (!cookieValue) return null
-
-        const session = JSON.parse(cookieValue)
-        return session.access_token || null
-    } catch (error) {
-        console.error('Erro ao pegar token:', error)
-        return null
-    }
 }
 
 /**
@@ -118,7 +100,7 @@ export async function checkUserLikedTracks(
       return new Set()
     }
 
-    const token = getAccessToken()
+    const token = await getAccessToken()
 
     if (!token) {
       // Usuário não está logado

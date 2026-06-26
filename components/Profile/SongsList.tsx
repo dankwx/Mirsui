@@ -19,6 +19,7 @@ import {
 } from '../ui/dropdown-menu'
 import { removeTrack, toggleFavorite } from './actions'
 import { isEarly } from './early'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCertificateGeneratorSimple } from '@/hooks/use-certificate-generator-simple'
 
@@ -62,6 +63,10 @@ const hashStr = (s: string) => {
     for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
     return h
 }
+
+// Link para a página da track (mesma lógica usada no /feed)
+const trackHref = (song: Song) =>
+    `/track/${song.track_url?.split('/').pop() || song.track_title}`
 
 // margem antecipada (mock determinístico) — meses antes do pico
 const earlyMargin = (song: Song) =>
@@ -330,11 +335,9 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                         </div>
                         <div className="grid grid-cols-2 gap-[18px] sm:grid-cols-4 sm:gap-[22px]">
                             {favTracks.map((song) => (
-                                <a
+                                <Link
                                     key={song.id}
-                                    href={song.track_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    href={trackHref(song)}
                                     className="group"
                                 >
                                     <div className="relative overflow-hidden rounded-[5px] shadow-[0_12px_30px_-14px_rgba(0,0,0,0.7)]">
@@ -350,7 +353,7 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                                     <div className="mt-0.5 truncate font-mono text-[11px] text-[#ece3d2]/50">
                                         {song.artist_name}
                                     </div>
-                                </a>
+                                </Link>
                             ))}
                         </div>
                     </div>
@@ -412,11 +415,9 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                         {list.map((song) => {
                             const early = isEarly(song)
                             return (
-                                <a
+                                <Link
                                     key={song.id}
-                                    href={song.track_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    href={trackHref(song)}
                                     className="group"
                                 >
                                     <div className="relative overflow-hidden rounded-[5px] shadow-[0_10px_22px_-12px_rgba(22,18,12,0.4)] transition duration-200 ease-out group-hover:-translate-y-[5px] group-hover:shadow-[0_18px_34px_-12px_rgba(22,18,12,0.5)]">
@@ -451,7 +452,7 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                                             </span>
                                         )}
                                     </div>
-                                </a>
+                                </Link>
                             )
                         })}
                     </div>

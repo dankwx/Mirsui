@@ -327,11 +327,14 @@ const LoginModal: React.FC<LoginModalProps> = ({
         resetFeedback()
         setLoading(true)
         try {
+            capture(isSignup ? 'user_signed_up' : 'user_logged_in', {
+                method: 'google',
+            })
             const supabase = createClient()
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: `${window.location.origin}/auth/confirm`,
+                    redirectTo: `${window.location.origin}/auth/callback`,
                 },
             })
             if (error) throw error

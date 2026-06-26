@@ -6,7 +6,10 @@ import { createServerClient } from '@supabase/ssr'
 const PUBLIC_ROUTES = [
   '/',
   '/how-it-works',
+  '/termos',
+  '/privacidade',
   '/auth/confirm',
+  '/auth/callback',
   '/auth/check-email',
   '/reset-password',
   '/check-email',

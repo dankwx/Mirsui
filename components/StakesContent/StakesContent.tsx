@@ -208,6 +208,65 @@ function fmt(n: number): string {
     return Math.round(n).toLocaleString('pt-BR')
 }
 
+// ---- movimento / feedback ----
+// Por que o stake deu (ou não deu) pontos. Os pontos só sobem quando a
+// popularidade da faixa cresce (ver Stake.md). Aqui a gente traduz o
+// baseline → agora numa frase humana + cor, pra explicar mesmo o "0".
+type Movement = {
+    tone: 'up' | 'flat' | 'down'
+    delta: number
+    color: string
+    arrow: string
+    headline: string
+    sub: string
+}
+
+function movement(s: Stake): Movement {
+    const from = Math.round(s.baseline_popularity)
+    const to = Math.round(s.last_popularity)
+    const delta = to - from
+    const pts = fmt(s.accumulated_points)
+    const ptsLabel = s.accumulated_points === 1 ? 'ponto' : 'pontos'
+
+    if (delta > 0) {
+        return {
+            tone: 'up',
+            delta,
+            color: '#cdef36',
+            arrow: '↑',
+            headline: `Subiu ${from} → ${to}`,
+            sub:
+                s.accumulated_points > 0
+                    ? `Já rendeu ${pts} ${ptsLabel}`
+                    : 'Vira ponto na próxima medição',
+        }
+    }
+    if (delta < 0) {
+        return {
+            tone: 'down',
+            delta,
+            color: '#d98359',
+            arrow: '↓',
+            headline: `Caiu ${from} → ${to}`,
+            sub:
+                s.accumulated_points > 0
+                    ? `Rendeu ${pts} ${ptsLabel} antes de cair`
+                    : 'Pontos só entram quando ela cresce',
+        }
+    }
+    return {
+        tone: 'flat',
+        delta: 0,
+        color: 'rgba(236,227,210,.62)',
+        arrow: '→',
+        headline: `Parada em ${to}`,
+        sub:
+            s.accumulated_points > 0
+                ? `Rendeu ${pts} ${ptsLabel} no caminho`
+                : 'Não se mexeu desde o seu stake',
+    }
+}
+
 const monoFont = 'font-mono'
 
 function mapSearchTrack(t: {
@@ -590,6 +649,7 @@ export default function StakesContent({
                             const opened = isOpen(s.id)
                             const mult = Number(s.multiplier)
                             const busy = busyId === s.id
+                            const mv = removida ? null : movement(s)
 
                             // estilo da borda: removida = apagado, livre = destaque, segurando = neutro
                             const border = removida
@@ -691,6 +751,46 @@ export default function StakesContent({
 
                                     {/* CONTEÚDO */}
                                     <div className="flex flex-col p-5 pt-[18px]">
+                                        {/* movimento: por que deu (ou não) pontos */}
+                                        {mv && (
+                                            <div className="mb-4 flex items-center gap-3 rounded-xl border border-mir-line bg-mir-fill1/40 px-3.5 py-3">
+                                                <div
+                                                    className="flex h-9 w-9 flex-none items-center justify-center rounded-lg text-[16px] font-bold leading-none"
+                                                    style={{
+                                                        color: mv.color,
+                                                        background: `${mv.color}1f`,
+                                                    }}
+                                                >
+                                                    {mv.arrow}
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <div
+                                                        className="text-[13.5px] font-bold tracking-[-0.01em]"
+                                                        style={{
+                                                            color:
+                                                                mv.tone === 'flat'
+                                                                    ? '#ece3d2'
+                                                                    : mv.color,
+                                                        }}
+                                                    >
+                                                        {mv.headline}
+                                                    </div>
+                                                    <div className="mt-0.5 font-mono text-[10.5px] leading-tight text-mir-text2/70">
+                                                        {mv.sub}
+                                                    </div>
+                                                </div>
+                                                {mv.delta !== 0 && (
+                                                    <span
+                                                        className="flex-none font-mono text-[12px] font-bold"
+                                                        style={{ color: mv.color }}
+                                                    >
+                                                        {mv.delta > 0 ? '+' : ''}
+                                                        {mv.delta}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
+
                                         {/* action */}
                                         {removida ? (
                                             <>
@@ -793,22 +893,43 @@ export default function StakesContent({
                                                 </div>
                                                 <div>
                                                     <div className="mb-1.5 flex justify-between font-mono text-[9.5px] tracking-[0.1em] text-mir-text2/[0.7]">
+                                                        <span>POPULARIDADE</span>
                                                         <span>
-                                                            POPULARIDADE QUANDO DEU STAKE
-                                                        </span>
-                                                        <span>
-                                                            agora {s.last_popularity}
+                                                            {Math.round(
+                                                                s.baseline_popularity
+                                                            )}{' '}
+                                                            no stake →{' '}
+                                                            {Math.round(
+                                                                s.last_popularity
+                                                            )}{' '}
+                                                            agora
                                                         </span>
                                                     </div>
-                                                    <div className="h-1 overflow-hidden rounded-sm bg-mir-text2/20">
+                                                    <div className="relative h-1.5 rounded-sm bg-mir-text2/15">
                                                         <div
-                                                            className="h-full rounded-sm bg-mir-text2/[0.9]"
+                                                            className="absolute inset-y-0 left-0 rounded-sm"
                                                             style={{
                                                                 width:
-                                                                    s.baseline_popularity +
-                                                                    '%',
+                                                                    Math.round(
+                                                                        s.last_popularity
+                                                                    ) + '%',
+                                                                background:
+                                                                    mv?.color ??
+                                                                    'rgba(236,227,210,.6)',
                                                             }}
                                                         />
+                                                        <div
+                                                            className="absolute inset-y-[-2.5px] w-px bg-mir-text/60"
+                                                            style={{
+                                                                left: `calc(${Math.round(
+                                                                    s.baseline_popularity
+                                                                )}% - 0.5px)`,
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="mt-1.5 font-mono text-[9px] tracking-[0.04em] text-mir-text2/55">
+                                                        a marca vertical é onde estava
+                                                        quando você deu stake
                                                     </div>
                                                 </div>
                                                 <div className="font-mono text-[11px] leading-[1.45] text-mir-text2/[0.9]">

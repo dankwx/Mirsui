@@ -12,13 +12,13 @@ import { countTrackOccurrences } from '@/utils/fetchTrackInfo'
 import { getTopTrackClaimers } from '@/utils/trackPopularityService'
 import { searchYouTubeVideo } from '@/utils/youtubeService'
 import TrackActions from '@/components/TrackActions/TrackActions'
-import TrackSelo from '@/components/TrackSelo/TrackSelo'
+import TrackShare from '@/components/TrackShare/TrackShare'
 import TrackPreviewBar from '@/components/TrackPreviewBar/TrackPreviewBar'
 import ProfileFooter from '@/components/Profile/ProfileFooter'
 import type { Metadata } from 'next'
 
 import Link from 'next/link'
-import { ArrowLeft, Clock, Crown, Flag, TrendingUp } from 'lucide-react'
+import { ArrowLeft, Clock, Crown, TrendingUp } from 'lucide-react'
 
 export async function generateMetadata({
     params,
@@ -107,6 +107,12 @@ function claimWhen(ts: string | null) {
     const months = Math.floor(days / 30)
     if (months < 12) return months === 1 ? 'há 1 mês' : `há ${months} meses`
     return `${MONTHS[d.getMonth()]} ${d.getFullYear()}`
+}
+// Data por extenso (14 mar 2024) para o recibo
+function fullDate(ts?: string | null) {
+    if (!ts) return '—'
+    const d = new Date(ts)
+    return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`
 }
 
 export default async function TrackDetailsPage({
@@ -295,9 +301,6 @@ export default async function TrackDetailsPage({
                                     </span>
                                 </div>
                             )}
-                            <span className="absolute left-3.5 top-3.5 inline-flex items-center gap-1.5 rounded-full border border-[rgba(205,239,54,0.4)] bg-[rgba(22,18,12,0.62)] px-2.5 py-1 font-mono text-[9.5px] font-bold uppercase tracking-[0.12em] text-mir-acc backdrop-blur-sm">
-                                <Flag className="h-2.5 w-2.5" /> Janela fechada
-                            </span>
                         </div>
 
                         {/* Info */}
@@ -408,16 +411,13 @@ export default async function TrackDetailsPage({
                 {/* Rail */}
                 <aside className="flex flex-col gap-[18px] lg:sticky lg:top-[84px]">
                     {trackInfo && (
-                        <TrackSelo
+                        <TrackShare
                             trackUri={trackInfo.uri}
                             trackTitle={trackInfo.name}
                             artistName={artistNames}
                             albumImageUrl={albumImageUrl}
-                            claimed={hasUserClaimed}
-                            position={userClaimPosition}
                             year={releaseYear}
                             totalClaims={totalClaims}
-                            isLoggedIn={isLoggedIn}
                         />
                     )}
                 </aside>
@@ -436,11 +436,66 @@ export default async function TrackDetailsPage({
                                 {firstClaimerName} ouviu{' '}
                                 <span className="text-[#c14a26]">antes</span> do mundo.
                             </h2>
-                            <p className="m-0 max-w-[280px] font-mono text-[12px] leading-relaxed text-mir-bg/60">
-                                A janela abre quando a faixa ainda é obscura e fecha
-                                quando vira tendência. Reivindicar dentro dela é o
-                                que entra pra história.
-                            </p>
+                            {/* Recibo — registro autenticado da descoberta */}
+                            <div className="w-full max-w-[300px]">
+                                <div className="rounded-2xl border border-mir-bg/10 bg-[#f5eede] p-6 shadow-[0_24px_48px_-32px_rgba(22,18,12,0.55)]">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[14px] font-bold tracking-[-0.02em] text-mir-bg">
+                                            Mirsui
+                                        </span>
+                                        <span className="text-[11px] font-semibold tracking-[0.08em] tabular-nums text-mir-bg/40">
+                                            Nº {trackNo}
+                                        </span>
+                                    </div>
+
+                                    <div className="mt-5">
+                                        <div className="line-clamp-2 text-[19px] font-bold leading-tight tracking-[-0.02em] text-mir-bg">
+                                            {trackInfo?.name || 'Faixa'}
+                                        </div>
+                                        <div className="mt-1 truncate text-[13px] font-medium text-mir-bg/50">
+                                            {artistNames}
+                                        </div>
+                                    </div>
+
+                                    <div className="my-5 border-t border-dashed border-mir-bg/15" />
+
+                                    <div>
+                                        <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-mir-bg/40">
+                                            Primeiro a cravar
+                                        </div>
+                                        <div className="mt-1.5 text-[16px] font-bold tracking-[-0.01em] text-mir-bg">
+                                            {firstClaimerName}
+                                        </div>
+                                        <div className="mt-0.5 text-[13px] font-medium text-mir-bg/50">
+                                            {fullDate(firstClaimer?.claimedat)}
+                                        </div>
+                                    </div>
+
+                                    <div className="my-5 border-t border-dashed border-mir-bg/15" />
+
+                                    <dl className="space-y-2.5">
+                                        <div className="flex items-baseline justify-between">
+                                            <dt className="text-[13px] font-medium text-mir-bg/50">
+                                                Reivindicações
+                                            </dt>
+                                            <dd className="text-[14px] font-bold tabular-nums text-mir-bg">
+                                                {totalClaims}
+                                            </dd>
+                                        </div>
+                                        <div className="flex items-baseline justify-between">
+                                            <dt className="text-[13px] font-medium text-mir-bg/50">
+                                                Popularidade hoje
+                                            </dt>
+                                            <dd className="text-[14px] font-bold tabular-nums text-mir-bg">
+                                                {trackInfo?.popularity ?? '—'}
+                                                <span className="text-mir-bg/40">
+                                                    /100
+                                                </span>
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Timeline */}
@@ -476,7 +531,7 @@ export default async function TrackDetailsPage({
                                 Reivindicações
                             </h3>
                             <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-mir-bg/50">
-                                {totalClaims} no total · janela fechada
+                                {totalClaims} no total
                             </span>
                         </div>
                         <ol className="mt-3.5 flex flex-col gap-2.5">

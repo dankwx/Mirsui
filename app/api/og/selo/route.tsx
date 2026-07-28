@@ -1,8 +1,9 @@
 // app/api/og/selo/route.tsx
 //
-// Gera o "selo de descoberta" como imagem 1080x1920 (formato story) via
-// next/og. O servidor busca a capa do Spotify, então não há problema de CORS
-// no client — o componente só baixa/compartilha o PNG resultante.
+// Gera a imagem de compartilhamento (formato story 1080x1920) via next/og,
+// estilo Letterboxd: capa do álbum em destaque sobre fundo escuro, faixa e
+// artista, com marca discreta. O servidor busca a capa do Spotify, então não
+// há problema de CORS no client — o componente só baixa/compartilha o PNG.
 
 import { ImageResponse } from 'next/og'
 import { NextRequest } from 'next/server'
@@ -20,13 +21,13 @@ export async function GET(req: NextRequest) {
     const title = (searchParams.get('title') || 'Faixa').slice(0, 80)
     const artist = (searchParams.get('artist') || '').slice(0, 80)
     const cover = searchParams.get('cover') || ''
-    const position = parseInt(searchParams.get('position') || '0', 10)
     const total = parseInt(searchParams.get('total') || '0', 10)
     const year = searchParams.get('year') || ''
 
-    const isFirst = position === 1
-    const bigLabel = isFirst ? '1º HIPSTER' : position > 0 ? `#${position}` : '✦'
-    const kicker = isFirst ? 'primeiro a cravar' : 'no acervo desde cedo'
+    const footer =
+        total > 0
+            ? `${total} no acervo${year ? ` · desde ${year}` : ''}`
+            : 'mirsui.app'
 
     return new ImageResponse(
         (
@@ -39,83 +40,87 @@ export async function GET(req: NextRequest) {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     backgroundColor: BG,
-                    padding: '110px 90px',
+                    padding: '120px 90px',
                     position: 'relative',
                 }}
             >
-                {/* glow */}
+                {/* glow sutil */}
                 <div
                     style={{
                         position: 'absolute',
-                        top: '-260px',
+                        top: '120px',
                         left: '50%',
                         marginLeft: '-450px',
                         width: '900px',
                         height: '900px',
-                        background: `radial-gradient(closest-side, ${ACC}38, transparent 72%)`,
+                        background: `radial-gradient(closest-side, ${ACC}22, transparent 70%)`,
                         display: 'flex',
                     }}
                 />
 
-                {/* topo */}
+                {/* topo — marca */}
                 <div
                     style={{
                         display: 'flex',
-                        width: '100%',
                         alignItems: 'center',
-                        justifyContent: 'space-between',
+                        gap: '16px',
                     }}
                 >
+                    <svg
+                        width="46"
+                        height="46"
+                        viewBox="0 0 100 100"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <circle cx="50" cy="50" r="49" fill={ON_ACC} />
+                        <path
+                            d="M50 1 a49 49 0 0 1 0 98 a24.5 24.5 0 0 1 0-49 a24.5 24.5 0 0 0 0-49z"
+                            fill={ACC}
+                        />
+                        <circle cx="50" cy="25.5" r="7.2" fill={ON_ACC} />
+                        <circle cx="50" cy="74.5" r="7.2" fill={ACC} />
+                    </svg>
                     <div
                         style={{
                             display: 'flex',
-                            fontSize: '40px',
+                            fontSize: '34px',
                             fontWeight: 800,
-                            letterSpacing: '-2px',
+                            letterSpacing: '-1.5px',
                             color: TEXT,
                         }}
                     >
                         mirsui
                     </div>
-                    <div
-                        style={{
-                            display: 'flex',
-                            fontSize: '22px',
-                            letterSpacing: '8px',
-                            color: MUTED,
-                        }}
-                    >
-                        SELO DE DESCOBERTA
-                    </div>
                 </div>
 
-                {/* miolo */}
+                {/* miolo — capa + faixa (texto alinhado à esquerda da capa) */}
                 <div
                     style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        alignItems: 'center',
+                        width: '700px',
                     }}
                 >
                     {cover ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                             src={cover}
-                            width={560}
-                            height={560}
+                            width={700}
+                            height={700}
                             alt=""
                             style={{
-                                borderRadius: '32px',
-                                border: `2px solid ${ACC}55`,
+                                borderRadius: '28px',
+                                border: '1px solid rgba(243,236,219,0.12)',
                                 objectFit: 'cover',
+                                boxShadow: '0 60px 120px -40px rgba(0,0,0,0.8)',
                             }}
                         />
                     ) : (
                         <div
                             style={{
-                                width: '560px',
-                                height: '560px',
-                                borderRadius: '32px',
+                                width: '700px',
+                                height: '700px',
+                                borderRadius: '28px',
                                 backgroundColor: '#221d15',
                                 display: 'flex',
                             }}
@@ -125,42 +130,11 @@ export async function GET(req: NextRequest) {
                     <div
                         style={{
                             display: 'flex',
-                            marginTop: '64px',
-                            padding: '16px 40px',
-                            borderRadius: '999px',
-                            backgroundColor: ACC,
-                            color: ON_ACC,
-                            fontSize: '64px',
-                            fontWeight: 800,
-                            letterSpacing: '-1px',
-                        }}
-                    >
-                        {bigLabel}
-                    </div>
-
-                    <div
-                        style={{
-                            display: 'flex',
-                            marginTop: '20px',
-                            fontSize: '24px',
-                            letterSpacing: '6px',
-                            textTransform: 'uppercase',
-                            color: MUTED,
-                        }}
-                    >
-                        {kicker}
-                    </div>
-
-                    <div
-                        style={{
-                            display: 'flex',
-                            marginTop: '44px',
-                            fontSize: '78px',
+                            marginTop: '56px',
+                            fontSize: '74px',
                             fontWeight: 800,
                             letterSpacing: '-3px',
                             color: TEXT,
-                            textAlign: 'center',
-                            maxWidth: '900px',
                             lineHeight: 1.04,
                         }}
                     >
@@ -172,10 +146,8 @@ export async function GET(req: NextRequest) {
                                 display: 'flex',
                                 marginTop: '18px',
                                 fontSize: '40px',
-                                fontWeight: 700,
+                                fontWeight: 600,
                                 color: ACC,
-                                textAlign: 'center',
-                                maxWidth: '900px',
                             }}
                         >
                             {artist}
@@ -194,8 +166,17 @@ export async function GET(req: NextRequest) {
                     <div
                         style={{
                             display: 'flex',
-                            fontSize: '34px',
-                            fontWeight: 700,
+                            width: '80px',
+                            height: '2px',
+                            backgroundColor: 'rgba(243,236,219,0.18)',
+                            marginBottom: '26px',
+                        }}
+                    />
+                    <div
+                        style={{
+                            display: 'flex',
+                            fontSize: '32px',
+                            fontWeight: 600,
                             color: TEXT,
                             textAlign: 'center',
                         }}
@@ -205,14 +186,12 @@ export async function GET(req: NextRequest) {
                     <div
                         style={{
                             display: 'flex',
-                            marginTop: '22px',
+                            marginTop: '16px',
                             fontSize: '24px',
                             color: MUTED,
                         }}
                     >
-                        {total > 0
-                            ? `${total} já cravaram${year ? ` · desde ${year}` : ''}`
-                            : 'mirsui.app'}
+                        {footer}
                     </div>
                 </div>
             </div>

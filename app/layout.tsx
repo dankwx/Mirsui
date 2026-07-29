@@ -7,6 +7,7 @@ import Footer from '@/components/Footer/Footer'
 import GoogleAnalytics from '@/components/GoogleAnalytics/GoogleAnalytics'
 import AnalyticsProvider from '@/components/AnalyticsProvider/AnalyticsProvider'
 import PostHogProvider from '@/components/PostHogProvider/PostHogProvider'
+import { siteUrl } from '@/lib/site'
 
 const hanken = Hanken_Grotesk({
     subsets: ['latin'],
@@ -28,9 +29,10 @@ const spaceGrotesk = Space_Grotesk({
 })
 
 export const metadata: Metadata = {
+    metadataBase: new URL(siteUrl),
     title: 'Mirsui',
     description:
-        'Claim your music, bet virals',
+        'Salve a música antes dela estourar. Fica registrado que a descoberta foi sua.',
 }
 
 export default function RootLayout({
@@ -39,7 +41,7 @@ export default function RootLayout({
     children: React.ReactNode
 }>) {
     return (
-        <html lang="en">
+        <html lang="pt-BR">
             <body className={`${hanken.variable} ${archivo.variable} ${spaceGrotesk.variable} ${hanken.className}`}>
                 <GoogleAnalytics />
                 <PostHogProvider>

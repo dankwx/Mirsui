@@ -1,14 +1,22 @@
 import Link from 'next/link'
 import MirsuiLogo from '../MirsuiLogo/MirsuiLogo'
 
-const LINKS = [
-    { label: 'A CENA', href: '/' },
-    { label: 'SOBRE', href: '/how-it-works' },
+const LANDING_LINKS = [
+    { label: 'A CENA', href: '/#cena' },
+    { label: 'COMO FUNCIONA', href: '/#como' },
+]
+const LEGAL_LINKS = [
     { label: 'TERMOS', href: '/termos' },
     { label: 'PRIVACIDADE', href: '/privacidade' },
 ]
 
-export default function LandingFooter() {
+/**
+ * `compact` é para as telas logadas: as âncoras da landing (#cena, #como) não
+ * levam a lugar nenhum para quem está logado, já que "/" redireciona ao /feed.
+ */
+export default function LandingFooter({ compact = false }: { compact?: boolean }) {
+    const links = compact ? LEGAL_LINKS : [...LANDING_LINKS, ...LEGAL_LINKS]
+
     return (
         <footer className="w-full border-t-2 border-[#cdef36] bg-[#16120c]">
             <div className="mx-auto flex w-full max-w-[1320px] flex-wrap items-center justify-between gap-5 px-5 py-12 sm:px-8">
@@ -20,14 +28,12 @@ export default function LandingFooter() {
                     mirsui
                 </Link>
 
-                <div className="text-center font-mono text-[11px] leading-[1.6] tracking-[0.1em] text-[#ece3d2]/40">
-                    ARQUIVO MUSICAL CURATORIAL · Nº 047 · 12 JANELAS ABERTAS
-                    <br />
+                <div className="text-center font-mono text-[11px] leading-[1.6] tracking-[0.1em] text-[#ece3d2]/65">
                     feito por quem ouve cedo demais.
                 </div>
 
-                <div className="flex gap-[18px] font-mono text-[11px] tracking-[0.1em] text-[#ece3d2]/55">
-                    {LINKS.map((l) => (
+                <div className="flex flex-wrap justify-end gap-[18px] font-mono text-[11px] tracking-[0.1em] text-[#ece3d2]/65">
+                    {links.map((l) => (
                         <Link
                             key={l.label}
                             href={l.href}

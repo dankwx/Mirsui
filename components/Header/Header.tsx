@@ -38,6 +38,11 @@ const navLinks: NavLink[] = [
         match: (p) => p === '/' || p.startsWith('/feed'),
     },
     {
+        title: 'A pilha',
+        url: '/pilha',
+        match: (p) => p.startsWith('/pilha'),
+    },
+    {
         title: 'Acervo',
         url: '/library',
         match: (p) => p.startsWith('/library') || p.startsWith('/user'),
@@ -48,7 +53,8 @@ const navLinks: NavLink[] = [
         match: (p) => p.startsWith('/stakes'),
     },
     {
-        title: 'Claim',
+        // o resto do site fala "carimbar"; "Claim" era o único rótulo em inglês
+        title: 'Carimbar',
         url: '/claimtrack',
         match: (p) => p.startsWith('/claimtrack'),
     },
@@ -100,7 +106,7 @@ export default function Header({ userProfile }: HeaderProps) {
 
     return (
         <header className="sticky top-0 z-40 border-b border-mir-line bg-mir-bg/85 backdrop-blur-xl">
-            <nav className="mx-auto flex h-[72px] w-full max-w-[1180px] items-center gap-7 px-5 sm:px-10">
+            <nav className="mx-auto flex h-[72px] w-full max-w-[1320px] items-center gap-7 px-5 sm:px-10">
                 <Link
                     href={homeUrl}
                     className="flex items-center gap-2.5 text-2xl font-black tracking-[-0.04em] text-mir-text"

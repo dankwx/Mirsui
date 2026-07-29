@@ -32,8 +32,11 @@ const config = {
     				fill1: 'rgba(236,227,210,0.04)',
     				fill2: 'rgba(236,227,210,0.08)',
     				text: '#ece3d2',
-    				text2: 'rgba(236,227,210,0.62)',
-    				text3: 'rgba(236,227,210,0.42)',
+    				// contraste sobre mir-bg: text 14.6:1, text2 7.6:1, text3 5.1:1.
+    				// text3 estava em 0.42 (3.5:1) e reprovava no WCAG AA, apesar de
+    				// vestir timestamps, rótulos e legendas em todo o app.
+    				text2: 'rgba(236,227,210,0.70)',
+    				text3: 'rgba(236,227,210,0.55)',
     				acc: '#cdef36',
     				'acc-soft': 'rgba(205,239,54,0.14)',
     				'on-acc': '#16120c'

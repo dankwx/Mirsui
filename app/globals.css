@@ -237,7 +237,9 @@
   --fill2: rgba(236, 227, 210, 0.07);
   --text: #ece3d2;
   --text2: #9b958b;
-  --text3: #6a655c;
+  /* 5.1:1 sobre --bg. O antigo #6a655c dava 3.2:1 e reprovava no WCAG AA,
+     justamente nos eyebrows, no ticker e nas legendas de 11px. */
+  --text3: #8b857a;
   --acc: #cdef36;
   --acc-soft: rgba(205, 239, 54, 0.14);
   --on-acc: #16120c;
@@ -649,12 +651,16 @@
   border-radius: 10px;
   font-size: 13.5px;
 }
+/* wrapper do carrossel: segura as setas e os fades de borda */
+.mir-landing .hwall-wrap {
+  position: relative;
+  margin-top: clamp(28px, 3.5vw, 40px);
+}
 .mir-landing .hwall {
   display: flex;
   gap: 18px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  margin-top: clamp(28px, 3.5vw, 40px);
   padding-bottom: 16px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -662,8 +668,70 @@
 .mir-landing .hwall::-webkit-scrollbar {
   display: none;
 }
+/* fades indicando que ainda há conteúdo para os lados */
+.mir-landing .hwall-fade {
+  position: absolute;
+  top: 0;
+  bottom: 16px;
+  width: 72px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+.mir-landing .hwall-fade.is-on {
+  opacity: 1;
+}
+.mir-landing .hwall-fade.left {
+  left: -1px;
+  background: linear-gradient(90deg, var(--bg), transparent);
+}
+.mir-landing .hwall-fade.right {
+  right: -1px;
+  background: linear-gradient(270deg, var(--bg), transparent);
+}
+.mir-landing .hwall-nav {
+  position: absolute;
+  top: calc(clamp(170px, 21vw, 224px) / 2);
+  z-index: 3;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  border: 1px solid var(--line2);
+  background: rgba(15, 13, 11, 0.82);
+  backdrop-filter: blur(8px);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.14s, border-color 0.14s, opacity 0.22s ease;
+}
+.mir-landing .hwall-nav:hover {
+  background: rgba(15, 13, 11, 0.95);
+  border-color: var(--text3);
+}
+.mir-landing .hwall-nav:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+.mir-landing .hwall-nav.prev {
+  left: -8px;
+}
+.mir-landing .hwall-nav.next {
+  right: -8px;
+}
+/* em telas de toque o swipe já é a affordance; as setas só atrapalham */
+@media (hover: none) {
+  .mir-landing .hwall-nav {
+    display: none;
+  }
+}
 .mir-landing .poster {
   flex: 0 0 clamp(170px, 21vw, 224px);
+  /* sem isto o min-width:auto do flexbox deixa o título nowrap esticar o card
+     (chegava a 414px) e o ellipsis nunca dispara */
+  min-width: 0;
   scroll-snap-align: start;
   display: block;
 }
@@ -677,17 +745,38 @@
   overflow: hidden;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
+/* a capa fica por cima das iniciais: se a imagem falhar ou demorar,
+   o card continua legível em vez de virar um quadrado vazio */
+/* sem z-index de propósito: a ordem do DOM (iniciais → capa → ::after do vinheta)
+   já empilha certo, e um z-index aqui passaria a capa por cima do vinheta */
 .mir-landing .poster .cover-art img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-.mir-landing .poster:hover .cover-art {
+.mir-landing .poster:hover .cover-art,
+.mir-landing .poster:focus-visible .cover-art {
   transform: translateY(-6px);
   box-shadow: 0 18px 36px rgba(0, 0, 0, 0.46);
 }
+.mir-landing .poster:focus-visible {
+  outline: none;
+}
+.mir-landing .poster:focus-visible .cover-art {
+  box-shadow: 0 0 0 2px var(--acc), 0 18px 36px rgba(0, 0, 0, 0.46);
+}
 .mir-landing .poster .mir-cover-ini {
+  position: absolute;
+  inset: 0;
+  left: 0;
+  bottom: 0;
+  display: grid;
+  place-items: center;
   font-size: 50px;
+  color: rgba(236, 227, 210, 0.16);
+  line-height: 1;
 }
 .mir-landing .rank-chip {
   position: absolute;
@@ -722,7 +811,7 @@
   border-radius: 7px;
   font-weight: 600;
 }
-.mir-landing .poster .play {
+.mir-landing .poster .stamp {
   position: absolute;
   right: 11px;
   bottom: 11px;
@@ -740,7 +829,8 @@
   transition: opacity 0.17s, transform 0.17s;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
 }
-.mir-landing .poster:hover .play {
+.mir-landing .poster:hover .stamp,
+.mir-landing .poster:focus-visible .stamp {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
@@ -770,10 +860,103 @@
   color: var(--acc);
 }
 
+/* Como funciona — split assimétrico: os três tempos à esquerda, o selo à direita */
+.mir-landing .como {
+  border-top: 1px solid var(--line);
+  padding-top: clamp(54px, 7vw, 92px);
+  padding-bottom: clamp(54px, 7vw, 92px);
+}
+.mir-landing .como-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(240px, 25vw, 312px);
+  gap: clamp(36px, 6vw, 88px);
+  align-items: center;
+}
+.mir-landing .como-col {
+  display: grid;
+  gap: clamp(30px, 4vw, 44px);
+}
+.mir-landing .como-beats {
+  position: relative;
+  padding-left: 30px;
+  display: grid;
+  gap: clamp(24px, 3vw, 34px);
+  max-width: 46ch;
+}
+.mir-landing .como-beats::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 10px;
+  bottom: 10px;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    var(--acc),
+    rgba(205, 239, 54, 0.55) 45%,
+    rgba(205, 239, 54, 0.12)
+  );
+}
+.mir-landing .como-beat {
+  position: relative;
+}
+.mir-landing .como-beat::before {
+  content: '';
+  position: absolute;
+  left: -30px;
+  top: 5px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--acc);
+}
+.mir-landing .como-beat h3 {
+  margin: 0;
+  font-size: clamp(18px, 1.9vw, 22px);
+  font-weight: 700;
+  letter-spacing: -0.022em;
+}
+.mir-landing .como-beat p {
+  margin: 8px 0 0;
+  color: var(--text2);
+  font-size: 15.5px;
+  line-height: 1.55;
+}
+.mir-landing .como-selo {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1080 / 1920;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--line2);
+  background: #14110b;
+  box-shadow: 0 40px 90px -34px rgba(0, 0, 0, 0.85);
+}
+.mir-landing .como-selo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mir-landing .como-cap {
+  margin: 14px 0 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  text-align: center;
+}
+
 /* Manifesto */
 .mir-landing .manifesto {
   border-top: 1px solid var(--line);
   padding: clamp(70px, 10vw, 128px) 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 28px 48px;
 }
 .mir-landing .manifesto p {
   margin: 0;
@@ -781,7 +964,7 @@
   font-weight: 700;
   letter-spacing: -0.034em;
   line-height: 1.14;
-  max-width: 21ch;
+  max-width: 24ch;
   text-wrap: balance;
 }
 .mir-landing .manifesto em {
@@ -789,12 +972,13 @@
   color: var(--acc);
 }
 .mir-landing .manifesto .sig {
-  margin-top: 30px;
   font-family: var(--mono);
   font-size: 11.5px;
   color: var(--text3);
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  text-align: right;
+  padding-bottom: 8px;
 }
 
 /* CTA final */
@@ -850,11 +1034,42 @@
   color: var(--text3);
 }
 
+.mir-landing [id] {
+  scroll-margin-top: 24px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mir-landing {
+    scroll-behavior: smooth;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .mir-landing .hero-photo,
   .mir-landing .ticker-track,
   .mir-landing .live-dot {
     animation: none;
+  }
+  .mir-landing .hwall {
+    scroll-behavior: auto;
+  }
+}
+
+@media (max-width: 980px) {
+  .mir-landing .como-grid {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .mir-landing .como-beats {
+    justify-self: start;
+  }
+  .mir-landing .como-selo-col {
+    width: min(280px, 100%);
+  }
+  .mir-landing .manifesto {
+    grid-template-columns: 1fr;
+  }
+  .mir-landing .manifesto .sig {
+    text-align: left;
+    padding-bottom: 0;
   }
 }
 
@@ -862,10 +1077,244 @@
   .mir-landing .lp-nav .links {
     display: none;
   }
-  .mir-landing .lp-nav .b-light {
-    display: none;
+  /* "Entrar" continua visível no mobile: era o único caminho de login no topo */
+  .mir-landing .lp-nav .b {
+    padding: 8px 13px;
+    font-size: 12.5px;
+  }
+  .mir-landing .lp-nav .nav-right {
+    gap: 7px;
   }
   .mir-landing .ticker-lead {
     display: none;
+  }
+}
+/* ======================================================
+   A Pilha — mosaico de capas empilhadas por gravidade
+   A posição de cada peça vem do JS (components/Pile/pileLayout.ts);
+   aqui fica só a queda, o repouso e o realce no hover.
+   ====================================================== */
+.pile-stage {
+  position: relative;
+  width: 100%;
+  /* contexto de empilhamento próprio: o z-index 900 do hover precisa valer
+     só entre as peças. Sem isto a peça sob o mouse passava por cima do header
+     fixo e da ficha que abre no clique. */
+  z-index: 0;
+}
+
+.pile-slot {
+  position: absolute;
+  cursor: pointer;
+  /* container query para as iniciais do fallback acompanharem o tamanho da peça */
+  container-type: size;
+  /* na primeira montagem não transiciona (já nasce na posição); isto é para
+     quando a janela muda de largura e a pilha reassenta */
+  transition: left 0.5s cubic-bezier(0.22, 1, 0.3, 1),
+    top 0.5s cubic-bezier(0.22, 1, 0.3, 1), width 0.5s, height 0.5s;
+}
+
+.pile-piece {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 3px;
+  transform: rotate(var(--r, 0deg));
+  /* repouso dessaturado: a pilha inteira vira textura e a peça sob o mouse
+     é a única em cor cheia */
+  filter: saturate(0.76) brightness(0.8);
+  box-shadow: 0 10px 26px -12px rgba(0, 0, 0, 0.8);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.3s,
+    box-shadow 0.3s;
+  animation: pile-drop 0.74s cubic-bezier(0.2, 0.86, 0.3, 1.06) var(--d, 0ms)
+    backwards;
+  will-change: transform;
+}
+.pile-piece img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pile-ini {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 32px;
+  font-size: 27cqw;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  color: rgba(236, 227, 210, 0.13);
+  user-select: none;
+}
+
+@keyframes pile-drop {
+  0% {
+    transform: translateY(-90px) rotate(calc(var(--r, 0deg) * 2.4)) scale(1.05);
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
+  }
+  /* o achatamento no pouso é o que dá peso: sem ele a peça só desliza */
+  78% {
+    transform: translateY(0) rotate(var(--r, 0deg)) scale(1.035, 0.955);
+  }
+  100% {
+    transform: translateY(0) rotate(var(--r, 0deg)) scale(1);
+    opacity: 1;
+  }
+}
+
+/* z-index vem inline (ordem de empilhamento), daí o !important */
+.pile-slot:hover {
+  z-index: 900 !important;
+}
+.pile-slot:hover .pile-piece {
+  transform: rotate(0deg) translateY(-7px) scale(1.09);
+  filter: none;
+  box-shadow: 0 28px 62px -18px rgba(0, 0, 0, 0.9),
+    0 0 0 1.5px rgba(205, 239, 54, 0.6);
+}
+
+.pile-slot.is-dim {
+  pointer-events: none;
+}
+.pile-slot.is-dim .pile-piece {
+  filter: saturate(0) brightness(0.32);
+  transform: rotate(var(--r, 0deg)) scale(0.93);
+  box-shadow: none;
+}
+
+/* ---- tooltip ---- */
+.pile-tip {
+  position: absolute;
+  z-index: 2;
+  bottom: calc(100% + 12px);
+  display: flex;
+  width: max-content;
+  max-width: 250px;
+  flex-direction: column;
+  gap: 3px;
+  border: 1px solid rgba(205, 239, 54, 0.3);
+  border-radius: 11px;
+  background: rgba(20, 17, 11, 0.96);
+  padding: 10px 13px;
+  box-shadow: 0 22px 48px -18px rgba(0, 0, 0, 0.95);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease, transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.pile-tip strong {
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: #ece3d2;
+}
+.pile-tip-artist {
+  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  font-size: 11.5px;
+  color: rgba(236, 227, 210, 0.7);
+}
+.pile-tip-meta {
+  margin-top: 2px;
+  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(236, 227, 210, 0.5);
+}
+.pile-tip--center {
+  left: 50%;
+  transform: translate(-50%, 7px);
+}
+.pile-tip--left {
+  left: 0;
+  transform: translateY(7px);
+}
+.pile-tip--right {
+  right: 0;
+  transform: translateY(7px);
+}
+.pile-slot:hover .pile-tip--center {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.pile-slot:hover .pile-tip--left,
+.pile-slot:hover .pile-tip--right {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* sem hover (toque) o tooltip nunca aparece e só atrapalharia o layout */
+@media (hover: none) {
+  .pile-tip {
+    display: none;
+  }
+}
+
+/* ---- chips de gênero ---- */
+.pile-chip {
+  border: 1px solid rgba(236, 227, 210, 0.14);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(236, 227, 210, 0.7);
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+}
+.pile-chip:hover {
+  border-color: rgba(236, 227, 210, 0.34);
+  color: #ece3d2;
+}
+.pile-chip:active {
+  transform: translateY(1px);
+}
+.pile-chip.is-on {
+  background: #cdef36;
+  border-color: #cdef36;
+  color: #16120c;
+  font-weight: 700;
+}
+
+/* ---- chamada da pilha no feed ---- */
+@keyframes pile-cta-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(205, 239, 54, 0.42);
+  }
+  60% {
+    box-shadow: 0 0 0 13px rgba(205, 239, 54, 0);
+  }
+}
+.pile-cta {
+  animation: pile-cta-pulse 2.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pile-piece {
+    animation: none;
+  }
+  .pile-cta {
+    animation: none;
+  }
+}
+
+/* prévia da pilha na faixa do feed: as capas se abrem um pouco no hover */
+.pile-teaser {
+  transform: rotate(var(--tr, 0deg));
+  transition: transform 0.38s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.pile-band:hover .pile-teaser {
+  transform: rotate(calc(var(--tr, 0deg) * 1.9)) translateY(-5px) scale(1.06);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pile-band:hover .pile-teaser {
+    transform: rotate(var(--tr, 0deg));
   }
 }

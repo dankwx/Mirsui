@@ -1,5 +1,6 @@
 // components/RecentClaims/RecentClaims.tsx
 import Link from 'next/link'
+import Image from 'next/image'
 import { RecentClaim } from '@/utils/recentClaimsService'
 import { formatTimestamp } from '@/utils/feedHelpers'
 
@@ -56,22 +57,26 @@ export default function RecentClaims({ claims }: RecentClaimsProps) {
                                 <span className="font-mono text-[12px] tabular-nums text-mir-text3">
                                     {String(index + 1).padStart(2, '0')}
                                 </span>
-                                {claim.track_thumbnail ? (
-                                    <img
-                                        src={claim.track_thumbnail}
-                                        alt={claim.track_title}
-                                        className="h-10 w-10 rounded-md object-cover"
-                                    />
-                                ) : (
-                                    <div
-                                        className="mir-cover h-10 w-10 rounded-md"
-                                        style={{ ['--tone' as string]: tone(claim.artist_name) }}
+                                <div
+                                    className="mir-cover h-10 w-10 rounded-md"
+                                    style={{ ['--tone' as string]: tone(claim.artist_name) }}
+                                >
+                                    <span
+                                        aria-hidden="true"
+                                        className="absolute inset-0 grid select-none place-items-center text-[15px] font-extrabold leading-none tracking-[-0.05em] text-mir-text/15"
                                     >
-                                        <span className="absolute bottom-0.5 left-2.5 select-none text-[21px] font-extrabold leading-[0.8] tracking-[-0.05em] text-white/[0.07]">
-                                            {initials(claim.artist_name)}
-                                        </span>
-                                    </div>
-                                )}
+                                        {initials(claim.artist_name)}
+                                    </span>
+                                    {claim.track_thumbnail && (
+                                        <Image
+                                            src={claim.track_thumbnail}
+                                            alt=""
+                                            width={40}
+                                            height={40}
+                                            className="absolute inset-0 h-full w-full object-cover"
+                                        />
+                                    )}
+                                </div>
                                 <div className="flex min-w-0 flex-col leading-[1.3]">
                                     <span className="truncate text-[13px] font-semibold text-mir-text transition-colors group-hover:text-mir-acc">
                                         {claim.track_title}

@@ -2,17 +2,39 @@ import Link from 'next/link'
 import Image from 'next/image'
 import MirsuiLogo from '@/components/MirsuiLogo/MirsuiLogo'
 import AuthModalTrigger from '@/components/AuthModalTrigger/AuthModalTrigger'
+import TrackWall from '@/components/TrackWall/TrackWall'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { getTrendingTracks, getRecentActivity } from '@/utils/homepageService'
 import { formatTimestamp } from '@/utils/feedHelpers'
 import type { Metadata } from 'next'
 
+const TITLE = 'mirsui'
+const DESCRIPTION =
+    'Salve a música antes dela estourar. Fica registrado que a descoberta foi sua.'
+
 export const metadata: Metadata = {
-    title: 'mirsui',
-    description:
-        'Cave som antes de todo mundo. Carimba, e fica registrado que a descoberta foi sua.',
+    title: TITLE,
+    description: DESCRIPTION,
+    alternates: { canonical: '/' },
+    openGraph: {
+        type: 'website',
+        locale: 'pt_BR',
+        siteName: 'Mirsui',
+        title: TITLE,
+        description: DESCRIPTION,
+        url: '/',
+        images: [{ url: '/api/og/landing', width: 1200, height: 630 }],
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: TITLE,
+        description: DESCRIPTION,
+        images: ['/api/og/landing'],
+    },
 }
+
+const HERO_PHOTO = '/assets/track-art2.webp'
 
 /* ---------- primitivos visuais ---------- */
 function Glyph({ size = 22 }: { size?: number }) {
@@ -38,16 +60,22 @@ function ArrowIcon({ size = 16 }: { size?: number }) {
     )
 }
 
-function PlayIcon({ size = 16 }: { size?: number }) {
+/** O card abre o cadastro para carimbar a faixa — não toca a música. */
+function StampIcon({ size = 16 }: { size?: number }) {
     return (
         <svg
             width={size}
             height={size}
             viewBox="0 0 24 24"
-            fill="currentColor"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
             aria-hidden="true"
         >
-            <path d="M7 4.5v15l13-7.5z" />
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
         </svg>
     )
 }
@@ -93,9 +121,21 @@ function tic0(ts: string) {
     const v = formatTimestamp(ts)
     return v === 'agora mesmo' ? 'agora' : v
 }
-function trackHref(track: { track_url?: string | null; track_title: string }) {
-    return `/track/${track.track_url?.split('/').pop() || track.track_title}`
-}
+
+const BEATS = [
+    {
+        title: 'Carimba',
+        body: 'Achou um som que quase ninguém ouviu ainda? Carimba. Fica gravado o dia e a hora em que você chegou.',
+    },
+    {
+        title: 'A faixa cresce',
+        body: 'A gente acompanha o que acontece com ela depois. Quanto mais cedo foi o seu carimbo, mais ele vale.',
+    },
+    {
+        title: 'A prova é sua',
+        body: 'Seu acervo vira um selo compartilhável com a data. Não é opinião: é registro de que você ouviu antes.',
+    },
+]
 
 export default async function HomePage() {
     const supabase = await createClient()
@@ -119,8 +159,24 @@ export default async function HomePage() {
     const tickerItems =
         tickerBase.length > 0 ? [...tickerBase, ...tickerBase] : []
 
+    // o selo da faixa em alta serve de amostra real do produto na seção "como funciona"
+    const seloTrack = trendingTracks[0]
+    const seloSrc = seloTrack
+        ? '/api/og/selo?' +
+          new URLSearchParams({
+              title: seloTrack.track_title,
+              artist: seloTrack.artist_name,
+              cover: seloTrack.track_thumbnail || '',
+              total: String(seloTrack.total_claims ?? 0),
+              year: seloTrack.year || '',
+          }).toString()
+        : null
+
     return (
         <div className="mir-landing">
+            {/* a foto do hero é o LCP e entra por CSS, então precisa do preload */}
+            <link rel="preload" as="image" href={HERO_PHOTO} />
+
             {/* ============ HERO ============ */}
             <header className="hero">
                 <div className="hero-photo" aria-hidden="true" />
@@ -136,7 +192,7 @@ export default async function HomePage() {
                             <a href="#cena" className="active">
                                 A cena
                             </a>
-                            <a href="#manifesto">Sobre</a>
+                            <a href="#como">Como funciona</a>
                         </div>
                         <div className="nav-right">
                             <AuthModalTrigger className="b b-light" mode="login">
@@ -157,18 +213,16 @@ export default async function HomePage() {
                         mir? sui<span className="dot">.</span>
                     </h1>
                     <p className="hero-sub">
-                        Você vai entender <em>daqui 6 meses</em>.
+                        Salve a música <em>antes dela estourar</em>. Fica
+                        registrado que a descoberta foi sua.
                     </p>
                     <div className="hero-cta">
                         <AuthModalTrigger className="b b-acc" mode="signup">
                             Criar conta grátis <ArrowIcon size={16} />
                         </AuthModalTrigger>
                         <AuthModalTrigger className="b b-light" mode="login">
-                            Já tenho conta
+                            Entrar
                         </AuthModalTrigger>
-                    </div>
-                    <div className="hero-fine">
-                        ARQUIVO MUSICAL CURATORIAL · Nº 047 · 12 JANELAS ABERTAS
                     </div>
                 </div>
 
@@ -182,9 +236,14 @@ export default async function HomePage() {
                             {tickerItems.map((it, i) => (
                                 <span className="ti" key={i}>
                                     <span className="early-dot" />
-                                    <b>{it.who}</b> carimbou{' '}
-                                    <span className="tk">{it.track}</span> —{' '}
-                                    {it.artist}
+                                    {/* o texto vai num item só: .ti é inline-flex
+                                        com gap, e soltar a vírgula como filho
+                                        direto criaria um espaço antes dela */}
+                                    <span className="ti-txt">
+                                        <b>{it.who}</b> carimbou{' '}
+                                        <span className="tk">{it.track}</span>,{' '}
+                                        {it.artist}
+                                    </span>
                                     <span className="ago">· {it.ago}</span>
                                 </span>
                             ))}
@@ -213,13 +272,14 @@ export default async function HomePage() {
                             </AuthModalTrigger>
                         </div>
 
-                        <div className="hwall">
+                        <TrackWall>
                             {trendingTracks.map((t, i) => (
                                 <AuthModalTrigger
                                     as="div"
                                     className="poster"
                                     mode="login"
                                     key={t.id}
+                                    ariaLabel={`Carimbar ${t.track_title}, de ${t.artist_name}`}
                                 >
                                     <div className="cover-wrap">
                                         <span className="rank-chip">
@@ -238,21 +298,25 @@ export default async function HomePage() {
                                                 } as React.CSSProperties
                                             }
                                         >
-                                            {t.track_thumbnail ? (
+                                            {/* as iniciais ficam por baixo da capa:
+                                                se a imagem falhar, o card não fica vazio */}
+                                            <span
+                                                className="mir-cover-ini"
+                                                aria-hidden="true"
+                                            >
+                                                {initials(t.artist_name)}
+                                            </span>
+                                            {t.track_thumbnail && (
                                                 <Image
                                                     src={t.track_thumbnail}
-                                                    alt={`Capa de ${t.track_title}`}
+                                                    alt=""
                                                     width={240}
                                                     height={240}
                                                 />
-                                            ) : (
-                                                <span className="mir-cover-ini">
-                                                    {initials(t.artist_name)}
-                                                </span>
                                             )}
                                         </div>
-                                        <span className="play">
-                                            <PlayIcon size={16} />
+                                        <span className="stamp">
+                                            <StampIcon size={16} />
                                         </span>
                                     </div>
                                     <div className="ptt">{t.track_title}</div>
@@ -263,10 +327,55 @@ export default async function HomePage() {
                                     </div>
                                 </AuthModalTrigger>
                             ))}
-                        </div>
+                        </TrackWall>
                     </div>
                 </section>
             )}
+
+            {/* ============ COMO FUNCIONA ============ */}
+            <section className="como" id="como">
+                <div className="wrap">
+                    <div className="como-grid">
+                        <div className="como-col">
+                            <div className="sec-head">
+                                <h2>Você ouve primeiro. A gente registra.</h2>
+                                <p className="sh-sub">
+                                    Carimbar leva um clique. O que ele vale só
+                                    aparece quando a faixa cresce.
+                                </p>
+                            </div>
+
+                            <div className="como-beats">
+                                {BEATS.map((b) => (
+                                    <div className="como-beat" key={b.title}>
+                                        <h3>{b.title}</h3>
+                                        <p>{b.body}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {seloSrc && (
+                            <div className="como-selo-col">
+                                <div className="como-selo">
+                                    {/* passa pelo otimizador: o PNG cru do /api/og
+                                        tem ~1 MB e aqui ele é exibido a ~300px */}
+                                    <Image
+                                        src={seloSrc}
+                                        alt={`Selo de descoberta da faixa ${seloTrack!.track_title}, de ${seloTrack!.artist_name}`}
+                                        width={324}
+                                        height={576}
+                                        sizes="(max-width: 980px) 280px, 312px"
+                                    />
+                                </div>
+                                <p className="como-cap">
+                                    O selo que você compartilha
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </section>
 
             {/* ============ MANIFESTO ============ */}
             <section className="manifesto wrap" id="manifesto">
@@ -274,7 +383,7 @@ export default async function HomePage() {
                     O algoritmo te entrega o que já bombou. O Mirsui guarda o que
                     você ouviu <em>antes</em>.
                 </p>
-                <div className="sig">Mirsui — acervo de quem ouve primeiro</div>
+                <div className="sig">Você vai entender daqui 6 meses</div>
             </section>
 
             {/* ============ CTA FINAL ============ */}

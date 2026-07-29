@@ -18,6 +18,10 @@ const PUBLIC_ROUTES = [
 // Rotas de API públicas
 const PUBLIC_API_ROUTES = [
   '/api/auth/',
+  // Imagens de compartilhamento (selo, card da home). Precisam ser abertas:
+  // crawler de WhatsApp/Twitter/Facebook nunca chega autenticado, então com o
+  // gate de sessão elas respondiam 307 para "/" e o preview saía vazio.
+  '/api/og/',
 ]
 
 function isPublicPath(pathname: string): boolean {

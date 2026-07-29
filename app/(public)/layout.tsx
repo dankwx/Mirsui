@@ -1,19 +1,8 @@
-// app/layout.tsx (Layout raiz - SEM 'use client')
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import '../globals.css'
-import { Toaster } from '@/components/ui/toaster'
+// app/(public)/layout.tsx (Layout do site deslogado - SEM 'use client')
+// Fontes, globals.css e o Toaster já vêm do layout raiz.
 import LandingFooter from '@/components/Footer/LandingFooter'
 
-const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
-    title: 'Mirsui',
-    description:
-        'Claim your music and prove that you litened to it before it got popular',
-}
-
-export default function DashboardFooter({
+export default function PublicLayout({
     children,
 }: {
     children: React.ReactNode

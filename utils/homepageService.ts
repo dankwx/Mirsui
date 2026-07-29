@@ -47,10 +47,17 @@ export async function getTrendingTracks(limit: number = 6): Promise<TrendingTrac
     return []
   }
 
-  // Remover duplicatas mantendo a primeira ocorrência (mais popular/recente)
+  // Remover duplicatas mantendo a primeira ocorrência (mais popular/recente).
+  // A chave preferida é o id do Spotify extraído da track_url: a mesma faixa
+  // carimbada por dois usuários costuma vir com artist_name diferente
+  // ("Daft Punk" vs "Daft Punk, Julian Casablancas"), o que fazia a chave
+  // título+artista deixar duplicatas passarem para o carrossel.
   const uniqueTracks = new Map<string, typeof data[0]>()
   data?.forEach(track => {
-    const key = `${track.track_title.toLowerCase()}-${track.artist_name.toLowerCase()}`
+    const spotifyId = track.track_url?.split('?')[0].split('/').filter(Boolean).pop()
+    const key =
+      spotifyId ||
+      `${track.track_title.toLowerCase()}-${track.artist_name.toLowerCase()}`
     if (!uniqueTracks.has(key)) {
       uniqueTracks.set(key, track)
     }

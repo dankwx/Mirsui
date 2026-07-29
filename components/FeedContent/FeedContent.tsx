@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Check, Loader2, Play, Plus } from 'lucide-react'
+import Image from 'next/image'
+import { ArrowRight, ArrowUpRight, Check, Loader2, Plus } from 'lucide-react'
 import { FeedPostWithInteractions } from '@/utils/feedService.backend'
 import { RecentClaim } from '@/utils/feedService.backend'
 import { formatTimestamp } from '@/utils/feedHelpers'
@@ -40,7 +41,7 @@ function initials(name: string) {
         .slice(0, 2)
 }
 function ordLabel(n: number | null | undefined) {
-    if (!n || n < 1) return '—'
+    if (!n || n < 1) return null
     return `${n}ª`
 }
 function timeAgo(ts: string | null) {
@@ -53,6 +54,9 @@ function trackHref(post: { track_url?: string | null; track_title: string }) {
 }
 function whoOf(post: FeedPost) {
     return post.display_name || post.username
+}
+function isEarly(post: FeedPost) {
+    return typeof post.position === 'number' && post.position <= 10
 }
 
 /* ---------- estado de "salvar" reutilizável ---------- */
@@ -85,34 +89,43 @@ function useSave(post: FeedPost, isAuthenticated: boolean) {
     return { saved, count, busy, toggle }
 }
 
-/* ---------- Capa tonal de fallback ---------- */
+/* ---------- Capa (as iniciais ficam por baixo, como fallback) ---------- */
 function Cover({
     seed,
     thumbnail,
+    size,
     className,
     iniClassName,
+    priority,
 }: {
     seed: string
     thumbnail?: string | null
+    size: number
     className: string
     iniClassName: string
+    priority?: boolean
 }) {
-    if (thumbnail) {
-        return (
-            <img
-                src={thumbnail}
-                alt={seed}
-                className={`${className} flex-none object-cover`}
-            />
-        )
-    }
     return (
-        <div className={`mir-cover ${className} flex-none`} style={{ ['--tone' as string]: tone(seed) }}>
+        <div
+            className={`mir-cover ${className} flex-none`}
+            style={{ ['--tone' as string]: tone(seed) }}
+        >
             <span
-                className={`absolute bottom-0.5 left-2.5 select-none font-extrabold leading-[0.8] tracking-[-0.05em] text-white/[0.07] ${iniClassName}`}
+                aria-hidden="true"
+                className={`absolute inset-0 grid select-none place-items-center font-extrabold leading-none tracking-[-0.05em] text-mir-text/15 ${iniClassName}`}
             >
                 {initials(seed)}
             </span>
+            {thumbnail && (
+                <Image
+                    src={thumbnail}
+                    alt=""
+                    width={size}
+                    height={size}
+                    priority={priority}
+                    className="absolute inset-0 h-full w-full object-cover"
+                />
+            )}
         </div>
     )
 }
@@ -125,7 +138,7 @@ function Ticker({ posts }: { posts: FeedPost[] }) {
             .map((p) => `${whoOf(p).toUpperCase()} SALVOU ${p.track_title.toUpperCase()}`)
         return items.length > 0
             ? items
-            : ['A CENA ESTÁ EM SILÊNCIO — SEJA O PRIMEIRO A SALVAR']
+            : ['A CENA ESTÁ EM SILÊNCIO. SEJA O PRIMEIRO A SALVAR']
     }, [posts])
 
     const line = (
@@ -143,7 +156,7 @@ function Ticker({ posts }: { posts: FeedPost[] }) {
 
     return (
         <div className="overflow-hidden border-b-2 border-mir-bg bg-mir-acc text-mir-on-acc">
-            <div className="flex w-max animate-[mir-ticker_38s_linear_infinite] py-[7px] will-change-transform hover:[animation-play-state:paused]">
+            <div className="flex w-max animate-[mir-ticker_38s_linear_infinite] py-[7px] will-change-transform hover:[animation-play-state:paused] motion-reduce:animate-none">
                 {line}
                 {line}
             </div>
@@ -151,73 +164,91 @@ function Ticker({ posts }: { posts: FeedPost[] }) {
     )
 }
 
-/* ---------- O drop de hoje (faixa em destaque, fundo papel) ---------- */
-function DropSection({
+/* ---------- Nota que a pessoa escreveu ao carimbar ---------- */
+function ClaimNote({ text, className = '' }: { text: string; className?: string }) {
+    return (
+        <p
+            className={`border-l-2 border-mir-acc/40 pl-3 text-[14px] italic leading-[1.5] ${className}`}
+        >
+            {text}
+        </p>
+    )
+}
+
+/* ---------- O drop de hoje (faixa em destaque) ---------- */
+function DropCard({
     post,
     isAuthenticated,
 }: {
     post: FeedPost
     isAuthenticated: boolean
 }) {
-    const { saved, busy, toggle } = useSave(post, isAuthenticated)
+    const { saved, count, busy, toggle } = useSave(post, isAuthenticated)
     const who = whoOf(post)
-    const early = typeof post.position === 'number' && post.position <= 10
+    const ord = ordLabel(post.position)
 
     return (
-        <section className="w-full border-y border-mir-line bg-[#ece3d2] text-[#16120c]">
-            <div className="mx-auto max-w-[1180px] px-5 py-12 sm:px-10 sm:py-[60px]">
-                <div className="mb-6 font-mono text-[11px] uppercase tracking-[0.2em] text-[#c14a26]">
-                    ★ O drop de hoje
-                </div>
-                <div className="flex flex-wrap items-center gap-8 sm:gap-12">
-                    <Link href={trackHref(post)} className="group relative block flex-none">
-                        <Cover
-                            seed={post.artist_name}
-                            thumbnail={post.track_thumbnail}
-                            className="h-[220px] w-[220px] rounded-lg shadow-[0_26px_50px_-22px_rgba(22,18,12,0.55)] sm:h-[280px] sm:w-[280px]"
-                            iniClassName="text-[72px]"
-                        />
-                        <span className="absolute bottom-4 right-4 flex h-12 w-12 items-center justify-center rounded-full bg-mir-bg text-mir-acc shadow-[0_8px_20px_rgba(0,0,0,0.3)] transition group-hover:scale-105">
-                            <Play className="h-5 w-5 fill-current" />
-                        </span>
+        <section className="relative overflow-hidden rounded-[18px] border border-mir-line2 bg-mir-surface p-6 sm:p-8">
+            <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-mir-acc/[0.07] blur-3xl"
+            />
+
+            <div className="relative flex flex-wrap items-start gap-6 sm:gap-8">
+                <Link href={trackHref(post)} className="block flex-none">
+                    <Cover
+                        seed={post.artist_name}
+                        thumbnail={post.track_thumbnail}
+                        size={200}
+                        priority
+                        className="h-[148px] w-[148px] rounded-xl shadow-[0_20px_44px_-20px_rgba(0,0,0,0.7)] transition-transform hover:-translate-y-1 sm:h-[180px] sm:w-[180px]"
+                        iniClassName="text-[54px]"
+                    />
+                </Link>
+
+                <div className="min-w-[260px] flex-1">
+                    <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-mir-acc">
+                        O drop de hoje
+                    </span>
+
+                    <Link href={trackHref(post)} className="mt-3 block w-max max-w-full">
+                        <h2 className="text-[clamp(26px,3.2vw,38px)] font-extrabold leading-[1.02] tracking-[-0.035em] text-mir-text transition-colors hover:text-mir-acc">
+                            {post.track_title}
+                        </h2>
                     </Link>
+                    <div className="mt-1 font-mono text-[13px] tracking-[0.04em] text-mir-text2">
+                        {post.artist_name}
+                    </div>
 
-                    <div className="min-w-[280px] flex-1">
-                        <Link href={trackHref(post)} className="block w-max max-w-full">
-                            <h2 className="text-[clamp(30px,4vw,44px)] font-extrabold leading-[0.98] tracking-[-0.04em] transition-opacity hover:opacity-80">
-                                {post.track_title}
-                            </h2>
-                        </Link>
-                        <div className="mt-2 font-mono text-[13px] tracking-[0.04em] text-[#16120c]/60">
-                            {post.artist_name}
-                        </div>
-
-                        <p className="mt-5 max-w-[520px] text-[16px] leading-[1.5] text-[#16120c]/75">
-                            <b className="font-semibold">{who}</b> achou cedo e salvou{' '}
-                            {timeAgo(post.claimedat) || 'recentemente'}.{' '}
-                            {early
-                                ? 'A janela ainda está aberta — salva antes de virar tendência.'
-                                : 'Entre na lista de quem ouviu antes do algoritmo.'}
+                    {post.claim_message ? (
+                        <ClaimNote
+                            text={post.claim_message}
+                            className="mt-4 max-w-[52ch] text-mir-text2"
+                        />
+                    ) : (
+                        <p className="mt-4 max-w-[52ch] text-[15px] leading-[1.5] text-mir-text2">
+                            <b className="font-semibold text-mir-text">{who}</b> achou
+                            cedo e salvou {timeAgo(post.claimedat) || 'recentemente'}.
                         </p>
+                    )}
 
-                        <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
-                            <button
-                                onClick={toggle}
-                                disabled={busy || !isAuthenticated}
-                                title={!isAuthenticated ? 'Entre para salvar' : ''}
-                                className={`inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-bold transition active:translate-y-px disabled:opacity-60 ${
-                                    saved
-                                        ? 'border-[1.5px] border-[#16120c]/35 bg-transparent text-[#16120c]'
-                                        : 'bg-mir-bg text-mir-acc hover:brightness-110'
-                                }`}
-                            >
-                                {saved ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                                {saved ? 'Salva no seu acervo' : 'Salvar agora'}
-                            </button>
-                            <span className="font-mono text-[12px] text-[#16120c]/55">
-                                {ordLabel(post.position)} a salvar · {post.likes_count} no acervo
-                            </span>
-                        </div>
+                    <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
+                        <button
+                            onClick={toggle}
+                            disabled={busy || !isAuthenticated}
+                            className={`inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14.5px] font-bold transition active:translate-y-px disabled:opacity-60 ${
+                                saved
+                                    ? 'border border-mir-line2 bg-transparent text-mir-text2 hover:border-mir-text3 hover:text-mir-text'
+                                    : 'bg-mir-acc text-mir-on-acc hover:brightness-110'
+                            }`}
+                        >
+                            {saved ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                            {saved ? 'Salva no seu acervo' : 'Salvar agora'}
+                        </button>
+                        <span className="font-mono text-[12px] text-mir-text3">
+                            {ord ? `${who} foi ${ord} a salvar · ` : ''}
+                            {count} no acervo
+                        </span>
                     </div>
                 </div>
             </div>
@@ -225,7 +256,7 @@ function DropSection({
     )
 }
 
-/* ---------- Item do feed (estilo activity editorial) ---------- */
+/* ---------- Item do feed ---------- */
 function FeedItem({
     post,
     isAuthenticated,
@@ -235,17 +266,19 @@ function FeedItem({
 }) {
     const { saved, count, busy, toggle } = useSave(post, isAuthenticated)
 
-    const early = typeof post.position === 'number' && post.position <= 10
+    const early = isEarly(post)
     const who = whoOf(post)
+    const ord = ordLabel(post.position)
 
     return (
-        <article className="grid grid-cols-[72px_1fr] gap-3.5 border-t border-mir-line py-[22px] sm:grid-cols-[96px_1fr] sm:gap-[18px]">
+        <article className="grid grid-cols-[72px_1fr] gap-3.5 border-t border-mir-line py-[22px] sm:grid-cols-[88px_1fr] sm:gap-[18px]">
             <Link href={trackHref(post)} className="block">
                 <Cover
                     seed={post.artist_name}
                     thumbnail={post.track_thumbnail}
-                    className="h-[72px] w-[72px] rounded-[9px] sm:h-24 sm:w-24"
-                    iniClassName="text-[21px] sm:text-[38px]"
+                    size={96}
+                    className="h-[72px] w-[72px] rounded-[9px] sm:h-[88px] sm:w-[88px]"
+                    iniClassName="text-[24px] sm:text-[30px]"
                 />
             </Link>
 
@@ -257,7 +290,16 @@ function FeedItem({
                     >
                         <span className="flex h-6 w-6 flex-none items-center justify-center overflow-hidden rounded-full bg-[radial-gradient(120%_120%_at_30%_22%,#322c22,#1b1813)] text-[10px] font-extrabold tracking-[-0.03em] text-mir-text">
                             {post.avatar_url ? (
-                                <img src={post.avatar_url} alt={who} className="h-full w-full object-cover" />
+                                // <img> cru de propósito: avatar de OAuth vem de
+                                // domínios variados (googleusercontent etc.) que não
+                                // estão liberados em next.config, e o otimizador
+                                // quebraria em runtime. São 24px, não vale o risco.
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                    src={post.avatar_url}
+                                    alt=""
+                                    className="h-full w-full object-cover"
+                                />
                             ) : (
                                 (who || 'U').charAt(0).toUpperCase()
                             )}
@@ -267,10 +309,12 @@ function FeedItem({
                         </span>
                     </Link>
                     <span className="text-mir-text3">·</span>
-                    <span className="font-mono text-[11px] text-mir-text3">{timeAgo(post.claimedat)}</span>
+                    <span className="font-mono text-[11px] text-mir-text3">
+                        {timeAgo(post.claimedat)}
+                    </span>
                     {early && (
                         <span className="rounded border border-mir-acc/40 bg-mir-acc-soft px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.1em] text-mir-acc">
-                            {post.position === 1 ? '1º a salvar' : 'cedo'}
+                            cedo
                         </span>
                     )}
                 </div>
@@ -280,49 +324,119 @@ function FeedItem({
                         {post.track_title}
                     </h3>
                 </Link>
-                <div className="mt-0.5 truncate text-[13.5px] text-mir-text2">{post.artist_name}</div>
+                <div className="mt-0.5 truncate text-[13.5px] text-mir-text2">
+                    {post.artist_name}
+                </div>
 
-                <div className="mt-3 flex flex-wrap items-center gap-4">
-                    <span
-                        className={`inline-flex items-center gap-[7px] font-mono text-[11px] tracking-[0.03em] ${
-                            early ? 'text-mir-acc' : 'text-mir-text2'
+                {post.claim_message && (
+                    <ClaimNote text={post.claim_message} className="mt-3 text-mir-text2" />
+                )}
+
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <span className="font-mono text-[11px] tracking-[0.03em] text-mir-text3">
+                        {ord && (
+                            <span
+                                className={
+                                    early
+                                        ? 'font-semibold text-mir-acc'
+                                        : 'font-semibold text-mir-text2'
+                                }
+                            >
+                                {ord}{' '}
+                            </span>
+                        )}
+                        {ord ? 'a salvar · ' : ''}
+                        {count} também {count === 1 ? 'tem' : 'têm'}
+                    </span>
+
+                    <button
+                        onClick={toggle}
+                        disabled={busy || !isAuthenticated}
+                        className={`ml-auto inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-[7px] text-[12.5px] font-semibold transition active:translate-y-px disabled:opacity-60 ${
+                            saved
+                                ? 'border border-mir-line2 bg-transparent text-mir-text2 hover:border-mir-text3 hover:bg-mir-fill1 hover:text-mir-text'
+                                : 'bg-mir-acc text-mir-on-acc hover:brightness-[1.07]'
                         }`}
                     >
-                        {early && (
-                            <span className="inline-block h-1.5 w-1.5 flex-none rounded-full bg-mir-acc shadow-[0_0_0_3px_rgba(132,184,106,0.14)]" />
-                        )}
-                        <span className={early ? 'font-semibold text-mir-acc' : 'font-semibold text-mir-text'}>
-                            {ordLabel(post.position)}
-                        </span>
-                        a salvar
-                    </span>
-                    <span className="font-mono text-[11px] text-mir-text3">{count} também têm</span>
-
-                    <div className="ml-auto flex gap-2">
-                        <button
-                            onClick={toggle}
-                            disabled={busy || !isAuthenticated}
-                            title={!isAuthenticated ? 'Entre para salvar' : ''}
-                            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-[7px] text-[12.5px] font-semibold transition active:translate-y-px disabled:opacity-60 ${
-                                saved
-                                    ? 'border border-mir-line2 bg-transparent text-mir-text2 hover:border-mir-text3 hover:bg-mir-fill1 hover:text-mir-text'
-                                    : 'bg-mir-acc text-mir-on-acc hover:brightness-[1.07]'
-                            }`}
-                        >
-                            {saved ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-                            {saved ? 'Salva' : 'Salvar'}
-                        </button>
-                        <Link
-                            href={trackHref(post)}
-                            aria-label="Abrir faixa"
-                            className="inline-flex items-center justify-center rounded-full border border-mir-line2 p-[9px] text-mir-text2 transition hover:border-mir-text3 hover:bg-mir-fill1 hover:text-mir-text"
-                        >
-                            <Play className="h-3.5 w-3.5 fill-current" />
-                        </Link>
-                    </div>
+                        {saved ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                        {saved ? 'Salva' : 'Salvar'}
+                    </button>
                 </div>
             </div>
         </article>
+    )
+}
+
+/* ---------- Entrada da Pilha ----------
+   Faixa larga, uma só, entre o cabeçalho e o feed. É a porta da superfície
+   de descoberta, então ganha tratamento de destaque: prévia das capas
+   inclinadas à esquerda, que se abrem no hover, e um CTA pulsando. */
+const TEASER_ROT = ['-9deg', '6deg', '-4deg', '10deg', '-6deg']
+
+function PileBanner({ claims }: { claims: RecentClaim[] }) {
+    const teasers = claims.slice(0, 5)
+    const slots = teasers.length > 0 ? teasers : Array.from({ length: 4 })
+
+    return (
+        <Link
+            href="/pilha"
+            className="pile-band group relative mb-9 block overflow-hidden rounded-[18px] border border-mir-line2 bg-[#12100b] transition-colors hover:border-mir-acc/45"
+        >
+            <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -left-16 top-1/2 h-56 w-72 -translate-y-1/2 rounded-full bg-mir-acc/[0.09] blur-3xl"
+            />
+
+            <div className="relative flex flex-wrap items-center gap-x-7 gap-y-5 px-6 py-5 sm:px-8">
+                <div className="relative hidden h-[84px] w-[214px] flex-none sm:block">
+                    {slots.map((c: any, i) => (
+                        <span
+                            key={i}
+                            // sem .mir-cover aqui de propósito: aquela classe força
+                            // position:relative e tiraria as capas do posicionamento
+                            // absoluto que monta o leque
+                            className="pile-teaser absolute top-[5px] block h-[74px] w-[74px] overflow-hidden rounded-[3px] shadow-[0_10px_24px_-10px_rgba(0,0,0,0.9)]"
+                            style={{
+                                left: i * 35,
+                                zIndex: i,
+                                ['--tr' as string]: TEASER_ROT[i % 5],
+                                background: tone(c?.artist_name || `p${i}`),
+                            }}
+                        >
+                            <span className="absolute inset-0 grid select-none place-items-center text-[19px] font-extrabold tracking-[-0.05em] text-mir-text/15">
+                                {initials(c?.artist_name || 'Mirsui')}
+                            </span>
+                            {c?.track_thumbnail && (
+                                <Image
+                                    src={c.track_thumbnail}
+                                    alt=""
+                                    width={96}
+                                    height={96}
+                                    className="absolute inset-0 h-full w-full object-cover"
+                                />
+                            )}
+                        </span>
+                    ))}
+                </div>
+
+                <div className="min-w-[220px] flex-1">
+                    <span className="font-mono text-[10.5px] uppercase tracking-[0.2em] text-mir-acc">
+                        A pilha
+                    </span>
+                    <p className="mt-2 text-[clamp(19px,2.2vw,25px)] font-extrabold leading-[1.05] tracking-[-0.035em] text-mir-text">
+                        Tudo que a cena já carimbou, despejado num lugar só.
+                    </p>
+                    <p className="mt-1.5 font-mono text-[11.5px] leading-[1.5] tracking-[0.03em] text-mir-text3">
+                        Capa grande, muita gente. Capa pequena, quase ninguém — ainda.
+                    </p>
+                </div>
+
+                <span className="pile-cta inline-flex flex-none items-center gap-2 rounded-full bg-mir-acc px-6 py-3 text-[14px] font-bold text-mir-on-acc transition group-hover:brightness-110">
+                    Revirar a pilha
+                    <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </span>
+            </div>
+        </Link>
     )
 }
 
@@ -334,19 +448,33 @@ function FaroCard() {
             className="group block rounded-[14px] bg-mir-acc p-[22px] text-mir-on-acc transition hover:brightness-[1.04]"
         >
             <span className="font-mono text-[11px] font-bold uppercase tracking-[0.14em]">
-                Você esta semana
+                Seu turno
             </span>
             <p className="mt-3 text-[22px] font-extrabold leading-[1.04] tracking-[-0.03em]">
-                Reivindique o que você achou primeiro.
+                Carimbe o que você achou primeiro.
             </p>
             <p className="mt-2 font-mono text-[11.5px] leading-[1.5] text-mir-on-acc/70">
                 Seu nome fica no histórico da faixa. Ouça cedo, prove o faro.
             </p>
             <span className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-mir-bg text-[13px] font-bold text-mir-acc">
-                Reivindicar agora
+                Carimbar agora
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </span>
         </Link>
+    )
+}
+
+/* ---------- Estado vazio ---------- */
+function EmptyState({ title, body }: { title: string; body: string }) {
+    return (
+        <div className="mt-6 rounded-[13px] border border-dashed border-mir-line2 px-8 py-14 text-center">
+            <p className="text-[17px] font-bold tracking-[-0.02em] text-mir-text">
+                {title}
+            </p>
+            <p className="mx-auto mt-2 max-w-[42ch] text-[14px] leading-[1.55] text-mir-text2">
+                {body}
+            </p>
+        </div>
     )
 }
 
@@ -356,21 +484,8 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId 
     const [loading, setLoading] = useState(false)
     const [hasMore, setHasMore] = useState(initialPosts.length === 5)
     const [tab, setTab] = useState<'cena' | 'seguindo'>('cena')
-    const [clock, setClock] = useState('--:--:--')
 
     const isAuthenticated = !!currentUserId
-
-    // Relógio ao vivo "ATUALIZADO HH:MM:SS" (apenas no cliente, evita hidratação divergente)
-    useEffect(() => {
-        const fmt = () => {
-            const d = new Date()
-            const p = (n: number) => String(n).padStart(2, '0')
-            setClock(`${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`)
-        }
-        fmt()
-        const t = setInterval(fmt, 1000)
-        return () => clearInterval(t)
-    }, [])
 
     // Sem dados de "quem você segue" nesta carga; a aba fica preparada
     // para quando essa relação for fornecida pelo backend.
@@ -380,7 +495,6 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId 
 
     const loadMorePosts = async () => {
         setLoading(true)
-        const scrollPosition = window.scrollY
         try {
             const response = await fetch(`${BACKEND_URL}/feed?limit=5&offset=${posts.length}`)
             if (!response.ok) {
@@ -421,9 +535,10 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId 
                 ...post,
                 isLiked: userLikes.has(post.id),
             }))
-            setPosts([...posts, ...postsWithLikes])
+            // append puro: a lista só cresce para baixo, então o scroll do
+            // usuário não se move e não há posição para restaurar
+            setPosts((current) => [...current, ...postsWithLikes])
             if (newPosts.length < 5) setHasMore(false)
-            setTimeout(() => window.scrollTo(0, scrollPosition), 0)
         } catch (error) {
             console.error('Erro ao carregar mais posts:', error)
         } finally {
@@ -435,56 +550,53 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId 
 
     return (
         <div className="w-full">
-            {/* Ticker ao vivo */}
             <Ticker posts={posts} />
 
-            {/* Cabeçalho editorial */}
-            <header className="mx-auto w-full max-w-[1180px] px-5 pt-12 sm:px-10 sm:pt-14">
-                <span className="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-mir-acc">
-                    <span className="inline-block h-2 w-2 rounded-full bg-mir-acc animate-[mir-pulse_2s_infinite]" />
-                    Agora · atualizado {clock}
-                </span>
-                <h1 className="mt-4 max-w-[18ch] text-[clamp(34px,5.4vw,56px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-mir-text">
-                    A cena, salvando em tempo real
-                </h1>
-                <p className="mt-4 max-w-[58ch] text-[16px] leading-[1.55] text-mir-text2">
-                    Quem ouviu primeiro o quê — e o que ainda dá tempo de você salvar{' '}
-                    <em className="not-italic font-medium text-mir-acc">antes de virar tendência</em>.
-                </p>
+            <div className="mx-auto w-full max-w-[1320px] px-5 sm:px-10">
+                {/* Cabeçalho: título e abas na mesma faixa, para o feed começar cedo */}
+                <header className="flex flex-wrap items-end justify-between gap-x-8 gap-y-5 pb-7 pt-10 sm:pt-12">
+                    <div>
+                        <span className="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-mir-acc">
+                            <span className="inline-block h-2 w-2 rounded-full bg-mir-acc animate-[mir-pulse_2s_infinite] motion-reduce:animate-none" />
+                            A cena, ao vivo
+                        </span>
+                        <h1 className="mt-3 text-[clamp(28px,3.4vw,40px)] font-extrabold leading-[1.02] tracking-[-0.04em] text-mir-text">
+                            Quem ouviu primeiro o quê.
+                        </h1>
+                    </div>
 
-                <div className="mt-6 flex w-max gap-1 rounded-full border border-mir-line bg-mir-fill1 p-[3px]">
-                    {([
-                        ['cena', 'Da cena'],
-                        ['seguindo', 'De quem você segue'],
-                    ] as const).map(([key, label]) => (
-                        <button
-                            key={key}
-                            onClick={() => setTab(key)}
-                            className={`whitespace-nowrap rounded-full px-[18px] py-2 text-[13px] font-semibold transition-colors ${
-                                tab === key
-                                    ? 'bg-mir-acc text-mir-on-acc'
-                                    : 'text-mir-text2 hover:text-mir-text'
-                            }`}
-                        >
-                            {label}
-                        </button>
-                    ))}
-                </div>
-            </header>
+                    <div className="flex w-max gap-1 rounded-full border border-mir-line bg-mir-fill1 p-[3px]">
+                        {([
+                            ['cena', 'Da cena'],
+                            ['seguindo', 'De quem você segue'],
+                        ] as const).map(([key, label]) => (
+                            <button
+                                key={key}
+                                onClick={() => setTab(key)}
+                                className={`whitespace-nowrap rounded-full px-[18px] py-2 text-[13px] font-semibold transition-colors ${
+                                    tab === key
+                                        ? 'bg-mir-acc text-mir-on-acc'
+                                        : 'text-mir-text2 hover:text-mir-text'
+                                }`}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+                </header>
 
-            {/* O drop de hoje (faixa líder) */}
-            {drop && (
-                <div className="mt-12 sm:mt-14">
-                    <DropSection post={drop} isAuthenticated={isAuthenticated} />
-                </div>
-            )}
+                <PileBanner claims={recentClaims} />
 
-            {/* Grid principal */}
-            <div className="mx-auto w-full max-w-[1180px] px-5 sm:px-10">
-                <div className="grid grid-cols-1 items-start gap-[34px] pb-[70px] pt-[30px] lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-[46px]">
+                <div className="grid grid-cols-1 items-start gap-[34px] pb-[70px] lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-[46px]">
                     <section className="flex flex-col">
+                        {drop && (
+                            <div className="mb-9">
+                                <DropCard post={drop} isAuthenticated={isAuthenticated} />
+                            </div>
+                        )}
+
                         <div className="flex flex-wrap items-baseline justify-between gap-2 pb-1">
-                            <h2 className="text-[26px] font-extrabold tracking-[-0.03em] text-mir-text">
+                            <h2 className="text-[22px] font-extrabold tracking-[-0.03em] text-mir-text">
                                 Despachos da cena
                             </h2>
                             <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-mir-text3">
@@ -517,18 +629,28 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId 
                                     </div>
                                 )}
                             </>
+                        ) : !onCena ? (
+                            <EmptyState
+                                title="Você ainda não segue ninguém"
+                                body="Quando você seguir outros ouvintes, o que eles salvarem aparece aqui, separado do barulho da cena inteira."
+                            />
                         ) : (
-                            <div className="mt-2 rounded-[13px] border border-dashed border-mir-line2 p-[54px] text-center font-mono text-[13px] text-mir-text3">
-                                {!onCena
-                                    ? 'Você ainda não segue ninguém salvando.'
-                                    : hasAny
-                                      ? 'Por enquanto, só o drop de hoje. Volte logo para mais despachos.'
-                                      : 'O radar ainda está em silêncio. Seja o primeiro a salvar uma faixa.'}
-                            </div>
+                            <EmptyState
+                                title={
+                                    hasAny
+                                        ? 'Por enquanto, só o drop de hoje'
+                                        : 'O radar ainda está em silêncio'
+                                }
+                                body={
+                                    hasAny
+                                        ? 'A cena está quieta agora. Volte mais tarde para os próximos despachos.'
+                                        : 'Ninguém carimbou nada ainda. Seja o primeiro e seu nome abre o histórico da faixa.'
+                                }
+                            />
                         )}
                     </section>
 
-                    <aside className="flex flex-col gap-[22px] lg:sticky lg:top-[84px]">
+                    <aside className="flex flex-col gap-[22px] lg:sticky lg:top-[92px]">
                         <RecentClaims claims={recentClaims} />
                         <FaroCard />
                     </aside>

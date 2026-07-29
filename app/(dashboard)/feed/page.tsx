@@ -40,9 +40,14 @@ export default async function FeedPage() {
     }))
 
     return (
-        <>
-            <FeedContent initialPosts={postsWithLikes} recentClaims={recentClaims} currentUserId={currentUserId} />
-            <LandingFooter />
-        </>
+        // min-h + flex column: com a aba "seguindo" vazia a página fica curta e o
+        // rodapé flutuava no meio da tela. Escopado aqui para não mexer no
+        // fluxo das outras páginas do dashboard.
+        <div className="flex min-h-[calc(100dvh-72px)] flex-col">
+            <div className="flex-1">
+                <FeedContent initialPosts={postsWithLikes} recentClaims={recentClaims} currentUserId={currentUserId} />
+            </div>
+            <LandingFooter compact />
+        </div>
     )
 }

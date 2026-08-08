@@ -1,5 +1,5 @@
 import React from 'react'
-import { getFeedPostsWithInteractions, checkUserLikedTracks, getRecentClaims } from '@/utils/feedService.backend'
+import { getFeedPostsWithInteractions, getRecentClaims } from '@/utils/feedService.backend'
 import FeedContent from '@/components/FeedContent/FeedContent'
 import LandingFooter from '@/components/Footer/LandingFooter'
 import { createClient } from '@/utils/supabase/server'
@@ -28,16 +28,8 @@ export default async function FeedPage() {
 
     const currentUserId = user?.id ?? null
 
-    // Buscar likes do usuário (se estiver logado) só quando há posts.
-    const userLikes = feed.posts.length > 0
-        ? await checkUserLikedTracks(feed.posts.map(post => post.id))
-        : new Set<number>()
-
-    // Mapear posts com informação de like
-    const postsWithLikes = feed.posts.map(post => ({
-        ...post,
-        isLiked: userLikes.has(post.id)
-    }))
+    // `saved_by_me` já vem de /feed: o backend resolve na mesma requisição,
+    // usando o token que authHeaders() manda. Não há segunda ida ao banco.
 
     return (
         // min-h + flex column: com a aba "seguindo" vazia a página fica curta e o
@@ -46,7 +38,7 @@ export default async function FeedPage() {
         <div className="flex min-h-[calc(100dvh-72px)] flex-col">
             <div className="flex-1">
                 <FeedContent
-                    initialPosts={postsWithLikes}
+                    initialPosts={feed.posts}
                     recentClaims={recent.claims}
                     currentUserId={currentUserId}
                     loadFailed={feed.failed}

@@ -10,10 +10,10 @@ import { RecentClaim } from '@/utils/feedService.backend'
 import { formatTimestamp } from '@/utils/feedHelpers'
 import RecentClaims from '@/components/RecentClaims/RecentClaims'
 import { createClient } from '@/utils/supabase/client'
-import { toggleTrackLike } from '@/utils/trackActions'
+import { saveTrack } from '@/utils/trackActions'
 
 interface FeedContentProps {
-    initialPosts: (FeedPostWithInteractions & { isLiked: boolean })[]
+    initialPosts: FeedPostWithInteractions[]
     recentClaims: RecentClaim[]
     currentUserId: string | null
     /** a busca no servidor falhou — diferente de "não veio nada" */
@@ -22,7 +22,17 @@ interface FeedContentProps {
     recentClaimsFailed?: boolean
 }
 
-type FeedPost = FeedPostWithInteractions & { isLiked: boolean }
+type FeedPost = FeedPostWithInteractions
+
+/** o que cada card precisa saber sobre salvar, resolvido lá em cima por faixa */
+interface SaveState {
+    saved: boolean
+    savers: number
+    busy: boolean
+    error: string | null
+    canSave: boolean
+    onSave: () => void
+}
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'
 
@@ -57,41 +67,63 @@ function timeAgo(ts: string | null) {
 function trackHref(post: { track_url?: string | null; track_title: string }) {
     return `/track/${post.track_url?.split('/').pop() || post.track_title}`
 }
-function whoOf(post: FeedPost) {
-    return post.display_name || post.username
+function whoOf(post: FeedPost, isOwn: boolean) {
+    return isOwn ? 'Você' : post.display_name || post.username
 }
 function isEarly(post: FeedPost) {
     return typeof post.position === 'number' && post.position <= 10
 }
 
-/* ---------- estado de "salvar" reutilizável ---------- */
-function useSave(post: FeedPost, isAuthenticated: boolean) {
-    const [saved, setSaved] = useState(post.isLiked)
-    const [count, setCount] = useState(post.likes_count)
-    const [busy, setBusy] = useState(false)
+/* ---------- Botão de salvar ----------
+   Salvar é mão única: não existe "dessalvar", porque tirar um salvamento
+   abriria buraco na numeração de quem veio depois. Então o estado salvo não é
+   um botão desabilitado (que parece quebrado) e sim um selo — a ação acabou.
 
-    const toggle = async () => {
-        if (!isAuthenticated || busy) return
-        setBusy(true)
-        const next = !saved
-        // atualização otimista
-        setSaved(next)
-        setCount((c) => c + (next ? 1 : -1))
-        try {
-            const result = await toggleTrackLike(post.id, next)
-            if (!result.success) {
-                setSaved(!next)
-                setCount((c) => c + (next ? -1 : 1))
-            }
-        } catch {
-            setSaved(!next)
-            setCount((c) => c + (next ? -1 : 1))
-        } finally {
-            setBusy(false)
-        }
+   Faixa sem track_uri (dado antigo) não tem como ser salva: o backend precisa
+   dela para calcular a posição. Nesse caso não mostramos botão nenhum, em vez
+   de oferecer uma ação que vai falhar. */
+function SaveButton({ state, size }: { state: SaveState; size: 'drop' | 'item' }) {
+    const drop = size === 'drop'
+    const base = drop
+        ? 'inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14.5px] font-bold'
+        : 'inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-[7px] text-[12.5px] font-semibold'
+    const icon = drop ? 'h-4 w-4' : 'h-3.5 w-3.5'
+
+    if (!state.canSave && !state.saved) return null
+
+    // O selo recua de propósito: só o check leva o acento. Em lima cheia ele
+    // competiria com o badge "cedo" na mesma linha, e o feed inteiro viraria
+    // destaque conforme o acervo cresce. Quem grita é a ação, não o que já foi.
+    if (state.saved) {
+        return (
+            <span
+                className={`${base} ${drop ? '' : 'ml-auto'} border border-mir-line2 text-mir-text2`}
+            >
+                <Check className={`${icon} text-mir-acc`} />
+                {drop ? 'Salva no seu acervo' : 'Salva'}
+            </span>
+        )
     }
 
-    return { saved, count, busy, toggle }
+    return (
+        <span className={drop ? 'inline-flex flex-col gap-1.5' : 'ml-auto inline-flex flex-col items-end gap-1'}>
+            <button
+                onClick={state.onSave}
+                disabled={state.busy}
+                className={`${base} bg-mir-acc text-mir-on-acc transition hover:brightness-110 active:translate-y-px disabled:opacity-60`}
+            >
+                {state.busy ? (
+                    <Loader2 className={`${icon} animate-spin`} />
+                ) : (
+                    <Plus className={icon} />
+                )}
+                {state.busy ? 'Salvando…' : 'Salvar'}
+            </button>
+            {state.error && (
+                <span className="font-mono text-[11px] text-mir-text3">{state.error}</span>
+            )}
+        </span>
+    )
 }
 
 /* ---------- Capa (as iniciais ficam por baixo, como fallback) ---------- */
@@ -140,7 +172,9 @@ function Ticker({ posts, loadFailed = false }: { posts: FeedPost[]; loadFailed?:
     const segments = useMemo(() => {
         const items = posts
             .slice(0, 8)
-            .map((p) => `${whoOf(p).toUpperCase()} SALVOU ${p.track_title.toUpperCase()}`)
+            // sempre o nome, mesmo sendo você: o ticker é o mural da cena, não
+            // uma frase dirigida a quem está lendo
+            .map((p) => `${whoOf(p, false).toUpperCase()} SALVOU ${p.track_title.toUpperCase()}`)
         if (items.length > 0) return items
         // sem dados por falha, a cena pode estar cheia — dizer que está em
         // silêncio seria afirmar o que a gente não sabe
@@ -184,15 +218,8 @@ function ClaimNote({ text, className = '' }: { text: string; className?: string 
 }
 
 /* ---------- O drop de hoje (faixa em destaque) ---------- */
-function DropCard({
-    post,
-    isAuthenticated,
-}: {
-    post: FeedPost
-    isAuthenticated: boolean
-}) {
-    const { saved, count, busy, toggle } = useSave(post, isAuthenticated)
-    const who = whoOf(post)
+function DropCard({ post, isOwn, save }: { post: FeedPost; isOwn: boolean; save: SaveState }) {
+    const who = whoOf(post, isOwn)
     const ord = ordLabel(post.position)
 
     return (
@@ -241,21 +268,11 @@ function DropCard({
                     )}
 
                     <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
-                        <button
-                            onClick={toggle}
-                            disabled={busy || !isAuthenticated}
-                            className={`inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14.5px] font-bold transition active:translate-y-px disabled:opacity-60 ${
-                                saved
-                                    ? 'border border-mir-line2 bg-transparent text-mir-text2 hover:border-mir-text3 hover:text-mir-text'
-                                    : 'bg-mir-acc text-mir-on-acc hover:brightness-110'
-                            }`}
-                        >
-                            {saved ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                            {saved ? 'Salva no seu acervo' : 'Salvar agora'}
-                        </button>
+                        <SaveButton state={save} size="drop" />
                         <span className="font-mono text-[12px] text-mir-text3">
-                            {ord ? `${who} foi ${ord} a salvar · ` : ''}
-                            {count} no acervo
+                            {ord ? `${isOwn ? 'Você' : who} foi ${ord} a salvar` : ''}
+                            {ord && save.savers > 1 ? ' · ' : ''}
+                            {save.savers > 1 ? `${save.savers} já salvaram` : ''}
                         </span>
                     </div>
                 </div>
@@ -265,17 +282,9 @@ function DropCard({
 }
 
 /* ---------- Item do feed ---------- */
-function FeedItem({
-    post,
-    isAuthenticated,
-}: {
-    post: FeedPost
-    isAuthenticated: boolean
-}) {
-    const { saved, count, busy, toggle } = useSave(post, isAuthenticated)
-
+function FeedItem({ post, isOwn, save }: { post: FeedPost; isOwn: boolean; save: SaveState }) {
     const early = isEarly(post)
-    const who = whoOf(post)
+    const who = whoOf(post, isOwn)
     const ord = ordLabel(post.position)
 
     return (
@@ -353,22 +362,12 @@ function FeedItem({
                                 {ord}{' '}
                             </span>
                         )}
-                        {ord ? 'a salvar · ' : ''}
-                        {count} também {count === 1 ? 'tem' : 'têm'}
+                        {ord ? 'a salvar' : ''}
+                        {ord && save.savers > 1 ? ' · ' : ''}
+                        {save.savers > 1 ? `${save.savers} já salvaram` : ''}
                     </span>
 
-                    <button
-                        onClick={toggle}
-                        disabled={busy || !isAuthenticated}
-                        className={`ml-auto inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-[7px] text-[12.5px] font-semibold transition active:translate-y-px disabled:opacity-60 ${
-                            saved
-                                ? 'border border-mir-line2 bg-transparent text-mir-text2 hover:border-mir-text3 hover:bg-mir-fill1 hover:text-mir-text'
-                                : 'bg-mir-acc text-mir-on-acc hover:brightness-[1.07]'
-                        }`}
-                    >
-                        {saved ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-                        {saved ? 'Salva' : 'Salvar'}
-                    </button>
+                    <SaveButton state={save} size="item" />
                 </div>
             </div>
         </article>
@@ -528,6 +527,64 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId,
 
     const isAuthenticated = !!currentUserId
 
+    /* ---------- salvar ----------
+       O estado mora aqui, e não em cada card, porque salvar é por MÚSICA
+       (track_uri) e não por achado (id da linha). A mesma faixa pode aparecer
+       duas vezes no feed, salva por pessoas diferentes; salvar numa tem que
+       marcar a outra na hora, senão a tela volta a se contradizer.
+
+       `savedNow` guarda só o que foi salvo nesta sessão — o que já estava
+       salvo vem em `saved_by_me` de cada post. Assim não há estado inicial
+       para sincronizar quando chegam posts novos do "carregar mais". */
+    const [savedNow, setSavedNow] = useState<Set<string>>(() => new Set())
+    const [savingUri, setSavingUri] = useState<string | null>(null)
+    const [saveError, setSaveError] = useState<{ uri: string; message: string } | null>(null)
+
+    const buildSaveState = (post: FeedPost): SaveState => {
+        const uri = post.track_uri
+        const savedInSession = !!uri && savedNow.has(uri)
+        const saved = post.saved_by_me || savedInSession
+        return {
+            saved,
+            // o contador do servidor não conhece o que acabei de salvar agora
+            savers: post.savers_count + (savedInSession && !post.saved_by_me ? 1 : 0),
+            busy: !!uri && savingUri === uri,
+            error: saveError?.uri === uri ? saveError.message : null,
+            canSave: isAuthenticated && !!uri,
+            onSave: () => save(post),
+        }
+    }
+
+    const save = async (post: FeedPost) => {
+        const uri = post.track_uri
+        if (!uri || !isAuthenticated || savingUri || post.saved_by_me || savedNow.has(uri)) return
+
+        setSavingUri(uri)
+        setSaveError(null)
+        // otimista: o botão vira selo antes da ida ao servidor
+        setSavedNow((current) => new Set(current).add(uri))
+
+        const result = await saveTrack({
+            trackUri: uri,
+            trackName: post.track_title,
+            artistName: post.artist_name,
+            albumName: post.album_name,
+            spotifyUrl: post.track_url,
+            trackThumbnail: post.track_thumbnail || '',
+            popularity: post.popularity,
+        })
+
+        if (!result.success) {
+            setSavedNow((current) => {
+                const next = new Set(current)
+                next.delete(uri)
+                return next
+            })
+            setSaveError({ uri, message: result.message })
+        }
+        setSavingUri(null)
+    }
+
     // Sem dados de "quem você segue" nesta carga; a aba fica preparada
     // para quando essa relação for fornecida pelo backend.
     const onCena = tab === 'cena'
@@ -538,7 +595,25 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId,
         setLoading(true)
         setLoadMoreFailed(false)
         try {
-            const response = await fetch(`${BACKEND_URL}/feed?limit=5&offset=${posts.length}`)
+            // O token vai junto porque é ele que faz o backend devolver
+            // `saved_by_me`. Sem isso, as faixas carregadas aqui voltariam a
+            // oferecer "Salvar" para quem já salvou — exatamente o que esta
+            // tela deixou de fazer.
+            const headers: HeadersInit = { 'Content-Type': 'application/json' }
+            try {
+                const supabase = createClient()
+                const { data: { session } } = await supabase.auth.getSession()
+                if (session?.access_token) {
+                    headers['Authorization'] = `Bearer ${session.access_token}`
+                }
+            } catch (error) {
+                console.error('Erro ao obter sessão:', error)
+            }
+
+            const response = await fetch(
+                `${BACKEND_URL}/feed?limit=5&offset=${posts.length}`,
+                { headers }
+            )
             if (!response.ok) {
                 // sem isto o clique não fazia nada visível e parecia botão quebrado
                 console.error('Erro ao carregar mais achados:', response.status)
@@ -547,42 +622,16 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId,
                 return
             }
             const data = await response.json()
-            const newPosts = data.posts || []
+            const newPosts: FeedPost[] = data.posts || []
             if (newPosts.length === 0) {
                 setHasMore(false)
                 setLoading(false)
                 return
             }
 
-            const trackIds = newPosts.map((post: any) => post.id)
-            let userLikes: Set<number> = new Set()
-            try {
-                const supabase = createClient()
-                const { data: { session } } = await supabase.auth.getSession()
-                const headers: HeadersInit = { 'Content-Type': 'application/json' }
-                if (session?.access_token) {
-                    headers['Authorization'] = `Bearer ${session.access_token}`
-                }
-                const likesResponse = await fetch(`${BACKEND_URL}/feed/user-likes`, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify({ track_ids: trackIds }),
-                })
-                if (likesResponse.ok) {
-                    const likesData = await likesResponse.json()
-                    userLikes = new Set(likesData.liked_tracks || [])
-                }
-            } catch (error) {
-                console.error('Erro ao buscar likes:', error)
-            }
-
-            const postsWithLikes = newPosts.map((post: any) => ({
-                ...post,
-                isLiked: userLikes.has(post.id),
-            }))
             // append puro: a lista só cresce para baixo, então o scroll do
             // usuário não se move e não há posição para restaurar
-            setPosts((current) => [...current, ...postsWithLikes])
+            setPosts((current) => [...current, ...newPosts])
             if (newPosts.length < 5) setHasMore(false)
         } catch (error) {
             console.error('Erro ao carregar mais achados:', error)
@@ -637,7 +686,11 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId,
                     <section className="flex flex-col">
                         {drop && (
                             <div className="mb-9">
-                                <DropCard post={drop} isAuthenticated={isAuthenticated} />
+                                <DropCard
+                                    post={drop}
+                                    isOwn={drop.user_id === currentUserId}
+                                    save={buildSaveState(drop)}
+                                />
                             </div>
                         )}
 
@@ -655,7 +708,12 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId,
                         ) : feed.length > 0 ? (
                             <>
                                 {feed.map((post) => (
-                                    <FeedItem key={post.id} post={post} isAuthenticated={isAuthenticated} />
+                                    <FeedItem
+                                        key={post.id}
+                                        post={post}
+                                        isOwn={post.user_id === currentUserId}
+                                        save={buildSaveState(post)}
+                                    />
                                 ))}
 
                                 {onCena && hasMore && (

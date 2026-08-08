@@ -21,8 +21,11 @@ export interface FeedPostWithInteractions {
   username: string
   display_name: string | null
   avatar_url: string | null
-  likes_count: number
+  /** quantas pessoas salvaram esta MÚSICA (por track_uri), não este achado */
+  savers_count: number
   comments_count: number
+  /** o usuário logado já salvou esta música; false para visitante */
+  saved_by_me: boolean
 }
 
 export interface RecentClaim {
@@ -114,45 +117,4 @@ export async function getRecentClaims(limit: number = 4): Promise<RecentClaimsRe
         console.error('Erro ao buscar achados recentes:', error)
         return { claims: [], failed: true }
     }
-}
-
-/**
- * Verifica quais tracks o usuário curtiu
- */
-export async function checkUserLikedTracks(
-  trackIds: number[]
-): Promise<Set<number>> {
-  try {
-    if (trackIds.length === 0) {
-      return new Set()
-    }
-
-    const token = await getAccessToken()
-
-    if (!token) {
-      // Usuário não está logado
-      return new Set()
-    }
-
-    const response = await fetch(`${BACKEND_URL}/feed/user-likes`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ track_ids: trackIds }),
-      cache: 'no-store',
-    })
-
-    if (!response.ok) {
-      console.error('Erro ao buscar likes do usuário:', response.status)
-      return new Set()
-    }
-
-    const data = await response.json()
-    return new Set(data.liked_tracks || [])
-  } catch (error) {
-    console.error('Erro ao buscar likes do usuário:', error)
-    return new Set()
-  }
 }

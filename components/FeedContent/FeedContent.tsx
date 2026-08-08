@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useTransition } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, ArrowUpRight, Check, Loader2, Plus } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ArrowRight, ArrowUpRight, Check, Loader2, Plus, RotateCw } from 'lucide-react'
 import { FeedPostWithInteractions } from '@/utils/feedService.backend'
 import { RecentClaim } from '@/utils/feedService.backend'
 import { formatTimestamp } from '@/utils/feedHelpers'
@@ -15,6 +16,10 @@ interface FeedContentProps {
     initialPosts: (FeedPostWithInteractions & { isLiked: boolean })[]
     recentClaims: RecentClaim[]
     currentUserId: string | null
+    /** a busca no servidor falhou — diferente de "não veio nada" */
+    loadFailed?: boolean
+    /** idem, para a lista do "subindo na cena" (chamada separada) */
+    recentClaimsFailed?: boolean
 }
 
 type FeedPost = FeedPostWithInteractions & { isLiked: boolean }
@@ -131,15 +136,18 @@ function Cover({
 }
 
 /* ---------- Ticker ao vivo ---------- */
-function Ticker({ posts }: { posts: FeedPost[] }) {
+function Ticker({ posts, loadFailed = false }: { posts: FeedPost[]; loadFailed?: boolean }) {
     const segments = useMemo(() => {
         const items = posts
             .slice(0, 8)
             .map((p) => `${whoOf(p).toUpperCase()} SALVOU ${p.track_title.toUpperCase()}`)
-        return items.length > 0
-            ? items
+        if (items.length > 0) return items
+        // sem dados por falha, a cena pode estar cheia — dizer que está em
+        // silêncio seria afirmar o que a gente não sabe
+        return loadFailed
+            ? ['SEM SINAL DA CENA AGORA']
             : ['A CENA ESTÁ EM SILÊNCIO. SEJA O PRIMEIRO A SALVAR']
-    }, [posts])
+    }, [posts, loadFailed])
 
     const line = (
         <span className="inline-flex shrink-0 items-center font-mono text-[11px] font-bold uppercase tracking-[0.14em]">
@@ -164,7 +172,7 @@ function Ticker({ posts }: { posts: FeedPost[] }) {
     )
 }
 
-/* ---------- Nota que a pessoa escreveu ao carimbar ---------- */
+/* ---------- Nota que a pessoa escreveu ao salvar ---------- */
 function ClaimNote({ text, className = '' }: { text: string; className?: string }) {
     return (
         <p
@@ -424,7 +432,7 @@ function PileBanner({ claims }: { claims: RecentClaim[] }) {
                         A pilha
                     </span>
                     <p className="mt-2 text-[clamp(19px,2.2vw,25px)] font-extrabold leading-[1.05] tracking-[-0.035em] text-mir-text">
-                        Tudo que a cena já carimbou, despejado num lugar só.
+                        Tudo que a cena já salvou, despejado num lugar só.
                     </p>
                     <p className="mt-1.5 font-mono text-[11.5px] leading-[1.5] tracking-[0.03em] text-mir-text3">
                         Capa grande, muita gente. Capa pequena, quase ninguém — ainda.
@@ -451,13 +459,13 @@ function FaroCard() {
                 Seu turno
             </span>
             <p className="mt-3 text-[22px] font-extrabold leading-[1.04] tracking-[-0.03em]">
-                Carimbe o que você achou primeiro.
+                Salve o que você achou primeiro.
             </p>
             <p className="mt-2 font-mono text-[11.5px] leading-[1.5] text-mir-on-acc/70">
                 Seu nome fica no histórico da faixa. Ouça cedo, prove o faro.
             </p>
             <span className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-mir-bg text-[13px] font-bold text-mir-acc">
-                Carimbar agora
+                Salvar agora
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </span>
         </Link>
@@ -478,11 +486,44 @@ function EmptyState({ title, body }: { title: string; body: string }) {
     )
 }
 
+/* ---------- Estado de erro ----------
+   Separado do EmptyState de propósito: antes, falha de rede ou 429 do backend
+   caía no vazio e a tela dizia que a cena estava parada. */
+function ErrorState({ onRetry, retrying }: { onRetry: () => void; retrying: boolean }) {
+    return (
+        <div className="mt-6 rounded-[13px] border border-dashed border-mir-line2 px-8 py-14 text-center">
+            <p className="text-[17px] font-bold tracking-[-0.02em] text-mir-text">
+                Não conseguimos carregar a cena
+            </p>
+            <p className="mx-auto mt-2 max-w-[42ch] text-[14px] leading-[1.55] text-mir-text2">
+                O problema é do nosso lado, não seu. Nada foi perdido: os achados
+                continuam salvos.
+            </p>
+            <button
+                onClick={onRetry}
+                disabled={retrying}
+                className="mt-5 inline-flex items-center gap-2 rounded-full border border-mir-line2 px-6 py-2.5 font-mono text-[12px] uppercase tracking-[0.1em] text-mir-text2 transition hover:border-mir-text3 hover:bg-mir-fill1 hover:text-mir-text disabled:opacity-50"
+            >
+                {retrying ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                    <RotateCw className="h-3.5 w-3.5" />
+                )}
+                {retrying ? 'Tentando…' : 'Tentar de novo'}
+            </button>
+        </div>
+    )
+}
+
 /* ---------- App ---------- */
-export default function FeedContent({ initialPosts, recentClaims, currentUserId }: FeedContentProps) {
+export default function FeedContent({ initialPosts, recentClaims, currentUserId, loadFailed = false, recentClaimsFailed = false }: FeedContentProps) {
+    const router = useRouter()
+    const [retrying, startRetry] = useTransition()
+    const retry = () => startRetry(() => router.refresh())
     const [posts, setPosts] = useState(initialPosts)
     const [loading, setLoading] = useState(false)
     const [hasMore, setHasMore] = useState(initialPosts.length === 5)
+    const [loadMoreFailed, setLoadMoreFailed] = useState(false)
     const [tab, setTab] = useState<'cena' | 'seguindo'>('cena')
 
     const isAuthenticated = !!currentUserId
@@ -495,9 +536,13 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId 
 
     const loadMorePosts = async () => {
         setLoading(true)
+        setLoadMoreFailed(false)
         try {
             const response = await fetch(`${BACKEND_URL}/feed?limit=5&offset=${posts.length}`)
             if (!response.ok) {
+                // sem isto o clique não fazia nada visível e parecia botão quebrado
+                console.error('Erro ao carregar mais achados:', response.status)
+                setLoadMoreFailed(true)
                 setLoading(false)
                 return
             }
@@ -540,7 +585,8 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId 
             setPosts((current) => [...current, ...postsWithLikes])
             if (newPosts.length < 5) setHasMore(false)
         } catch (error) {
-            console.error('Erro ao carregar mais posts:', error)
+            console.error('Erro ao carregar mais achados:', error)
+            setLoadMoreFailed(true)
         } finally {
             setLoading(false)
         }
@@ -550,7 +596,7 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId 
 
     return (
         <div className="w-full">
-            <Ticker posts={posts} />
+            <Ticker posts={posts} loadFailed={loadFailed} />
 
             <div className="mx-auto w-full max-w-[1320px] px-5 sm:px-10">
                 {/* Cabeçalho: título e abas na mesma faixa, para o feed começar cedo */}
@@ -597,21 +643,23 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId 
 
                         <div className="flex flex-wrap items-baseline justify-between gap-2 pb-1">
                             <h2 className="text-[22px] font-extrabold tracking-[-0.03em] text-mir-text">
-                                Despachos da cena
+                                Achados da cena
                             </h2>
                             <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-mir-text3">
                                 {onCena ? 'A cena inteira' : 'Quem você segue'}
                             </span>
                         </div>
 
-                        {feed.length > 0 ? (
+                        {loadFailed && posts.length === 0 ? (
+                            <ErrorState onRetry={retry} retrying={retrying} />
+                        ) : feed.length > 0 ? (
                             <>
                                 {feed.map((post) => (
                                     <FeedItem key={post.id} post={post} isAuthenticated={isAuthenticated} />
                                 ))}
 
                                 {onCena && hasMore && (
-                                    <div className="flex justify-center pt-7">
+                                    <div className="flex flex-col items-center gap-2.5 pt-7">
                                         <button
                                             onClick={loadMorePosts}
                                             disabled={loading}
@@ -622,10 +670,20 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId 
                                                     <Loader2 className="h-4 w-4 animate-spin" />
                                                     Carregando...
                                                 </>
+                                            ) : loadMoreFailed ? (
+                                                <>
+                                                    <RotateCw className="h-3.5 w-3.5" />
+                                                    Tentar de novo
+                                                </>
                                             ) : (
-                                                'Carregar mais despachos'
+                                                'Carregar mais achados'
                                             )}
                                         </button>
+                                        {loadMoreFailed && !loading && (
+                                            <p className="font-mono text-[11px] text-mir-text3">
+                                                não deu pra buscar agora
+                                            </p>
+                                        )}
                                     </div>
                                 )}
                             </>
@@ -643,15 +701,15 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId 
                                 }
                                 body={
                                     hasAny
-                                        ? 'A cena está quieta agora. Volte mais tarde para os próximos despachos.'
-                                        : 'Ninguém carimbou nada ainda. Seja o primeiro e seu nome abre o histórico da faixa.'
+                                        ? 'A cena está quieta agora. Volte mais tarde para os próximos achados.'
+                                        : 'Ninguém salvou nada ainda. Seja o primeiro e seu nome abre o histórico da faixa.'
                                 }
                             />
                         )}
                     </section>
 
                     <aside className="flex flex-col gap-[22px] lg:sticky lg:top-[92px]">
-                        <RecentClaims claims={recentClaims} />
+                        <RecentClaims claims={recentClaims} loadFailed={recentClaimsFailed} />
                         <FaroCard />
                     </aside>
                 </div>

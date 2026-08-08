@@ -20,7 +20,7 @@ export default async function FeedPage() {
 
     // Carregar apenas 5 posts inicialmente para melhor performance.
     // Primeiro descobre quem está logado e quais posts existem em paralelo.
-    const [{ data: { user } }, feedPosts, recentClaims] = await Promise.all([
+    const [{ data: { user } }, feed, recent] = await Promise.all([
         supabase.auth.getUser(),
         getFeedPostsWithInteractions(5, 0),
         getRecentClaims(4) // Buscar apenas 4 músicas únicas
@@ -29,12 +29,12 @@ export default async function FeedPage() {
     const currentUserId = user?.id ?? null
 
     // Buscar likes do usuário (se estiver logado) só quando há posts.
-    const userLikes = feedPosts.length > 0
-        ? await checkUserLikedTracks(feedPosts.map(post => post.id))
+    const userLikes = feed.posts.length > 0
+        ? await checkUserLikedTracks(feed.posts.map(post => post.id))
         : new Set<number>()
 
     // Mapear posts com informação de like
-    const postsWithLikes = feedPosts.map(post => ({
+    const postsWithLikes = feed.posts.map(post => ({
         ...post,
         isLiked: userLikes.has(post.id)
     }))
@@ -45,7 +45,13 @@ export default async function FeedPage() {
         // fluxo das outras páginas do dashboard.
         <div className="flex min-h-[calc(100dvh-72px)] flex-col">
             <div className="flex-1">
-                <FeedContent initialPosts={postsWithLikes} recentClaims={recentClaims} currentUserId={currentUserId} />
+                <FeedContent
+                    initialPosts={postsWithLikes}
+                    recentClaims={recent.claims}
+                    currentUserId={currentUserId}
+                    loadFailed={feed.failed}
+                    recentClaimsFailed={recent.failed}
+                />
             </div>
             <LandingFooter compact />
         </div>

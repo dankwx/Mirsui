@@ -35,57 +35,84 @@ export interface RecentClaim {
 }
 
 /**
+ * `failed` separa "não veio nada" de "a busca falhou". Sem isso, um 429 ou um
+ * 500 rendezia lista vazia e a tela dizia que a cena estava parada — o usuário
+ * não tinha como saber que era erro.
+ */
+export interface FeedPostsResult {
+  posts: FeedPostWithInteractions[]
+  failed: boolean
+}
+
+export interface RecentClaimsResult {
+  claims: RecentClaim[]
+  failed: boolean
+}
+
+/**
+ * O token vai junto mesmo em rota de leitura pública porque o rate limit do
+ * backend chaveia por usuário (ver mirsui-backend/src/lib/rateLimitKeys.ts).
+ * Sem ele, a chave cai no IP — que é sempre o do servidor Next, já que estas
+ * funções rodam no server component da /feed — e todas as visitas do app
+ * dividiam um balde só de 100 req / 15 min.
+ */
+async function authHeaders(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+  const token = await getAccessToken()
+  if (token) headers.Authorization = `Bearer ${token}`
+  return headers
+}
+
+/**
  * Busca posts do feed com interações via backend
  */
 export async function getFeedPostsWithInteractions(
   limit: number = 20,
   offset: number = 0
-): Promise<FeedPostWithInteractions[]> {
+): Promise<FeedPostsResult> {
   try {
     const response = await fetch(`${BACKEND_URL}/feed?limit=${limit}&offset=${offset}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: await authHeaders(),
       cache: 'no-store', // Sempre buscar dados frescos
     })
 
     if (!response.ok) {
       console.error('Erro ao buscar feed:', response.status)
-      return []
+      return { posts: [], failed: true }
     }
 
     const data = await response.json()
-    return data.posts || []
+    return { posts: data.posts || [], failed: false }
   } catch (error) {
     console.error('Erro ao buscar feed:', error)
-    return []
+    return { posts: [], failed: true }
   }
 }
 
 /**
- * Busca reivindicações recentes via backend
+ * Busca os achados recentes via backend
  */
-export async function getRecentClaims(limit: number = 4): Promise<RecentClaim[]> {
+export async function getRecentClaims(limit: number = 4): Promise<RecentClaimsResult> {
     try {
         const response = await fetch(`${BACKEND_URL}/feed/recent-claims?limit=${limit}`, {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: await authHeaders(),
             cache: 'no-store',
         })
 
         if (!response.ok) {
-            console.error('Erro ao buscar reivindicações recentes:', response.status)
-            return []
+            console.error('Erro ao buscar achados recentes:', response.status)
+            return { claims: [], failed: true }
         }
 
         const data = await response.json()
-        return data.claims || []
+        return { claims: data.claims || [], failed: false }
     } catch (error) {
-        console.error('Erro ao buscar reivindicações recentes:', error)
-        return []
+        console.error('Erro ao buscar achados recentes:', error)
+        return { claims: [], failed: true }
     }
 }
 

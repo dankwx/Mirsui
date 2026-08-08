@@ -5,13 +5,18 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
 // Busca stakes + total de pontos direto no backend, no servidor.
 // Roda no render do server component, então os dados já chegam no HTML
 // (sem esperar hidratação e sem o salto extra pelo proxy /api/stakes).
+// `failed` separa "não tem ficha na mesa" de "a busca falhou". Sem isso, um 429
+// ou um 500 renderizava as três vagas vazias e parecia que as fichas do usuário
+// tinham sido apagadas.
 export async function getStakesData(): Promise<{
     stakes: unknown[]
     points: number | null
+    failed: boolean
 }> {
     const token = await getAccessToken()
     if (!token) {
-        return { stakes: [], points: null }
+        // sem sessão não é falha: o middleware já redireciona quem não logou
+        return { stakes: [], points: null, failed: false }
     }
 
     const headers = { Authorization: `Bearer ${token}` }
@@ -22,13 +27,19 @@ export async function getStakesData(): Promise<{
     ])
 
     let stakes: unknown[] = []
+    let failed = true
     if (stakesRes.status === 'fulfilled' && stakesRes.value.ok) {
         try {
             const data = await stakesRes.value.json()
             stakes = Array.isArray(data.stakes) ? data.stakes : []
+            failed = false
         } catch {
             stakes = []
         }
+    } else if (stakesRes.status === 'rejected') {
+        console.error('Erro ao buscar fichas:', stakesRes.reason)
+    } else {
+        console.error('Erro ao buscar fichas:', stakesRes.value.status)
     }
 
     let points: number | null = null
@@ -41,5 +52,5 @@ export async function getStakesData(): Promise<{
         }
     }
 
-    return { stakes, points }
+    return { stakes, points, failed }
 }

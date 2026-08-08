@@ -6,6 +6,8 @@ import { formatTimestamp } from '@/utils/feedHelpers'
 
 interface RecentClaimsProps {
     claims: RecentClaim[]
+    /** a busca falhou — diferente de "ninguém salvou nada" */
+    loadFailed?: boolean
 }
 
 const TONES = [
@@ -27,7 +29,7 @@ function initials(name: string) {
         .slice(0, 2)
 }
 
-export default function RecentClaims({ claims }: RecentClaimsProps) {
+export default function RecentClaims({ claims, loadFailed = false }: RecentClaimsProps) {
     return (
         <section className="rounded-[14px] border border-mir-line bg-mir-surface p-5">
             <div className="mb-1 flex items-baseline justify-between gap-2.5">
@@ -44,7 +46,7 @@ export default function RecentClaims({ claims }: RecentClaimsProps) {
 
             {claims.length === 0 ? (
                 <p className="py-6 text-center font-mono text-[12px] text-mir-text3">
-                    Nada reivindicado ainda.
+                    {loadFailed ? 'Não deu pra carregar agora.' : 'Nada salvo ainda.'}
                 </p>
             ) : (
                 <ol className="flex flex-col">

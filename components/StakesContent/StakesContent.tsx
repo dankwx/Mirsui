@@ -12,7 +12,7 @@ import { formatMultiplier } from '@/utils/stakeMultiplier'
 import { capture } from '@/lib/posthog'
 import StakeChartModal from './StakeChartModal'
 
-// Regras da feature (ver Stake.md): 3 vagas, e só dá pra COLETAR os pontos
+// Regras da feature (ver Stake.md): 3 fichas, e só dá pra COLETAR os pontos
 // depois de 7 dias. Remover antes disso é permitido, mas zera os pontos.
 const MAX_SLOTS = 3
 const MIN_DAYS = 7
@@ -271,7 +271,7 @@ function movement(s: Stake): Movement {
         sub:
             s.accumulated_points > 0
                 ? `Rendeu ${pts} ${ptsLabel} no caminho`
-                : 'Não se mexeu desde o seu stake',
+                : 'Não se mexeu desde a sua ficha',
     }
 }
 
@@ -327,11 +327,16 @@ function CoverImage({
 export default function StakesContent({
     initialStakes = [],
     initialPoints = null,
+    initialLoadFailed = false,
 }: {
     initialStakes?: Stake[]
     initialPoints?: number | null
+    /** a busca no servidor falhou — diferente de "nenhuma ficha na mesa" */
+    initialLoadFailed?: boolean
 } = {}) {
     const [stakes, setStakes] = useState<Stake[]>(initialStakes)
+    const [loadFailed, setLoadFailed] = useState(initialLoadFailed)
+    const [retrying, setRetrying] = useState(false)
     // Dados já chegam do servidor (render do page.tsx), então não há "loading"
     // inicial: a lista aparece instantânea, igual ao perfil no header.
     const [loading, setLoading] = useState(false)
@@ -354,17 +359,23 @@ export default function StakesContent({
     const { toast } = useToast()
 
     // ---- carregar stakes + total de pontos ----
+    // Em falha NÃO zera a lista: antes, um 429 ou 500 virava setStakes([]) e as
+    // três vagas apareciam vazias, como se as fichas do usuário tivessem sido
+    // apagadas. Mantém o último estado conhecido e marca o erro.
     const loadStakes = useCallback(async () => {
         try {
             const res = await fetch('/api/stakes', { cache: 'no-store' })
             if (res.ok) {
                 const data = await res.json()
                 setStakes(Array.isArray(data.stakes) ? data.stakes : [])
+                setLoadFailed(false)
             } else {
-                setStakes([])
+                console.error('Erro ao buscar fichas:', res.status)
+                setLoadFailed(true)
             }
-        } catch {
-            setStakes([])
+        } catch (error) {
+            console.error('Erro ao buscar fichas:', error)
+            setLoadFailed(true)
         } finally {
             setLoading(false)
         }
@@ -381,6 +392,12 @@ export default function StakesContent({
             // silencioso — o total é secundário
         }
     }, [])
+
+    const retryLoad = useCallback(async () => {
+        setRetrying(true)
+        await Promise.all([loadStakes(), loadPoints()])
+        setRetrying(false)
+    }, [loadStakes, loadPoints])
 
     // Sem fetch na montagem: os dados iniciais vêm do servidor (page.tsx).
     // loadStakes/loadPoints ficam só pra revalidar após dar/recolher stake.
@@ -498,7 +515,7 @@ export default function StakesContent({
                     popularity: previewPop,
                 })
                 toast({
-                    title: 'Stake feito!',
+                    title: 'Ficha na mesa!',
                     description: `"${selected.title}" · multiplicador ${formatMultiplier(
                         Number(data.stake.multiplier)
                     )}`,
@@ -511,14 +528,14 @@ export default function StakesContent({
                     error: data.error ?? 'unknown',
                 })
                 toast({
-                    title: 'Não foi possível dar stake',
+                    title: 'Não foi possível botar a ficha',
                     description: data.error ?? 'Tente novamente',
                     variant: 'destructive',
                 })
             }
         } catch {
             toast({
-                title: 'Erro ao dar stake na faixa',
+                title: 'Erro ao botar a ficha',
                 variant: 'destructive',
             })
         } finally {
@@ -550,7 +567,7 @@ export default function StakesContent({
                         description: `+${fmt(data.points)} pontos pra sua conta`,
                     })
                 } else {
-                    toast({ description: 'Vaga liberada' })
+                    toast({ description: 'Ficha de volta na mão' })
                 }
                 setOpen((prev) => ({ ...prev, [c.id]: false }))
                 await Promise.all([loadStakes(), loadPoints()])
@@ -576,41 +593,66 @@ export default function StakesContent({
     const searchView = modalOpen && !selected
     const detailView = modalOpen && !!selected
 
+    // Falhou e não há nada em mão: a gente NÃO sabe o estado das fichas. Mostrar
+    // "0 DE 3 NA MESA" e três vagas livres aqui seria afirmar algo falso.
+    const stateUnknown = loadFailed && stakes.length === 0
+
     return (
         <>
             {/* HERO */}
             <section>
                 <div className="mx-auto max-w-[1200px] px-5 pb-6 pt-14 sm:px-8">
                     <div className="mb-4 font-mono text-[11px] tracking-[0.2em] text-mir-acc">
-                        DÊ STAKE NA FAIXA ANTES DELA BOMBAR
+                        BOTE SUAS FICHAS ANTES DELA BOMBAR
                     </div>
                     <div className="flex flex-wrap items-end gap-6">
                         <h1 className="m-0 text-[clamp(64px,9vw,116px)] font-black leading-[0.82] tracking-[-0.055em]">
-                            Stakes
+                            Fichas
                         </h1>
                         <p className="m-0 mb-3 max-w-[440px] text-[18px] leading-[1.45] text-mir-text2">
-                            Você tem{' '}
-                            <b className="font-bold text-mir-text">
-                                {MAX_SLOTS - used}{' '}
-                                {MAX_SLOTS - used === 1 ? 'vaga' : 'vagas'}
-                            </b>{' '}
-                            pra dar stake em faixas que acha que vão subir. Quanto
-                            mais escondida a faixa, maior o multiplicador. Seu faro,
-                            em jogo.
+                            {stateUnknown ? (
+                                <>
+                                    Suas fichas não carregaram agora. Nada foi
+                                    perdido: o que estava na mesa continua lá.
+                                </>
+                            ) : (
+                                <>
+                                    Você tem{' '}
+                                    <b className="font-bold text-mir-text">
+                                        {MAX_SLOTS - used}{' '}
+                                        {MAX_SLOTS - used === 1
+                                            ? 'ficha'
+                                            : 'fichas'}
+                                    </b>{' '}
+                                    pra botar nas faixas que você acha que vão
+                                    subir. Quanto mais escondida a faixa, maior o
+                                    multiplicador. Seu faro, em jogo.
+                                </>
+                            )}
                         </p>
                     </div>
 
                     <div className="mt-7 flex flex-wrap items-center gap-[18px] font-mono text-[11px] tracking-[0.12em] text-mir-text2/80">
-                        <span className="flex items-center gap-2">
-                            <span className="anim-blink h-2 w-2 rounded-full bg-mir-acc" />
-                            {used} DE {MAX_SLOTS} VAGAS EM JOGO
-                        </span>
-                        <span className="opacity-40">·</span>
-                        <span>COLETA LIBERA EM {MIN_DAYS} DIAS</span>
-                        {points != null && (
+                        {stateUnknown ? (
+                            <span className="text-mir-text3">
+                                NÃO FOI POSSÍVEL LER SUAS FICHAS
+                            </span>
+                        ) : (
                             <>
+                                <span className="flex items-center gap-2">
+                                    <span className="anim-blink h-2 w-2 rounded-full bg-mir-acc" />
+                                    {used} DE {MAX_SLOTS} FICHAS NA MESA
+                                </span>
                                 <span className="opacity-40">·</span>
-                                <span>{fmt(points)} PONTOS RECOLHIDOS</span>
+                                <span>COLETA LIBERA EM {MIN_DAYS} DIAS</span>
+                                {points != null && (
+                                    <>
+                                        <span className="opacity-40">·</span>
+                                        <span>
+                                            {fmt(points)} PONTOS RECOLHIDOS
+                                        </span>
+                                    </>
+                                )}
                             </>
                         )}
                     </div>
@@ -620,7 +662,28 @@ export default function StakesContent({
             {/* 3 SLOTS */}
             <section>
                 <div className="mx-auto max-w-[1200px] px-5 pb-20 pt-6 sm:px-8">
-                    <div className="grid grid-cols-1 items-start gap-[18px] md:grid-cols-3">
+                    {stateUnknown && (
+                        <div className="rounded-2xl border-[1.5px] border-dashed border-mir-line2 px-8 py-16 text-center">
+                            <p className="text-[19px] font-extrabold tracking-[-0.02em] text-mir-text">
+                                Não conseguimos carregar suas fichas
+                            </p>
+                            <p className="mx-auto mt-2 max-w-[46ch] text-[14px] leading-[1.55] text-mir-text2">
+                                O problema é do nosso lado. As fichas que você já
+                                botou seguem na mesa e os pontos continuam
+                                acumulando.
+                            </p>
+                            <button
+                                onClick={retryLoad}
+                                disabled={retrying}
+                                className="mt-6 inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border-none bg-mir-acc px-7 text-sm font-bold text-mir-on-acc disabled:opacity-60"
+                            >
+                                {retrying ? 'Tentando…' : 'Tentar de novo'}
+                            </button>
+                        </div>
+                    )}
+                    <div
+                        className={`grid grid-cols-1 items-start gap-[18px] md:grid-cols-3 ${stateUnknown ? 'hidden' : ''}`}
+                    >
                         {slots.map((s, i) => {
                             const vaga = '0' + (i + 1)
 
@@ -639,10 +702,11 @@ export default function StakesContent({
                                                 +
                                             </div>
                                             <div className="font-mono text-[11px] tracking-[0.16em] text-mir-text2/70">
-                                                VAGA {vaga} · LIVRE
+                                                FICHA {vaga} · NA MÃO
                                             </div>
                                             <div className="mt-0.5 max-w-[200px] text-[21px] font-extrabold leading-[1.1] tracking-[-0.03em]">
-                                                Dê stake numa faixa antes dela bombar
+                                                Bote essa ficha numa faixa antes
+                                                dela bombar
                                             </div>
                                             <span className="mt-4 inline-flex items-center gap-[7px] rounded-full bg-mir-acc px-[22px] py-[11px] text-sm font-bold text-mir-on-acc">
                                                 {loading ? 'Carregando…' : 'Escolher faixa →'}
@@ -714,7 +778,7 @@ export default function StakesContent({
                                         {/* gradiente do topo pra leitura do status */}
                                         <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/55 to-transparent" />
 
-                                        {/* topo: status + vaga (texto limpo, sem pill) */}
+                                        {/* topo: status + ficha (texto limpo, sem pill) */}
                                         <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-2 px-5 pt-[18px]">
                                             <span
                                                 className="inline-flex items-center gap-[9px] text-[14px] font-bold leading-none tracking-[-0.01em] [text-shadow:0_1px_4px_rgba(0,0,0,.55)]"
@@ -736,7 +800,7 @@ export default function StakesContent({
                                                 {statusLabel}
                                             </span>
                                             <span className="flex-none font-mono text-[10px] tracking-[0.18em] text-white/55 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">
-                                                VAGA {vaga}
+                                                FICHA {vaga}
                                             </span>
                                         </div>
 
@@ -835,7 +899,7 @@ export default function StakesContent({
                                                     disabled={busy}
                                                     className="h-11 w-full cursor-pointer rounded-full border border-mir-line2 bg-transparent text-sm font-bold text-mir-text/75 disabled:opacity-50"
                                                 >
-                                                    {busy ? 'Esvaziando…' : 'Esvaziar vaga'}
+                                                    {busy ? 'Retirando…' : 'Retirar a ficha'}
                                                 </button>
                                                 <div className="mt-[9px] text-center font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55]">
                                                     Faixa saiu do Spotify · não vale mais
@@ -896,7 +960,7 @@ export default function StakesContent({
                                             onClick={() => toggleInfo(s.id)}
                                             className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 border-t border-t-mir-line bg-transparent pt-3.5 font-mono text-[11px] tracking-[0.04em] text-mir-text2/70 transition-colors hover:text-mir-text2"
                                         >
-                                            {opened ? 'esconder infos' : 'ver infos do stake'}
+                                            {opened ? 'esconder infos' : 'ver infos da ficha'}
                                             <svg
                                                 width="11"
                                                 height="11"
@@ -917,7 +981,7 @@ export default function StakesContent({
                                                 <div className="flex items-start justify-between gap-3">
                                                     <div>
                                                         <div className="mb-[5px] font-mono text-[9.5px] tracking-[0.14em] text-mir-text2/[0.66]">
-                                                            MULTIPLICADOR DO STAKE
+                                                            MULTIPLICADOR DA FICHA
                                                         </div>
                                                         <div className="text-[34px] font-black leading-[0.85] tracking-[-0.04em] text-mir-acc">
                                                             {formatMultiplier(mult)}
@@ -934,7 +998,7 @@ export default function StakesContent({
                                                             {Math.round(
                                                                 s.baseline_popularity
                                                             )}{' '}
-                                                            no stake →{' '}
+                                                            na ficha →{' '}
                                                             {Math.round(
                                                                 s.last_popularity
                                                             )}{' '}
@@ -965,14 +1029,14 @@ export default function StakesContent({
                                                     </div>
                                                     <div className="mt-1.5 font-mono text-[9px] tracking-[0.04em] text-mir-text2/55">
                                                         a marca vertical é onde estava
-                                                        quando você deu stake
+                                                        quando você botou a ficha
                                                     </div>
                                                 </div>
                                                 <div className="font-mono text-[11px] leading-[1.45] text-mir-text2/[0.9]">
                                                     {fmt(s.pessoas_deram_stake)}{' '}
                                                     {s.pessoas_deram_stake === 1
-                                                        ? 'pessoa deu stake'
-                                                        : 'pessoas deram stake'}{' '}
+                                                        ? 'pessoa botou ficha'
+                                                        : 'pessoas botaram ficha'}{' '}
                                                     · {fmt(s.accumulated_points)} pontos
                                                     acumulados
                                                     {!removida && s.last_day_gain > 0
@@ -1002,11 +1066,11 @@ export default function StakesContent({
                         <div className="flex items-start justify-between gap-4 border-b border-mir-line px-6 py-[22px]">
                             <div>
                                 <div className="mb-[7px] font-mono text-[10px] tracking-[0.18em] text-mir-acc">
-                                    DAR STAKE NA VAGA{' '}
+                                    BOTAR A FICHA{' '}
                                     {modalSlot != null ? '0' + (modalSlot + 1) : ''}
                                 </div>
                                 <h3 className="m-0 text-[25px] font-black tracking-[-0.035em]">
-                                    {selected ? 'Confira e dê stake' : 'Buscar faixa'}
+                                    {selected ? 'Confira e bote a ficha' : 'Buscar faixa'}
                                 </h3>
                             </div>
                             <button
@@ -1076,7 +1140,7 @@ export default function StakesContent({
                                             </div>
                                             <div className="mt-1.5 max-w-[280px] font-mono text-[12px] leading-[1.6] text-mir-text2/[0.66]">
                                                 Comece a digitar o nome. Você confere as
-                                                infos dela antes de confirmar o stake.
+                                                infos dela antes de botar a ficha.
                                             </div>
                                         </div>
                                     )}
@@ -1266,7 +1330,7 @@ function DetailView({
                 disabled={staking || previewing}
                 className="h-[52px] w-full cursor-pointer rounded-full border-none bg-mir-acc text-base font-extrabold tracking-[-0.01em] text-mir-on-acc disabled:opacity-60"
             >
-                {staking ? 'Dando stake…' : `Dar stake · ${multLabel}`}
+                {staking ? 'Botando…' : `Botar ficha · ${multLabel}`}
             </button>
         </div>
     )

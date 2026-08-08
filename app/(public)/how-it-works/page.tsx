@@ -194,12 +194,12 @@ export default async function HowItWorksPage() {
                                     </div>
                                 </div>
                                 <h3 className="mb-4 text-2xl font-bold text-slate-900">
-                                    Faça o Claim
+                                    Salve
                                 </h3>
                                 <p className="mb-6 leading-relaxed text-slate-700">
                                     Achou uma música que você sente que vai
-                                    bombar? Clica em &quot;Claim&quot; e ela vai pro
-                                    seu perfil. Simples assim. Agora tá
+                                    bombar? Clica em &quot;Salvar&quot; e ela vai
+                                    pro seu perfil. Simples assim. Agora tá
                                     registrado.
                                 </p>
                                 <div className="space-y-2">
@@ -208,7 +208,7 @@ export default async function HowItWorksPage() {
                                             size={16}
                                             className="text-blue-600"
                                         />
-                                        <span>Claim ilimitados</span>
+                                        <span>Achados ilimitados</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm text-slate-600">
                                         <CheckCircle2
@@ -452,9 +452,9 @@ export default async function HowItWorksPage() {
                                                 Timing é Tudo
                                             </p>
                                             <p className="text-sm text-slate-600">
-                                                Quanto mais cedo você faz o
-                                                claim, mais pontos ganha quando
-                                                a música cresce
+                                                Quanto mais cedo você salva,
+                                                mais pontos ganha quando a
+                                                música cresce
                                             </p>
                                         </div>
                                     </div>
@@ -488,7 +488,7 @@ export default async function HowItWorksPage() {
                                                 Consistência Conta
                                             </p>
                                             <p className="text-sm text-slate-600">
-                                                Fazer claims regularmente e
+                                                Salvar faixas regularmente e
                                                 acertar várias vezes aumenta seu
                                                 multiplicador
                                             </p>
@@ -519,7 +519,7 @@ export default async function HowItWorksPage() {
                                         </div>
                                         <div>
                                             <p className="text-sm font-semibold text-slate-900">
-                                                Dia 1 - Você faz o claim
+                                                Dia 1 - Você salva
                                             </p>
                                             <p className="text-xs text-slate-600">
                                                 Música com 5k plays no Spotify
@@ -583,10 +583,10 @@ export default async function HowItWorksPage() {
                         <Card className="border-white/60 bg-white/60 backdrop-blur-xl">
                             <CardContent className="p-6">
                                 <h3 className="mb-2 text-lg font-semibold text-slate-900">
-                                    Quantos claims posso fazer?
+                                    Quantas faixas posso salvar?
                                 </h3>
                                 <p className="leading-relaxed text-slate-600">
-                                    Quantos você quiser! Não tem limite. Claim
+                                    Quantas você quiser, não tem limite. Salve
                                     todas as músicas que você acha que vão
                                     bombar.
                                 </p>
@@ -599,7 +599,7 @@ export default async function HowItWorksPage() {
                                     Posso perder pontos?
                                 </h3>
                                 <p className="leading-relaxed text-slate-600">
-                                    Não! Se uma música que você fez claim não
+                                    Não! Se uma música que você salvou não
                                     bombar, você simplesmente não ganha pontos.
                                     Mas não perde nada.
                                 </p>
@@ -640,7 +640,7 @@ export default async function HowItWorksPage() {
                                 </h3>
                                 <p className="leading-relaxed text-slate-600">
                                     Sim! A plataforma é totalmente gratuita pra
-                                    usar. Claims ilimitados, certificados,
+                                    usar. Achados ilimitados, selos,
                                     estatísticas, tudo de graça.
                                 </p>
                             </CardContent>

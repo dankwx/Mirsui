@@ -167,7 +167,7 @@ export default function StakeChartModal({
                         ) : (
                             <span className="flex-none font-mono text-[11px] text-mir-text2/55">
                                 {focus && focusIdx === 0
-                                    ? 'dia do stake'
+                                    ? 'dia da ficha'
                                     : 'sem ganho nesse dia'}
                             </span>
                         )}
@@ -282,7 +282,7 @@ function Chart({
                     className="relative h-[200px]"
                     onMouseLeave={() => setHover(null)}
                 >
-                    {/* linha de baseline (onde você deu stake) */}
+                    {/* linha de baseline (onde você botou a ficha) */}
                     <div
                         className="pointer-events-none absolute inset-x-0 border-t border-dashed border-mir-text/40"
                         style={{ bottom: `${baseY}%` }}

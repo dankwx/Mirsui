@@ -55,7 +55,7 @@ export default function TrackShare({
                     await navigator.share({
                         files: [file],
                         title: `${trackTitle} — ${artistName}`,
-                        text: 'Cravei essa faixa antes de virar mainstream 🌱',
+                        text: 'Salvei essa faixa antes de virar mainstream.',
                     })
                 } catch {
                     /* usuário cancelou */

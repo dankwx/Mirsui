@@ -30,6 +30,29 @@ type NavLink = {
     match: (pathname: string) => boolean
 }
 
+/* Vocabulário do produto (vale pra toda copy visível):
+ *
+ *   salvar / salva      a ação grátis e ilimitada de marcar que ouviu cedo.
+ *                       Verbo de botão, deliberadamente sem sabor: é o texto
+ *                       mais lido do app e palavra "criativa" cansa em alta
+ *                       frequência.
+ *   achado              o substantivo da mesma coisa ("meus achados").
+ *   acervo              onde os achados ficam. "412 no acervo" é a contagem.
+ *   ficha / botar ficha a aposta com vaga limitada, trava e multiplicador.
+ *                       Vem de "botar as fichas em", que em português falado já
+ *                       significa apoiar com convicção. Rota segue /stakes; só
+ *                       o rótulo é português.
+ *   Faro                a pontuação. Ainda sem página própria, então fora
+ *                       da nav por enquanto.
+ *
+ * Aposentados: carimbar/carimbo, claim/Claim, reivindicar, despacho, cravar/
+ * cravada, stake como verbo ("dê stake"). Identificadores, rotas e campos de
+ * banco seguem em claim/stake de propósito: renomear aquilo exige o backend.
+ *
+ * Nota: referencia/Mirsui Cravadas.dc.html é o mock antigo e ainda fala
+ * "cravada" inteiro. Ele ficou desalinhado de propósito, não é fonte.
+ */
+
 const navLinks: NavLink[] = [
     {
         title: 'Início',
@@ -48,13 +71,16 @@ const navLinks: NavLink[] = [
         match: (p) => p.startsWith('/library') || p.startsWith('/user'),
     },
     {
-        title: 'Stakes',
+        // a rota segue /stakes (link público, não muda); o rótulo é o nome
+        // em português da feature
+        title: 'Fichas',
         url: '/stakes',
         match: (p) => p.startsWith('/stakes'),
     },
     {
-        // o resto do site fala "carimbar"; "Claim" era o único rótulo em inglês
-        title: 'Carimbar',
+        // idem: a rota segue /claimtrack. "Carimbar" saiu porque o verbo do
+        // site é "salvar" — ver a nota de vocabulário no topo do arquivo
+        title: 'Salvar faixa',
         url: '/claimtrack',
         match: (p) => p.startsWith('/claimtrack'),
     },

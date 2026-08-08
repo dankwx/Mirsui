@@ -230,7 +230,7 @@ const COPY = {
     signup: {
         eyebrow: 'Comece agora',
         title: 'Crie sua conta',
-        sub: 'Grátis, sem cartão. Carimba o que ouvir e prova que chegou primeiro.',
+        sub: 'Grátis, sem cartão. Salva o que ouvir e prova que chegou primeiro.',
         oauth: 'Criar conta com Google',
         submit: 'Criar conta',
         footQ: 'Já tem conta?',

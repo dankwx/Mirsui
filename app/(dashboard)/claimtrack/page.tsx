@@ -7,8 +7,9 @@ import SearchWithResults from '@/components/SearchWithResults/SearchWithResults'
 import TrendingPage from '@/components/TrendingTracks/TrendingTracks'
 
 export const metadata: Metadata = {
-    title: 'Reivindicar Músicas - Mirsui',
-    description: 'Descubra novas músicas e reivindique tracks antes que se tornem virais.',
+    title: 'Salvar faixa - Mirsui',
+    description:
+        'Ache faixas antes da cena lotar e salve pra ficar registrado que você chegou primeiro.',
 }
 
 export default function ClaimTracksPage() {
@@ -20,7 +21,7 @@ export default function ClaimTracksPage() {
             icon: Disc3,
         },
         {
-            title: 'Claims bem-sucedidos',
+            title: 'Achados que subiram',
             value: '92% taxa de acerto',
             description: 'Validado pela comunidade e curadores especialistas',
             icon: ShieldCheck,
@@ -28,7 +29,7 @@ export default function ClaimTracksPage() {
         {
             title: 'Velocidade média',
             value: '2m 37s',
-            description: 'Tempo médio para reivindicar após o alerta subir',
+            description: 'Tempo médio para salvar após o alerta subir',
             icon: Timer,
         },
     ]
@@ -48,11 +49,11 @@ export default function ClaimTracksPage() {
                         <div className="max-w-xl space-y-6">
                             <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.35em] text-white/70">
                                 <Sparkles className="h-4 w-4 text-purple-200" />
-                                <span>claim antes do hype</span>
+                                <span>salve antes do hype</span>
                             </div>
                             <div className="space-y-4">
                                 <h1 className="text-4xl font-semibold leading-tight text-white md:text-5xl">
-                                    Reivindique os próximos hits antes de explodirem
+                                    Salve os próximos hits antes de explodirem
                                 </h1>
                                 <p className="text-base text-white/60 md:text-lg">
                                     Utilize os sinais do nosso Music Prophet, acompanhe o movimento da comunidade e garanta seu lugar nas próximas catapultas sonoras.
@@ -104,10 +105,10 @@ export default function ClaimTracksPage() {
                                 <TrendingUp className="mt-1 h-5 w-5 text-purple-200" />
                                 <div className="space-y-2">
                                     <h3 className="text-lg font-semibold text-white">
-                                        Como funciona o Claim Track?
+                                        Como escolher o que salvar
                                     </h3>
                                     <p className="text-sm text-white/60">
-                                        Monitoramos sinais de crescimento orgânico, comportamento social e engajamento em tempo real. Combine essas pistas com o radar da comunidade para reivindicar com confiança antes que os algoritmos deem o próximo salto.
+                                        A gente acompanha crescimento de audiência e movimento social em tempo real. Cruze esses sinais com o que a cena está salvando e você chega antes do algoritmo.
                                     </p>
                                 </div>
                             </div>

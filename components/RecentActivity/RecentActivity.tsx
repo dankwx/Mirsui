@@ -101,7 +101,7 @@ export default async function RecentActivity() {
                                         >
                                             {track.username}
                                         </Link>
-                                        <span>reivindicou</span>
+                                        <span>salvou</span>
                                         <span className="text-white/40">
                                             {formatClaimedAt(track.claimed_at)}
                                         </span>

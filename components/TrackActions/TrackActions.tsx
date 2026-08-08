@@ -71,10 +71,10 @@ export default function TrackActions({
             if (!response.ok) {
                 if (response.status === 401) {
                     toast({
-                        title: 'Faça login para reivindicar',
+                        title: 'Faça login para salvar',
                         description:
                             data.error ||
-                            'Você precisa estar logado para reivindicar uma faixa.',
+                            'Você precisa estar logado para salvar uma faixa.',
                         variant: 'destructive',
                     })
                     return
@@ -83,13 +83,13 @@ export default function TrackActions({
                     setIsClaimed(true)
                     setPosition(data.position)
                     toast({
-                        title: 'Você já reivindicou esta faixa',
+                        title: 'Você já salvou esta faixa',
                         description: `Sua posição é #${data.position}.`,
                         variant: 'destructive',
                     })
                     return
                 }
-                throw new Error(data.error || 'Erro ao reivindicar faixa')
+                throw new Error(data.error || 'Erro ao salvar a faixa')
             }
 
             capture('track_claimed', {
@@ -106,12 +106,12 @@ export default function TrackActions({
             setShowMessage(false)
             setMessage('')
             toast({
-                title: 'Faixa reivindicada!',
-                description: `Você é o #${data.position} a reivindicar "${trackTitle}".`,
+                title: 'Achado seu!',
+                description: `Você é o #${data.position} a salvar "${trackTitle}".`,
             })
         } catch (error) {
             toast({
-                title: 'Erro ao reivindicar',
+                title: 'Erro ao salvar',
                 description:
                     error instanceof Error
                         ? error.message
@@ -167,14 +167,14 @@ export default function TrackActions({
                         />
                     )}
                     {isClaimed
-                        ? `Reivindicada${position ? ` · #${position}` : ''}`
-                        : 'Reivindicar'}
+                        ? `Salva${position ? ` · #${position}` : ''}`
+                        : 'Salvar'}
                 </button>
 
                 <button
                     onClick={() => setShowMessage((s) => !s)}
                     disabled={isClaimed}
-                    aria-label="Comentar ao reivindicar"
+                    aria-label="Deixar uma nota ao salvar"
                     className="inline-flex items-center justify-center rounded-[11px] border border-mir-line2 p-[11px] text-mir-text2 transition hover:border-mir-text3 hover:bg-mir-fill1 hover:text-mir-text disabled:opacity-50"
                 >
                     <MessageCircle className="h-4 w-4" />
@@ -193,7 +193,7 @@ export default function TrackActions({
                 <div className="mt-3 rounded-xl border border-mir-line bg-mir-surface p-3">
                     <div className="mb-2 flex items-center justify-between">
                         <span className="text-[12.5px] font-semibold text-mir-text">
-                            Deixe uma nota ao reivindicar (opcional)
+                            Deixe uma nota ao salvar (opcional)
                         </span>
                         <button
                             onClick={() => setShowMessage(false)}
@@ -225,7 +225,7 @@ export default function TrackActions({
                             ) : (
                                 <Send className="h-3.5 w-3.5" />
                             )}
-                            Reivindicar
+                            Salvar
                         </button>
                     </div>
                 </div>
@@ -239,14 +239,14 @@ export default function TrackActions({
                         <b className="font-bold text-mir-text">
                             {position ? `${position}º` : `${total}º`}
                         </b>{' '}
-                        a reivindicar
+                        a salvar
                         <span className="font-mono text-mir-text3">·</span>
                         entrou pra história dessa faixa
                     </>
                 ) : (
                     <>
                         <b className="font-bold text-mir-text">{total}</b>
-                        {total === 1 ? ' já reivindicou' : ' já reivindicaram'}
+                        {total === 1 ? ' já salvou' : ' já salvaram'}
                         <span className="font-mono text-mir-text3">·</span>
                         seja o{' '}
                         <b className="font-bold text-mir-text">{total + 1}º</b>{' '}

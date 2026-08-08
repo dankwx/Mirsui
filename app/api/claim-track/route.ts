@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
         if (!response.ok) {
             return NextResponse.json(
-                { error: data.error || 'Erro ao reivindicar música' },
+                { error: data.error || 'Erro ao salvar a faixa' },
                 { status: response.status }
             )
         }

@@ -5,7 +5,7 @@ import { getPileTracks } from '@/utils/pileService'
 
 export const metadata: Metadata = {
     title: 'A pilha - Mirsui',
-    description: 'Tudo que a cena carimbou, despejado num lugar só.',
+    description: 'Tudo que a cena salvou, despejado num lugar só.',
 }
 
 export default function PilhaPage() {

@@ -44,7 +44,8 @@ export async function POST(request: NextRequest) {
         const data = await response.json()
         return NextResponse.json(data, { status: response.status })
     } catch (error) {
-        console.error('Erro ao dar stake na faixa:', error)
-        return NextResponse.json({ error: 'Erro ao dar stake na faixa' }, { status: 500 })
+        // a string do `error` chega ao usuário no toast do StakesContent
+        console.error('Erro ao botar a ficha:', error)
+        return NextResponse.json({ error: 'Erro ao botar a ficha' }, { status: 500 })
     }
 }

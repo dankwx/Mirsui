@@ -8,12 +8,12 @@
 // em ~50 requisições a cada 5s: buscar 74 capas ao vivo derrubava um quarto
 // delas e ainda punha 8s de latência na página.
 //
-// O que é mock: "carimbos" e "há quantos dias foi a primeira" saem de um hash
+// O que é mock: "salvos" e "há quantos dias foi o primeiro" saem de um hash
 // do nome da faixa — determinístico, então a mesma faixa mostra sempre os
 // mesmos números, e a temperatura (topo/meio/subsolo) define a faixa de valores.
 //
 // Para virar real: troque getPileTracks() pela consulta de tudo que foi
-// carimbado no site, devolvendo o mesmo PileTrack. O componente não muda.
+// salvo no site, devolvendo o mesmo PileTrack. O componente não muda.
 //
 // Para regerar o snapshot: buscar cada par artista/faixa em
 // https://api.deezer.com/search?q=artist:"X" track:"Y"&limit=1 e pegar
@@ -145,7 +145,7 @@ export function getPileTracks(): PileTrack[] {
             coverSmall: coverUrl(md5, 250),
             genre,
             heat,
-            carimbos: Math.round(lo + a * (hi - lo)),
+            salvos: Math.round(lo + a * (hi - lo)),
             dias: 1 + Math.round(b * 210),
         }
     })

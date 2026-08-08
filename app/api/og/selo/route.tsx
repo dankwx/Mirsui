@@ -181,7 +181,7 @@ export async function GET(req: NextRequest) {
                             textAlign: 'center',
                         }}
                     >
-                        cravei antes de virar mainstream
+                        salvei antes de virar mainstream
                     </div>
                     <div
                         style={{

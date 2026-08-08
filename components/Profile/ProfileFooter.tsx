@@ -7,7 +7,7 @@ interface ProfileFooterProps {
 }
 
 const LINKS = [
-    { label: 'CLAIM', href: '/claimtrack' },
+    { label: 'SALVAR FAIXA', href: '/claimtrack' },
     { label: 'TERMOS', href: '/termos' },
     { label: 'PRIVACIDADE', href: '/privacidade' },
 ]

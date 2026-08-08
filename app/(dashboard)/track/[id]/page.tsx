@@ -33,7 +33,7 @@ export async function generateMetadata({
             'Artista Desconhecido'
         return {
             title: `${trackInfo.name} - ${artistNames} | Mirsui`,
-            description: `Descubra quem cravou "${trackInfo.name}" de ${artistNames} antes de virar mainstream. Reivindique sua descoberta no Mirsui.`,
+            description: `Descubra quem salvou "${trackInfo.name}" de ${artistNames} antes de virar mainstream. Salve seu achado no Mirsui.`,
         }
     }
 
@@ -196,7 +196,7 @@ export default async function TrackDetailsPage({
         firstClaimerProfile?.username ||
         'Alguém'
 
-    // Verifica se o usuário atual já reivindicou esta faixa
+    // Verifica se o usuário atual já salvou esta faixa
     let hasUserClaimed = false
     let userClaimPosition: number | null = null
 
@@ -461,7 +461,7 @@ export default async function TrackDetailsPage({
 
                                     <div>
                                         <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-mir-bg/40">
-                                            Primeiro a cravar
+                                            Primeiro a salvar
                                         </div>
                                         <div className="mt-1.5 text-[16px] font-bold tracking-[-0.01em] text-mir-bg">
                                             {firstClaimerName}
@@ -476,7 +476,7 @@ export default async function TrackDetailsPage({
                                     <dl className="space-y-2.5">
                                         <div className="flex items-baseline justify-between">
                                             <dt className="text-[13px] font-medium text-mir-bg/50">
-                                                Reivindicações
+                                                No acervo
                                             </dt>
                                             <dd className="text-[14px] font-bold tabular-nums text-mir-bg">
                                                 {totalClaims}
@@ -508,7 +508,7 @@ export default async function TrackDetailsPage({
                             <div className="flex justify-between font-mono text-[11px] tracking-[0.04em]">
                                 <div className="text-left">
                                     <div className="font-bold text-mir-bg">
-                                        {firstClaimerName} reivindicou
+                                        {firstClaimerName} salvou
                                     </div>
                                     <div className="mt-0.5 text-mir-bg/50">
                                         {claimWhen(firstClaimer?.claimedat)} · obscura
@@ -525,10 +525,10 @@ export default async function TrackDetailsPage({
                             </div>
                         </div>
 
-                        {/* Reivindicações */}
+                        {/* quem já salvou a faixa */}
                         <div className="mt-8 flex flex-wrap items-baseline justify-between gap-2">
                             <h3 className="m-0 text-[22px] font-extrabold tracking-[-0.02em]">
-                                Reivindicações
+                                Quem já salvou
                             </h3>
                             <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-mir-bg/50">
                                 {totalClaims} no total
@@ -577,8 +577,8 @@ export default async function TrackDetailsPage({
                                             </div>
                                             <div className="mt-0.5 font-mono text-[11px] text-mir-bg/55">
                                                 {isFirst
-                                                    ? 'primeiro a reivindicar'
-                                                    : 'reivindicou'}{' '}
+                                                    ? 'primeiro a salvar'
+                                                    : 'salvou'}{' '}
                                                 · {claimWhen(claimer.claimedat)}
                                             </div>
                                         </Link>

@@ -16,9 +16,9 @@ export interface PileTrack {
     coverSmall: string | null
     genre: string
     heat: PileHeat
-    /** mock: quantas pessoas carimbaram */
-    carimbos: number
-    /** mock: há quantos dias foi a primeira carimbada */
+    /** mock: quantas pessoas salvaram a faixa */
+    salvos: number
+    /** mock: há quantos dias foi o primeiro salvamento */
     dias: number
 }
 

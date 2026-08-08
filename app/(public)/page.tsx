@@ -60,7 +60,7 @@ function ArrowIcon({ size = 16 }: { size?: number }) {
     )
 }
 
-/** O card abre o cadastro para carimbar a faixa — não toca a música. */
+/** O card abre o cadastro para salvar a faixa; não toca a música. */
 function StampIcon({ size = 16 }: { size?: number }) {
     return (
         <svg
@@ -124,12 +124,12 @@ function tic0(ts: string) {
 
 const BEATS = [
     {
-        title: 'Carimba',
-        body: 'Achou um som que quase ninguém ouviu ainda? Carimba. Fica gravado o dia e a hora em que você chegou.',
+        title: 'Salva',
+        body: 'Achou um som que quase ninguém ouviu ainda? Salva. Fica gravado o dia e a hora em que você chegou.',
     },
     {
         title: 'A faixa cresce',
-        body: 'A gente acompanha o que acontece com ela depois. Quanto mais cedo foi o seu carimbo, mais ele vale.',
+        body: 'A gente acompanha o que acontece com ela depois. Quanto mais cedo você chegou, mais o achado vale.',
     },
     {
         title: 'A prova é sua',
@@ -240,7 +240,7 @@ export default async function HomePage() {
                                         com gap, e soltar a vírgula como filho
                                         direto criaria um espaço antes dela */}
                                     <span className="ti-txt">
-                                        <b>{it.who}</b> carimbou{' '}
+                                        <b>{it.who}</b> salvou{' '}
                                         <span className="tk">{it.track}</span>,{' '}
                                         {it.artist}
                                     </span>
@@ -261,7 +261,7 @@ export default async function HomePage() {
                                 <span className="eyebrow">
                                     <span className="early-dot" /> Subindo na cena
                                 </span>
-                                <h2>O que tá sendo carimbado agora.</h2>
+                                <h2>O que tá sendo salvo agora.</h2>
                                 <p className="sh-sub">
                                     Ainda dá tempo de salvar antes de virar
                                     tendência.
@@ -279,7 +279,7 @@ export default async function HomePage() {
                                     className="poster"
                                     mode="login"
                                     key={t.id}
-                                    ariaLabel={`Carimbar ${t.track_title}, de ${t.artist_name}`}
+                                    ariaLabel={`Salvar ${t.track_title}, de ${t.artist_name}`}
                                 >
                                     <div className="cover-wrap">
                                         <span className="rank-chip">
@@ -321,9 +321,14 @@ export default async function HomePage() {
                                     </div>
                                     <div className="ptt">{t.track_title}</div>
                                     <div className="par">{t.artist_name}</div>
+                                    {/* o número é o total de salvamentos da faixa,
+                                        não o da semana — o texto dizia "essa semana"
+                                        e não batia com o dado */}
                                     <div className="padds">
-                                        <TrendIcon size={12} /> +{t.total_claims}{' '}
-                                        essa semana
+                                        <TrendIcon size={12} />{' '}
+                                        {t.total_claims === 1
+                                            ? '1 já salvou'
+                                            : `${t.total_claims} já salvaram`}
                                     </div>
                                 </AuthModalTrigger>
                             ))}
@@ -340,7 +345,7 @@ export default async function HomePage() {
                             <div className="sec-head">
                                 <h2>Você ouve primeiro. A gente registra.</h2>
                                 <p className="sh-sub">
-                                    Carimbar leva um clique. O que ele vale só
+                                    Salvar leva um clique. O que aquilo vale só
                                     aparece quando a faixa cresce.
                                 </p>
                             </div>
@@ -390,7 +395,7 @@ export default async function HomePage() {
             <section className="endcta wrap">
                 <h2>Entra e começa a cavar.</h2>
                 <p>
-                    Som novo todo dia. Carimba o que você curtir e monta o
+                    Som novo todo dia. Salva o que você curtir e monta o
                     histórico de quem ouviu antes.
                 </p>
                 <div>

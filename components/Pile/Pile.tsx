@@ -122,10 +122,10 @@ function PieceSheet({
                     <div className="mt-5 grid grid-cols-2 gap-3 border-t border-mir-line pt-4">
                         <div>
                             <div className="text-[22px] font-extrabold tabular-nums tracking-[-0.03em] text-mir-acc">
-                                {nf.format(track.carimbos)}
+                                {nf.format(track.salvos)}
                             </div>
                             <div className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-mir-text3">
-                                carimbos
+                                no acervo
                             </div>
                         </div>
                         <div>
@@ -143,7 +143,7 @@ function PieceSheet({
                             href="/claimtrack"
                             className="flex-1 rounded-full bg-mir-acc px-5 py-3 text-center text-[14px] font-bold text-mir-on-acc transition hover:brightness-110 active:translate-y-px"
                         >
-                            Carimbar essa
+                            Salvar essa
                         </Link>
                         <a
                             href={spotifySearch(track)}
@@ -186,7 +186,7 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
     )
 
     const total = useMemo(
-        () => tracks.reduce((s, t) => s + t.carimbos, 0),
+        () => tracks.reduce((s, t) => s + t.salvos, 0),
         [tracks]
     )
     const matches = useMemo(
@@ -205,8 +205,12 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
     return (
         <div className="pile-root">
             <div className="mx-auto w-full max-w-[1320px] px-5 sm:px-10">
-                {/* ---- cabeçalho ---- */}
-                <header className="pt-9 sm:pt-12">
+                {/* ---- cabeçalho ----
+                    Uma faixa fina, de propósito: a pilha é o assunto da página,
+                    então o título não disputa tamanho com ela. Antes eram 367px
+                    de cabeçalho (título de 86px + parágrafo de 3 linhas) e a
+                    massa da pilha só começava depois da primeira dobra. */}
+                <header className="pt-5 sm:pt-6">
                     <Link
                         href="/feed"
                         className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-mir-text3 transition-colors hover:text-mir-text"
@@ -215,49 +219,43 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
                         voltar ao feed
                     </Link>
 
-                    <div className="mt-5 flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
-                        <div>
-                            <div className="flex items-center gap-3">
-                                <h1 className="text-[clamp(40px,7vw,86px)] font-extrabold leading-[0.88] tracking-[-0.055em] text-mir-text">
-                                    A pilha
-                                </h1>
-                                <span className="mb-2 self-end rounded-full border border-mir-line2 px-2 py-[3px] font-mono text-[9.5px] uppercase tracking-[0.14em] text-mir-text3">
-                                    prévia
-                                </span>
-                            </div>
-                            <p className="mt-4 max-w-[46ch] text-[15px] leading-[1.55] text-mir-text2">
-                                Tudo que a cena carimbou, despejado num lugar
-                                só.{' '}
-                                <span className="text-mir-text3">
-                                    Quanto maior a capa, mais gente carimbou.
-                                    Passe o mouse para ver quem é.
-                                </span>
-                            </p>
-                        </div>
+                    <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-2">
+                        <h1 className="text-[clamp(26px,2.6vw,34px)] font-extrabold leading-none tracking-[-0.04em] text-mir-text">
+                            A pilha
+                        </h1>
+                        <span className="rounded-full border border-mir-line2 px-2 py-[3px] font-mono text-[9.5px] uppercase tracking-[0.14em] text-mir-text3">
+                            prévia
+                        </span>
 
-                        <div className="flex items-end gap-8">
-                            <div>
-                                <div className="text-[30px] font-extrabold tabular-nums leading-none tracking-[-0.04em] text-mir-acc">
+                        {/* a legenda que a pilha precisa, na horizontal: no
+                            desktop ocupa zero altura em vez das 3 linhas do
+                            parágrafo antigo; abaixo de lg cai pra própria linha
+                            em vez de sumir, porque é ela que explica o tamanho
+                            das capas */}
+                        <p className="w-full text-[13px] leading-snug text-mir-text3 lg:w-auto lg:leading-none">
+                            capa maior, mais gente salvou · clique pra abrir a
+                            faixa
+                        </p>
+
+                        <div className="flex w-full items-baseline gap-5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-mir-text3 lg:ml-auto lg:w-auto">
+                            <span>
+                                <b className="mr-1.5 font-sans text-[19px] font-extrabold tabular-nums tracking-[-0.035em] text-mir-acc">
                                     {nf.format(tracks.length)}
-                                </div>
-                                <div className="mt-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-mir-text3">
-                                    faixas na pilha
-                                </div>
-                            </div>
-                            <div>
-                                <div className="text-[30px] font-extrabold tabular-nums leading-none tracking-[-0.04em] text-mir-text">
+                                </b>
+                                faixas
+                            </span>
+                            <span>
+                                <b className="mr-1.5 font-sans text-[19px] font-extrabold tabular-nums tracking-[-0.035em] text-mir-text">
                                     {nf.format(total)}
-                                </div>
-                                <div className="mt-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-mir-text3">
-                                    carimbos
-                                </div>
-                            </div>
+                                </b>
+                                no acervo
+                            </span>
                         </div>
                     </div>
                 </header>
 
                 {/* ---- filtros ---- */}
-                <div className="sticky top-[72px] z-30 -mx-5 mt-8 flex flex-wrap items-center gap-2 bg-mir-bg/85 px-5 py-3 backdrop-blur-xl sm:-mx-10 sm:px-10">
+                <div className="sticky top-[72px] z-30 -mx-5 mt-4 flex flex-wrap items-center gap-2 bg-mir-bg/85 px-5 py-2.5 backdrop-blur-xl sm:-mx-10 sm:px-10">
                     <button
                         onClick={() => setGenre(null)}
                         className={`pile-chip ${genre === null ? 'is-on' : ''}`}
@@ -296,7 +294,7 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
                     Fica no mesmo container dos filtros de propósito: se estivesse
                     em outra div, o bloco sticky perderia o contexto e os chips
                     sumiriam já nos primeiros 300px de rolagem da pilha. */}
-                <div className="pb-24 pt-6">
+                <div className="pb-24 pt-3">
                     <div
                         ref={wrapRef}
                         className="pile-stage"
@@ -353,7 +351,7 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
                                             {t.artist}
                                         </span>
                                         <span className="pile-tip-meta">
-                                            {nf.format(t.carimbos)} carimbos ·{' '}
+                                            {nf.format(t.salvos)} no acervo ·{' '}
                                             {t.genre} · primeira {ago(t.dias)}
                                         </span>
                                     </div>

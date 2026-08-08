@@ -43,7 +43,7 @@ function makeRng(seed: number) {
     }
 }
 
-// tamanho base por "temperatura": quanto mais gente carimbou, maior a capa.
+// tamanho base por "temperatura": quanto mais gente salvou, maior a capa.
 // A variação de tamanho é o dado, não enfeite.
 const HEAT_SIZE: Record<PileHeat, [number, number]> = {
     topo: [186, 252],
@@ -71,10 +71,15 @@ function makeFloor(cols: number, rand: () => number) {
         const s = f * f * (3 - 2 * f)
         const noise = values[k] * (1 - s) + values[k + 1] * s
 
+        // O monte é o contorno, não a altura: com queda de 230px nas bordas
+        // + 82px de ruído, os primeiros ~300px do palco ficavam num respingo
+        // de capas e a massa da pilha só aparecia depois da primeira dobra.
+        // Menos profundidade e expoente maior mantêm a silhueta de coisa
+        // despejada, mas o centro enche já no topo.
         const fromCenter = Math.abs((i / Math.max(1, cols - 1)) * 2 - 1)
-        const edge = Math.pow(fromCenter, 2.4) * 230
+        const edge = Math.pow(fromCenter, 2.6) * 165
 
-        floor[i] = edge + noise * 82
+        floor[i] = edge + noise * 62
     }
 
     const min = Math.min(...floor)
@@ -113,16 +118,21 @@ export function packPile(
 
         // testa alguns pontos de queda e fica com o que afunda mais, com um
         // empurrãozinho para o centro — é isso que forma o monte em vez de
-        // uma faixa de largura uniforme
+        // uma faixa de largura uniforme.
+        // 34 tentativas em vez de 16: com poucas amostras a peça aceitava o
+        // primeiro vão razoável e a pilha abria buracos. Mais amostras = pack
+        // mais apertado = pilha mais baixa, que é o que traz a massa pra cima.
+        // O puxão pro centro caiu de 0.22 para 0.16 pelo mesmo motivo: puxão
+        // forte demais empilha torre no meio e deixa as laterais vazias.
         let best = { col: 0, y: Infinity, score: Infinity }
-        const tries = 16
+        const tries = 34
         for (let a = 0; a < tries; a++) {
             const col = Math.round(rand() * maxCol)
             let y = 0
             for (let c = col; c < col + span; c++) y = Math.max(y, heights[c])
 
             const center = (col + span / 2) / Math.max(1, cols)
-            const pull = Math.abs(center - 0.5) * width * 0.22
+            const pull = Math.abs(center - 0.5) * width * 0.16
             const score = y + pull
             if (score < best.score) best = { col, y, score }
         }

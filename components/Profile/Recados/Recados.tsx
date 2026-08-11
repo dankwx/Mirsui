@@ -169,7 +169,7 @@ const Recados: React.FC<RecadosProps> = ({
                     <button
                         type="submit"
                         disabled={!content.trim() || isPosting}
-                        className="flex-none rounded-[9px] bg-mir-acc px-[18px] py-[9px] text-[13px] font-semibold text-mir-on-acc transition hover:brightness-105 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex-none rounded-[9px] bg-mir-warm px-[18px] py-[9px] text-[13px] font-semibold text-mir-on-warm transition hover:brightness-105 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {isPosting ? 'Enviando...' : 'Enviar'}
                     </button>
@@ -199,7 +199,7 @@ const Recados: React.FC<RecadosProps> = ({
                                 key={recado.id}
                                 className={`group relative flex gap-[14px] border-b border-mir-line py-[18px] ${
                                     recado.is_pinned
-                                        ? 'border-l-2 border-l-mir-acc bg-mir-acc-soft pl-[14px] pr-3'
+                                        ? 'border-l-2 border-l-mir-warm bg-mir-warm-soft pl-[14px] pr-3'
                                         : ''
                                 }`}
                             >
@@ -230,7 +230,7 @@ const Recados: React.FC<RecadosProps> = ({
                                             </span>
                                         )}
                                         {recado.is_pinned && (
-                                            <span className="inline-flex items-center gap-1 rounded-[5px] bg-mir-acc px-[6px] py-[2px] font-mono text-[9px] font-semibold uppercase tracking-[0.08em] text-mir-on-acc">
+                                            <span className="inline-flex items-center gap-1 rounded-[5px] bg-mir-warm px-[6px] py-[2px] font-mono text-[9px] font-semibold uppercase tracking-[0.08em] text-mir-on-warm">
                                                 Fixado
                                             </span>
                                         )}

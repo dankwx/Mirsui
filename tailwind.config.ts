@@ -23,10 +23,34 @@ const config = {
     			mono: ['var(--font-space-grotesk)', 'Space Grotesk', 'system-ui', 'sans-serif']
     		},
     		colors: {
+    			/**
+    			 * Duas cores acentuam, e cada uma tem um assunto:
+    			 *
+    			 *   acc  (lima)    tempo e precedência. "Você chegou cedo": posição,
+    			 *                  destaque de 1º lugar, foco. Nada além disso.
+    			 *   warm (laranja)  gente. Seguir, recados, favoritar, presença de
+    			 *                  outra pessoa na sua página.
+    			 *   text (creme)    todo o resto, inclusive hover e botão neutro.
+    			 *
+    			 * O lima dá 14,4:1 sobre mir-bg — praticamente o mesmo que o texto
+    			 * (14,6:1). Ele não escurece o suficiente para virar "secundário":
+    			 * ou é o dado mais importante da tela, ou não devia estar aceso.
+    			 */
     			mir: {
+    				// Rampa de elevação. Continua sutil de propósito (é um app escuro
+    				// e quente, não um dashboard de caixinhas), mas a distância entre
+    				// os degraus dobrou: card sobre bg saiu de 1,11:1 para 1,20:1.
+    				// Antes nada levantava do fundo e todo elemento precisava de uma
+    				// borda para existir.
+    				//
+    				// bg fica em #16120c: esse hex está escrito à mão em ~20 lugares
+    				// (rotas OG, MirsuiLogo, LegalDoc, mir-landing) como a tinta do
+    				// produto. Mover o chão exigiria caçar todos eles.
     				bg: '#16120c',
-    				surface: '#1c1710',
-    				card: '#231c12',
+    				surface: '#221b12',
+    				card: '#2b2317',
+    				/** menus, popovers e hover — o degrau que faltava */
+    				raised: '#382d1d',
     				line: 'rgba(236,227,210,0.12)',
     				line2: 'rgba(236,227,210,0.20)',
     				fill1: 'rgba(236,227,210,0.04)',
@@ -35,11 +59,18 @@ const config = {
     				// contraste sobre mir-bg: text 14.6:1, text2 7.6:1, text3 5.1:1.
     				// text3 estava em 0.42 (3.5:1) e reprovava no WCAG AA, apesar de
     				// vestir timestamps, rótulos e legendas em todo o app.
+    				// Sobre o mir-card novo, text3 dá 4,7:1 — ainda passa no AA.
     				text2: 'rgba(236,227,210,0.70)',
     				text3: 'rgba(236,227,210,0.55)',
     				acc: '#cdef36',
     				'acc-soft': 'rgba(205,239,54,0.14)',
-    				'on-acc': '#16120c'
+    				'on-acc': '#16120c',
+    				// Irmão claro do #c14a26 que já vivia escondido no gradiente de
+    				// avatar. 6,3:1 sobre mir-bg e 5,2:1 sobre mir-card: passa no AA
+    				// como texto normal, então pode escrever, não só decorar.
+    				warm: '#e8734a',
+    				'warm-soft': 'rgba(232,115,74,0.14)',
+    				'on-warm': '#16120c'
     			},
     			border: 'hsl(var(--border))',
     			input: 'hsl(var(--input))',

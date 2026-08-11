@@ -11,6 +11,12 @@ import { UserPlus, UserMinus, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { capture } from '@/lib/posthog'
 
+/**
+ * Seguir é laranja, não lima: o lima do app significa "você chegou cedo", e
+ * seguir alguém não tem nada a ver com precedência. O laranja é a cor da camada
+ * humana — seguir, recados, favoritar.
+ */
+
 type ButtonType = 'icon' | 'text'
 
 interface FollowButtonProps {
@@ -56,7 +62,7 @@ export default function FollowButton({
             'h-10 w-10 rounded-full border transition',
             isFollowing
                 ? 'border-mir-line2 bg-mir-fill1 text-mir-text2 hover:bg-mir-fill2 hover:text-mir-text'
-                : 'border-transparent bg-mir-acc text-mir-on-acc hover:bg-mir-acc hover:brightness-105'
+                : 'border-transparent bg-mir-warm text-mir-on-warm hover:bg-mir-warm hover:brightness-105'
         )
 
         return (
@@ -81,7 +87,7 @@ export default function FollowButton({
         'rounded-[9px] border px-[18px] py-[9px] text-[13.5px] font-semibold transition active:translate-y-px',
         isFollowing
             ? 'border-mir-line2 bg-transparent text-mir-text2 hover:border-mir-text3 hover:bg-mir-fill1 hover:text-mir-text'
-            : 'border-transparent bg-mir-acc text-mir-on-acc hover:bg-mir-acc hover:brightness-105'
+            : 'border-transparent bg-mir-warm text-mir-on-warm hover:bg-mir-warm hover:brightness-105'
     )
 
     return (

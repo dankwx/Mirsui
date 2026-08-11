@@ -203,7 +203,7 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                     align="end"
-                    className="w-56 border border-mir-line bg-mir-surface text-mir-text2 shadow-[0_24px_60px_rgba(0,0,0,0.5)]"
+                    className="w-56 border border-mir-line bg-mir-raised text-mir-text2 shadow-[0_24px_60px_rgba(0,0,0,0.5)]"
                 >
                     <DropdownMenuItem
                         onClick={() => handleToggleFavorite(song.id, song.is_favorited)}
@@ -211,7 +211,7 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                         className="cursor-pointer focus:bg-mir-fill2 focus:text-mir-text"
                     >
                         <HeartIcon
-                            className={`mr-2 h-4 w-4 ${song.is_favorited ? 'fill-current text-mir-acc' : ''}`}
+                            className={`mr-2 h-4 w-4 ${song.is_favorited ? 'fill-current text-mir-warm' : ''}`}
                         />
                         {favoriteStates[song.id] ? (
                             <span className="flex items-center">
@@ -267,17 +267,20 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
 
     const Tile = ({ song, mes }: { song: Song; mes: string | null }) => (
         <Link href={trackHref(song)} className="group block min-w-0">
+            {/* O mês é cronologia, não precedência: em lima ele ficava mais
+                aceso que o ordinal logo abaixo, que é o dado que distingue a
+                pessoa. Ambos os assuntos são "tempo", mas só um é conquista. */}
             {grouped && (
-                <div className="mb-2 flex h-[15px] items-center gap-2 font-mono text-[11px] text-mir-acc">
+                <div className="mb-2 flex h-[15px] items-center gap-2 font-mono text-[11px] text-mir-text3">
                     {mes && (
                         <>
                             <span className="truncate">{mes}</span>
-                            <span className="h-px flex-1 bg-mir-acc/25" />
+                            <span className="h-px flex-1 bg-mir-line" />
                         </>
                     )}
                 </div>
             )}
-            <div className="relative overflow-hidden rounded-[4px] bg-mir-card ring-1 ring-mir-line transition group-hover:ring-mir-acc">
+            <div className="relative overflow-hidden rounded-[4px] bg-mir-card ring-1 ring-mir-line transition group-hover:ring-mir-text3">
                 <Capa song={song} />
                 {canRemove && <OwnerMenu song={song} />}
             </div>
@@ -293,11 +296,11 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                     // O title cobre quem não conhece a convenção.
                     <span
                         title={`${song.position}ª a salvar`}
-                        className={
+                        className={`tabular-nums ${
                             song.position === 1
                                 ? 'font-bold text-mir-acc'
                                 : 'text-mir-text3'
-                        }
+                        }`}
                     >
                         {song.position}ª
                     </span>
@@ -306,7 +309,7 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                     <span className="truncate text-mir-text3">{mesAno(song.claimedat)}</span>
                 )}
                 {song.is_favorited && (
-                    <HeartIcon className="ml-auto h-3 w-3 flex-none fill-current text-mir-acc" />
+                    <HeartIcon className="ml-auto h-3 w-3 flex-none fill-current text-mir-warm" />
                 )}
             </div>
         </Link>
@@ -325,7 +328,7 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                         </p>
                         <Link
                             href="/claimtrack"
-                            className="mt-5 inline-flex rounded-full bg-mir-acc px-5 py-2.5 text-[13.5px] font-bold text-mir-on-acc transition hover:brightness-105 active:translate-y-px"
+                            className="mt-5 inline-flex rounded-full bg-mir-text px-5 py-2.5 text-[13.5px] font-bold text-mir-bg transition hover:brightness-105 active:translate-y-px"
                         >
                             Salvar a primeira
                         </Link>
@@ -343,7 +346,7 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                         <h2 className="m-0 text-[clamp(26px,3.6vw,34px)] font-extrabold tracking-[-0.04em] text-mir-text">
                             Acervo
                         </h2>
-                        <p className="m-0 mt-1.5 font-mono text-[11.5px] text-mir-text3">
+                        <p className="m-0 mt-1.5 font-mono text-[11.5px] tabular-nums text-mir-text3">
                             {list.length} {list.length === 1 ? 'faixa' : 'faixas'}
                         </p>
                     </div>
@@ -358,7 +361,7 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                                         aria-pressed={filter === f.id}
                                         className={`rounded-full px-3.5 py-1.5 font-mono text-[11.5px] transition ${
                                             filter === f.id
-                                                ? 'bg-mir-acc text-mir-on-acc'
+                                                ? 'bg-mir-text text-mir-bg'
                                                 : 'text-mir-text3 hover:text-mir-text'
                                         }`}
                                     >
@@ -372,7 +375,7 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                                 value={sort}
                                 onChange={(e) => setSort(e.target.value as Sort)}
                                 aria-label="Ordenar acervo"
-                                className="cursor-pointer appearance-none rounded-full border border-mir-line2 bg-transparent py-2 pl-4 pr-9 font-mono text-[11.5px] text-mir-text2 outline-none transition hover:border-mir-acc hover:text-mir-text focus-visible:ring-1 focus-visible:ring-mir-acc"
+                                className="cursor-pointer appearance-none rounded-full border border-mir-line2 bg-transparent py-2 pl-4 pr-9 font-mono text-[11.5px] text-mir-text2 outline-none transition hover:border-mir-text3 hover:text-mir-text focus-visible:ring-1 focus-visible:ring-mir-acc"
                             >
                                 {SORTS.map((s) => (
                                     <option

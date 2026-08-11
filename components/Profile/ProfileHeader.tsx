@@ -138,7 +138,7 @@ export default function ProfileHeader({
                             disabled={!canEdit}
                             className={`h-[76px] w-[76px] flex-none overflow-hidden rounded-full ring-1 ring-mir-line2 sm:h-[92px] sm:w-[92px] ${
                                 canEdit
-                                    ? 'cursor-pointer transition hover:ring-mir-acc'
+                                    ? 'cursor-pointer transition hover:ring-mir-text3'
                                     : 'cursor-default'
                             }`}
                             style={{
@@ -190,10 +190,14 @@ export default function ProfileHeader({
 
                     {/* ações */}
                     <div className="mt-6 flex flex-wrap items-center gap-3">
+                        {/* Creme, não lima: editar o próprio perfil é manutenção,
+                            não conquista. O lima desta página é o número de
+                            destaque ali em cima, e ele não divide a tela com um
+                            botão do mesmo tom. */}
                         {canEdit ? (
                             <button
                                 onClick={() => setOpenEdit(true)}
-                                className="inline-flex items-center gap-2 rounded-full bg-mir-acc px-5 py-2.5 text-[13.5px] font-bold text-mir-on-acc transition hover:brightness-105 active:translate-y-px"
+                                className="inline-flex items-center gap-2 rounded-full bg-mir-text px-5 py-2.5 text-[13.5px] font-bold text-mir-bg transition hover:brightness-105 active:translate-y-px"
                             >
                                 <Pencil className="h-[14px] w-[14px]" />
                                 Editar perfil
@@ -209,11 +213,11 @@ export default function ProfileHeader({
                         )}
                         <button
                             onClick={handleShare}
-                            className="inline-flex items-center gap-2 rounded-full border border-mir-line2 px-5 py-2.5 text-[13.5px] font-bold text-mir-text2 transition hover:border-mir-acc hover:text-mir-acc active:translate-y-px"
+                            className="inline-flex items-center gap-2 rounded-full border border-mir-line2 px-5 py-2.5 text-[13.5px] font-bold text-mir-text2 transition hover:border-mir-text3 hover:text-mir-text active:translate-y-px"
                         >
                             {copied ? (
                                 <>
-                                    <Check className="h-[14px] w-[14px] text-mir-acc" />
+                                    <Check className="h-[14px] w-[14px] text-mir-text" />
                                     Link copiado
                                 </>
                             ) : (
@@ -246,7 +250,7 @@ export default function ProfileHeader({
                                     key={song.id}
                                     href={trackHref(song)}
                                     title={`${song.track_title}, ${song.artist_name}`}
-                                    className="group block overflow-hidden rounded-[4px] bg-mir-card ring-1 ring-mir-line transition hover:ring-mir-acc"
+                                    className="group block overflow-hidden rounded-[4px] bg-mir-card ring-1 ring-mir-line transition hover:ring-mir-text3"
                                 >
                                     {song.track_thumbnail ? (
                                         <img
@@ -303,7 +307,7 @@ export default function ProfileHeader({
                                 <Button
                                     type="submit"
                                     disabled={isSaving}
-                                    className="flex-1 rounded-full bg-mir-acc text-[13.5px] font-semibold text-mir-on-acc hover:bg-mir-acc hover:brightness-105"
+                                    className="flex-1 rounded-full bg-mir-text text-[13.5px] font-semibold text-mir-bg hover:bg-mir-text hover:brightness-105"
                                 >
                                     {isSaving ? 'Salvando...' : 'Salvar'}
                                 </Button>

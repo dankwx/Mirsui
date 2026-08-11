@@ -57,7 +57,7 @@ export default function FollowersFollowingSection({
                 </Avatar>
                 <a
                     href={`/user/${user.username}`}
-                    className="font-mono text-[13px] text-mir-text2 transition hover:text-mir-acc"
+                    className="font-mono text-[13px] text-mir-text2 transition hover:text-mir-warm"
                 >
                     @{user.username}
                 </a>
@@ -77,7 +77,7 @@ export default function FollowersFollowingSection({
     // minúscula. São a mesma fileira de números, então não podem divergir.
     const statTrigger = (count: number, label: string) => (
         <button className="group flex flex-col text-left">
-            <span className="text-[30px] font-extrabold leading-none tracking-[-0.03em] tabular-nums text-mir-text transition group-hover:text-mir-acc">
+            <span className="text-[30px] font-extrabold leading-none tracking-[-0.03em] tabular-nums text-mir-text transition group-hover:text-mir-warm">
                 {count}
             </span>
             <span className="mt-1.5 font-mono text-[10.5px] lowercase tracking-[0.06em] text-mir-text3">

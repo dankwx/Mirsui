@@ -110,7 +110,7 @@ export default function ChegouCedo({
                         href={trackHref(destaque)}
                         className="group block max-w-[300px]"
                     >
-                        <div className="overflow-hidden rounded-[4px] bg-mir-card ring-1 ring-mir-line transition group-hover:ring-mir-acc">
+                        <div className="overflow-hidden rounded-[4px] bg-mir-card ring-1 ring-mir-line transition group-hover:ring-mir-text3">
                             <Capa song={destaque} />
                         </div>
                         <div className="mt-4 text-[22px] font-extrabold leading-tight tracking-[-0.03em] text-mir-text">
@@ -136,7 +136,7 @@ export default function ChegouCedo({
                                     href={trackHref(song)}
                                     className="group block min-w-0"
                                 >
-                                    <div className="overflow-hidden rounded-[4px] bg-mir-card ring-1 ring-mir-line transition group-hover:ring-mir-acc">
+                                    <div className="overflow-hidden rounded-[4px] bg-mir-card ring-1 ring-mir-line transition group-hover:ring-mir-text3">
                                         <Capa song={song} />
                                     </div>
                                     <div className="mt-3 truncate text-[14.5px] font-bold tracking-[-0.01em] text-mir-text">

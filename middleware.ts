@@ -2,18 +2,46 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
-// Rotas públicas que não precisam de autenticação
-const PUBLIC_ROUTES = [
+// O conteúdo do Mirsui é aberto. Login serve para AGIR (salvar, botar ficha,
+// seguir, comentar), não para OLHAR — mesmo modelo de Letterboxd e Last.fm.
+//
+// O motivo prático: um link de faixa mandado no WhatsApp precisa abrir para
+// quem clica. Com o gate anterior, qualquer visitante caía num redirect para a
+// landing, e o único canal de crescimento que um site deste tamanho tem é o
+// compartilhamento.
+//
+// As páginas já estavam prontas para isso — track, artist, user e library
+// calculam `isLoggedIn` e adaptam a interface. O cadeado era só este arquivo.
+
+/** Rotas públicas por correspondência exata. */
+const PUBLIC_EXACT = [
   '/',
   '/how-it-works',
   '/termos',
   '/privacidade',
-  '/auth/confirm',
-  '/auth/callback',
   '/auth/check-email',
   '/reset-password',
   '/check-email',
 ]
+
+/** Prefixos públicos: a própria rota e tudo abaixo dela. */
+const PUBLIC_PREFIXES = [
+  '/track', // ficha da faixa
+  '/artist', // página do artista
+  '/user', // perfil público
+  '/feed', // o que a cena andou salvando
+  '/pilha', // o catálogo que o Observatório mede
+  // `/library` sozinho resolve para a biblioteca de QUEM ESTÁ LOGADO e já se
+  // protege sozinho (redirect para '/' quando não há sessão). O que interessa
+  // abrir aqui é `/library/<username>`, o acervo de uma pessoa.
+  '/library',
+  '/auth/confirm',
+  '/auth/callback',
+]
+
+// Seguem exigindo sessão, e cada um por um motivo:
+//   /stakes     — estado de jogo pessoal (as fichas de quem está logado)
+//   /claimtrack — página de ação, e herdada de outra fase do produto
 
 // Rotas de API públicas
 const PUBLIC_API_ROUTES = [
@@ -25,15 +53,15 @@ const PUBLIC_API_ROUTES = [
 ]
 
 function isPublicPath(pathname: string): boolean {
-  const isPublicRoute = PUBLIC_ROUTES.some(route =>
-    route === '/'
-      ? pathname === '/'
-      : pathname === route || pathname.startsWith(`${route}/`)
+  if (PUBLIC_EXACT.includes(pathname)) return true
+
+  const isPublicPrefix = PUBLIC_PREFIXES.some(
+    route => pathname === route || pathname.startsWith(`${route}/`)
   )
   const isPublicApiRoute = PUBLIC_API_ROUTES.some(route =>
     pathname.startsWith(route)
   )
-  return isPublicRoute || isPublicApiRoute
+  return isPublicPrefix || isPublicApiRoute
 }
 
 export async function middleware(request: NextRequest) {

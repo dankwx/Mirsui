@@ -86,6 +86,36 @@ const navLinks: NavLink[] = [
     },
 ]
 
+/**
+ * Nav de quem chega sem sessão.
+ *
+ * O conteúdo do site abriu (faixa, artista, perfil, feed e acervo dos outros),
+ * mas /pilha, /library, /stakes e /claimtrack seguem exigindo login. Mostrar a
+ * nav completa para um visitante seria oferecer quatro becos sem saída: os
+ * quatro itens levam a um redirect de volta para a landing.
+ *
+ * Aqui "Início" é a landing — e não o feed, como no caso logado —, então o feed
+ * ganha item próprio. Para quem tem sessão isso sairia repetido, que é o motivo
+ * de as duas listas serem separadas em vez de uma filtrada.
+ */
+const navLinksVisitante: NavLink[] = [
+    {
+        title: 'Início',
+        url: '/',
+        match: (p) => p === '/',
+    },
+    {
+        title: 'Achados',
+        url: '/feed',
+        match: (p) => p.startsWith('/feed'),
+    },
+    {
+        title: 'A pilha',
+        url: '/pilha',
+        match: (p) => p.startsWith('/pilha'),
+    },
+]
+
 export default function Header({ userProfile }: HeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const profileRef = useRef<HTMLDivElement>(null)
@@ -142,7 +172,7 @@ export default function Header({ userProfile }: HeaderProps) {
                 </Link>
 
                 <div className="hidden items-center gap-7 md:flex">
-                    {navLinks.map((link) => {
+                    {(userProfile ? navLinks : navLinksVisitante).map((link) => {
                         const active = link.match(pathname)
                         const href = link.title === 'Início' ? homeUrl : link.url
                         return (

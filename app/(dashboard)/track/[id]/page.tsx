@@ -11,14 +11,16 @@ import { fetchDeezerGenresByISRC } from '@/utils/deezerService'
 import { countTrackOccurrences } from '@/utils/fetchTrackInfo'
 import { getTopTrackClaimers } from '@/utils/trackPopularityService'
 import { searchYouTubeVideo } from '@/utils/youtubeService'
+import { getTrackCurve } from '@/utils/observatoryService'
 import TrackActions from '@/components/TrackActions/TrackActions'
 import TrackShare from '@/components/TrackShare/TrackShare'
+import TrackCurve from '@/components/TrackCurve/TrackCurve'
 import TrackPreviewBar from '@/components/TrackPreviewBar/TrackPreviewBar'
 import ProfileFooter from '@/components/Profile/ProfileFooter'
 import type { Metadata } from 'next'
 
 import Link from 'next/link'
-import { ArrowLeft, Clock, Crown, TrendingUp } from 'lucide-react'
+import { ArrowLeft, Clock, Crown } from 'lucide-react'
 
 export async function generateMetadata({
     params,
@@ -164,6 +166,11 @@ export default async function TrackDetailsPage({
         genre = formatGenres(await fetchDeezerGenresByISRC(isrc))
     }
 
+    // Curva do Observatório — o histórico de audiência que o Mirsui mede todo
+    // dia. Casada pelo ISRC (ver utils/observatoryService.ts). Devolve null para
+    // faixa ainda não medida, e aí o bloco não aparece.
+    const curva = await getTrackCurve(isrc)
+
     // Ficha técnica — dados reais (Spotify + fallback Deezer)
     const specs = [
         genre && { k: 'Gênero', v: genre },
@@ -306,9 +313,6 @@ export default async function TrackDetailsPage({
                         {/* Info */}
                         <div className="min-w-0 flex-1 pt-1">
                             <div className="flex flex-wrap items-center gap-3">
-                                <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[rgba(205,239,54,0.4)] bg-mir-acc-soft py-1 pl-2 pr-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.08em] text-mir-acc">
-                                    <TrendingUp className="h-3 w-3" /> Em alta
-                                </span>
                                 {genre && (
                                     <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-mir-text3">
                                         {genre}
@@ -406,6 +410,7 @@ export default async function TrackDetailsPage({
                             artistName={artistNames}
                         />
                     )}
+                    {curva && <TrackCurve curva={curva} />}
                 </main>
 
                 {/* Rail */}

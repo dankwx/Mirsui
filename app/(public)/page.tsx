@@ -6,6 +6,7 @@ import TrackWall from '@/components/TrackWall/TrackWall'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { getTrendingTracks, getRecentActivity } from '@/utils/homepageService'
+import { getLandingObservatory } from '@/utils/observatoryService'
 import { formatTimestamp } from '@/utils/feedHelpers'
 import type { Metadata } from 'next'
 
@@ -122,6 +123,22 @@ function tic0(ts: string) {
     return v === 'agora mesmo' ? 'agora' : v
 }
 
+/**
+ * Rota da ficha da faixa a partir do que a landing tem em mãos.
+ *
+ * `tracks.track_url` guarda a URL completa do Spotify com o parâmetro `si`
+ * (https://open.spotify.com/track/<id>?si=...), e `track_uri` guarda
+ * `spotify:track:<id>`. As duas formas aparecem, então a extração aceita ambas.
+ *
+ * Sem id reconhecível cai em '/feed' em vez de montar uma rota quebrada — a
+ * página existe para qualquer id válido do Spotify, mas não para lixo.
+ */
+function trackHref(origem?: string | null): string {
+    if (!origem) return '/feed'
+    const m = origem.match(/(?:track[:/])([A-Za-z0-9]{22})/)
+    return m ? `/track/${m[1]}` : '/feed'
+}
+
 const BEATS = [
     {
         title: 'Salva',
@@ -144,16 +161,19 @@ export default async function HomePage() {
         redirect('/feed')
     }
 
-    const [trendingTracks, recentActivity] = await Promise.all([
+    const [trendingTracks, recentActivity, observatorio] = await Promise.all([
         getTrendingTracks(8),
         getRecentActivity(8),
+        getLandingObservatory(10),
     ])
 
     // monta o feed do ticker a partir da atividade real (duplicado p/ loop perfeito)
-    const tickerBase = recentActivity.map((t: any) => ({
+    const tickerBase = recentActivity.map((t) => ({
         who: t.profiles?.display_name || t.profiles?.username || 'Alguém',
-        track: t.track_title as string,
-        artist: t.artist_name as string,
+        username: t.profiles?.username ?? null,
+        track: t.track_title,
+        artist: t.artist_name,
+        href: trackHref(t.track_uri),
         ago: tic0(t.claimedat),
     }))
     const tickerItems =
@@ -188,10 +208,12 @@ export default async function HomePage() {
                         <Link href="/" className="logo">
                             <Glyph /> mirsui
                         </Link>
+                        {/* Eram só âncoras para dentro da própria página. Agora
+                            que o conteúdo abriu, a nav leva às páginas reais —
+                            e é por ela que o crawler encontra o resto do site. */}
                         <div className="links">
-                            <a href="#cena" className="active">
-                                A cena
-                            </a>
+                            <Link href="/feed">Achados</Link>
+                            <Link href="/pilha">A pilha</Link>
                             <a href="#como">Como funciona</a>
                         </div>
                         <div className="nav-right">
@@ -228,25 +250,53 @@ export default async function HomePage() {
 
                 {/* ticker ao vivo */}
                 {tickerItems.length > 0 && (
-                    <div className="ticker" aria-hidden="true">
-                        <div className="ticker-lead">
+                    <div className="ticker">
+                        <div className="ticker-lead" aria-hidden="true">
                             <span className="live-dot" /> ao vivo
                         </div>
+                        {/* A lista é duplicada para o loop da animação, então a
+                            segunda metade sai de árvore de acessibilidade e de
+                            tabulação — senão o leitor de tela ouve tudo duas
+                            vezes e o tab passa por links repetidos. */}
                         <div className="ticker-track">
-                            {tickerItems.map((it, i) => (
-                                <span className="ti" key={i}>
-                                    <span className="early-dot" />
-                                    {/* o texto vai num item só: .ti é inline-flex
-                                        com gap, e soltar a vírgula como filho
-                                        direto criaria um espaço antes dela */}
-                                    <span className="ti-txt">
-                                        <b>{it.who}</b> salvou{' '}
-                                        <span className="tk">{it.track}</span>,{' '}
-                                        {it.artist}
+                            {tickerItems.map((it, i) => {
+                                const eco = i >= tickerBase.length
+                                return (
+                                    <span
+                                        className="ti"
+                                        key={i}
+                                        aria-hidden={eco || undefined}
+                                    >
+                                        <span className="early-dot" />
+                                        {/* o texto vai num item só: .ti é
+                                            inline-flex com gap, e soltar a
+                                            vírgula como filho direto criaria um
+                                            espaço antes dela */}
+                                        <span className="ti-txt">
+                                            {it.username ? (
+                                                <Link
+                                                    href={`/user/${it.username}`}
+                                                    tabIndex={eco ? -1 : undefined}
+                                                >
+                                                    <b>{it.who}</b>
+                                                </Link>
+                                            ) : (
+                                                <b>{it.who}</b>
+                                            )}{' '}
+                                            salvou{' '}
+                                            <Link
+                                                href={it.href}
+                                                className="tk"
+                                                tabIndex={eco ? -1 : undefined}
+                                            >
+                                                {it.track}
+                                            </Link>
+                                            , {it.artist}
+                                        </span>
+                                        <span className="ago">· {it.ago}</span>
                                     </span>
-                                    <span className="ago">· {it.ago}</span>
-                                </span>
-                            ))}
+                                )
+                            })}
                         </div>
                     </div>
                 )}
@@ -267,19 +317,21 @@ export default async function HomePage() {
                                     tendência.
                                 </p>
                             </div>
-                            <AuthModalTrigger className="b b-solid" mode="login">
+                            <Link href="/feed" className="b b-solid">
                                 Explorar tudo <ArrowIcon size={15} />
-                            </AuthModalTrigger>
+                            </Link>
                         </div>
 
                         <TrackWall>
                             {trendingTracks.map((t, i) => (
-                                <AuthModalTrigger
-                                    as="div"
+                                // Era AuthModalTrigger: a capa mostrava uma faixa
+                                // real e o clique abria login. Agora que a ficha
+                                // é pública, o card leva até ela.
+                                <Link
+                                    href={trackHref(t.track_url)}
                                     className="poster"
-                                    mode="login"
                                     key={t.id}
-                                    ariaLabel={`Salvar ${t.track_title}, de ${t.artist_name}`}
+                                    aria-label={`Abrir ${t.track_title}, de ${t.artist_name}`}
                                 >
                                     <div className="cover-wrap">
                                         <span className="rank-chip">
@@ -330,7 +382,104 @@ export default async function HomePage() {
                                             ? '1 já salvou'
                                             : `${t.total_claims} já salvaram`}
                                     </div>
-                                </AuthModalTrigger>
+                                </Link>
+                            ))}
+                        </TrackWall>
+                    </div>
+                </section>
+            )}
+
+            {/* ============ O OBSERVATÓRIO ============
+                A seção acima é social: o que as pessoas daqui salvaram, hoje
+                umas 30 faixas. Esta é o ativo próprio — o catálogo que o Mirsui
+                mede sozinho, todo dia, sem depender de ninguém ter salvado.
+
+                O título muda conforme o dado: enquanto não houver série longa o
+                bastante para chamar de tendência, a lista é o subsolo do radar,
+                e a seção diz isso. Quando o histórico encher, ela vira "as que
+                mais subiram" sem ninguém tocar no código. */}
+            {observatorio && observatorio.faixas.length > 0 && (
+                <section className="wall-sec" id="observatorio">
+                    <div className="wrap">
+                        <div className="wall-head">
+                            <div className="sec-head">
+                                <span className="eyebrow">
+                                    <span className="live-dot" /> O Observatório
+                                </span>
+                                <h2>
+                                    {observatorio.temMovimento
+                                        ? 'As que mais subiram desde que começamos a medir.'
+                                        : 'O que ainda tá no subsolo.'}
+                                </h2>
+                                <p className="sh-sub">
+                                    {observatorio.medidas.toLocaleString('pt-BR')}{' '}
+                                    faixas medidas todo dia desde{' '}
+                                    {/* o ponto final entra na expressão: solto na
+                                        linha de baixo, o JSX vira a quebra em
+                                        espaço e sai "10 de agosto ." */}
+                                    {(observatorio.desde
+                                        ? new Date(
+                                              observatorio.desde + 'T12:00:00Z'
+                                          ).toLocaleDateString('pt-BR', {
+                                              day: 'numeric',
+                                              month: 'long',
+                                          })
+                                        : 'o início') +
+                                        '. Nenhuma plataforma publica esse histórico.'}
+                                </p>
+                            </div>
+                            <Link href="/pilha" className="b b-solid">
+                                Ver a pilha <ArrowIcon size={15} />
+                            </Link>
+                        </div>
+
+                        <TrackWall>
+                            {observatorio.faixas.map((f) => (
+                                <Link
+                                    href={`/track/${f.spotifyId}`}
+                                    className="poster"
+                                    key={f.spotifyId}
+                                    aria-label={`Abrir ${f.title}, de ${f.artist}`}
+                                >
+                                    <div className="cover-wrap">
+                                        <span className="rank-chip">
+                                            {f.variacao != null
+                                                ? `+${f.variacao
+                                                      .toFixed(1)
+                                                      .replace('.', ',')}%`
+                                                : `${f.audiencia}/100`}
+                                        </span>
+                                        <div
+                                            className="cover-art mir-cover"
+                                            style={
+                                                {
+                                                    '--tone': tone(f.artist),
+                                                } as React.CSSProperties
+                                            }
+                                        >
+                                            <span
+                                                className="mir-cover-ini"
+                                                aria-hidden="true"
+                                            >
+                                                {initials(f.artist)}
+                                            </span>
+                                            {f.cover && (
+                                                <Image
+                                                    src={f.cover}
+                                                    alt=""
+                                                    width={240}
+                                                    height={240}
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="ptt">{f.title}</div>
+                                    <div className="par">{f.artist}</div>
+                                    <div className="padds">
+                                        <TrendIcon size={12} />{' '}
+                                        {f.genre ?? 'medida hoje'}
+                                    </div>
+                                </Link>
                             ))}
                         </TrackWall>
                     </div>

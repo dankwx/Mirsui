@@ -87,6 +87,99 @@ export async function getTrackCurve(
     return buscar(isrc)
 }
 
+/* ------------------------------------------------------------------ landing */
+
+export interface FaixaDoObservatorio {
+    spotifyId: string
+    title: string
+    artist: string
+    cover: string | null
+    genre: string | null
+    /** 0-100, nível de audiência medido */
+    audiencia: number
+    /** variação % desde a primeira medição; null enquanto não houver série */
+    variacao: number | null
+}
+
+export interface ObservatorioNaLanding {
+    /** quantas faixas o Observatório mede hoje */
+    medidas: number
+    /** data da primeira medição */
+    desde: string | null
+    /**
+     * Há variação medida em série longa o bastante para ser chamada de
+     * tendência. Enquanto for false, a lista é o subsolo do radar — e o título
+     * da seção precisa dizer isso, não prometer alta.
+     */
+    temMovimento: boolean
+    faixas: FaixaDoObservatorio[]
+}
+
+interface LandingBruta {
+    medidas?: number
+    desde?: string | null
+    tem_movimento?: boolean
+    faixas?: {
+        spotify_id?: string
+        title?: string
+        artist?: string
+        md5?: string | null
+        genre?: string | null
+        audiencia?: number
+        variacao?: number | null
+    }[]
+}
+
+const buscarLanding = unstable_cache(
+    async (limite: number): Promise<ObservatorioNaLanding | null> => {
+        const { data, error } = await supabasePublic.rpc(
+            'get_landing_observatory',
+            { p_limite: limite }
+        )
+
+        if (error) {
+            console.error('[observatorio] falha na landing:', error.message)
+            return null
+        }
+        if (!data) return null
+
+        const b = data as LandingBruta
+
+        return {
+            medidas: Number(b.medidas) || 0,
+            desde: b.desde ?? null,
+            temMovimento: !!b.tem_movimento,
+            faixas: (b.faixas ?? []).flatMap((f) => {
+                if (!f.spotify_id || !f.title || !f.artist) return []
+                return [
+                    {
+                        spotifyId: f.spotify_id,
+                        title: f.title,
+                        artist: f.artist,
+                        // mesma montagem de capa da Pilha (ver utils/pileService.ts)
+                        cover: f.md5
+                            ? `https://cdn-images.dzcdn.net/images/cover/${f.md5}/500x500-000000-80-0-0.jpg`
+                            : null,
+                        genre: f.genre ?? null,
+                        audiencia: Number(f.audiencia) || 0,
+                        variacao:
+                            f.variacao == null ? null : Number(f.variacao),
+                    },
+                ]
+            }),
+        }
+    },
+    ['observatorio-landing'],
+    { revalidate: REVALIDAR_SEGUNDOS, tags: ['observatorio', 'landing'] }
+)
+
+/** Resumo do Observatório para a home. Null se a consulta falhar. */
+export async function getLandingObservatory(
+    limite = 8
+): Promise<ObservatorioNaLanding | null> {
+    return buscarLanding(limite)
+}
+
 /**
  * Variação percentual entre a primeira e a última medição.
  *

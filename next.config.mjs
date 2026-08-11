@@ -1,7 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['i.scdn.co', 'tqprioqqitimssshcrcr.supabase.co'],
+        // cdn-images.dzcdn.net: capas do Deezer, que é a fonte do Observatório.
+        // Sem o domínio aqui o <Image> quebra em runtime — a Pilha escapa disso
+        // porque usa <img> cru, mas a landing passa pelo otimizador.
+        domains: [
+            'i.scdn.co',
+            'cdn-images.dzcdn.net',
+            'tqprioqqitimssshcrcr.supabase.co',
+        ],
     },
     // Reverse proxy do PostHog: o client envia eventos para /ingest (mesmo domínio),
     // o que evita que adblockers bloqueiem o tracking. Recomendado pela PostHog.

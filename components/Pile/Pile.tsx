@@ -2,8 +2,8 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Shuffle, X } from 'lucide-react'
-import { HEAT_LABEL, PILE_GENRES, type PileTrack } from '@/utils/pileTypes'
+import { ArrowLeft, LayoutGrid, List, Shuffle, X } from 'lucide-react'
+import { HEAT_LABEL, type PileTrack } from '@/utils/pileTypes'
 import { packPile } from './pileLayout'
 
 const nf = new Intl.NumberFormat('pt-BR')
@@ -37,11 +37,6 @@ function initials(name: string) {
         .join('')
         .toUpperCase()
         .slice(0, 2)
-}
-function ago(dias: number) {
-    if (dias < 30) return `há ${dias} ${dias === 1 ? 'dia' : 'dias'}`
-    const m = Math.round(dias / 30)
-    return `há ${m} ${m === 1 ? 'mês' : 'meses'}`
 }
 function spotifySearch(t: PileTrack) {
     return `https://open.spotify.com/search/${encodeURIComponent(`${t.artist} ${t.title}`)}`
@@ -119,32 +114,40 @@ function PieceSheet({
                         {track.artist}
                     </p>
 
-                    <div className="mt-5 grid grid-cols-2 gap-3 border-t border-mir-line pt-4">
-                        <div>
-                            <div className="text-[22px] font-extrabold tabular-nums tracking-[-0.03em] text-mir-acc">
-                                {nf.format(track.salvos)}
-                            </div>
-                            <div className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-mir-text3">
-                                no acervo
-                            </div>
+                    {/* Um número só, e ele é medido. Antes eram dois — "no
+                        acervo" e "a primeira" —, os dois saídos de um hash do
+                        nome da faixa. Ver migrations/013_pilha_real.sql. */}
+                    <div className="mt-5 border-t border-mir-line pt-4">
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-[22px] font-extrabold tabular-nums tracking-[-0.03em] text-mir-acc">
+                                {track.audiencia}
+                            </span>
+                            <span className="text-[13px] tabular-nums text-mir-text3">
+                                /100
+                            </span>
                         </div>
-                        <div>
-                            <div className="text-[22px] font-extrabold tracking-[-0.03em] text-mir-text">
-                                {ago(track.dias)}
-                            </div>
-                            <div className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-mir-text3">
-                                a primeira
-                            </div>
+                        <div className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-mir-text3">
+                            audiência hoje
                         </div>
                     </div>
 
+                    {/* Ia para /claimtrack, genérico: a página não sabia de que
+                        faixa se tratava, e para visitante deslogado era só uma
+                        parede de login. Agora abre a ficha da própria faixa, que
+                        é pública e tem o botão de salvar de verdade. */}
                     <div className="mt-5 flex gap-2.5">
-                        <Link
-                            href="/claimtrack"
-                            className="flex-1 rounded-full bg-mir-acc px-5 py-3 text-center text-[14px] font-bold text-mir-on-acc transition hover:brightness-110 active:translate-y-px"
-                        >
-                            Salvar essa
-                        </Link>
+                        {track.spotifyId ? (
+                            <Link
+                                href={`/track/${track.spotifyId}`}
+                                className="flex-1 rounded-full bg-mir-acc px-5 py-3 text-center text-[14px] font-bold text-mir-on-acc transition hover:brightness-110 active:translate-y-px"
+                            >
+                                Abrir a faixa
+                            </Link>
+                        ) : (
+                            <span className="flex-1 rounded-full border border-mir-line2 px-5 py-3 text-center text-[14px] font-semibold text-mir-text3">
+                                Sem ficha no Spotify
+                            </span>
+                        )}
                         <a
                             href={spotifySearch(track)}
                             target="_blank"
@@ -167,6 +170,7 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
     const [run, setRun] = useState(0)
     const [genre, setGenre] = useState<string | null>(null)
     const [open, setOpen] = useState<PileTrack | null>(null)
+    const [vista, setVista] = useState<'mosaico' | 'lista'>('mosaico')
 
     useEffect(() => {
         const el = wrapRef.current
@@ -185,8 +189,15 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
         [tracks, width, run]
     )
 
-    const total = useMemo(
-        () => tracks.reduce((s, t) => s + t.salvos, 0),
+    // Os chips vêm das faixas que chegaram, não de uma lista fixa: os gêneros
+    // são os do Deezer e mudam conforme o Observatório cresce.
+    // Array.from em vez de espalhar o Set: o target do tsconfig é anterior a
+    // es2015 e não itera Set sem downlevelIteration.
+    const generos = useMemo(
+        () =>
+            Array.from(new Set(tracks.map((t) => t.genre))).sort((a, b) =>
+                a.localeCompare(b, 'pt-BR')
+            ),
         [tracks]
     )
     const matches = useMemo(
@@ -233,7 +244,7 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
                             em vez de sumir, porque é ela que explica o tamanho
                             das capas */}
                         <p className="w-full text-[13px] leading-snug text-mir-text3 lg:w-auto lg:leading-none">
-                            capa maior, mais gente salvou · clique pra abrir a
+                            capa maior, mais audiência · clique pra abrir a
                             faixa
                         </p>
 
@@ -246,9 +257,9 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
                             </span>
                             <span>
                                 <b className="mr-1.5 font-sans text-[19px] font-extrabold tabular-nums tracking-[-0.035em] text-mir-text">
-                                    {nf.format(total)}
+                                    {nf.format(generos.length)}
                                 </b>
-                                no acervo
+                                gêneros
                             </span>
                         </div>
                     </div>
@@ -262,7 +273,7 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
                     >
                         tudo
                     </button>
-                    {PILE_GENRES.map((g) => (
+                    {generos.map((g) => (
                         <button
                             key={g}
                             onClick={() =>
@@ -274,13 +285,37 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
                         </button>
                     ))}
 
-                    <button
-                        onClick={despejar}
-                        className="ml-auto inline-flex items-center gap-2 rounded-full border border-mir-line2 px-4 py-[7px] font-mono text-[11px] uppercase tracking-[0.1em] text-mir-text2 transition hover:border-mir-acc/60 hover:text-mir-acc active:translate-y-px"
-                    >
-                        <Shuffle className="h-3.5 w-3.5" />
-                        despejar de novo
-                    </button>
+                    <div className="ml-auto flex items-center gap-2">
+                        {vista === 'mosaico' && (
+                            <button
+                                onClick={despejar}
+                                className="inline-flex items-center gap-2 rounded-full border border-mir-line2 px-4 py-[7px] font-mono text-[11px] uppercase tracking-[0.1em] text-mir-text2 transition hover:border-mir-acc/60 hover:text-mir-acc active:translate-y-px"
+                            >
+                                <Shuffle className="h-3.5 w-3.5" />
+                                despejar de novo
+                            </button>
+                        )}
+                        <button
+                            onClick={() =>
+                                setVista((v) =>
+                                    v === 'mosaico' ? 'lista' : 'mosaico'
+                                )
+                            }
+                            className="inline-flex items-center gap-2 rounded-full border border-mir-line2 px-4 py-[7px] font-mono text-[11px] uppercase tracking-[0.1em] text-mir-text2 transition hover:border-mir-acc/60 hover:text-mir-acc active:translate-y-px"
+                        >
+                            {vista === 'mosaico' ? (
+                                <>
+                                    <List className="h-3.5 w-3.5" />
+                                    ver em lista
+                                </>
+                            ) : (
+                                <>
+                                    <LayoutGrid className="h-3.5 w-3.5" />
+                                    ver a pilha
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </div>
 
                 {genre && (
@@ -290,11 +325,109 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
                     </p>
                 )}
 
+                {/* ---- a lista ----
+                    As duas vistas ficam SEMPRE no DOM, alternadas por CSS, e não
+                    montadas condicionalmente. O motivo é o mosaico: as posições
+                    dele são calculadas em px a partir da largura medida pelo
+                    ResizeObserver, que no servidor não roda — então o HTML que
+                    sai do servidor tem zero peça de mosaico, e as 168 faixas
+                    existem lá só como JSON do payload do React.
+
+                    Renderizando a lista de verdade, o conteúdo da Pilha passa a
+                    existir em HTML semântico para quem não executa JavaScript.
+                    E não é só crawler: ninguém acha uma faixa específica varrendo
+                    168 capas sem título, então a lista é uma vista útil por si.
+
+                    (Ainda sem link para /track: aquelas páginas são endereçadas
+                    por id do Spotify e o Observatório mede por id do Deezer.
+                    Falta a ponte ISRC -> Spotify.) */}
+                <div className={vista === 'lista' ? 'pb-24 pt-3' : 'hidden'}>
+                    <ol className="divide-y divide-mir-line border-y border-mir-line">
+                        {tracks
+                            .filter((t) => genre === null || t.genre === genre)
+                            .map((t, i) => {
+                                const conteudo = (
+                                    <>
+                                        <span className="w-8 shrink-0 text-right font-mono text-[11px] tabular-nums text-mir-text3">
+                                            {i + 1}
+                                        </span>
+                                        {t.coverSmall ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img
+                                                src={t.coverSmall}
+                                                alt=""
+                                                loading="lazy"
+                                                decoding="async"
+                                                className="h-11 w-11 shrink-0 rounded object-cover"
+                                            />
+                                        ) : (
+                                            <span
+                                                className="grid h-11 w-11 shrink-0 place-items-center rounded font-mono text-[11px] text-mir-text3"
+                                                style={{
+                                                    background: tone(t.artist),
+                                                }}
+                                            >
+                                                {initials(t.artist)}
+                                            </span>
+                                        )}
+
+                                        <span className="min-w-0 flex-1">
+                                            <span className="block truncate text-[15px] font-semibold tracking-[-0.01em] text-mir-text">
+                                                {t.title}
+                                            </span>
+                                            <span className="block truncate font-mono text-[12px] text-mir-text2">
+                                                {t.artist}
+                                            </span>
+                                        </span>
+
+                                        <span className="hidden shrink-0 font-mono text-[10.5px] uppercase tracking-[0.12em] text-mir-text3 sm:block">
+                                            {t.genre}
+                                        </span>
+                                        <span className="hidden w-24 shrink-0 font-mono text-[10.5px] uppercase tracking-[0.12em] text-mir-text3 md:block">
+                                            {HEAT_LABEL[t.heat]}
+                                        </span>
+                                        <span className="w-14 shrink-0 text-right text-[15px] font-extrabold tabular-nums tracking-[-0.02em] text-mir-acc">
+                                            {t.audiencia}
+                                        </span>
+                                    </>
+                                )
+
+                                const classe =
+                                    'flex w-full items-center gap-4 py-3 text-left transition-colors hover:bg-mir-fill1'
+
+                                return (
+                                    <li key={t.id}>
+                                        {/* Link de verdade quando a ponte para o
+                                            Spotify resolveu — é o que o crawler
+                                            segue e o que tira a Pilha do papel de
+                                            beco sem saída. Sem id, cai no card,
+                                            que ao menos mostra o que se sabe. */}
+                                        {t.spotifyId ? (
+                                            <Link
+                                                href={`/track/${t.spotifyId}`}
+                                                className={classe}
+                                            >
+                                                {conteudo}
+                                            </Link>
+                                        ) : (
+                                            <button
+                                                onClick={() => setOpen(t)}
+                                                className={classe}
+                                            >
+                                                {conteudo}
+                                            </button>
+                                        )}
+                                    </li>
+                                )
+                            })}
+                    </ol>
+                </div>
+
                 {/* ---- o mosaico ----
                     Fica no mesmo container dos filtros de propósito: se estivesse
                     em outra div, o bloco sticky perderia o contexto e os chips
                     sumiriam já nos primeiros 300px de rolagem da pilha. */}
-                <div className="pb-24 pt-3">
+                <div className={vista === 'mosaico' ? 'pb-24 pt-3' : 'hidden'}>
                     <div
                         ref={wrapRef}
                         className="pile-stage"
@@ -351,8 +484,8 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
                                             {t.artist}
                                         </span>
                                         <span className="pile-tip-meta">
-                                            {nf.format(t.salvos)} no acervo ·{' '}
-                                            {t.genre} · primeira {ago(t.dias)}
+                                            audiência {t.audiencia}/100 ·{' '}
+                                            {t.genre} · {HEAT_LABEL[t.heat]}
                                         </span>
                                     </div>
                                 </div>

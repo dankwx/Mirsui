@@ -137,17 +137,16 @@ const Recados: React.FC<RecadosProps> = ({
     }
 
     return (
-        <section className="pb-16 pt-9">
-            {/* Cabeçalho da seção */}
-            <div className="mb-[18px] flex flex-wrap items-baseline justify-between gap-[18px]">
-                <div className="flex items-baseline gap-[11px]">
-                    <h3 className="whitespace-nowrap text-[13px] font-bold uppercase tracking-[0.13em] text-mir-text2">
-                        Recados
-                    </h3>
-                    <span className="font-mono text-[11px] text-mir-text3">
-                        {total} {total === 1 ? 'recado' : 'recados'}
-                    </span>
-                </div>
+        <section className="pb-16 pt-14">
+            {/* Mesma régua de título das outras seções do perfil: antes era um
+                rótulo de 13px em caixa alta e a seção sumia no fim da página. */}
+            <div className="mb-6">
+                <h2 className="m-0 text-[clamp(26px,3.6vw,34px)] font-extrabold tracking-[-0.04em] text-mir-text">
+                    Recados
+                </h2>
+                <p className="m-0 mt-1.5 font-mono text-[11.5px] text-mir-text3">
+                    {total} {total === 1 ? 'recado' : 'recados'}
+                </p>
             </div>
 
             {/* Caixa de novo recado */}

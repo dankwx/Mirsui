@@ -73,12 +73,14 @@ export default function FollowersFollowingSection({
         </div>
     )
 
+    // Mesma métrica visual do <Numero> em ProfileHeader: 30px, rótulo em
+    // minúscula. São a mesma fileira de números, então não podem divergir.
     const statTrigger = (count: number, label: string) => (
         <button className="group flex flex-col text-left">
-            <span className="text-[28px] font-extrabold leading-none tracking-[-0.03em] tabular-nums text-[#ece3d2] transition group-hover:text-[#cdef36] sm:text-[32px]">
+            <span className="text-[30px] font-extrabold leading-none tracking-[-0.03em] tabular-nums text-mir-text transition group-hover:text-mir-acc">
                 {count}
             </span>
-            <span className="mt-[5px] font-mono text-[10px] uppercase tracking-[0.14em] text-[#ece3d2]/45">
+            <span className="mt-1.5 font-mono text-[10.5px] lowercase tracking-[0.06em] text-mir-text3">
                 {label}
             </span>
         </button>

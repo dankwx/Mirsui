@@ -37,6 +37,8 @@ export interface Song {
     discover_rating: number | null
     track_thumbnail: string | null
     claimedat: string | null
+    /** ordem de chegada nesta música: 1 = ninguém tinha salvado antes */
+    position: number | null
     is_favorited: boolean // Favorito do DONO do perfil (público)
     is_user_favorited?: boolean // Favorito do usuário logado (para funcionalidade)
     favorite_count?: number

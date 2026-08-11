@@ -1,12 +1,20 @@
 // app/user/[username]/page.tsx
 import { notFound } from 'next/navigation'
-import ProfilePageComponent from '@/components/Profile/ProfilePage'
+import ProfileHeader from '@/components/Profile/ProfileHeader'
+import ChegouCedo from '@/components/Profile/ChegouCedo'
+import ArtistasDoAcervo from '@/components/Profile/ArtistasDoAcervo'
 import SongsList from '@/components/Profile/SongsList'
-import ProfileFooter from '@/components/Profile/ProfileFooter'
-import { isEarly } from '@/components/Profile/early'
 import { fetchUserData, fetchAuthData } from '@/utils/profileService'
 import { fetchSongs } from '@/utils/fetchSongs'
 import { fetchProfileComments } from '@/utils/profileCommentsService'
+import {
+    buildProfileStats,
+    buildTopArtists,
+    buildEarliest,
+    buildBadge,
+    rankVitrine,
+    countSaversByUri,
+} from '@/utils/profileStats'
 import Recados from '@/components/Profile/Recados/Recados'
 import { createClient } from '@/utils/supabase/server'
 import type { Metadata } from 'next'
@@ -15,13 +23,10 @@ interface ProfilePageParams {
     params: { username: string }
 }
 
-const MONTHS_UP = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ']
-
-const hashStr = (s: string) => {
-    let h = 0
-    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
-    return h
-}
+/** faixas na vitrine "Chegou cedo" (1 destaque + 4) */
+const VITRINE = 5
+/** candidatas contadas antes de escolher as cinco. Ver rankVitrine. */
+const CANDIDATAS = 12
 
 export async function generateMetadata({
     params,
@@ -41,7 +46,7 @@ export async function generateMetadata({
 
     return {
         title: `${displayName} (@${userData.username}) | Mirsui`,
-        description: `Veja o perfil de ${displayName} no Mirsui. Descubra suas descobertas musicais e credibilidade hipster.`,
+        description: `O acervo de ${displayName} no Mirsui: o que salvou, quando salvou e em que posição chegou.`,
     }
 }
 
@@ -59,7 +64,6 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
 
     const supabase = await createClient()
 
-    // Fetch only songs and profile data
     const [
         rawSongs,
         achievementResult,
@@ -86,47 +90,45 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
         rating: ratingResult.data || [],
     }
 
-    const stats = {
-        tracks: songs.length,
-        early: songs.filter(isEarly).length,
-        artists: new Set(
-            songs.map((s) => s.artist_name.split(',')[0].trim())
-        ).size,
-    }
-
-    // Selo editorial — derivados determinísticos (mockup) a partir do perfil
-    const seed = hashStr(userData.username || userData.id)
-    const profileNo = String(seed % 1000).padStart(3, '0')
-    const faroTop = (seed % 14) + 2 // TOP 2%–15%
-    const memberSince = 2023 + (seed % 2) // 2023 / 2024
-    const now = new Date()
-    const edition = `${MONTHS_UP[now.getMonth()]} ${now.getFullYear()}`
+    const stats = buildProfileStats(songs)
+    const badge = buildBadge(stats, songs)
+    const artists = buildTopArtists(songs, 6)
+    const favorites = songs.filter((s) => s.is_favorited).slice(0, 4)
+    // Conta quem salvou as doze mais cedo e só então escolhe as cinco: a
+    // contagem é o critério de desempate entre as faixas em 1º.
+    const candidatas = buildEarliest(songs, CANDIDATAS)
+    const savers = await countSaversByUri(
+        candidatas.map((song) => song.track_uri).filter((uri): uri is string => !!uri)
+    )
+    const vitrine = rankVitrine(candidatas, savers, VITRINE)
 
     return (
-        <div className="w-full bg-[#16120c]">
-            <ProfilePageComponent
+        <div className="w-full bg-mir-bg">
+            <ProfileHeader
                 userData={profileData}
                 stats={stats}
+                badge={badge}
+                favorites={favorites}
                 isLoggedIn={isLoggedIn}
                 isOwnProfile={isOwnProfile}
-                profileNo={profileNo}
-                edition={edition}
-                memberSince={memberSince}
-                faroTop={faroTop}
             />
+
+            <ChegouCedo songs={vitrine} savers={savers} />
+
+            <ArtistasDoAcervo artists={artists} />
 
             <SongsList
                 songs={songs}
                 canRemove={isOwnProfile}
                 userData={{
-                    display_name: profileData.display_name || profileData.username,
-                    username: profileData.username,
+                    display_name: profileData.display_name || profileData.username || '',
+                    username: profileData.username || '',
                     avatar_url: profileData.avatar_url,
                 }}
             />
 
-            <section className="w-full border-t border-[#ece3d2]/10 bg-[#16120c]">
-                <div className="mx-auto w-full max-w-[1200px] px-5 py-16 sm:px-8">
+            <section className="w-full bg-mir-bg">
+                <div className="mx-auto w-full max-w-[1200px] px-5 pb-8 sm:px-8">
                     <Recados
                         profileId={userData.id}
                         currentUserId={currentUserId}
@@ -135,8 +137,6 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
                     />
                 </div>
             </section>
-
-            <ProfileFooter profileNo={profileNo} memberSince={memberSince} />
         </div>
     )
 }

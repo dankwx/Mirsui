@@ -20,7 +20,8 @@ export async function fetchSongs(
             popularity,
             discover_rating,
             track_thumbnail,
-            claimedat
+            claimedat,
+            position
         `
         )
         .eq('user_id', userId)
@@ -82,6 +83,7 @@ export async function fetchSongs(
         discover_rating: item.discover_rating,
         track_thumbnail: item.track_thumbnail,
         claimedat: item.claimedat,
+        position: item.position ?? null,
         is_favorited: ownerFavoriteSet.has(item.id), // Favorito do DONO do perfil
         is_user_favorited: userFavoriteSet.has(item.id), // Favorito do usuário logado (para funcionalidade)
         favorite_count: 0, // Removido contador público

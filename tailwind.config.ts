@@ -70,7 +70,14 @@ const config = {
     				// como texto normal, então pode escrever, não só decorar.
     				warm: '#e8734a',
     				'warm-soft': 'rgba(232,115,74,0.14)',
-    				'on-warm': '#16120c'
+    				'on-warm': '#16120c',
+    				// A mesma família, para as seções de papel (#ece3d2) da /track e
+    				// dos documentos legais. O lima é ilegível sobre creme — 1,08:1,
+    				// literalmente invisível — e era por isso que aquelas seções já
+    				// tinham inventado um vermelho próprio, hardcoded em cinco lugares.
+    				// Este passa 5,0:1 sobre o papel, então vale até em rótulo de 11px;
+    				// o #c14a26 que estava lá dava 3,9:1 e reprovava no AA.
+    				'warm-ink': '#a83c1c'
     			},
     			border: 'hsl(var(--border))',
     			input: 'hsl(var(--input))',

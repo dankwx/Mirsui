@@ -16,7 +16,7 @@ import TrackActions from '@/components/TrackActions/TrackActions'
 import TrackShare from '@/components/TrackShare/TrackShare'
 import TrackCurve from '@/components/TrackCurve/TrackCurve'
 import TrackPreviewBar from '@/components/TrackPreviewBar/TrackPreviewBar'
-import ProfileFooter from '@/components/Profile/ProfileFooter'
+import LandingFooter from '@/components/Footer/LandingFooter'
 import type { Metadata } from 'next'
 
 import Link from 'next/link'
@@ -262,13 +262,6 @@ export default async function TrackDetailsPage({
 
     const coverTone = tone(artistNames + (trackInfo?.name || ''))
 
-    // Selo editorial — derivados determinísticos para o rodapé
-    let seed = 0
-    for (let i = 0; i < trackId.length; i++)
-        seed = (seed * 31 + trackId.charCodeAt(i)) >>> 0
-    const trackNo = String(seed % 1000).padStart(3, '0')
-    const footerSince = releaseYear || 2024
-
     return (
         <div>
             {/* ============ HERO ============ */}
@@ -330,7 +323,7 @@ export default async function TrackDetailsPage({
                                         <span key={artist.id}>
                                             <Link
                                                 href={`/artist/${artist.id}`}
-                                                className="text-mir-acc transition hover:brightness-[1.12]"
+                                                className="text-mir-text transition hover:text-mir-text2"
                                             >
                                                 {artist.name}
                                             </Link>
@@ -341,7 +334,7 @@ export default async function TrackDetailsPage({
                                     ))}
                                 </div>
                             ) : (
-                                <p className="mt-2.5 text-[clamp(18px,2.2vw,23px)] font-bold text-mir-acc">
+                                <p className="mt-2.5 text-[clamp(18px,2.2vw,23px)] font-bold text-mir-text">
                                     {artistNames}
                                 </p>
                             )}
@@ -432,24 +425,31 @@ export default async function TrackDetailsPage({
             {topClaimers.length > 0 && (
                 <section className="bg-[#ece3d2] text-mir-bg">
                     <div className="mx-auto w-full max-w-[1180px] px-5 py-16 sm:px-10">
-                        <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#c14a26]">
+                        <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-mir-warm-ink">
                             ★ A prova
                         </div>
 
                         <div className="mt-3.5 flex flex-wrap items-end justify-between gap-4">
                             <h2 className="m-0 max-w-[560px] text-[clamp(30px,4.5vw,52px)] font-black leading-[0.96] tracking-[-0.04em]">
                                 {firstClaimerName} ouviu{' '}
-                                <span className="text-[#c14a26]">antes</span> do mundo.
+                                <span className="text-mir-warm-ink">antes</span> do mundo.
                             </h2>
                             {/* Recibo — registro autenticado da descoberta */}
                             <div className="w-full max-w-[300px]">
                                 <div className="rounded-2xl border border-mir-bg/10 bg-[#f5eede] p-6 shadow-[0_24px_48px_-32px_rgba(22,18,12,0.55)]">
+                                    {/* Sem "Nº 042" aqui. O número era
+                                        hash(trackId) % 1000: não indexava nada,
+                                        colidia entre faixas, e estava num recibo
+                                        que se apresenta como registro autenticado.
+                                        O resto do bloco já é tudo verdade — quem
+                                        salvou primeiro, quando, quantos vieram
+                                        depois. */}
                                     <div className="flex items-center justify-between">
                                         <span className="text-[14px] font-bold tracking-[-0.02em] text-mir-bg">
                                             Mirsui
                                         </span>
-                                        <span className="text-[11px] font-semibold tracking-[0.08em] tabular-nums text-mir-bg/40">
-                                            Nº {trackNo}
+                                        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-mir-bg/40">
+                                            Recibo
                                         </span>
                                     </div>
 
@@ -503,28 +503,37 @@ export default async function TrackDetailsPage({
                             </div>
                         </div>
 
-                        {/* Timeline */}
+                        {/* De lá até hoje.
+                            Isto se parecia com um gráfico: a barra ia de 8% a 76%
+                            e os dois pontos ficavam em 8% e 76%, números escritos
+                            à mão que não mediam nada. Os rótulos acompanhavam —
+                            "obscura" e "pico" são duas afirmações que o banco não
+                            sustenta (popularity é o número do Spotify hoje, não um
+                            máximo histórico). Ficaram só as duas pontas, que são
+                            reais, sem eixo fingido no meio.
+                            O ponto da esquerda também era lima, que sobre papel
+                            creme dá 1,08:1: só aparecia pelo anel escuro. */}
                         <div className="mt-10 rounded-xl border border-mir-bg/10 bg-[#efe7d6] px-7 pb-7 pt-9">
                             <div className="relative my-3.5 h-[3px] rounded-sm bg-mir-bg/20">
-                                <div className="absolute left-[8%] right-[24%] top-0 h-[3px] rounded-sm bg-mir-bg" />
-                                <div className="absolute left-[8%] top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-mir-bg bg-mir-acc" />
-                                <div className="absolute left-[76%] top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-mir-bg bg-[#c14a26]" />
+                                <div className="absolute inset-x-0 top-0 h-[3px] rounded-sm bg-mir-bg/55" />
+                                <div className="absolute left-0 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-[3px] border-mir-bg bg-mir-bg" />
+                                <div className="absolute right-0 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-[3px] border-mir-bg bg-mir-warm-ink" />
                             </div>
-                            <div className="flex justify-between font-mono text-[11px] tracking-[0.04em]">
+                            <div className="flex justify-between gap-4 font-mono text-[11px] tracking-[0.04em]">
                                 <div className="text-left">
                                     <div className="font-bold text-mir-bg">
                                         {firstClaimerName} salvou
                                     </div>
                                     <div className="mt-0.5 text-mir-bg/50">
-                                        {claimWhen(firstClaimer?.claimedat)} · obscura
+                                        {claimWhen(firstClaimer?.claimedat)}
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <div className="font-bold text-[#c14a26]">
-                                        em alta agora
+                                    <div className="font-bold text-mir-warm-ink">
+                                        popularidade hoje
                                     </div>
-                                    <div className="mt-0.5 text-mir-bg/50">
-                                        pico · {trackInfo?.popularity ?? '—'} popular.
+                                    <div className="mt-0.5 tabular-nums text-mir-bg/50">
+                                        {trackInfo?.popularity ?? '—'}/100 no Spotify
                                     </div>
                                 </div>
                             </div>
@@ -555,7 +564,7 @@ export default async function TrackDetailsPage({
                                         key={claimer.user_id}
                                         className="flex items-center gap-4 rounded-[10px] border border-mir-bg/10 bg-[#efe7d6] px-5 py-[18px]"
                                     >
-                                        <span className="w-6 flex-none text-center font-mono text-[18px] font-bold text-[#c14a26]">
+                                        <span className="w-6 flex-none text-center font-mono text-[18px] font-bold text-mir-warm-ink">
                                             {isFirst ? (
                                                 <Crown className="mx-auto h-[18px] w-[18px]" />
                                             ) : (
@@ -600,7 +609,7 @@ export default async function TrackDetailsPage({
                 </section>
             )}
 
-            <ProfileFooter profileNo={trackNo} memberSince={footerSince} />
+            <LandingFooter compact />
         </div>
     )
 }

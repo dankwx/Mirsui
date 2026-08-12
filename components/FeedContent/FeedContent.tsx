@@ -93,7 +93,11 @@ function SaveButton({ state, size }: { state: SaveState; size: 'drop' | 'item' }
 
     // O selo recua de propósito: só o check leva o acento. Em lima cheia ele
     // competiria com o badge "cedo" na mesma linha, e o feed inteiro viraria
-    // destaque conforme o acervo cresce. Quem grita é a ação, não o que já foi.
+    // destaque conforme o acervo cresce.
+    //
+    // A ação "Salvar" é creme, e o check de já-salva é lima: a ação se repete
+    // em toda linha do feed, a confirmação só aparece no que é seu. O que se
+    // repete não pode ser o que brilha.
     if (state.saved) {
         return (
             <span
@@ -110,7 +114,7 @@ function SaveButton({ state, size }: { state: SaveState; size: 'drop' | 'item' }
             <button
                 onClick={state.onSave}
                 disabled={state.busy}
-                className={`${base} bg-mir-acc text-mir-on-acc transition hover:brightness-110 active:translate-y-px disabled:opacity-60`}
+                className={`${base} bg-mir-text text-mir-bg transition hover:brightness-110 active:translate-y-px disabled:opacity-60`}
             >
                 {state.busy ? (
                     <Loader2 className={`${icon} animate-spin`} />
@@ -183,21 +187,24 @@ function Ticker({ posts, loadFailed = false }: { posts: FeedPost[]; loadFailed?:
             : ['A CENA ESTÁ EM SILÊNCIO. SEJA O PRIMEIRO A SALVAR']
     }, [posts, loadFailed])
 
+    // Barra escura, não lima cheia. Uma faixa lima de ponta a ponta no topo era
+    // o elemento mais alto da página inteira, e o que ela carrega é fofoca da
+    // cena — não é a conquista de ninguém. Só o "AO VIVO" fica aceso.
     const line = (
         <span className="inline-flex shrink-0 items-center font-mono text-[11px] font-bold uppercase tracking-[0.14em]">
-            <span className="px-4">● AO VIVO</span>
+            <span className="px-4 text-mir-acc">● AO VIVO</span>
             {segments.map((s, i) => (
                 <span key={i} className="inline-flex items-center">
-                    <span className="px-3 text-[#16120c]/55">✦</span>
+                    <span className="px-3 text-mir-text3">✦</span>
                     <span className="whitespace-nowrap">{s}</span>
                 </span>
             ))}
-            <span className="px-3 text-[#16120c]/55">✦</span>
+            <span className="px-3 text-mir-text3">✦</span>
         </span>
     )
 
     return (
-        <div className="overflow-hidden border-b-2 border-mir-bg bg-mir-acc text-mir-on-acc">
+        <div className="overflow-hidden border-b border-mir-line bg-mir-surface text-mir-text2">
             <div className="flex w-max animate-[mir-ticker_38s_linear_infinite] py-[7px] will-change-transform hover:[animation-play-state:paused] motion-reduce:animate-none">
                 {line}
                 {line}
@@ -209,8 +216,10 @@ function Ticker({ posts, loadFailed = false }: { posts: FeedPost[]; loadFailed?:
 /* ---------- Nota que a pessoa escreveu ao salvar ---------- */
 function ClaimNote({ text, className = '' }: { text: string; className?: string }) {
     return (
+        // Laranja: alguém escreveu isso com a própria mão. É a camada humana,
+        // igual a recado e a seguir.
         <p
-            className={`border-l-2 border-mir-acc/40 pl-3 text-[14px] italic leading-[1.5] ${className}`}
+            className={`border-l-2 border-mir-warm/50 pl-3 text-[14px] italic leading-[1.5] ${className}`}
         >
             {text}
         </p>
@@ -242,12 +251,12 @@ function DropCard({ post, isOwn, save }: { post: FeedPost; isOwn: boolean; save:
                 </Link>
 
                 <div className="min-w-[260px] flex-1">
-                    <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-mir-acc">
+                    <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-mir-text3">
                         O drop de hoje
                     </span>
 
                     <Link href={trackHref(post)} className="mt-3 block w-max max-w-full">
-                        <h2 className="text-[clamp(26px,3.2vw,38px)] font-extrabold leading-[1.02] tracking-[-0.035em] text-mir-text transition-colors hover:text-mir-acc">
+                        <h2 className="text-[clamp(26px,3.2vw,38px)] font-extrabold leading-[1.02] tracking-[-0.035em] text-mir-text underline-offset-[6px] transition hover:underline hover:decoration-mir-line2 hover:decoration-2">
                             {post.track_title}
                         </h2>
                     </Link>
@@ -337,7 +346,7 @@ function FeedItem({ post, isOwn, save }: { post: FeedPost; isOwn: boolean; save:
                 </div>
 
                 <Link href={trackHref(post)} className="mt-2.5 block w-max max-w-full">
-                    <h3 className="truncate text-[18px] font-bold leading-[1.15] tracking-[-0.015em] text-mir-text transition-colors hover:text-mir-acc">
+                    <h3 className="truncate text-[18px] font-bold leading-[1.15] tracking-[-0.015em] text-mir-text underline-offset-4 transition hover:underline hover:decoration-mir-line2 hover:decoration-2">
                         {post.track_title}
                     </h3>
                 </Link>
@@ -387,7 +396,7 @@ function PileBanner({ claims }: { claims: RecentClaim[] }) {
     return (
         <Link
             href="/pilha"
-            className="pile-band group relative mb-9 block overflow-hidden rounded-[18px] border border-mir-line2 bg-[#12100b] transition-colors hover:border-mir-acc/45"
+            className="pile-band group relative mb-9 block overflow-hidden rounded-[18px] border border-mir-line2 bg-mir-bg transition-colors hover:border-mir-text3"
         >
             <span
                 aria-hidden="true"
@@ -427,7 +436,7 @@ function PileBanner({ claims }: { claims: RecentClaim[] }) {
                 </div>
 
                 <div className="min-w-[220px] flex-1">
-                    <span className="font-mono text-[10.5px] uppercase tracking-[0.2em] text-mir-acc">
+                    <span className="font-mono text-[10.5px] uppercase tracking-[0.2em] text-mir-text3">
                         A pilha
                     </span>
                     <p className="mt-2 text-[clamp(19px,2.2vw,25px)] font-extrabold leading-[1.05] tracking-[-0.035em] text-mir-text">
@@ -438,7 +447,10 @@ function PileBanner({ claims }: { claims: RecentClaim[] }) {
                     </p>
                 </div>
 
-                <span className="pile-cta inline-flex flex-none items-center gap-2 rounded-full bg-mir-acc px-6 py-3 text-[14px] font-bold text-mir-on-acc transition group-hover:brightness-110">
+                {/* Sem o pulso infinito que estava aqui: a faixa já tem a
+                    animação das capas se abrindo no hover, e duas fontes de
+                    movimento no mesmo alvo brigam entre si. */}
+                <span className="inline-flex flex-none items-center gap-2 rounded-full bg-mir-text px-6 py-3 text-[14px] font-bold text-mir-bg transition group-hover:brightness-110">
                     Revirar a pilha
                     <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </span>
@@ -447,7 +459,11 @@ function PileBanner({ claims }: { claims: RecentClaim[] }) {
     )
 }
 
-/* ---------- Cartão Faro (rail, destaque lima) ---------- */
+/* ---------- Cartão Faro (rail, destaque lima) ----------
+   O único bloco de lima cheia da página, e é de propósito. O ticker, a chamada
+   da pilha e a aba ativa saíram do lima justamente para que sobrasse um lugar
+   onde ele significasse alguma coisa. A mensagem aqui é literalmente a promessa
+   do produto ("salve o que você achou primeiro"), que é o assunto do lima. */
 function FaroCard() {
     return (
         <Link
@@ -670,7 +686,7 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId,
                                 onClick={() => setTab(key)}
                                 className={`whitespace-nowrap rounded-full px-[18px] py-2 text-[13px] font-semibold transition-colors ${
                                     tab === key
-                                        ? 'bg-mir-acc text-mir-on-acc'
+                                        ? 'bg-mir-text text-mir-bg'
                                         : 'text-mir-text2 hover:text-mir-text'
                                 }`}
                             >

@@ -1173,11 +1173,13 @@
 .pile-slot:hover {
   z-index: 900 !important;
 }
+/* O anel do hover é creme, não lima: na pilha o mouse passa por dezenas de
+   peças por segundo, e o lima piscando a cada uma esvaziava a cor. */
 .pile-slot:hover .pile-piece {
   transform: rotate(0deg) translateY(-7px) scale(1.09);
   filter: none;
   box-shadow: 0 28px 62px -18px rgba(0, 0, 0, 0.9),
-    0 0 0 1.5px rgba(205, 239, 54, 0.6);
+    0 0 0 1.5px rgba(236, 227, 210, 0.7);
 }
 
 .pile-slot.is-dim {
@@ -1199,7 +1201,7 @@
   max-width: 250px;
   flex-direction: column;
   gap: 3px;
-  border: 1px solid rgba(205, 239, 54, 0.3);
+  border: 1px solid rgba(236, 227, 210, 0.22);
   border-radius: 11px;
   background: rgba(20, 17, 11, 0.96);
   padding: 10px 13px;
@@ -1275,32 +1277,17 @@
 .pile-chip:active {
   transform: translateY(1px);
 }
+/* Mesmo tratamento dos filtros do acervo e das abas do feed: estado de UI é
+   creme, não acento. */
 .pile-chip.is-on {
-  background: #cdef36;
-  border-color: #cdef36;
+  background: #ece3d2;
+  border-color: #ece3d2;
   color: #16120c;
   font-weight: 700;
 }
 
-/* ---- chamada da pilha no feed ---- */
-@keyframes pile-cta-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(205, 239, 54, 0.42);
-  }
-  60% {
-    box-shadow: 0 0 0 13px rgba(205, 239, 54, 0);
-  }
-}
-.pile-cta {
-  animation: pile-cta-pulse 2.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .pile-piece {
-    animation: none;
-  }
-  .pile-cta {
     animation: none;
   }
 }

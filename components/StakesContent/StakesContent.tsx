@@ -602,7 +602,7 @@ export default function StakesContent({
             {/* HERO */}
             <section>
                 <div className="mx-auto max-w-[1200px] px-5 pb-6 pt-14 sm:px-8">
-                    <div className="mb-4 font-mono text-[11px] tracking-[0.2em] text-mir-acc">
+                    <div className="mb-4 font-mono text-[11px] tracking-[0.2em] text-mir-text3">
                         BOTE SUAS FICHAS ANTES DELA BOMBAR
                     </div>
                     <div className="flex flex-wrap items-end gap-6">
@@ -675,7 +675,7 @@ export default function StakesContent({
                             <button
                                 onClick={retryLoad}
                                 disabled={retrying}
-                                className="mt-6 inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border-none bg-mir-acc px-7 text-sm font-bold text-mir-on-acc disabled:opacity-60"
+                                className="mt-6 inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border-none bg-mir-text px-7 text-sm font-bold text-mir-bg disabled:opacity-60"
                             >
                                 {retrying ? 'Tentando…' : 'Tentar de novo'}
                             </button>
@@ -691,14 +691,14 @@ export default function StakesContent({
                                 return (
                                     <div
                                         key={i}
-                                        className="flex min-w-0 rounded-2xl border-[1.5px] border-dashed border-mir-acc/30 bg-mir-acc/[0.03]"
+                                        className="flex min-w-0 rounded-2xl border-[1.5px] border-dashed border-mir-line2 bg-mir-fill1"
                                     >
                                         <button
                                             onClick={() => openModal(i)}
                                             disabled={loading}
                                             className="flex min-h-[300px] w-full cursor-pointer flex-col items-center justify-center gap-1.5 border-none bg-transparent p-[26px] text-center text-inherit disabled:opacity-50"
                                         >
-                                            <div className="mb-3 flex h-[60px] w-[60px] items-center justify-center rounded-full border-[1.5px] border-mir-acc/50 text-[34px] font-light leading-[0] text-mir-acc">
+                                            <div className="mb-3 flex h-[60px] w-[60px] items-center justify-center rounded-full border-[1.5px] border-mir-line2 text-[34px] font-light leading-[0] text-mir-text3">
                                                 +
                                             </div>
                                             <div className="font-mono text-[11px] tracking-[0.16em] text-mir-text2/70">
@@ -708,7 +708,7 @@ export default function StakesContent({
                                                 Bote essa ficha numa faixa antes
                                                 dela bombar
                                             </div>
-                                            <span className="mt-4 inline-flex items-center gap-[7px] rounded-full bg-mir-acc px-[22px] py-[11px] text-sm font-bold text-mir-on-acc">
+                                            <span className="mt-4 inline-flex items-center gap-[7px] rounded-full bg-mir-text px-[22px] py-[11px] text-sm font-bold text-mir-bg">
                                                 {loading ? 'Carregando…' : 'Escolher faixa →'}
                                             </span>
                                         </button>
@@ -911,7 +911,7 @@ export default function StakesContent({
                                                     <button
                                                         onClick={() => recolher(s)}
                                                         disabled={busy}
-                                                        className="h-11 flex-1 cursor-pointer rounded-full border-none bg-mir-acc text-sm font-bold text-mir-on-acc disabled:opacity-60"
+                                                        className="h-11 flex-1 cursor-pointer rounded-full border-none bg-mir-text text-sm font-bold text-mir-bg disabled:opacity-60"
                                                     >
                                                         {busy
                                                             ? 'Recolhendo…'
@@ -1065,7 +1065,7 @@ export default function StakesContent({
                     >
                         <div className="flex items-start justify-between gap-4 border-b border-mir-line px-6 py-[22px]">
                             <div>
-                                <div className="mb-[7px] font-mono text-[10px] tracking-[0.18em] text-mir-acc">
+                                <div className="mb-[7px] font-mono text-[10px] tracking-[0.18em] text-mir-text3">
                                     BOTAR A FICHA{' '}
                                     {modalSlot != null ? '0' + (modalSlot + 1) : ''}
                                 </div>
@@ -1120,7 +1120,7 @@ export default function StakesContent({
                                 <div className="max-h-[48vh] overflow-y-auto px-3 pb-3.5 pt-1.5">
                                     {query.trim().length < 2 && (
                                         <div className="flex flex-col items-center px-6 py-12 text-center">
-                                            <div className="mb-4 flex h-[58px] w-[58px] items-center justify-center rounded-full border border-mir-acc/30 bg-mir-acc/[0.07] text-mir-acc">
+                                            <div className="mb-4 flex h-[58px] w-[58px] items-center justify-center rounded-full border border-mir-line2 bg-mir-fill2 text-mir-text3">
                                                 <svg
                                                     width="26"
                                                     height="26"
@@ -1328,7 +1328,7 @@ function DetailView({
             <button
                 onClick={onConfirm}
                 disabled={staking || previewing}
-                className="h-[52px] w-full cursor-pointer rounded-full border-none bg-mir-acc text-base font-extrabold tracking-[-0.01em] text-mir-on-acc disabled:opacity-60"
+                className="h-[52px] w-full cursor-pointer rounded-full border-none bg-mir-text text-base font-extrabold tracking-[-0.01em] text-mir-bg disabled:opacity-60"
             >
                 {staking ? 'Botando…' : `Botar ficha · ${multLabel}`}
             </button>

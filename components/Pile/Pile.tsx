@@ -99,7 +99,7 @@ function PieceSheet({
 
                 <div className="relative -mt-8 px-6 pb-6">
                     <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full border border-mir-acc/40 bg-mir-acc-soft px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-mir-acc">
+                        <span className="rounded-full border border-mir-line2 bg-mir-fill2 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-mir-text2">
                             {track.genre}
                         </span>
                         <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-mir-text3">
@@ -119,7 +119,9 @@ function PieceSheet({
                         nome da faixa. Ver migrations/013_pilha_real.sql. */}
                     <div className="mt-5 border-t border-mir-line pt-4">
                         <div className="flex items-baseline gap-2">
-                            <span className="text-[22px] font-extrabold tabular-nums tracking-[-0.03em] text-mir-acc">
+                            {/* Audiência é contagem de gente, não precedência:
+                                vai no laranja, junto com seguidores e recados. */}
+                            <span className="text-[22px] font-extrabold tabular-nums tracking-[-0.03em] text-mir-warm">
                                 {track.audiencia}
                             </span>
                             <span className="text-[13px] tabular-nums text-mir-text3">
@@ -139,7 +141,7 @@ function PieceSheet({
                         {track.spotifyId ? (
                             <Link
                                 href={`/track/${track.spotifyId}`}
-                                className="flex-1 rounded-full bg-mir-acc px-5 py-3 text-center text-[14px] font-bold text-mir-on-acc transition hover:brightness-110 active:translate-y-px"
+                                className="flex-1 rounded-full bg-mir-text px-5 py-3 text-center text-[14px] font-bold text-mir-bg transition hover:brightness-110 active:translate-y-px"
                             >
                                 Abrir a faixa
                             </Link>
@@ -250,7 +252,7 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
 
                         <div className="flex w-full items-baseline gap-5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-mir-text3 lg:ml-auto lg:w-auto">
                             <span>
-                                <b className="mr-1.5 font-sans text-[19px] font-extrabold tabular-nums tracking-[-0.035em] text-mir-acc">
+                                <b className="mr-1.5 font-sans text-[19px] font-extrabold tabular-nums tracking-[-0.035em] text-mir-text">
                                     {nf.format(tracks.length)}
                                 </b>
                                 faixas
@@ -289,7 +291,7 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
                         {vista === 'mosaico' && (
                             <button
                                 onClick={despejar}
-                                className="inline-flex items-center gap-2 rounded-full border border-mir-line2 px-4 py-[7px] font-mono text-[11px] uppercase tracking-[0.1em] text-mir-text2 transition hover:border-mir-acc/60 hover:text-mir-acc active:translate-y-px"
+                                className="inline-flex items-center gap-2 rounded-full border border-mir-line2 px-4 py-[7px] font-mono text-[11px] uppercase tracking-[0.1em] text-mir-text2 transition hover:border-mir-text3 hover:text-mir-text active:translate-y-px"
                             >
                                 <Shuffle className="h-3.5 w-3.5" />
                                 despejar de novo
@@ -301,7 +303,7 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
                                     v === 'mosaico' ? 'lista' : 'mosaico'
                                 )
                             }
-                            className="inline-flex items-center gap-2 rounded-full border border-mir-line2 px-4 py-[7px] font-mono text-[11px] uppercase tracking-[0.1em] text-mir-text2 transition hover:border-mir-acc/60 hover:text-mir-acc active:translate-y-px"
+                            className="inline-flex items-center gap-2 rounded-full border border-mir-line2 px-4 py-[7px] font-mono text-[11px] uppercase tracking-[0.1em] text-mir-text2 transition hover:border-mir-text3 hover:text-mir-text active:translate-y-px"
                         >
                             {vista === 'mosaico' ? (
                                 <>
@@ -386,7 +388,7 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
                                         <span className="hidden w-24 shrink-0 font-mono text-[10.5px] uppercase tracking-[0.12em] text-mir-text3 md:block">
                                             {HEAT_LABEL[t.heat]}
                                         </span>
-                                        <span className="w-14 shrink-0 text-right text-[15px] font-extrabold tabular-nums tracking-[-0.02em] text-mir-acc">
+                                        <span className="w-14 shrink-0 text-right text-[15px] font-extrabold tabular-nums tracking-[-0.02em] text-mir-warm">
                                             {t.audiencia}
                                         </span>
                                     </>

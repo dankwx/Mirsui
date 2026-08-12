@@ -80,9 +80,13 @@ export default function Acervo({ generos }: { generos: GeneroDoAcervo[] }) {
                 </div>
             </div>
 
-            {/* Uma fileira por gênero, sangrando até a borda. A rolagem lateral
-                é a affordance de "tem mais do que cabe", que é o ponto: o
-                acervo não termina no fim da tela. */}
+            {/* Uma fileira por gênero, no mesmo container do resto da página.
+                A primeira versão sangrava até a borda da tela, e isso quebrava
+                em monitor largo: num 2315px os títulos começavam em 530px (o
+                container de 1320 centralizado) e as capas em 40px, 490px de
+                desalinhamento. A rolagem lateral continua sendo a affordance de
+                "tem mais do que cabe" — o overflow corta a última capa na borda
+                direita do container, que é o mesmo recado. */}
             <div className="flex flex-col gap-9 pb-20 lg:pb-24">
                 {generos.map((g) => (
                     <div key={g.nome}>
@@ -96,7 +100,12 @@ export default function Acervo({ generos }: { generos: GeneroDoAcervo[] }) {
                             <span className="h-px flex-1 bg-mir-line" />
                         </div>
 
-                        <div className="mt-3.5 flex snap-x gap-3.5 overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:px-10 [&::-webkit-scrollbar]:hidden">
+                        {/* scroll-pl acompanha o px: sem ele o scroll-snap
+                            encosta o primeiro item na borda do scrollport e
+                            ignora o padding, então a fileira nascia com
+                            scrollLeft de 40px e as capas ficavam justamente
+                            esse tanto à esquerda do título. */}
+                        <div className="mx-auto mt-3.5 flex w-full max-w-[1320px] snap-x scroll-pl-5 gap-3.5 overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:scroll-pl-10 sm:px-10 [&::-webkit-scrollbar]:hidden">
                             {g.faixas.map((f) => (
                                 <Faixa
                                     key={f.id}

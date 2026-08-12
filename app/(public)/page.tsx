@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { getTrendingTracks, getRecentActivity } from '@/utils/homepageService'
 import { getLandingObservatory } from '@/utils/observatoryService'
-import LandingFooter from '@/components/Footer/LandingFooter'
 import Hero from '@/components/Landing/Hero'
 import Escala from '@/components/Landing/Escala'
 import ComoFunciona from '@/components/Landing/ComoFunciona'
@@ -79,8 +78,8 @@ export default async function HomePage() {
             <ComoFunciona faixas={trendingTracks} />
             <Parede faixas={trendingTracks} />
             <Fechamento />
-
-            <LandingFooter />
+            {/* Sem <LandingFooter /> aqui: quem monta o rodapé é o
+                app/(public)/layout.tsx, para todas as páginas deslogadas. */}
         </div>
     )
 }

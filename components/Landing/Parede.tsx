@@ -15,7 +15,10 @@ export default function Parede({ faixas }: { faixas: TrendingTrack[] }) {
     if (faixas.length === 0) return null
 
     return (
-        <section className="border-b border-mir-line bg-mir-bg">
+        // id="cena" é âncora antiga: o rodapé linka /#cena desde antes desta
+        // reescrita. Trocar ou remover o id quebraria o link em todas as
+        // páginas deslogadas.
+        <section id="cena" className="scroll-mt-6 border-b border-mir-line bg-mir-bg">
             <div className="mx-auto w-full max-w-[1320px] px-5 pb-24 pt-24 sm:px-10 lg:pb-28 lg:pt-32">
                 <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
                     <h2 className="m-0 max-w-[18ch] font-display text-[clamp(30px,4.2vw,50px)] font-black leading-[1] tracking-[-0.045em] text-mir-text">

@@ -33,7 +33,8 @@ export default function ComoFunciona({ faixas }: { faixas: TrendingTrack[] }) {
     const pilha = faixas.slice(0, 4)
 
     return (
-        <section id="como" className="border-b border-mir-line bg-mir-bg">
+        // id="como" também é âncora antiga do rodapé (/#como).
+        <section id="como" className="scroll-mt-6 border-b border-mir-line bg-mir-bg">
             <div className="mx-auto grid w-full max-w-[1320px] gap-16 px-5 py-24 sm:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-center lg:gap-24 lg:py-32">
                 <div className="min-w-0">
                     <h2 className="m-0 max-w-[16ch] font-display text-[clamp(32px,4.6vw,56px)] font-black leading-[0.98] tracking-[-0.045em] text-mir-text">

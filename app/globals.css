@@ -793,24 +793,6 @@
   border-radius: 8px;
   letter-spacing: 0.04em;
 }
-.mir-landing .ear-tab {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--on-acc);
-  background: var(--acc);
-  padding: 4px 8px;
-  border-radius: 7px;
-  font-weight: 600;
-}
 .mir-landing .poster .stamp {
   position: absolute;
   right: 11px;

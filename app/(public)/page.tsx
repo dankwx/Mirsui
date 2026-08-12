@@ -246,6 +246,20 @@ export default async function HomePage() {
                             Entrar
                         </AuthModalTrigger>
                     </div>
+
+                    {/* A escala do Observatório é o número mais forte da página
+                        e estava enterrado no subtítulo de uma seção lá embaixo,
+                        enquanto o hero não trazia número nenhum.
+                        Fala de escala, não de duração: a série tem dois dias de
+                        medição, então "medindo todo dia desde tal data" ainda
+                        seria vender histórico que não existe. Que o arquivo
+                        esteja começando é justamente o argumento do produto. */}
+                    {observatorio && observatorio.medidas > 0 && (
+                        <div className="hero-fine">
+                            {observatorio.medidas.toLocaleString('pt-BR')} faixas
+                            sob medição diária · o histórico começa agora
+                        </div>
+                    )}
                 </div>
 
                 {/* ticker ao vivo */}
@@ -334,12 +348,17 @@ export default async function HomePage() {
                                     aria-label={`Abrir ${t.track_title}, de ${t.artist_name}`}
                                 >
                                     <div className="cover-wrap">
+                                        {/* Aqui havia um selo "early" nos dois
+                                            primeiros cards. Ele não vinha de
+                                            dado nenhum: era `i < 2`, então as
+                                            duas primeiras capas ganhavam o selo
+                                            fosse qual fosse a faixa. Além de
+                                            estar em inglês numa página em
+                                            português. O card já mostra quantas
+                                            pessoas salvaram, que é real. */}
                                         <span className="rank-chip">
                                             #{String(i + 1).padStart(2, '0')}
                                         </span>
-                                        {i < 2 && (
-                                            <span className="ear-tab">early</span>
-                                        )}
                                         <div
                                             className="cover-art mir-cover"
                                             style={
@@ -537,7 +556,12 @@ export default async function HomePage() {
                     O algoritmo te entrega o que já bombou. O Mirsui guarda o que
                     você ouviu <em>antes</em>.
                 </p>
-                <div className="sig">Você vai entender daqui 6 meses</div>
+                {/* Era "Você vai entender daqui 6 meses": uma provocação ao
+                    visitante, que ou já é do clube ou está sendo dispensado.
+                    A assinatura agora fala do produto, e é verificável — o
+                    Mirsui não tem recomendação, o que a própria fine print do
+                    CTA final já afirma. */}
+                <div className="sig">Nada aqui foi recomendado</div>
             </section>
 
             {/* ============ CTA FINAL ============ */}

@@ -59,10 +59,16 @@ function ordLabel(n: number | null | undefined) {
     if (!n || n < 1) return null
     return `${n}ª`
 }
+/**
+ * `formatTimestamp` devolve tempo relativo até 7 dias ("3d") e data absoluta
+ * depois ("14/11"). O "há" entrava nos dois casos, então o feed inteiro dizia
+ * "salvou há 14/11". Data absoluta pede "em".
+ */
 function timeAgo(ts: string | null) {
     if (!ts) return ''
     const v = formatTimestamp(ts)
-    return v === 'agora mesmo' ? 'agora mesmo' : `há ${v}`
+    if (v === 'agora mesmo') return v
+    return /^\d{2}\/\d{2}$/.test(v) ? `em ${v}` : `há ${v}`
 }
 function trackHref(post: { track_url?: string | null; track_title: string }) {
     return `/track/${post.track_url?.split('/').pop() || post.track_title}`
@@ -70,9 +76,16 @@ function trackHref(post: { track_url?: string | null; track_title: string }) {
 function whoOf(post: FeedPost, isOwn: boolean) {
     return isOwn ? 'Você' : post.display_name || post.username
 }
-function isEarly(post: FeedPost) {
-    return typeof post.position === 'number' && post.position <= 10
-}
+/**
+ * Só o primeiro leva acento, igual ao perfil e ao acervo.
+ *
+ * Antes era `position <= 10`, e vestia um selo "cedo" em lima. Com o app novo
+ * quase toda faixa está no top 10, então o selo aparecia em toda linha do feed
+ * — e vinha ao lado de "1ª a salvar", que já diz a mesma coisa com mais
+ * precisão. Dois selos em lima por linha, dizendo o mesmo, é o que fez o
+ * acento parar de significar alguma coisa.
+ */
+const chegouPrimeiro = (post: FeedPost) => post.position === 1
 
 /* ---------- Botão de salvar ----------
    Salvar é mão única: não existe "dessalvar", porque tirar um salvamento
@@ -292,19 +305,22 @@ function DropCard({ post, isOwn, save }: { post: FeedPost; isOwn: boolean; save:
 
 /* ---------- Item do feed ---------- */
 function FeedItem({ post, isOwn, save }: { post: FeedPost; isOwn: boolean; save: SaveState }) {
-    const early = isEarly(post)
+    const primeiro = chegouPrimeiro(post)
     const who = whoOf(post, isOwn)
     const ord = ordLabel(post.position)
 
+    // Espaçamento apertado de propósito: com py-[22px] e capa de 88px cabiam
+    // três itens numa tela de 1400px, e vinte achados viravam sete telas de
+    // rolagem. Letterboxd e Last.fm põem de oito a doze.
     return (
-        <article className="grid grid-cols-[72px_1fr] gap-3.5 border-t border-mir-line py-[22px] sm:grid-cols-[88px_1fr] sm:gap-[18px]">
+        <article className="grid grid-cols-[64px_1fr] gap-3.5 border-t border-mir-line py-[15px] sm:grid-cols-[76px_1fr] sm:gap-4">
             <Link href={trackHref(post)} className="block">
                 <Cover
                     seed={post.artist_name}
                     thumbnail={post.track_thumbnail}
                     size={96}
-                    className="h-[72px] w-[72px] rounded-[9px] sm:h-[88px] sm:w-[88px]"
-                    iniClassName="text-[24px] sm:text-[30px]"
+                    className="h-16 w-16 rounded-lg sm:h-[76px] sm:w-[76px]"
+                    iniClassName="text-[22px] sm:text-[26px]"
                 />
             </Link>
 
@@ -338,14 +354,9 @@ function FeedItem({ post, isOwn, save }: { post: FeedPost; isOwn: boolean; save:
                     <span className="font-mono text-[11px] text-mir-text3">
                         {timeAgo(post.claimedat)}
                     </span>
-                    {early && (
-                        <span className="rounded border border-mir-acc/40 bg-mir-acc-soft px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.1em] text-mir-acc">
-                            cedo
-                        </span>
-                    )}
                 </div>
 
-                <Link href={trackHref(post)} className="mt-2.5 block w-max max-w-full">
+                <Link href={trackHref(post)} className="mt-1.5 block w-max max-w-full">
                     <h3 className="truncate text-[18px] font-bold leading-[1.15] tracking-[-0.015em] text-mir-text underline-offset-4 transition hover:underline hover:decoration-mir-line2 hover:decoration-2">
                         {post.track_title}
                     </h3>
@@ -355,17 +366,17 @@ function FeedItem({ post, isOwn, save }: { post: FeedPost; isOwn: boolean; save:
                 </div>
 
                 {post.claim_message && (
-                    <ClaimNote text={post.claim_message} className="mt-3 text-mir-text2" />
+                    <ClaimNote text={post.claim_message} className="mt-2 text-mir-text2" />
                 )}
 
-                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
                     <span className="font-mono text-[11px] tracking-[0.03em] text-mir-text3">
                         {ord && (
                             <span
                                 className={
-                                    early
-                                        ? 'font-semibold text-mir-acc'
-                                        : 'font-semibold text-mir-text2'
+                                    primeiro
+                                        ? 'font-semibold tabular-nums text-mir-acc'
+                                        : 'font-semibold tabular-nums text-mir-text2'
                                 }
                             >
                                 {ord}{' '}

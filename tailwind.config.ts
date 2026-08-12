@@ -20,7 +20,11 @@ const config = {
     	extend: {
     		fontFamily: {
     			sans: ['var(--font-hanken)', 'system-ui', 'sans-serif'],
-    			mono: ['var(--font-space-grotesk)', 'Space Grotesk', 'system-ui', 'sans-serif']
+    			mono: ['var(--font-space-grotesk)', 'Space Grotesk', 'system-ui', 'sans-serif'],
+    			// Archivo já era carregada e vivia servindo uma regra de CSS da
+    			// landing antiga e os documentos legais. Exposta como utilitário,
+    			// ela vira a display de verdade em vez de peso morto.
+    			display: ['var(--font-archivo)', 'Archivo', 'system-ui', 'sans-serif']
     		},
     		colors: {
     			/**
@@ -43,9 +47,9 @@ const config = {
     				// Antes nada levantava do fundo e todo elemento precisava de uma
     				// borda para existir.
     				//
-    				// bg fica em #16120c: esse hex está escrito à mão em ~20 lugares
-    				// (rotas OG, MirsuiLogo, LegalDoc, mir-landing) como a tinta do
-    				// produto. Mover o chão exigiria caçar todos eles.
+    				// bg fica em #16120c: esse hex está escrito à mão em vários
+    				// lugares (rotas OG, MirsuiLogo, LegalDoc, rodapés) como a tinta
+    				// do produto. Mover o chão exigiria caçar todos eles.
     				bg: '#16120c',
     				surface: '#221b12',
     				card: '#2b2317',

@@ -41,6 +41,8 @@ export interface RecentActivityItem {
     track_thumbnail: string | null
     position: number
     claimedat: string
+    /** o que a pessoa escreveu ao salvar; quase sempre vazio, e tudo bem */
+    claim_message: string | null
     /** spotify:track:<id> — vira o link do ticker para a ficha da faixa */
     track_uri: string | null
     profiles: {
@@ -82,6 +84,7 @@ async function buscarAtividadeRecente(limit: number): Promise<RecentActivityItem
       track_thumbnail,
       position,
       claimedat,
+      claim_message,
       track_uri,
       profiles:user_id!inner (
         username,

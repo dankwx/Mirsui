@@ -1,9 +1,15 @@
 import Link from 'next/link'
 import MirsuiLogo from '../MirsuiLogo/MirsuiLogo'
 
+/**
+ * "COMO FUNCIONA" apontava para /#como, a seção de três tempos da home. A home
+ * deixou de ter seção de argumento, então a âncora não tinha mais alvo e o
+ * clique não ia a lugar nenhum. Passou a apontar para a página que existe e
+ * cobre o assunto.
+ */
 const LANDING_LINKS = [
     { label: 'A CENA', href: '/#cena' },
-    { label: 'COMO FUNCIONA', href: '/#como' },
+    { label: 'COMO FUNCIONA', href: '/how-it-works' },
 ]
 const LEGAL_LINKS = [
     { label: 'TERMOS', href: '/termos' },

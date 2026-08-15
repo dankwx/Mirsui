@@ -2,6 +2,7 @@
 import Header from '@/components/Header/Header'
 import { createClient } from '@/utils/supabase/server'
 import { AuthProvider } from '@/components/AuthProvider/AuthProvider'
+import { isAdmin } from '@/lib/admin'
 
 // Tipo para o perfil do usuário
 interface UserProfile {
@@ -23,6 +24,10 @@ export default async function DashboardLayout({
 
     // Buscar dados do usuário no servidor (rápido)
     let userProfile: UserProfile | null = null
+    // Só serve para decidir se o item "Painel" aparece no menu. A rota /admin
+    // refaz a checagem por conta própria — o Header é client component e um
+    // booleano no payload não protege nada.
+    let dono = false
 
     try {
         const { data: authData, error: authError } =
@@ -30,6 +35,7 @@ export default async function DashboardLayout({
 
         if (!authError && authData?.user) {
             const userId = authData.user.id
+            dono = isAdmin(authData.user.email)
 
             // Buscar informações do perfil na tabela profiles
             // (email vem do auth, não da tabela)
@@ -60,7 +66,7 @@ export default async function DashboardLayout({
     return (
         <AuthProvider>
             <div className="min-h-screen bg-mir-bg font-sans text-mir-text">
-                <Header userProfile={userProfile} />
+                <Header userProfile={userProfile} isDono={dono} />
                 <main className="relative">{children}</main>
                 <div className="mir-grain" aria-hidden="true" />
             </div>

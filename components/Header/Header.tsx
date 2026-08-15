@@ -3,7 +3,7 @@
 import SearchWithResults from '../SearchWithResults/SearchWithResults'
 import MirsuiLogo from '../MirsuiLogo/MirsuiLogo'
 import LoginModal from '../ModalLogin/ModalLogin'
-import { LogOut, Settings, UserRound } from 'lucide-react'
+import { Gauge, LogOut, Settings, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -22,6 +22,13 @@ interface UserProfile {
 
 interface HeaderProps {
     userProfile?: UserProfile | null
+    /**
+     * Só decide se o atalho para /admin aparece no menu. A permissão de
+     * verdade é conferida no servidor, em /admin e em GET /admin/overview:
+     * este componente roda no cliente e um booleano no payload do RSC é
+     * sugestão de interface, não tranca.
+     */
+    isDono?: boolean
 }
 
 type NavLink = {
@@ -116,7 +123,7 @@ const navLinksVisitante: NavLink[] = [
     },
 ]
 
-export default function Header({ userProfile }: HeaderProps) {
+export default function Header({ userProfile, isDono = false }: HeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const profileRef = useRef<HTMLDivElement>(null)
     const pathname = usePathname()
@@ -250,6 +257,16 @@ export default function Header({ userProfile }: HeaderProps) {
                                             <Settings className="h-4 w-4" />
                                             Configurações
                                         </Link>
+                                        {isDono && (
+                                            <Link
+                                                href="/admin"
+                                                className="flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors hover:bg-mir-fill2 hover:text-mir-text"
+                                                onClick={() => setIsMenuOpen(false)}
+                                            >
+                                                <Gauge className="h-4 w-4" />
+                                                Painel
+                                            </Link>
+                                        )}
                                         <button
                                             type="button"
                                             onClick={handleSignOut}

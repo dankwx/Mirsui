@@ -214,11 +214,24 @@ export async function uploadPlaylistThumbnail(
     file: File
 ): Promise<{ success: boolean; thumbnailUrl?: string; error?: string }> {
     const supabase = createClient()
-    
+
     try {
+        // O caminho começa pelo id do dono porque a policy do bucket confere
+        // exatamente isso: a primeira pasta tem que ser o auth.uid() de quem
+        // está subindo. Antes era `playlists/<id>/thumbnail` e o Storage aceitava
+        // escrita anônima, então qualquer um trocava a capa de qualquer playlist.
+        // Ver migrations/016_storage_fechado.sql no backend.
+        const {
+            data: { user },
+        } = await supabase.auth.getUser()
+
+        if (!user) {
+            return { success: false, error: 'Você precisa estar logado' }
+        }
+
         // Upload do arquivo para o storage
-        const filePath = `playlists/${playlistId}/thumbnail`
-        
+        const filePath = `${user.id}/playlists/${playlistId}/thumbnail`
+
         const { error: uploadError } = await supabase.storage
             .from('playlist-thumbnails')
             .upload(filePath, file, {

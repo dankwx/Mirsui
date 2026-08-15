@@ -1,14 +1,10 @@
 'use client'
 
 import React, { useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
 import { LoaderCircle, Upload, Check, ImageIcon } from 'lucide-react'
 
-// Ensure these environment variables are set in your .env.local
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+const MAX_BYTES = 5 * 1024 * 1024
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
 interface UserProps {
     username: string | null
@@ -27,10 +23,22 @@ export default function ModalChangeAvatar({
     const [uploading, setUploading] = useState(false)
     const [uploadSuccess, setUploadSuccess] = useState(false)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null)
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const selectedFile = e.target.files[0]
+
+            if (!ALLOWED_TYPES.includes(selectedFile.type)) {
+                setError('Formato inválido. Use JPG, PNG, WEBP ou GIF.')
+                return
+            }
+            if (selectedFile.size > MAX_BYTES) {
+                setError('A imagem deve ter no máximo 5MB.')
+                return
+            }
+
+            setError(null)
             setFile(selectedFile)
 
             const reader = new FileReader()
@@ -41,35 +49,28 @@ export default function ModalChangeAvatar({
         }
     }
 
+    // O upload vai pelo backend (service role), não direto no bucket com a anon
+    // key: o caminho do arquivo é `<uuid>/profile-picture`, previsível, e o
+    // Storage aceitava escrita anônima — dava pra trocar a foto de qualquer um.
     const handleUpload = async () => {
         if (!file || !id) return
 
         try {
             setUploading(true)
+            setError(null)
 
-            const filePath = `${id}/profile-picture`
+            const body = new FormData()
+            body.append('file', file)
 
-            const { error } = await supabase.storage
-                .from('user-profile-images')
-                .upload(filePath, file, {
-                    cacheControl: '300',
-                    upsert: true,
-                })
+            const response = await fetch(`/api/profiles/${id}/avatar`, {
+                method: 'POST',
+                body,
+            })
+            const data = await response.json()
 
-            if (error) throw error
-
-            const {
-                data: { publicUrl },
-            } = supabase.storage
-                .from('user-profile-images')
-                .getPublicUrl(filePath)
-
-            console.log('Profile picture URL:', publicUrl)
-
-            const { error: updateError } = await supabase
-                .from('profiles')
-                .update({ avatar_url: publicUrl })
-                .eq('id', id)
+            if (!response.ok) {
+                throw new Error(data?.error || 'Erro ao enviar a foto')
+            }
 
             setUploadSuccess(true)
 
@@ -80,9 +81,11 @@ export default function ModalChangeAvatar({
                 setFile(null)
                 setPreviewUrl(null)
             }, 1500)
-        } catch (error) {
-            console.error('Error uploading profile picture:', error)
-            alert('Failed to upload profile picture')
+        } catch (err) {
+            console.error('Erro ao enviar a foto de perfil:', err)
+            setError(
+                err instanceof Error ? err.message : 'Erro ao enviar a foto'
+            )
         } finally {
             setUploading(false)
         }
@@ -147,16 +150,22 @@ export default function ModalChangeAvatar({
                         </span>
                         <input
                             type="file"
-                            accept="image/*"
+                            accept={ALLOWED_TYPES.join(',')}
                             onChange={handleFileChange}
                             className="hidden"
                         />
                     </label>
 
-                    <p className="text-center font-mono text-[11px] leading-[1.6] text-mir-text2/[0.66]">
-                        JPG, PNG ou GIF. A imagem fica quadrada, recortada em
-                        círculo.
-                    </p>
+                    {error ? (
+                        <p className="text-center font-mono text-[11px] leading-[1.6] text-red-400/90">
+                            {error}
+                        </p>
+                    ) : (
+                        <p className="text-center font-mono text-[11px] leading-[1.6] text-mir-text2/[0.66]">
+                            JPG, PNG, WEBP ou GIF, até 5MB. A imagem fica
+                            quadrada, recortada em círculo.
+                        </p>
+                    )}
                 </div>
 
                 {/* FOOTER */}

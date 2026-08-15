@@ -69,6 +69,9 @@ accumulated_points += points_gain
   (`DELETE` da linha).
 - Coletar após 7 dias: registra os pontos em `stake_collections` (ledger), marca o
   stake como `coletada` e libera a vaga.
+- Quem faz as duas coisas é a função `collect_stake()` no banco (`SECURITY
+  DEFINER`), não o Node: é uma transação só, com `for update` na linha do stake,
+  então dois "recolher" simultâneos não geram dois lançamentos do mesmo saldo.
 
 ## Faixa removida do Deezer
 
@@ -100,3 +103,27 @@ accumulated_points += points_gain
   total do usuário é `SUM(stake_collections.points)`.
 - "X pessoas deram stake" (contador social) usa a função `count_stakes_by_track_uri`
   (`SECURITY DEFINER`), que expõe só o agregado — nunca linhas de outros usuários.
+
+## Quem pode escrever (migration 018)
+
+As três tabelas são **somente leitura** para `anon` e `authenticated` — e a
+leitura só enxerga as linhas do próprio usuário, pelas policies de SELECT. Antes
+não era assim: com a anon key do bundle dava para `POST` um lançamento de
+999999999 pontos no ledger, ou dar `PATCH` em `accumulated_points`, `multiplier`,
+`status` e `staked_at`. Dono da linha não é o mesmo que autor do valor: o valor
+vem do Deezer, medido pelo servidor.
+
+Sobraram dois caminhos de escrita, os dois do lado do servidor:
+
+| o quê | por onde |
+| --- | --- |
+| dar stake (`POST /stakes`) | service role, no backend — baseline e multiplicador são medidos no Deezer na hora |
+| snapshot diário | service role, no job (`src/jobs/stakeSnapshot.ts`) |
+| recolher | `collect_stake()`, com a regra dos 7 dias dentro do banco |
+
+Consequência prática: **sem `SUPABASE_SERVICE_ROLE_KEY` o backend não consegue
+mais criar stake** (responde 503). O job já dependia dessa env; agora a rota
+também.
+
+Um índice único parcial (`stakes_um_ativo_por_faixa`) garante no banco o "um
+stake ativo por faixa". O limite de 3 vagas continua só no Node.

@@ -29,20 +29,10 @@ export function dataPorExtenso(iso: string | null): string {
     })
 }
 
-/**
- * Rota da ficha a partir do que a home tem em mãos.
- *
- * `tracks.track_url` guarda a URL completa do Spotify com o parâmetro `si`
- * (https://open.spotify.com/track/<id>?si=...) e `track_uri` guarda
- * `spotify:track:<id>`. As duas formas aparecem, então o regex aceita ambas.
- *
- * Sem id reconhecível cai em '/feed' em vez de montar uma rota quebrada.
- */
-export function trackHref(origem: string | null | undefined): string {
-    if (!origem) return '/feed'
-    const m = origem.match(/(?:track[:/])([A-Za-z0-9]{22})/)
-    return m ? `/track/${m[1]}` : '/feed'
-}
+// A rota da ficha mora em utils/trackHref.ts desde que o ISRC virou o
+// identificador canônico (migration 023): agora a home prefere o ISRC da linha
+// e só cai no id do Spotify espremido da URL quando ele não existe.
+export { trackHref } from '@/utils/trackHref'
 
 /** Iniciais para a capa que não carregou. */
 export function iniciais(nome: string): string {

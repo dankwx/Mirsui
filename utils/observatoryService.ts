@@ -90,7 +90,8 @@ export async function getTrackCurve(
 /* ------------------------------------------------------------------ landing */
 
 export interface FaixaDoObservatorio {
-    spotifyId: string
+    /** endereço da faixa no site. Era o id do Spotify — ver migration 023. */
+    isrc: string
     title: string
     artist: string
     cover: string | null
@@ -120,7 +121,7 @@ interface LandingBruta {
     desde?: string | null
     tem_movimento?: boolean
     faixas?: {
-        spotify_id?: string
+        isrc?: string
         title?: string
         artist?: string
         md5?: string | null
@@ -150,10 +151,10 @@ const buscarLanding = unstable_cache(
             desde: b.desde ?? null,
             temMovimento: !!b.tem_movimento,
             faixas: (b.faixas ?? []).flatMap((f) => {
-                if (!f.spotify_id || !f.title || !f.artist) return []
+                if (!f.isrc || !f.title || !f.artist) return []
                 return [
                     {
-                        spotifyId: f.spotify_id,
+                        isrc: f.isrc,
                         title: f.title,
                         artist: f.artist,
                         // mesma montagem de capa da Pilha (ver utils/pileService.ts)

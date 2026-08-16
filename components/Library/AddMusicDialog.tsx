@@ -15,11 +15,14 @@ import Image from 'next/image'
 import { useToast } from '@/components/ui/use-toast'
 import { addTrackToPlaylist } from '@/utils/libraryService.client'
 
-interface SpotifyTrack {
+// A busca agora vem do Deezer (ver app/api/search/route.ts). A forma da
+// resposta continua a mesma; o que mudou é que `id` é o ISRC da gravação e a
+// URL externa vem pronta em vez de ser montada com o id do Spotify.
+interface FaixaDaBusca {
     album: {
         name: string
         images: { url: string }[]
-        release_date: string
+        release_date?: string
     }
     artists: { name: string }[]
     name: string
@@ -27,11 +30,12 @@ interface SpotifyTrack {
     uri: string
     duration_ms: number
     id: string
+    externalUrl?: string
 }
 
 interface SearchResults {
     tracks: {
-        items: SpotifyTrack[]
+        items: FaixaDaBusca[]
     }
 }
 
@@ -118,7 +122,7 @@ export default function AddMusicDialog({
         }
     }, [open])
 
-    const handleAddTrack = async (track: SpotifyTrack) => {
+    const handleAddTrack = async (track: FaixaDaBusca) => {
         const trackId = track.id
         
         if (addingTracks.has(trackId) || addedTracks.has(trackId)) {
@@ -133,7 +137,9 @@ export default function AddMusicDialog({
                 artist_name: track.artists.map(a => a.name).join(', '),
                 album_name: track.album.name,
                 track_thumbnail: track.album.images[0]?.url,
-                track_url: `https://open.spotify.com/track/${track.id}`,
+                // Vem pronta da busca. Montar a URL do Spotify a partir de
+                // `track.id` deixou de funcionar quando `id` virou o ISRC.
+                track_url: track.externalUrl || '',
                 duration: formatDuration(track.duration_ms)
             })
 

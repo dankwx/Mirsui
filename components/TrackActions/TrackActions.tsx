@@ -6,13 +6,23 @@ import { useToast } from '@/components/ui/use-toast'
 import { capture } from '@/lib/posthog'
 
 interface TrackActionsProps {
+    /** chave opaca do acervo: `spotify:track:<id>` (legado) ou `isrc:<ISRC>` */
     trackUri: string
+    /**
+     * A identidade da GRAVAÇÃO. Vai junto no save para que a mesma faixa salva
+     * por caminhos diferentes conte no mesmo lugar — ver `tracks.isrc` na
+     * migration 023 e utils/trackClaims.ts.
+     */
+    isrc: string | null
     trackTitle: string
     artistName: string
     albumName: string
     popularity: number
     trackThumbnail: string
+    /** onde ouvir a faixa fora daqui (Spotify ou Deezer) */
     trackUrl: string
+    /** o endereço canônico da faixa NO MIRSUI — é isto que se compartilha */
+    shareUrl: string
     totalClaims: number
     initialClaimed?: boolean
     userPosition?: number | null
@@ -20,12 +30,14 @@ interface TrackActionsProps {
 
 export default function TrackActions({
     trackUri,
+    isrc,
     trackTitle,
     artistName,
     albumName,
     popularity,
     trackThumbnail,
     trackUrl,
+    shareUrl,
     totalClaims,
     initialClaimed = false,
     userPosition = null,
@@ -47,19 +59,16 @@ export default function TrackActions({
         if (isClaimed || isLoading) return
         setIsLoading(true)
         try {
-            const spotifyUrl =
-                trackUrl ||
-                `https://open.spotify.com/track/${trackUri.split(':')[2]}`
-
             const response = await fetch('/api/claim-track', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     trackUri,
+                    isrc,
                     trackName: trackTitle,
                     artistName,
                     albumName,
-                    spotifyUrl,
+                    spotifyUrl: trackUrl,
                     trackThumbnail,
                     popularity,
                     claimMessage: message.trim() || undefined,
@@ -124,17 +133,20 @@ export default function TrackActions({
     }
 
     const handleShare = async () => {
+        // O link é o da página no Mirsui, não o do Spotify. Compartilhar a
+        // faixa daqui mandava o tráfego para fora da própria página que o
+        // gerou — e o link de lá não tem quem salvou nem a curva.
         const shareData = {
             title: `${trackTitle} — ${artistName}`,
             text: 'Confira esta faixa no Mirsui',
-            url: trackUrl,
+            url: shareUrl,
         }
         try {
             if (navigator.share) {
                 await navigator.share(shareData)
                 capture('track_shared', { track_uri: trackUri, method: 'native' })
             } else {
-                await navigator.clipboard.writeText(trackUrl)
+                await navigator.clipboard.writeText(shareUrl)
                 capture('track_shared', { track_uri: trackUri, method: 'clipboard' })
                 toast({
                     title: 'Link copiado!',

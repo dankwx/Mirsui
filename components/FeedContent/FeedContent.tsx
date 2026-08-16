@@ -11,6 +11,7 @@ import { formatTimestamp } from '@/utils/feedHelpers'
 import RecentClaims from '@/components/RecentClaims/RecentClaims'
 import { createClient } from '@/utils/supabase/client'
 import { saveTrack } from '@/utils/trackActions'
+import { trackHref } from '@/utils/trackHref'
 
 interface FeedContentProps {
     initialPosts: FeedPostWithInteractions[]
@@ -69,9 +70,6 @@ function timeAgo(ts: string | null) {
     const v = formatTimestamp(ts)
     if (v === 'agora mesmo') return v
     return /^\d{2}\/\d{2}$/.test(v) ? `em ${v}` : `há ${v}`
-}
-function trackHref(post: { track_url?: string | null; track_title: string }) {
-    return `/track/${post.track_url?.split('/').pop() || post.track_title}`
 }
 function whoOf(post: FeedPost, isOwn: boolean) {
     return isOwn ? 'Você' : post.display_name || post.username

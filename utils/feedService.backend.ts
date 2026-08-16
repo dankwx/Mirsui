@@ -15,13 +15,15 @@ export interface FeedPostWithInteractions {
   position: number
   claimedat: string | null
   track_uri: string | null
+  /** identidade da gravação; é o que monta o link da ficha (migration 023) */
+  isrc: string | null
   discover_rating: number | null
   claim_message: string | null
   youtube_url: string | null
   username: string
   display_name: string | null
   avatar_url: string | null
-  /** quantas pessoas salvaram esta MÚSICA (por track_uri), não este achado */
+  /** quantas pessoas salvaram esta MÚSICA (por gravação), não este achado */
   savers_count: number
   comments_count: number
   /** o usuário logado já salvou esta música; false para visitante */
@@ -34,6 +36,7 @@ export interface RecentClaim {
     artist_name: string
     track_thumbnail: string
     track_url: string
+    isrc: string | null
     claimedat: string
 }
 

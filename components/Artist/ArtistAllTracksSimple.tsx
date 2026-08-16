@@ -17,7 +17,6 @@ import {
     Disc3,
     Star
 } from 'lucide-react'
-import { extractSpotifyIdFromUri } from '@/lib/spotifyUri'
 import { formatDuration, formatReleaseDate, getAlbumTypeLabel } from '@/lib/formatters'
 import {
     DropdownMenu,
@@ -30,6 +29,10 @@ interface Track {
     id: string
     name: string
     uri: string
+    /** rota interna já pronta (utils/artistPageService.ts) */
+    href?: string | null
+    /** onde ouvir a faixa fora daqui */
+    externalUrl?: string
     duration_ms: number
     popularity?: number
     album: {
@@ -39,7 +42,7 @@ interface Track {
         album_type: string
         id: string
     }
-    artists: { name: string; id: string }[]
+    artists: { name: string; id: string | null }[]
 }
 
 interface ArtistAllTracksSimpleProps {
@@ -65,6 +68,8 @@ export default function ArtistAllTracksSimple({
                 id: track.id,
                 name: track.name,
                 uri: track.uri,
+                href: track.href,
+                externalUrl: track.externalUrl,
                 duration_ms: track.duration_ms,
                 popularity: track.popularity,
                 album: track.album,
@@ -78,7 +83,7 @@ export default function ArtistAllTracksSimple({
             const albumTrack: Track = {
                 id: album.id + '_album',
                 name: `${album.name} (Álbum Completo)`,
-                uri: `spotify:album:${album.id}`,
+                uri: `deezer:album:${album.id}`,
                 duration_ms: 0,
                 popularity: 0,
                 album: {
@@ -213,11 +218,19 @@ export default function ArtistAllTracksSimple({
                     ) : (
                         <>
                             {displayedTracks.map((track, index) => {
-                                const trackSpotifyId = extractSpotifyIdFromUri(track.uri)
+                                // As rotas vêm prontas de
+                                // utils/artistPageService.ts. Antes saíam de
+                                // `extractSpotifyIdFromUri(track.uri)`, que
+                                // LANÇA para qualquer uri fora do formato do
+                                // Spotify — uma faixa de outra fonte derrubava
+                                // a página inteira.
                                 const isAlbum = isAlbumEntry(track)
-                                const spotifyUrl = isAlbum 
-                                    ? `https://open.spotify.com/album/${track.album.id}`
-                                    : `https://open.spotify.com/track/${trackSpotifyId}`
+                                const href: string | null = isAlbum
+                                    ? `/album/${track.album.id}`
+                                    : (track.href ?? null)
+                                const externalUrl: string = isAlbum
+                                    ? `https://www.deezer.com/album/${track.album.id}`
+                                    : (track.externalUrl ?? '')
                                 
                                 return (
                                     <div
@@ -261,17 +274,15 @@ export default function ArtistAllTracksSimple({
                                                             >
                                                                 {track.album.name}
                                                             </a>
+                                                        ) : href ? (
+                                                            <a
+                                                                href={href}
+                                                                className="hover:underline"
+                                                            >
+                                                                {track.name}
+                                                            </a>
                                                         ) : (
-                                                            trackSpotifyId ? (
-                                                                <a
-                                                                    href={`/track/${trackSpotifyId}`}
-                                                                    className="hover:underline"
-                                                                >
-                                                                    {track.name}
-                                                                </a>
-                                                            ) : (
-                                                                track.name
-                                                            )
+                                                            track.name
                                                         )}
                                                     </h3>
                                                     <Badge variant="secondary" className="flex items-center gap-1 text-xs">
@@ -316,7 +327,7 @@ export default function ArtistAllTracksSimple({
                                                 asChild
                                             >
                                                 <a
-                                                    href={spotifyUrl}
+                                                    href={externalUrl}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="flex items-center gap-1"

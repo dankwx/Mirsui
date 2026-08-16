@@ -110,7 +110,16 @@ export default async function RecentActivity() {
                                     <div className="mt-2">
                                         <p className="text-sm font-semibold text-white">
                                             <Link
-                                                href={`/track/${track.track_id || track.track_title}`}
+                                                // `track_id` é o ISRC (ou o
+                                                // id antigo espremido do uri).
+                                                // Sem ele o link ia para
+                                                // /track/<título da faixa>, que
+                                                // nunca resolveu nada.
+                                                href={
+                                                    track.track_id
+                                                        ? `/track/${track.track_id}`
+                                                        : '/feed'
+                                                }
                                                 className="hover:text-purple-200"
                                             >
                                                 {track.track_title}

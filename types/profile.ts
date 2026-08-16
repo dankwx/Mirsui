@@ -30,6 +30,8 @@ export interface Song {
     id: string
     track_url: string
     track_uri: string | null
+    /** identidade da gravação — é o que monta o link da ficha (migration 023) */
+    isrc: string | null
     track_title: string
     artist_name: string
     album_name: string

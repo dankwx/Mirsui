@@ -1,4 +1,4 @@
-// Link para a ficha da faixa. Mesma regra usada no /feed: o id do Spotify é o
-// último segmento da track_url. Sem url, cai no título para não gerar href vazio.
-export const trackHref = (song: { track_url: string; track_title: string }) =>
-    `/track/${song.track_url?.split('/').pop() || song.track_title}`
+// A regra do link da ficha mora em utils/trackHref.ts, junto com a do feed, da
+// landing e da atividade recente — eram quatro cópias que já divergiam entre si.
+// Este arquivo continua existindo só para não mexer nos imports do perfil.
+export { trackHref } from '@/utils/trackHref'

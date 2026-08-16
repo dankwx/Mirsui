@@ -15,17 +15,22 @@ import { capaDoAcervo, type GeneroDoAcervo } from '@/utils/homeService'
  * quantidade de capas na fileira.
  */
 
-/** Só ~1/4 do catálogo tem par no Spotify; sem id não existe ficha para abrir. */
+/**
+ * Sem ISRC não existe ficha para abrir — mas isso hoje é raro e some sozinho:
+ * o Deezer devolveu ISRC para 3.425 de 3.425 faixas consultadas, e a fila do
+ * job cobre o resto. Este ramo era a regra quando o endereço era o id do
+ * Spotify (só 21,4% do catálogo tinha um); agora é a exceção.
+ */
 function Faixa({
     md5,
     titulo,
     artista,
-    spotifyId,
+    isrc,
 }: {
     md5: string | null
     titulo: string
     artista: string
-    spotifyId: string | null
+    isrc: string | null
 }) {
     const capa = (
         <>
@@ -50,11 +55,11 @@ function Faixa({
 
     const classe = 'group w-[clamp(7.5rem,20vw,9.5rem)] flex-none snap-start'
 
-    if (!spotifyId) {
+    if (!isrc) {
         return <div className={classe}>{capa}</div>
     }
     return (
-        <Link href={`/track/${spotifyId}`} className={classe}>
+        <Link href={`/track/${isrc}`} className={classe}>
             {capa}
         </Link>
     )
@@ -112,7 +117,7 @@ export default function Acervo({ generos }: { generos: GeneroDoAcervo[] }) {
                                     md5={f.md5}
                                     titulo={f.titulo}
                                     artista={f.artista}
-                                    spotifyId={f.spotifyId}
+                                    isrc={f.isrc}
                                 />
                             ))}
                         </div>

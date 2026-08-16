@@ -1,15 +1,18 @@
-// app(dashboard)/artist/[id]/page.tsx
-import { createClient } from '@/utils/supabase/server'
-import { fetchAuthData } from '@/utils/profileService'
-import {
-    fetchSpotifyArtistInfo,
-    fetchSpotifyArtistAlbums,
-    fetchSpotifyArtistTopTracks,
-    SpotifyArtist,
-    SpotifyAlbum,
-    SpotifyTrack,
-} from '@/utils/spotifyService'
-import { formatDuration, formatReleaseDate, getAlbumTypeLabel } from '@/lib/formatters'
+// app/(dashboard)/artist/[id]/page.tsx
+//
+// A página de artista, endereçada pelo id do Deezer.
+//
+// Era 100% Spotify, e a seção principal estava quebrada havia meses sem que
+// nada gritasse: `/artists/{id}/top-tracks` responde **403** desde abril — não
+// é rate limit, é restrição de plataforma. O equivalente do Deezer funciona,
+// devolve até 99 faixas por requisição (contra 10) e cada uma vem com rank, que
+// é a métrica que o Observatório e os Stakes já usam.
+//
+// Ver docs/plano-independencia-do-spotify.md, fase 3.
+
+import { permanentRedirect, notFound } from 'next/navigation'
+import { carregarArtista } from '@/utils/artistPageService'
+import { searchDeezerArtists } from '@/utils/deezerService'
 import type { Metadata } from 'next'
 
 import ArtistHeroSection from '@/components/Artist/ArtistHeroSection'
@@ -22,27 +25,82 @@ import ArtistDetailsCard from '@/components/Artist/ArtistDetailsCard'
 import ArtistAllTracksSimple from '@/components/Artist/ArtistAllTracksSimple'
 import ArtistTrackStats from '@/components/Artist/ArtistTrackStats'
 
+const DEEZER_ID_RE = /^\d+$/
+const SPOTIFY_ID_RE = /^[A-Za-z0-9]{22}$/
+
+/**
+ * URL antiga, com id de artista do Spotify.
+ *
+ * A única ponte possível é o nome: o Deezer não conhece ids do Spotify e nós
+ * nunca guardamos essa correspondência (observed_tracks tem deezer_artist_id,
+ * não o do Spotify). Então pergunta-se o nome ao Spotify uma vez, acha-se o
+ * artista no Deezer e redireciona-se de vez — depois disso a URL nunca mais
+ * precisa de ninguém.
+ *
+ * Sem credencial do Spotify isto simplesmente não roda, e a URL antiga vira
+ * 404. É o preço de um formato de id que nunca foi nosso, e é a razão de o
+ * endereço novo ser de outra natureza.
+ */
+async function idDoDeezerPorIdDoSpotify(
+    spotifyArtistId: string
+): Promise<string | null> {
+    const temCredencial =
+        !!(process.env.SPOTIFY_CLIENT_ID || process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID) &&
+        !!(process.env.SPOTIFY_CLIENT_SECRET || process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET)
+    if (!temCredencial) return null
+
+    try {
+        const { fetchSpotifyArtistInfo } = await import('@/utils/spotifyService')
+        const doSpotify = await fetchSpotifyArtistInfo(spotifyArtistId)
+        if (!doSpotify?.name) return null
+
+        const achados = await searchDeezerArtists(doSpotify.name, 1)
+        return achados[0]?.id ?? null
+    } catch {
+        return null
+    }
+}
+
+/** `permanentRedirect` lança, então quem chama não continua depois dele. */
+async function resolver(bruto: string): Promise<string | null> {
+    const id = decodeURIComponent(bruto || '').trim()
+
+    if (DEEZER_ID_RE.test(id)) return id
+
+    if (SPOTIFY_ID_RE.test(id)) {
+        const doDeezer = await idDoDeezerPorIdDoSpotify(id)
+        if (doDeezer) permanentRedirect(`/artist/${doDeezer}`)
+    }
+
+    return null
+}
+
 export async function generateMetadata({
     params,
 }: {
     params: { id: string }
 }): Promise<Metadata> {
-    const artistInfo = await fetchSpotifyArtistInfo(params.id)
-    
-    if (artistInfo) {
-        const followerCount = artistInfo.followers?.total ? 
-            new Intl.NumberFormat('pt-BR', { notation: 'compact' }).format(artistInfo.followers.total) 
-            : ''
-        
+    const id = await resolver(params.id).catch(() => null)
+    const dados = id ? await carregarArtista(id) : null
+
+    if (!dados) {
         return {
-            title: `${artistInfo.name} | Mirsui`,
-            description: `Descubra ${artistInfo.name} no Mirsui${followerCount ? ` - ${followerCount} seguidores` : ''}. Veja quem descobriu suas músicas primeiro e explore sua discografia completa.`,
+            title: 'Artista - Mirsui',
+            description: 'Descubra informações sobre este artista no Mirsui.',
         }
     }
-    
+
+    const fas = dados.artista.followers.total
+        ? new Intl.NumberFormat('pt-BR', { notation: 'compact' }).format(
+              dados.artista.followers.total
+          )
+        : ''
+
     return {
-        title: 'Artista - Mirsui',
-        description: 'Descubra informações sobre este artista no Mirsui.',
+        title: `${dados.artista.name} | Mirsui`,
+        description: `Descubra ${dados.artista.name} no Mirsui${
+            fas ? ` — ${fas} fãs` : ''
+        }. Veja quem descobriu suas músicas primeiro e explore a discografia completa.`,
     }
 }
 
@@ -51,105 +109,60 @@ export default async function ArtistDetailsPage({
 }: {
     params: { id: string }
 }) {
-    const { id: artistId } = params
+    const id = await resolver(params.id)
+    if (!id) notFound()
 
-    // Fetch authentication data
-    const authData = await fetchAuthData()
-    const isLoggedIn = authData?.user ? true : false
+    const dados = await carregarArtista(id)
+    if (!dados) notFound()
 
-    // Fetch Spotify artist information
-    let artistInfo: SpotifyArtist | null = null
-    let artistAlbums: SpotifyAlbum[] = []
-    let topTracks: SpotifyTrack[] = []
+    const { artista, topTracks, albuns } = dados
 
-    if (artistId) {
-        artistInfo = await fetchSpotifyArtistInfo(artistId)
-        console.log({ artistInfo })
+    const albums = albuns.filter((a) => a.album_type === 'album')
+    const singles = albuns.filter((a) => a.album_type === 'single')
+    const compilations = albuns.filter((a) => a.album_type === 'compilation')
 
-        if (artistInfo) {
-            // Fetch albums and top tracks
-            const albumsData = await fetchSpotifyArtistAlbums(artistId)
-            artistAlbums = albumsData || []
+    const artistImageUrl = artista.images[0]?.url || '/placeholder-artist.svg'
+    const artistUrl = artista.external_urls.spotify
 
-            const topTracksData = await fetchSpotifyArtistTopTracks(artistId)
-            topTracks = topTracksData || []
-        }
-    }
+    // Seguidores do artista DENTRO do Mirsui. O número era 142 chumbado no
+    // código; virou 0 porque essa feature não existe, e zero honesto vale mais
+    // que cento e quarenta e dois inventados.
+    const totalFollows = 0
+    const hasUserFollowed = false
 
-    // Organize albums by type
-    const albums = artistAlbums.filter((album) => album.album_type === 'album')
-    const singles = artistAlbums.filter(
-        (album) => album.album_type === 'single'
-    )
-    const compilations = artistAlbums.filter(
-        (album) => album.album_type === 'compilation'
-    )
-
-    // Get artist image URL
-    const artistImageUrl =
-        artistInfo?.images?.[0]?.url || '/placeholder-artist.svg'
-
-    // Fetch the total number of follows for this artist (placeholder for now)
-    let totalFollows = 142 // Placeholder value
-
-    // Check if current user is already following this artist (placeholder for now)
-    let hasUserFollowed = false
-    let userFollowDate = null
-
-    // Construct Spotify URL for the artist
-    const artistUrl = `https://open.spotify.com/artist/${artistId}`
-
-    // Format follower count
     const formatFollowers = (count: number) => {
-        if (count >= 1000000) {
-            return `${(count / 1000000).toFixed(1)}M`
-        } else if (count >= 1000) {
-            return `${(count / 1000).toFixed(1)}K`
-        }
+        if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`
+        if (count >= 1000) return `${(count / 1000).toFixed(1)}K`
         return count.toString()
     }
+
+    const fas = artista.followers.total
+        ? formatFollowers(artista.followers.total)
+        : 'N/A'
 
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="grid gap-8 lg:grid-cols-3">
                 {/* Left Column - Artist Info */}
                 <div className="space-y-6 lg:col-span-2">
-                    {/* Hero Section */}
                     <ArtistHeroSection
-                        artistInfo={artistInfo}
+                        artistInfo={artista}
                         artistImageUrl={artistImageUrl}
                         artistUrl={artistUrl}
                         hasUserFollowed={hasUserFollowed}
                     />
-                    {/* Stats Grid */}
                     <ArtistStatsGrid
                         totalFollows={totalFollows}
-                        spotifyFollowers={
-                            artistInfo?.followers?.total
-                                ? formatFollowers(artistInfo.followers.total)
-                                : 'N/A'
-                        }
-                        popularity={artistInfo?.popularity || 'N/A'}
-                        totalAlbums={artistAlbums.length}
+                        fas={fas}
+                        popularity={artista.popularity}
+                        totalAlbums={albuns.length}
                     />
-                    {/* Top Tracks */}
-                    <ArtistTopTracks
-                        topTracks={topTracks}
-                    />
-                    
-                    {/* Track Statistics */}
-                    <ArtistTrackStats
-                        topTracks={topTracks}
-                        albums={artistAlbums}
-                    />
-                    
-                    {/* All Tracks with Advanced View */}
-                    <ArtistAllTracksSimple
-                        topTracks={topTracks}
-                        albums={artistAlbums}
-                    />
-                    
-                    {/* Albums, EPs and Singles Tabs */}
+                    <ArtistTopTracks topTracks={topTracks} />
+
+                    <ArtistTrackStats topTracks={topTracks} albums={albuns} />
+
+                    <ArtistAllTracksSimple topTracks={topTracks} albums={albuns} />
+
                     <ArtistDiscographyTabs
                         albums={albums}
                         singles={singles}
@@ -162,14 +175,10 @@ export default async function ArtistDetailsPage({
                     <ArtistRecentFollowers />
                     <ArtistTopFans />
                     <ArtistDetailsCard
-                        genres={artistInfo?.genres || []}
-                        popularity={artistInfo?.popularity || 'N/A'}
-                        spotifyFollowers={
-                            artistInfo?.followers?.total
-                                ? formatFollowers(artistInfo.followers.total)
-                                : 'N/A'
-                        }
-                        totalAlbums={artistAlbums.length}
+                        genres={artista.genres}
+                        popularity={artista.popularity}
+                        fas={fas}
+                        totalAlbums={albuns.length}
                         formatFollowers={formatFollowers}
                     />
                 </div>

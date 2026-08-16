@@ -1,17 +1,49 @@
-// app/(dashboard)/track/[id]/page.tsx — redesign na direção Acervo
+// app/(dashboard)/track/[id]/page.tsx
+//
+// A página de faixa, endereçada pelo ISRC.
+//
+// O QUE MUDOU E POR QUÊ
+// Esta página era derivada inteira de uma linha — `fetchSpotifyTrackInfo(id)` —
+// e quando o Spotify devolvia null não existia plano B: sumia capa, artista,
+// ficha técnica, prévia e até a curva do Observatório, que é dado nosso e não
+// depende de API nenhuma para existir. Em 15/08/2026 a credencial estava em 429
+// com Retry-After de 3h24, e 4 de 4 páginas de produção renderizavam
+// "Faixa Desconhecida" com <title> vazio — inclusive para crawler.
+//
+// Além de cair, ela só existia para 1.388 das 6.490 faixas que o Observatório
+// mede: o endereço era o id do Spotify, e 5.102 gravações medidas todo dia
+// simplesmente não tinham um. O funil nunca foi do catálogo nem do Deezer.
+//
+// Agora o endereço é o ISRC — o código da gravação, que não é de plataforma
+// nenhuma — e a fonte é o Deezer, que numa requisição sem chave devolve tudo
+// que esta página lê, mais o gênero (que o Spotify deixa vazio para BR/indie) e
+// a prévia de 30 s (que o Spotify cortou). Ver
+// docs/plano-independencia-do-spotify.md.
+//
+// URLs antigas não quebram: id do Spotify e id do Deezer são redirecionados
+// para a forma canônica (§4.2 — os três formatos não colidem, verificado contra
+// os 3.425 ISRCs do banco).
 
+import { permanentRedirect, notFound } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { fetchAuthData } from '@/utils/profileService'
-import {
-    fetchSpotifyTrackInfo,
-    fetchSpotifyArtistInfo,
-    SpotifyTrack,
-} from '@/utils/spotifyService'
-import { fetchDeezerGenresByISRC } from '@/utils/deezerService'
-import { countTrackOccurrences } from '@/utils/fetchTrackInfo'
-import { getTopTrackClaimers } from '@/utils/trackPopularityService'
 import { searchYouTubeVideo } from '@/utils/youtubeService'
 import { getTrackCurve } from '@/utils/observatoryService'
+import {
+    formatoDoId,
+    isrcDeIdSpotify,
+    isrcDeIdDeezer,
+} from '@/utils/trackIdentity'
+import {
+    carregarFaixaPorIsrc,
+    carregarFaixaLegada,
+    type DadosDaFaixa,
+} from '@/utils/trackPageService'
+import {
+    contarSalvamentos,
+    quemSalvou,
+    salvamentoDoUsuario,
+} from '@/utils/trackClaims'
 import TrackActions from '@/components/TrackActions/TrackActions'
 import TrackShare from '@/components/TrackShare/TrackShare'
 import TrackCurve from '@/components/TrackCurve/TrackCurve'
@@ -22,30 +54,78 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft, Clock, Crown } from 'lucide-react'
 
+/* ------------------------------------------------------------- resolução */
+
+interface Resolvida {
+    faixa: DadosDaFaixa
+    /** null no caminho legado, onde não há gravação identificada */
+    isrc: string | null
+}
+
+/**
+ * Do que veio na URL até a ficha da faixa.
+ *
+ * Redireciona (308) quando o id é de plataforma e dá para descobrir o ISRC —
+ * assim cada URL antiga paga a conversão uma vez e nunca mais. `permanentRedirect`
+ * lança, então quem chama não continua depois dele.
+ */
+async function resolver(bruto: string): Promise<Resolvida | null> {
+    const id = decodeURIComponent(bruto || '').trim()
+    const formato = formatoDoId(id)
+
+    if (formato === 'isrc') {
+        const isrc = id.toUpperCase()
+        // Normaliza a caixa: /track/usum72409273 e /track/USUM72409273 são a
+        // mesma gravação, e uma URL canônica por gravação é o que faz o cache e
+        // o preview de link pararem de se dividir em duas.
+        if (id !== isrc) permanentRedirect(`/track/${isrc}`)
+        const faixa = await carregarFaixaPorIsrc(isrc)
+        return faixa ? { faixa, isrc } : null
+    }
+
+    if (formato === 'deezer') {
+        const isrc = await isrcDeIdDeezer(id)
+        if (isrc) permanentRedirect(`/track/${isrc.toUpperCase()}`)
+        return null
+    }
+
+    if (formato === 'spotify') {
+        const isrc = await isrcDeIdSpotify(id)
+        if (isrc) permanentRedirect(`/track/${isrc.toUpperCase()}`)
+        // Não deu para converter: renderiza pelo que o acervo guardou, sem
+        // chamar ninguém. Antes, aqui era onde a página ia a branco.
+        const faixa = await carregarFaixaLegada(id)
+        return faixa ? { faixa, isrc: null } : null
+    }
+
+    return null
+}
+
+/* ------------------------------------------------------------- metadados */
+
 export async function generateMetadata({
     params,
 }: {
     params: { id: string }
 }): Promise<Metadata> {
-    const trackInfo = await fetchSpotifyTrackInfo(params.id)
+    const r = await resolver(params.id).catch(() => null)
 
-    if (trackInfo) {
-        const artistNames =
-            trackInfo.artists?.map((artist) => artist.name).join(', ') ||
-            'Artista Desconhecido'
+    if (!r) {
         return {
-            title: `${trackInfo.name} - ${artistNames} | Mirsui`,
-            description: `Descubra quem salvou "${trackInfo.name}" de ${artistNames} antes de virar mainstream. Salve seu achado no Mirsui.`,
+            title: 'Faixa - Mirsui',
+            description: 'Descubra informações sobre esta faixa no Mirsui.',
         }
     }
 
+    const { title, artistNames } = r.faixa
     return {
-        title: 'Faixa - Mirsui',
-        description: 'Descubra informações sobre esta faixa no Mirsui.',
+        title: `${title} - ${artistNames} | Mirsui`,
+        description: `Descubra quem salvou "${title}" de ${artistNames} antes de virar mainstream. Salve seu achado no Mirsui.`,
     }
 }
 
-/* ---------- helpers de apresentação (direção Acervo) ---------- */
+/* ------------------------- helpers de apresentação (direção Acervo) ------- */
+
 const TONES = [
     '#241f1a', '#1c2320', '#27201f', '#1b2026', '#231d27', '#202420',
     '#2a201b', '#1a2326', '#25211c', '#1d2126', '#26211f', '#1f231d',
@@ -65,33 +145,24 @@ function initials(name: string) {
         .slice(0, 2)
 }
 const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
-// Formata a data de lançamento respeitando a precisão do Spotify
-// (ano / ano-mês / ano-mês-dia)
-function formatReleaseDate(date?: string) {
+// O Deezer manda a data completa (YYYY-MM-DD), mas o parse continua tolerante:
+// o campo pode vir do álbum, com precisão de ano ou de mês.
+function formatReleaseDate(date?: string | null) {
     if (!date) return null
     const [y, m, d] = date.split('-')
     if (d) return `${parseInt(d, 10)} ${MONTHS[parseInt(m, 10) - 1]} ${y}`
     if (m) return `${MONTHS[parseInt(m, 10) - 1]} ${y}`
     return y
 }
-// Gêneros do Spotify vêm em minúsculas ("canadian contemporary r&b").
-// Pega os 2 primeiros e capitaliza cada palavra para exibição.
+// O gênero do Deezer já vem apresentável e em português ("Rap/Hip Hop",
+// "Samba/Pagode") — diferente do Spotify, que mandava "canadian contemporary
+// r&b" em minúsculas. Sobrou juntar os dois primeiros.
 function formatGenres(genres?: string[] | null) {
     if (!genres || genres.length === 0) return null
-    return genres
-        .slice(0, 2)
-        .map((g) =>
-            g
-                .split(' ')
-                .map((w) =>
-                    w === 'r&b' ? 'R&B' : w.charAt(0).toUpperCase() + w.slice(1)
-                )
-                .join(' ')
-        )
-        .join(' · ')
+    return genres.slice(0, 2).join(' · ')
 }
-// Seguidores do artista, formatado em pt-BR (1,2 mi · 340 mil · 8.450)
-function formatFollowers(n?: number) {
+// Número de pessoas, formatado em pt-BR (1,2 mi · 340 mil · 8.450)
+function formatFollowers(n?: number | null) {
     if (n == null) return null
     if (n >= 1_000_000) {
         const m = (n / 1_000_000).toFixed(1).replace('.', ',').replace(',0', '')
@@ -110,138 +181,114 @@ function claimWhen(ts: string | null) {
     if (months < 12) return months === 1 ? 'há 1 mês' : `há ${months} meses`
     return `${MONTHS[d.getMonth()]} ${d.getFullYear()}`
 }
-// Data por extenso (14 mar 2024) para o recibo
 function fullDate(ts?: string | null) {
     if (!ts) return '—'
     const d = new Date(ts)
     return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`
 }
+/** O Deezer conta duração em segundos; o Spotify contava em milissegundos. */
+function formatDuration(segundos: number) {
+    if (!segundos) return '0:00'
+    const m = Math.floor(segundos / 60)
+    const s = Math.floor(segundos % 60)
+    return `${m}:${s.toString().padStart(2, '0')}`
+}
+
+/* -------------------------------------------------------------- página */
 
 export default async function TrackDetailsPage({
     params,
 }: {
     params: { id: string }
 }) {
-    const { id: trackId } = params
+    const resolvida = await resolver(params.id)
+    if (!resolvida) notFound()
+
+    const { faixa, isrc } = resolvida
 
     const authData = await fetchAuthData()
     const isLoggedIn = authData?.user ? true : false
 
-    let trackInfo: SpotifyTrack | null = null
-    if (trackId) {
-        trackInfo = await fetchSpotifyTrackInfo(trackId)
-    }
-
-    const artists =
-        trackInfo?.artists?.map((artist) => ({
-            name: artist.name,
-            id: artist.id,
-        })) || []
-    const artistNames =
-        artists.map((artist) => artist.name).join(', ') || 'Artista Desconhecido'
-    const albumImageUrl = trackInfo?.album.images?.[0]?.url || ''
-    const releaseYear = trackInfo?.album.release_date
-        ? new Date(trackInfo.album.release_date).getFullYear()
-        : null
-    const duration = trackInfo
-        ? `${Math.floor(trackInfo.duration_ms / 60000)}:${Math.floor(
-              (trackInfo.duration_ms % 60000) / 1000
-          )
-              .toString()
-              .padStart(2, '0')}`
-        : '0:00'
-
-    // Gênero não vem na track — buscamos no artista principal
-    let genre: string | null = null
-    let followers: number | undefined
-    const primaryArtistId = trackInfo?.artists?.[0]?.id
-    if (primaryArtistId) {
-        const artistInfo = await fetchSpotifyArtistInfo(String(primaryArtistId))
-        genre = formatGenres(artistInfo?.genres)
-        followers = artistInfo?.followers?.total
-    }
-    // Spotify costuma deixar genres vazio p/ artistas BR/indie — cai no Deezer
-    const isrc = trackInfo?.external_ids?.isrc || null
-    if (!genre && isrc) {
-        genre = formatGenres(await fetchDeezerGenresByISRC(isrc))
-    }
+    /**
+     * A chave opaca do acervo. `tracks.track_uri` continua sendo
+     * `spotify:track:<id>` para tudo que já foi salvo — migrar isso seria risco
+     * alto no único dado insubstituível do produto (§7 do plano). O que muda é
+     * que agora existe `tracks.isrc` ao lado, então a gravação sem id do
+     * Spotify também tem chave, e a contagem casa as duas formas.
+     */
+    const trackUri = faixa.spotifyTrackId
+        ? `spotify:track:${faixa.spotifyTrackId}`
+        : isrc
+          ? `isrc:${isrc}`
+          : null
 
     // Curva do Observatório — o histórico de audiência que o Mirsui mede todo
-    // dia. Casada pelo ISRC (ver utils/observatoryService.ts). Devolve null para
-    // faixa ainda não medida, e aí o bloco não aparece.
+    // dia, casado por ISRC. Independe do Deezer estar respondendo agora: isto
+    // já está no nosso banco.
     const curva = await getTrackCurve(isrc)
 
-    // Ficha técnica — dados reais (Spotify + fallback Deezer)
+    const [totalClaims, topClaimers, meuSalvamento] = await Promise.all([
+        contarSalvamentos(trackUri, isrc),
+        quemSalvou(trackUri, isrc, 8),
+        isLoggedIn && authData.user?.id
+            ? salvamentoDoUsuario(authData.user.id, trackUri, isrc)
+            : Promise.resolve(null),
+    ])
+
+    const hasUserClaimed = !!meuSalvamento
+    const userClaimPosition = meuSalvamento?.position ?? null
+
+    const genre = formatGenres(faixa.genres)
+    const releaseYear = faixa.releaseDate
+        ? new Date(faixa.releaseDate).getFullYear()
+        : null
+
+    // Ficha técnica — só o que é medido de verdade. Linha sem valor não aparece.
     const specs = [
         genre && { k: 'Gênero', v: genre },
-        trackInfo?.album.release_date && {
+        faixa.releaseDate && {
             k: 'Lançamento',
-            v: formatReleaseDate(trackInfo.album.release_date),
+            v: formatReleaseDate(faixa.releaseDate),
         },
-        followers != null && {
-            k: 'Ouvintes',
-            v: `${formatFollowers(followers)} seguidores`,
+        faixa.followers != null && {
+            k: 'Artista',
+            v: `${formatFollowers(faixa.followers)} fãs no Deezer`,
         },
     ].filter(Boolean) as { k: string; v: string }[]
 
-    let totalClaims = 0
-    if (trackInfo?.uri) {
-        totalClaims = await countTrackOccurrences(trackInfo.uri)
-    }
-
-    let topClaimers: any[] = []
-    if (trackInfo?.uri) {
-        topClaimers = await getTopTrackClaimers(trackInfo.uri, 8)
-    }
-
-    const firstClaimer = topClaimers[0]
+    const firstClaimer = topClaimers[0] as
+        | { profiles?: unknown; claimedat?: string | null; position?: number }
+        | undefined
     const firstClaimerProfile = Array.isArray(firstClaimer?.profiles)
-        ? firstClaimer?.profiles[0]
-        : firstClaimer?.profiles
+        ? (firstClaimer?.profiles as Record<string, string>[])[0]
+        : (firstClaimer?.profiles as Record<string, string> | undefined)
     const firstClaimerName =
         firstClaimerProfile?.display_name ||
         firstClaimerProfile?.username ||
         'Alguém'
 
-    // Verifica se o usuário atual já salvou esta faixa
-    let hasUserClaimed = false
-    let userClaimPosition: number | null = null
-
-    if (isLoggedIn && trackInfo?.uri) {
-        const supabase = await createClient()
-        const { data: userClaim, error } = await supabase
-            .from('tracks')
-            .select('position')
-            .eq('user_id', authData.user?.id)
-            .eq('track_uri', trackInfo.uri)
-            .single()
-
-        if (!error && userClaim) {
-            hasUserClaimed = true
-            userClaimPosition = userClaim.position
-        }
-    }
-
-    const trackUrl = `https://open.spotify.com/track/${trackId}`
-
-    // Prévia do YouTube: consulta o cache (Spotify id -> YouTube id) antes de
-    // gastar cota da YouTube Data API (10k unidades/dia, 100 por busca). Só
-    // chama a API em cache miss, e persiste o resultado para nunca repetir.
+    /**
+     * Prévia do YouTube: agora é a SEGUNDA opção, atrás do MP3 que o Deezer
+     * entrega no mesmo objeto da faixa. Só roda quando não veio prévia do
+     * Deezer e quando existe id do Spotify — que é a chave de `youtube_cache`
+     * (migrations 002 e 017). Na prática isso reduz o consumo da cota do
+     * YouTube (100 buscas/dia para o site inteiro) a quase zero.
+     */
     let youtubeVideoId: string | null = null
-    if (trackInfo?.name) {
+    if (!faixa.previewUrl && faixa.spotifyTrackId) {
         const supabase = await createClient()
         const { data: cached } = await supabase
             .from('youtube_cache')
             .select('youtube_video_id')
-            .eq('spotify_track_id', trackId)
+            .eq('spotify_track_id', faixa.spotifyTrackId)
             .maybeSingle()
 
         if (cached) {
             youtubeVideoId = cached.youtube_video_id
         } else {
             const youtubeUrl = await searchYouTubeVideo(
-                trackInfo.name,
-                artistNames
+                faixa.title,
+                faixa.artistNames
             )
             if (youtubeUrl) {
                 const match = youtubeUrl.match(
@@ -253,14 +300,28 @@ export default async function TrackDetailsPage({
             // falhas transitórias da API (cota estourada também retorna null).
             if (youtubeVideoId) {
                 await supabase.rpc('cache_youtube_video', {
-                    p_spotify_id: trackId,
+                    p_spotify_id: faixa.spotifyTrackId,
                     p_video_id: youtubeVideoId,
                 })
             }
         }
     }
 
-    const coverTone = tone(artistNames + (trackInfo?.name || ''))
+    // O link de compartilhar é o NOSSO endereço canônico. Antes era o link do
+    // Spotify, o que fazia a página mandar tráfego para fora de si mesma.
+    const shareUrl = isrc
+        ? `${process.env.NEXT_PUBLIC_SITE_URL || 'https://mirsui.com'}/track/${isrc}`
+        : `${process.env.NEXT_PUBLIC_SITE_URL || 'https://mirsui.com'}/track/${faixa.spotifyTrackId}`
+
+    // A URL guardada em `tracks.track_url` no momento do save: continua sendo
+    // "onde ouvir isto fora daqui".
+    const linkExterno = faixa.spotifyTrackId
+        ? `https://open.spotify.com/track/${faixa.spotifyTrackId}`
+        : faixa.deezerTrackId
+          ? `https://www.deezer.com/track/${faixa.deezerTrackId}`
+          : shareUrl
+
+    const coverTone = tone(faixa.artistNames + faixa.title)
 
     return (
         <div>
@@ -285,10 +346,10 @@ export default async function TrackDetailsPage({
                     <div className="flex flex-col gap-7 md:flex-row md:items-start md:gap-[46px]">
                         {/* Capa */}
                         <div className="relative w-[200px] flex-none overflow-hidden rounded-[10px] border border-mir-line2 shadow-[0_30px_60px_-24px_rgba(0,0,0,0.7)] sm:w-[260px] md:w-[330px]">
-                            {albumImageUrl ? (
+                            {faixa.coverUrl ? (
                                 <img
-                                    src={albumImageUrl}
-                                    alt={`Capa de ${trackInfo?.album.name || 'álbum'}`}
+                                    src={faixa.coverUrl}
+                                    alt={`Capa de ${faixa.albumName || 'álbum'}`}
                                     className="aspect-square w-full object-cover"
                                 />
                             ) : (
@@ -297,7 +358,7 @@ export default async function TrackDetailsPage({
                                     style={{ ['--tone' as string]: coverTone }}
                                 >
                                     <span className="absolute bottom-1 left-3.5 select-none text-[84px] font-extrabold leading-[0.8] tracking-[-0.05em] text-white/[0.07]">
-                                        {initials(artistNames)}
+                                        {initials(faixa.artistNames)}
                                     </span>
                                 </div>
                             )}
@@ -311,53 +372,65 @@ export default async function TrackDetailsPage({
                                         {genre}
                                     </span>
                                 )}
+                                {faixa.explicit && (
+                                    <span className="rounded-[4px] border border-mir-line2 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em] text-mir-text3">
+                                        Explícito
+                                    </span>
+                                )}
                             </div>
 
                             <h1 className="mt-3.5 text-[clamp(38px,6vw,68px)] font-extrabold leading-[0.94] tracking-[-0.04em] text-mir-text">
-                                {trackInfo?.name || 'Faixa Desconhecida'}
+                                {faixa.title}
                             </h1>
 
-                            {artists.length > 0 ? (
-                                <div className="mt-2.5 flex flex-wrap items-baseline gap-x-1.5 text-[clamp(18px,2.2vw,23px)] font-bold leading-tight tracking-[-0.01em]">
-                                    {artists.map((artist, index) => (
-                                        <span key={artist.id}>
+                            <div className="mt-2.5 flex flex-wrap items-baseline gap-x-1.5 text-[clamp(18px,2.2vw,23px)] font-bold leading-tight tracking-[-0.01em]">
+                                {faixa.artists.map((artist, index) => (
+                                    <span key={`${artist.id ?? artist.name}-${index}`}>
+                                        {artist.id ? (
                                             <Link
                                                 href={`/artist/${artist.id}`}
                                                 className="text-mir-text transition hover:text-mir-text2"
                                             >
                                                 {artist.name}
                                             </Link>
-                                            {index < artists.length - 1 && (
-                                                <span className="text-mir-text3">,</span>
-                                            )}
-                                        </span>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="mt-2.5 text-[clamp(18px,2.2vw,23px)] font-bold text-mir-text">
-                                    {artistNames}
-                                </p>
-                            )}
-
-                            <div className="mt-3.5 flex flex-wrap items-center gap-2.5 font-mono text-[12.5px] text-mir-text2">
-                                <span>{trackInfo?.album.name || 'Álbum'}</span>
-                                <span className="text-mir-text3">·</span>
-                                <span>{releaseYear || '—'}</span>
-                                <span className="text-mir-text3">·</span>
-                                <span className="inline-flex items-center gap-1.5">
-                                    <Clock className="h-3 w-3" /> {duration}
-                                </span>
+                                        ) : (
+                                            <span className="text-mir-text">
+                                                {artist.name}
+                                            </span>
+                                        )}
+                                        {index < faixa.artists.length - 1 && (
+                                            <span className="text-mir-text3">,</span>
+                                        )}
+                                    </span>
+                                ))}
                             </div>
 
-                            {trackInfo && (
+                            <div className="mt-3.5 flex flex-wrap items-center gap-2.5 font-mono text-[12.5px] text-mir-text2">
+                                <span>{faixa.albumName || 'Álbum'}</span>
+                                <span className="text-mir-text3">·</span>
+                                <span>{releaseYear || '—'}</span>
+                                {faixa.duration > 0 && (
+                                    <>
+                                        <span className="text-mir-text3">·</span>
+                                        <span className="inline-flex items-center gap-1.5">
+                                            <Clock className="h-3 w-3" />{' '}
+                                            {formatDuration(faixa.duration)}
+                                        </span>
+                                    </>
+                                )}
+                            </div>
+
+                            {trackUri && (
                                 <TrackActions
-                                    trackUri={trackInfo.uri}
-                                    trackUrl={trackUrl}
-                                    trackTitle={trackInfo.name}
-                                    artistName={artistNames}
-                                    albumName={trackInfo.album.name}
-                                    popularity={trackInfo.popularity}
-                                    trackThumbnail={albumImageUrl}
+                                    trackUri={trackUri}
+                                    isrc={isrc}
+                                    trackUrl={linkExterno}
+                                    shareUrl={shareUrl}
+                                    trackTitle={faixa.title}
+                                    artistName={faixa.artistNames}
+                                    albumName={faixa.albumName || ''}
+                                    popularity={faixa.popularity ?? 0}
+                                    trackThumbnail={faixa.coverUrl || ''}
                                     totalClaims={totalClaims}
                                     initialClaimed={hasUserClaimed}
                                     userPosition={userClaimPosition}
@@ -395,29 +468,27 @@ export default async function TrackDetailsPage({
             <div className="mx-auto grid w-full max-w-[1180px] grid-cols-1 items-start gap-9 px-5 pb-[72px] pt-[34px] sm:px-10 lg:grid-cols-[minmax(0,1fr)_330px] lg:gap-[44px]">
                 {/* Main */}
                 <main className="flex min-w-0 flex-col gap-9">
-                    {trackInfo && (
-                        <TrackPreviewBar
-                            videoId={youtubeVideoId}
-                            spotifyUrl={trackUrl}
-                            trackTitle={trackInfo.name}
-                            artistName={artistNames}
-                        />
-                    )}
+                    <TrackPreviewBar
+                        previewUrl={faixa.previewUrl}
+                        videoId={youtubeVideoId}
+                        isrc={isrc}
+                        spotifyTrackId={faixa.spotifyTrackId}
+                        trackTitle={faixa.title}
+                        artistName={faixa.artistNames}
+                    />
                     {curva && <TrackCurve curva={curva} />}
                 </main>
 
                 {/* Rail */}
                 <aside className="flex flex-col gap-[18px] lg:sticky lg:top-[84px]">
-                    {trackInfo && (
-                        <TrackShare
-                            trackUri={trackInfo.uri}
-                            trackTitle={trackInfo.name}
-                            artistName={artistNames}
-                            albumImageUrl={albumImageUrl}
-                            year={releaseYear}
-                            totalClaims={totalClaims}
-                        />
-                    )}
+                    <TrackShare
+                        trackUri={trackUri ?? shareUrl}
+                        trackTitle={faixa.title}
+                        artistName={faixa.artistNames}
+                        albumImageUrl={faixa.coverUrl || ''}
+                        year={releaseYear}
+                        totalClaims={totalClaims}
+                    />
                 </aside>
             </div>
 
@@ -437,13 +508,6 @@ export default async function TrackDetailsPage({
                             {/* Recibo — registro autenticado da descoberta */}
                             <div className="w-full max-w-[300px]">
                                 <div className="rounded-2xl border border-mir-bg/10 bg-[#f5eede] p-6 shadow-[0_24px_48px_-32px_rgba(22,18,12,0.55)]">
-                                    {/* Sem "Nº 042" aqui. O número era
-                                        hash(trackId) % 1000: não indexava nada,
-                                        colidia entre faixas, e estava num recibo
-                                        que se apresenta como registro autenticado.
-                                        O resto do bloco já é tudo verdade — quem
-                                        salvou primeiro, quando, quantos vieram
-                                        depois. */}
                                     <div className="flex items-center justify-between">
                                         <span className="text-[14px] font-bold tracking-[-0.02em] text-mir-bg">
                                             Mirsui
@@ -455,10 +519,10 @@ export default async function TrackDetailsPage({
 
                                     <div className="mt-5">
                                         <div className="line-clamp-2 text-[19px] font-bold leading-tight tracking-[-0.02em] text-mir-bg">
-                                            {trackInfo?.name || 'Faixa'}
+                                            {faixa.title}
                                         </div>
                                         <div className="mt-1 truncate text-[13px] font-medium text-mir-bg/50">
-                                            {artistNames}
+                                            {faixa.artistNames}
                                         </div>
                                     </div>
 
@@ -489,10 +553,10 @@ export default async function TrackDetailsPage({
                                         </div>
                                         <div className="flex items-baseline justify-between">
                                             <dt className="text-[13px] font-medium text-mir-bg/50">
-                                                Popularidade hoje
+                                                Audiência hoje
                                             </dt>
                                             <dd className="text-[14px] font-bold tabular-nums text-mir-bg">
-                                                {trackInfo?.popularity ?? '—'}
+                                                {faixa.popularity ?? '—'}
                                                 <span className="text-mir-bg/40">
                                                     /100
                                                 </span>
@@ -504,15 +568,13 @@ export default async function TrackDetailsPage({
                         </div>
 
                         {/* De lá até hoje.
-                            Isto se parecia com um gráfico: a barra ia de 8% a 76%
-                            e os dois pontos ficavam em 8% e 76%, números escritos
-                            à mão que não mediam nada. Os rótulos acompanhavam —
-                            "obscura" e "pico" são duas afirmações que o banco não
-                            sustenta (popularity é o número do Spotify hoje, não um
-                            máximo histórico). Ficaram só as duas pontas, que são
-                            reais, sem eixo fingido no meio.
-                            O ponto da esquerda também era lima, que sobre papel
-                            creme dá 1,08:1: só aparecia pelo anel escuro. */}
+                            As duas pontas são reais e agora estão na MESMA
+                            escala: a audiência do recibo é popScore(rank) do
+                            Deezer, que é exatamente o número que alimenta a
+                            curva logo acima. Antes eram duas métricas de duas
+                            empresas diferentes no mesmo bloco visual — o
+                            "popularity" do Spotify aqui e o rank do Deezer no
+                            gráfico. */}
                         <div className="mt-10 rounded-xl border border-mir-bg/10 bg-[#efe7d6] px-7 pb-7 pt-9">
                             <div className="relative my-3.5 h-[3px] rounded-sm bg-mir-bg/20">
                                 <div className="absolute inset-x-0 top-0 h-[3px] rounded-sm bg-mir-bg/55" />
@@ -525,15 +587,16 @@ export default async function TrackDetailsPage({
                                         {firstClaimerName} salvou
                                     </div>
                                     <div className="mt-0.5 text-mir-bg/50">
-                                        {claimWhen(firstClaimer?.claimedat)}
+                                        {claimWhen(firstClaimer?.claimedat ?? null)}
                                     </div>
                                 </div>
                                 <div className="text-right">
                                     <div className="font-bold text-mir-warm-ink">
-                                        popularidade hoje
+                                        audiência hoje
                                     </div>
                                     <div className="mt-0.5 tabular-nums text-mir-bg/50">
-                                        {trackInfo?.popularity ?? '—'}/100 no Spotify
+                                        {faixa.popularity ?? '—'}/100 medida pelo
+                                        Observatório
                                     </div>
                                 </div>
                             </div>
@@ -550,9 +613,11 @@ export default async function TrackDetailsPage({
                         </div>
                         <ol className="mt-3.5 flex flex-col gap-2.5">
                             {topClaimers.map((claimer, index) => {
-                                const profile = Array.isArray(claimer.profiles)
-                                    ? claimer.profiles[0]
-                                    : claimer.profiles
+                                const profile = (
+                                    Array.isArray(claimer.profiles)
+                                        ? claimer.profiles[0]
+                                        : claimer.profiles
+                                ) as Record<string, string> | undefined
                                 const name =
                                     profile?.display_name ||
                                     profile?.username ||

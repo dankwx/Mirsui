@@ -6,34 +6,40 @@ import { Input } from '../ui/input'
 import { SearchIcon, Music, User, Loader2, ChevronDown, Filter } from 'lucide-react'
 import Image from 'next/image'
 
-interface SpotifyTrack {
+// A busca vem do Deezer desde a fase 3 do plano de independência do Spotify
+// (ver app/api/search/route.ts). A forma da resposta não mudou; o significado
+// de `id` mudou: na faixa é o ISRC da gravação, no artista é o id do Deezer —
+// que são exatamente os endereços de /track/[id] e /artist/[id].
+interface FaixaDaBusca {
     album: {
         name: string
         images: { url: string }[]
-        release_date: string
+        release_date?: string
     }
     artists: { name: string }[]
     name: string
+    /** 0-100, agora na mesma escala do Observatório (popScore do rank) */
     popularity: number
     uri: string
     duration_ms: number
     id: string
 }
 
-interface SpotifyArtist {
+interface ArtistaDaBusca {
     id: string
     name: string
     images?: { url: string }[]
+    /** `nb_fan` do Deezer: quem favoritou o artista */
     followers?: { total: number }
     genres: string[]
 }
 
 interface SearchResults {
     tracks: {
-        items: SpotifyTrack[]
+        items: FaixaDaBusca[]
     }
     artists: {
-        items: SpotifyArtist[]
+        items: ArtistaDaBusca[]
     }
 }
 
@@ -58,8 +64,8 @@ export default function SearchWithResults() {
     const abortRef = useRef<AbortController | null>(null)
     const router = useRouter()
 
-    // Função para buscar no Spotify
-    const searchSpotify = useCallback(async (searchQuery: string) => {
+    // Busca no /api/search — Deezer primeiro, Spotify de reserva
+    const buscar = useCallback(async (searchQuery: string) => {
         if (searchQuery.trim().length < 2) {
             setResults(null)
             setShowResults(false)
@@ -128,7 +134,7 @@ export default function SearchWithResults() {
 
         timeoutRef.current = setTimeout(() => {
             if (query.trim()) {
-                searchSpotify(query)
+                buscar(query)
             } else {
                 setResults(null)
                 setShowResults(false)
@@ -141,7 +147,7 @@ export default function SearchWithResults() {
             }
             abortRef.current?.abort()
         }
-    }, [query, searchFilter, searchSpotify]) // Adicionado searchSpotify como dependência
+    }, [query, searchFilter, buscar])
 
     // Fechar resultados ao clicar fora
     useEffect(() => {
@@ -165,13 +171,13 @@ export default function SearchWithResults() {
             document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
-    const handleTrackClick = (track: SpotifyTrack) => {
+    const handleTrackClick = (track: FaixaDaBusca) => {
         console.log('Track selecionada:', track)
         setShowResults(false)
         router.push(`/track/${track.id}`)
     }
 
-    const handleArtistClick = (artist: SpotifyArtist) => {
+    const handleArtistClick = (artist: ArtistaDaBusca) => {
         console.log('Artista selecionado:', artist)
         setShowResults(false)
         router.push(`/artist/${artist.id}`)
@@ -386,7 +392,7 @@ export default function SearchWithResults() {
                                                 </span>
                                                 {artist.followers?.total != null && (
                                                     <span className="block text-xs text-mir-text2">
-                                                        {artist.followers.total.toLocaleString()} seguidores
+                                                        {artist.followers.total.toLocaleString('pt-BR')} fãs
                                                     </span>
                                                 )}
                                             </div>

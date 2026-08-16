@@ -26,7 +26,7 @@ const POR_GENERO = 6
 
 interface PileRow {
     id?: string
-    spotify_id?: string | null
+    isrc?: string | null
     title?: string
     artist?: string
     md5?: string | null
@@ -66,7 +66,7 @@ const buscar = unstable_cache(
             return [
                 {
                     id: r.id,
-                    spotifyId: r.spotify_id || null,
+                    isrc: r.isrc || null,
                     title: r.title,
                     artist: r.artist,
                     cover: r.md5 ? coverUrl(r.md5, 500) : null,

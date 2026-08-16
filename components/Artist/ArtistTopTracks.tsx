@@ -2,7 +2,6 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Music, Play } from 'lucide-react'
-import { extractSpotifyIdFromUri } from '@/lib/spotifyUri'
 import { formatDuration, formatReleaseDate } from '@/lib/formatters'
 
 interface ArtistTopTracksProps {
@@ -26,8 +25,11 @@ export default function ArtistTopTracks({
             </CardHeader>
             <CardContent className="space-y-3">
                 {topTracks.slice(0, 5).map((track, index) => {
-                    // Extract spotifyId for the current track
-                    const trackSpotifyId = extractSpotifyIdFromUri(track.uri)
+                    // A rota vem pronta de utils/artistPageService.ts. Antes
+                    // saía de `extractSpotifyIdFromUri(track.uri)`, que LANÇA
+                    // para qualquer uri fora do formato do Spotify — uma faixa
+                    // com uri de outra fonte derrubava a página inteira.
+                    const href: string | null = track.href ?? null
 
                     return (
                         <div
@@ -51,10 +53,9 @@ export default function ArtistTopTracks({
                                 </div>
                                 <div>
                                     <p className="font-medium text-gray-900">
-                                        {/* Use trackSpotifyId and correct Spotify URL */}
-                                        {trackSpotifyId ? (
+                                        {href ? (
                                             <a
-                                                href={`/track/${trackSpotifyId}`}
+                                                href={href}
                                                 rel="noopener noreferrer"
                                                 className="hover:underline"
                                             >

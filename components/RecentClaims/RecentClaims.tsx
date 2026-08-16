@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { RecentClaim } from '@/utils/recentClaimsService'
 import { formatTimestamp } from '@/utils/feedHelpers'
+import { trackHref } from '@/utils/trackHref'
 
 interface RecentClaimsProps {
     claims: RecentClaim[]
@@ -53,7 +54,7 @@ export default function RecentClaims({ claims, loadFailed = false }: RecentClaim
                     {claims.map((claim, index) => (
                         <li key={claim.id}>
                             <Link
-                                href={`/track/${claim.track_url?.split('/').pop() || claim.track_title}`}
+                                href={trackHref(claim)}
                                 className="group grid grid-cols-[18px_40px_1fr_auto] items-center gap-3 border-b border-mir-line py-[9px] first:pt-0 last:border-b-0 last:pb-0"
                             >
                                 <span className="font-mono text-[12px] tabular-nums text-mir-text3">

@@ -1,4 +1,41 @@
 // utils/spotifyService.ts
+//
+// O que sobrou do Spotify no front, e por quê.
+//
+// Este arquivo era a espinha do site: a página de faixa, a de artista e a busca
+// saíam toda daqui. Em 15/08/2026 a credencial do projeto respondia:
+//
+//   429 (Retry-After 12205s)  /tracks/{id}, /artists/{id}, /search,
+//                             /artists/{id}/albums
+//   403                       /artists/{id}/top-tracks, /audio-features/{id}
+//   404                       /recommendations   (removido pela plataforma)
+//
+// Os 403 e o 404 atravessaram a janela de castigo — não são consequência do
+// 429. E as páginas de faixa em produção renderizavam "Faixa Desconhecida",
+// porque tudo nelas era derivado de uma chamada só.
+//
+// Hoje a fonte é o Deezer (utils/deezerService.ts): uma requisição sem chave,
+// sem token e sem `market=` devolve tudo que a página lê, mais o gênero — que o
+// Spotify deixa vazio para BR e indie — e a prévia de 30 s, que o Spotify
+// cortou. Ver docs/plano-independencia-do-spotify.md.
+//
+// SOBRARAM TRÊS FUNÇÕES, TODAS FORA DO CAMINHO CRÍTICO:
+//
+//   fetchSpotifyTrackInfo   último recurso de utils/trackIdentity.ts para
+//                           descobrir o ISRC de um id do Spotify que não veio
+//                           de lugar nenhum nosso — só para redirecionar
+//   fetchSpotifyArtistInfo  o nome de um artista, para converter URL antiga de
+//                           /artist/<idDoSpotify> em id do Deezer
+//   searchSpotify           a reserva da busca, quando o Deezer não acha nada
+//
+// As três são chamadas por `await import(...)`, e nenhuma roda sem credencial.
+// O teste de aceitação do plano é subir o site com SPOTIFY_CLIENT_ID e
+// SPOTIFY_CLIENT_SECRET vazios e não notar diferença nenhuma, exceto que o
+// botão "ouvir no Spotify" às vezes cai na busca em vez da faixa exata.
+//
+// O QUE SAIU: fetchSpotifyArtistAlbums e fetchSpotifyArtistTopTracks. O
+// primeiro virou /artist/{id}/albums do Deezer; o segundo respondia 403 —
+// aquela seção do site estava quebrada, calada, havia meses.
 
 import 'server-only'
 
@@ -62,23 +99,17 @@ export interface SpotifyArtist {
     }
 }
 
-export interface SpotifyAlbum {
-    id: string
-    name: string
-    album_type: 'album' | 'single' | 'compilation'
-    images: { url: string; height: number; width: number }[]
-    release_date: string
-    release_date_precision: string
-    total_tracks: number
-    external_urls: {
-        spotify: string
-    }
-    artists: { name: string; id: string }[]
-}
-
 // Cache do token
 let cachedSpotifyAccessToken: string | null = null
 let cachedTokenExpiryTime: number | null = null
+
+/** Há credencial configurada? Sem ela nada aqui roda, e isso não é erro. */
+export function spotifyConfigurado(): boolean {
+    return (
+        !!(process.env.SPOTIFY_CLIENT_ID || process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID) &&
+        !!(process.env.SPOTIFY_CLIENT_SECRET || process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET)
+    )
+}
 
 async function getSpotifyAccessToken(): Promise<string | null> {
     // Fallback para os nomes NEXT_PUBLIC_ antigos enquanto as variáveis
@@ -90,12 +121,10 @@ async function getSpotifyAccessToken(): Promise<string | null> {
         process.env.SPOTIFY_CLIENT_SECRET ||
         process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET
 
-    if (!clientId || !clientSecret) {
-        console.error(
-            'Variáveis de ambiente SPOTIFY_CLIENT_ID ou SPOTIFY_CLIENT_SECRET não definidas.'
-        )
-        return null
-    }
+    // Antes isto era console.error. Virou silêncio de propósito: as envs do
+    // Spotify passaram a ser OPCIONAIS, e um log de erro a cada visita de
+    // página treinaria qualquer um a ignorar os logs do serviço.
+    if (!clientId || !clientSecret) return null
 
     if (
         cachedSpotifyAccessToken &&
@@ -140,17 +169,16 @@ async function getSpotifyAccessToken(): Promise<string | null> {
 /**
  * Faz uma requisição autenticada à API do Spotify, cuidando do token,
  * tratamento de erro e invalidação do cache em caso de 401.
+ *
+ * Devolver null aqui deixou de ser catastrófico: nenhuma tela é montada a
+ * partir desta função. Ela ou consegue enriquecer um link, ou não.
  */
 async function spotifyApiFetch<T>(
     path: string,
     revalidateSeconds: number
 ): Promise<T | null> {
     const accessToken = await getSpotifyAccessToken()
-
-    if (!accessToken) {
-        console.error('Token do Spotify não disponível.')
-        return null
-    }
+    if (!accessToken) return null
 
     try {
         const response = await fetch(`https://api.spotify.com/v1${path}`, {
@@ -182,12 +210,18 @@ async function spotifyApiFetch<T>(
     }
 }
 
+/**
+ * Só para descobrir o ISRC de um id do Spotify que não resolveu localmente e
+ * então redirecionar (utils/trackIdentity.ts, degrau 3). O resto da ficha vem
+ * do Deezer.
+ */
 export async function fetchSpotifyTrackInfo(
     trackId: string
 ): Promise<SpotifyTrack | null> {
     return spotifyApiFetch<SpotifyTrack>(`/tracks/${trackId}`, 86400)
 }
 
+/** A reserva da busca, quando o Deezer não devolve nada (app/api/search). */
 export async function searchSpotify(
     query: string,
     type: string = 'track,artist',
@@ -204,30 +238,12 @@ export async function searchSpotify(
     )
 }
 
+/**
+ * Só para pegar o NOME e converter uma URL antiga de /artist/<idDoSpotify> no
+ * id do Deezer, que é como a página de artista passou a ser endereçada.
+ */
 export async function fetchSpotifyArtistInfo(
     artistId: string
 ): Promise<SpotifyArtist | null> {
     return spotifyApiFetch<SpotifyArtist>(`/artists/${artistId}`, 86400)
-}
-
-export async function fetchSpotifyArtistAlbums(
-    artistId: string,
-    includeGroups: string = 'album,single,compilation',
-    limit: number = 50
-): Promise<SpotifyAlbum[] | null> {
-    const data = await spotifyApiFetch<{ items: SpotifyAlbum[] }>(
-        `/artists/${artistId}/albums?include_groups=${includeGroups}&market=BR&limit=${limit}`,
-        86400
-    )
-    return data ? data.items || [] : null
-}
-
-export async function fetchSpotifyArtistTopTracks(
-    artistId: string
-): Promise<SpotifyTrack[] | null> {
-    const data = await spotifyApiFetch<{ tracks: SpotifyTrack[] }>(
-        `/artists/${artistId}/top-tracks?market=BR`,
-        86400
-    )
-    return data ? data.tracks || [] : null
 }

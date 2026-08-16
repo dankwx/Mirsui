@@ -138,9 +138,9 @@ function PieceSheet({
                         parede de login. Agora abre a ficha da própria faixa, que
                         é pública e tem o botão de salvar de verdade. */}
                     <div className="mt-5 flex gap-2.5">
-                        {track.spotifyId ? (
+                        {track.isrc ? (
                             <Link
-                                href={`/track/${track.spotifyId}`}
+                                href={`/track/${track.isrc}`}
                                 className="flex-1 rounded-full bg-mir-text px-5 py-3 text-center text-[14px] font-bold text-mir-bg transition hover:brightness-110 active:translate-y-px"
                             >
                                 Abrir a faixa
@@ -404,9 +404,9 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
                                             segue e o que tira a Pilha do papel de
                                             beco sem saída. Sem id, cai no card,
                                             que ao menos mostra o que se sabe. */}
-                                        {t.spotifyId ? (
+                                        {t.isrc ? (
                                             <Link
-                                                href={`/track/${t.spotifyId}`}
+                                                href={`/track/${t.isrc}`}
                                                 className={classe}
                                             >
                                                 {conteudo}

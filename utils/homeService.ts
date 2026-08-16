@@ -35,8 +35,16 @@ export interface FaixaDoAcervo {
     md5: string | null
     /** rank do Deezer: ~2 mil é subsolo, ~1 milhão é hit */
     rank: number | null
-    /** só ~1/4 do catálogo tem par no Spotify, e só esses viram link */
-    spotifyId: string | null
+    /**
+     * ISRC — o endereço da faixa no site (/track/<ISRC>).
+     *
+     * Era `spotifyId`, e a nota aqui dizia "só ~1/4 do catálogo tem par no
+     * Spotify, e só esses viram link". Esse um quarto era o funil inteiro do
+     * site: 5.102 gravações medidas todo dia apareciam na parede sem link
+     * porque uma API de terceiro não confirmou que elas existem no mercado BR
+     * dela. Com o ISRC como endereço, quem tem ISRC tem página.
+     */
+    isrc: string | null
 }
 
 export interface GeneroDoAcervo {
@@ -52,7 +60,7 @@ interface LinhaBruta {
     genre: string | null
     cover_md5: string | null
     last_rank: number | null
-    spotify_track_id: string | null
+    isrc: string | null
 }
 
 const paraFaixa = (l: LinhaBruta): FaixaDoAcervo => ({
@@ -62,7 +70,7 @@ const paraFaixa = (l: LinhaBruta): FaixaDoAcervo => ({
     genero: l.genre,
     md5: l.cover_md5,
     rank: l.last_rank,
-    spotifyId: l.spotify_track_id,
+    isrc: l.isrc,
 })
 
 /**
@@ -97,7 +105,7 @@ const paredeCacheada = unstable_cache(
     async (quantas: number): Promise<FaixaDoAcervo[]> => {
         const { data, error } = await supabasePublic
             .from('observed_tracks')
-            .select('deezer_track_id,title,artist_name,genre,cover_md5,last_rank,spotify_track_id')
+            .select('deezer_track_id,title,artist_name,genre,cover_md5,last_rank,isrc')
             .eq('active', true)
             .not('cover_md5', 'is', null)
             .limit(quantas * 6)
@@ -190,7 +198,7 @@ const generosCacheados = unstable_cache(
                 const { data, error } = await supabasePublic
                     .from('observed_tracks')
                     .select(
-                        'deezer_track_id,title,artist_name,genre,cover_md5,last_rank,spotify_track_id'
+                        'deezer_track_id,title,artist_name,genre,cover_md5,last_rank,isrc'
                     )
                     .eq('active', true)
                     .eq('genre', nome)

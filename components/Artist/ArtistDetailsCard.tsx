@@ -3,8 +3,10 @@ import { Separator } from '@/components/ui/separator'
 
 interface ArtistDetailsCardProps {
   genres: string[]
+  /** 0-100: média da audiência das faixas mais tocadas */
   popularity: number | string
-  spotifyFollowers: string | number
+  /** `nb_fan` do Deezer, já formatado */
+  fas: string | number
   totalAlbums: number
   formatFollowers: (count: number) => string
 }
@@ -12,7 +14,7 @@ interface ArtistDetailsCardProps {
 export default function ArtistDetailsCard({
   genres,
   popularity,
-  spotifyFollowers,
+  fas,
   totalAlbums,
   formatFollowers,
 }: ArtistDetailsCardProps) {
@@ -28,13 +30,13 @@ export default function ArtistDetailsCard({
         </div>
         <Separator />
         <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Popularidade</span>
+          <span className="text-sm text-gray-600">Audiência média</span>
           <span className="text-sm font-medium">{popularity || 'N/A'}/100</span>
         </div>
         <Separator />
         <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Seguidores Spotify</span>
-          <span className="text-sm font-medium">{spotifyFollowers}</span>
+          <span className="text-sm text-gray-600">Fãs no Deezer</span>
+          <span className="text-sm font-medium">{fas}</span>
         </div>
         <Separator />
         <div className="flex justify-between">

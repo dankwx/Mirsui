@@ -65,7 +65,7 @@ export default function ArtistHeroSection({
                     <Button variant="outline" size="icon">
                         <Share2 className="h-4 w-4" />
                     </Button>
-                    <SpotifyButton artistUrl={artistUrl} />
+                    <SpotifyButton url={artistUrl} label="Ouvir no Deezer" />
                 </div>
             </div>
         </div>

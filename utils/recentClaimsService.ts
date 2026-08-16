@@ -6,5 +6,6 @@ export interface RecentClaim {
     artist_name: string
     track_thumbnail: string
     track_url: string
+    isrc: string | null
     claimedat: string
 }

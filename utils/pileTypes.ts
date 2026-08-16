@@ -10,14 +10,17 @@ export interface PileTrack {
     /** id da faixa no Deezer, que é onde o Observatório mede */
     id: string
     /**
-     * id da mesma gravação no Spotify, que é como as páginas do site são
-     * endereçadas (/track/[spotifyId]). Vem da ponte ISRC -> Spotify feita pelo
-     * job (ver mirsui-backend/migrations/014_ponte_spotify.sql).
+     * ISRC da gravação — como as páginas do site são endereçadas (/track/[isrc]).
      *
-     * null quando a faixa não existe no Spotify no mercado BR. Nesse caso a
-     * interface mostra a faixa sem link, em vez de mandar para lugar nenhum.
+     * Era o id do Spotify, vindo da ponte da migration 014. A ponte continua
+     * existindo (o botão "ouvir no Spotify" usa), mas saiu do endereço: ela
+     * cobria 1.388 das 6.490 faixas medidas, então 4 de cada 5 peças da pilha
+     * apareciam sem link. Ver migrations/023_isrc_canonico.sql.
+     *
+     * Continua podendo ser null enquanto a fila de ISRC do job não passou pela
+     * faixa — e aí a peça aparece sem link, como antes.
      */
-    spotifyId: string | null
+    isrc: string | null
     title: string
     artist: string
     /** 500x500 — usado nas peças grandes */

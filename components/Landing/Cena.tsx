@@ -56,7 +56,7 @@ function Achado({ item }: { item: RecentActivityItem }) {
 
     return (
         <article className="grid grid-cols-[64px_minmax(0,1fr)] gap-4 rounded-2xl border border-mir-line bg-mir-surface p-4">
-            <Link href={trackHref(item.track_uri)} className="block">
+            <Link href={trackHref(item)} className="block">
                 <Capa
                     src={item.track_thumbnail}
                     alt={`${item.track_title}, de ${item.artist_name}`}
@@ -68,7 +68,7 @@ function Achado({ item }: { item: RecentActivityItem }) {
             </Link>
 
             <div className="min-w-0">
-                <Link href={trackHref(item.track_uri)} className="block w-max max-w-full">
+                <Link href={trackHref(item)} className="block w-max max-w-full">
                     <h3 className="m-0 truncate text-[17px] font-bold leading-tight tracking-[-0.02em] text-mir-text underline-offset-4 transition hover:underline hover:decoration-mir-line2 hover:decoration-2">
                         {item.track_title}
                     </h3>

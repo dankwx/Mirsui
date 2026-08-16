@@ -13,6 +13,7 @@
 import { permanentRedirect, notFound } from 'next/navigation'
 import { carregarArtista } from '@/utils/artistPageService'
 import { searchDeezerArtists } from '@/utils/deezerService'
+import { enderecoDoArtista, idDoArtistaNoEndereco } from '@/utils/artistHref'
 import type { Metadata } from 'next'
 
 import ArtistHeroSection from '@/components/Artist/ArtistHeroSection'
@@ -25,7 +26,6 @@ import ArtistDetailsCard from '@/components/Artist/ArtistDetailsCard'
 import ArtistAllTracksSimple from '@/components/Artist/ArtistAllTracksSimple'
 import ArtistTrackStats from '@/components/Artist/ArtistTrackStats'
 
-const DEEZER_ID_RE = /^\d+$/
 const SPOTIFY_ID_RE = /^[A-Za-z0-9]{22}$/
 
 /**
@@ -61,18 +61,34 @@ async function idDoDeezerPorIdDoSpotify(
     }
 }
 
+/** O endereço canônico de um id do Deezer, já com o nome do artista no slug. */
+async function canonicoDe(deezerId: string): Promise<string> {
+    const dados = await carregarArtista(deezerId)
+    return enderecoDoArtista(deezerId, dados?.artista.name)
+}
+
 /** `permanentRedirect` lança, então quem chama não continua depois dele. */
 async function resolver(bruto: string): Promise<string | null> {
     const id = decodeURIComponent(bruto || '').trim()
 
-    if (DEEZER_ID_RE.test(id)) return id
-
+    // O id do Spotify vem primeiro porque é o único formato de comprimento
+    // fixo e sem hífen: nenhum endereço `slug-id` pode ser confundido com ele.
     if (SPOTIFY_ID_RE.test(id)) {
         const doDeezer = await idDoDeezerPorIdDoSpotify(id)
-        if (doDeezer) permanentRedirect(`/artist/${doDeezer}`)
+        if (doDeezer) permanentRedirect(await canonicoDe(doDeezer))
+        return null
     }
 
-    return null
+    // Cobre as duas formas de uma vez: o id puro (`/artist/4050205`, que é como
+    // as URLs antigas circularam) e a forma com slug. `DEEZER_ID_RE` saiu daqui
+    // porque `idDoArtistaNoEndereco` já trata "só dígitos" como caso próprio.
+    const doDeezer = idDoArtistaNoEndereco(id)
+    if (!doDeezer) return null
+
+    const canonico = await canonicoDe(doDeezer)
+    if (`/artist/${id}` !== canonico) permanentRedirect(canonico)
+
+    return doDeezer
 }
 
 export async function generateMetadata({
@@ -83,7 +99,9 @@ export async function generateMetadata({
     const id = await resolver(params.id).catch(() => null)
     const dados = id ? await carregarArtista(id) : null
 
-    if (!dados) {
+    // `!id` junto com `!dados` só para o TypeScript estreitar o tipo: `dados`
+    // não existe sem `id`, mas ele não deduz isso sozinho.
+    if (!id || !dados) {
         return {
             title: 'Artista - Mirsui',
             description: 'Descubra informações sobre este artista no Mirsui.',
@@ -101,6 +119,8 @@ export async function generateMetadata({
         description: `Descubra ${dados.artista.name} no Mirsui${
             fas ? ` — ${fas} fãs` : ''
         }. Veja quem descobriu suas músicas primeiro e explore a discografia completa.`,
+        // Um artista, um endereço — mesma razão da ficha da faixa.
+        alternates: { canonical: enderecoDoArtista(id, dados.artista.name) },
     }
 }
 

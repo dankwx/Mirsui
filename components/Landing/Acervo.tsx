@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { capaDoAcervo, type GeneroDoAcervo } from '@/utils/homeService'
+import { enderecoDaFaixa } from '@/utils/trackHref'
 
 /**
  * O acervo por gênero.
@@ -59,7 +60,7 @@ function Faixa({
         return <div className={classe}>{capa}</div>
     }
     return (
-        <Link href={`/track/${isrc}`} className={classe}>
+        <Link href={enderecoDaFaixa(isrc, artista, titulo)} className={classe}>
             {capa}
         </Link>
     )

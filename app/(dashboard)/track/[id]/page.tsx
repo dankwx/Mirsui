@@ -31,9 +31,12 @@ import { searchYouTubeVideo } from '@/utils/youtubeService'
 import { getTrackCurve } from '@/utils/observatoryService'
 import {
     formatoDoId,
+    isrcDoEndereco,
     isrcDeIdSpotify,
     isrcDeIdDeezer,
 } from '@/utils/trackIdentity'
+import { enderecoDaFaixa } from '@/utils/trackHref'
+import { enderecoDoArtista } from '@/utils/artistHref'
 import {
     carregarFaixaPorIsrc,
     carregarFaixaLegada,
@@ -63,6 +66,25 @@ interface Resolvida {
 }
 
 /**
+ * O endereço canônico de um ISRC.
+ *
+ * Existe para que as URLs de plataforma cheguem à forma final em UM salto. O
+ * caminho preguiçoso seria mandá-las para `/track/<isrc>` e deixar o próximo
+ * request acrescentar o slug, mas aí toda URL antiga custaria dois
+ * redirecionamentos — e cadeia de redirecionamento é exatamente o que faz o
+ * rastreador desistir.
+ *
+ * Quem monta o endereço é `carregarFaixaPorIsrc`, não esta função: a regra de
+ * qual título vira slug depende de ver as duas fontes ao mesmo tempo, e lá é o
+ * único lugar onde as duas existem.
+ */
+async function canonicoDe(isrc: string): Promise<string> {
+    const chave = isrc.toUpperCase()
+    const faixa = await carregarFaixaPorIsrc(chave)
+    return faixa?.enderecoCanonico ?? enderecoDaFaixa(chave)
+}
+
+/**
  * Do que veio na URL até a ficha da faixa.
  *
  * Redireciona (308) quando o id é de plataforma e dá para descobrir o ISRC —
@@ -73,25 +95,36 @@ async function resolver(bruto: string): Promise<Resolvida | null> {
     const id = decodeURIComponent(bruto || '').trim()
     const formato = formatoDoId(id)
 
-    if (formato === 'isrc') {
-        const isrc = id.toUpperCase()
-        // Normaliza a caixa: /track/usum72409273 e /track/USUM72409273 são a
-        // mesma gravação, e uma URL canônica por gravação é o que faz o cache e
-        // o preview de link pararem de se dividir em duas.
-        if (id !== isrc) permanentRedirect(`/track/${isrc}`)
+    // ISRC puro e `slug-isrc` são o mesmo caso: os dois carregam o ISRC no fim
+    // e o que muda é só a decoração na frente.
+    if (formato === 'isrc' || formato === 'slug') {
+        const isrc = isrcDoEndereco(id)
+        if (!isrc) return null
+
         const faixa = await carregarFaixaPorIsrc(isrc)
-        return faixa ? { faixa, isrc } : null
+        if (!faixa) return null
+
+        // A forma canônica só pode ser conhecida DEPOIS de carregar a faixa,
+        // porque o slug vem do título e do artista. Uma comparação resolve
+        // todos os desvios de uma vez: caixa alta (/track/USUM72409273), slug
+        // ausente, slug antigo de um título que mudou desde então, e slug
+        // simplesmente errado que alguém digitou. Todos chegam na URL certa por
+        // 308, nenhum vira 404.
+        const canonico = faixa.enderecoCanonico ?? enderecoDaFaixa(isrc)
+        if (`/track/${id}` !== canonico) permanentRedirect(canonico)
+
+        return { faixa, isrc }
     }
 
     if (formato === 'deezer') {
         const isrc = await isrcDeIdDeezer(id)
-        if (isrc) permanentRedirect(`/track/${isrc.toUpperCase()}`)
+        if (isrc) permanentRedirect(await canonicoDe(isrc))
         return null
     }
 
     if (formato === 'spotify') {
         const isrc = await isrcDeIdSpotify(id)
-        if (isrc) permanentRedirect(`/track/${isrc.toUpperCase()}`)
+        if (isrc) permanentRedirect(await canonicoDe(isrc))
         // Não deu para converter: renderiza pelo que o acervo guardou, sem
         // chamar ninguém. Antes, aqui era onde a página ia a branco.
         const faixa = await carregarFaixaLegada(id)
@@ -121,6 +154,10 @@ export async function generateMetadata({
     return {
         title: `${title} - ${artistNames} | Mirsui`,
         description: `Descubra quem salvou "${title}" de ${artistNames} antes de virar mainstream. Salve seu achado no Mirsui.`,
+        // Uma gravação, um endereço. Sem isto, o ISRC puro, a forma com slug e
+        // as URLs antigas de plataforma seriam três páginas aos olhos do
+        // índice, dividindo entre si o pouco sinal que existe.
+        alternates: { canonical: r.faixa.enderecoCanonico ?? undefined },
     }
 }
 
@@ -388,7 +425,7 @@ export default async function TrackDetailsPage({
                                     <span key={`${artist.id ?? artist.name}-${index}`}>
                                         {artist.id ? (
                                             <Link
-                                                href={`/artist/${artist.id}`}
+                                                href={enderecoDoArtista(artist.id, artist.name)}
                                                 className="text-mir-text transition hover:text-mir-text2"
                                             >
                                                 {artist.name}

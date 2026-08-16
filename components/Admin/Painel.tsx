@@ -9,6 +9,7 @@ import type {
     Registro,
     TipoRegistro,
 } from '@/utils/painelTypes'
+import { enderecoDaFaixa } from '@/utils/trackHref'
 
 /* ------------------------------------------------------------------ *
  * Formatação
@@ -73,10 +74,25 @@ const pct = (parte: number, todo: number) =>
     todo > 0 ? `${Math.round((parte / todo) * 100)}%` : '—'
 
 /** Versão que não explode: `extractSpotifyIdFromUri` lança, e um painel não pode cair por causa de uma linha antiga. */
-function idDaFaixa(uri: string | null): string | null {
-    if (!uri) return null
-    const partes = uri.split(':')
-    return partes.length === 3 && partes[0] === 'spotify' ? partes[2] : null
+/**
+ * O endereço da ficha, a partir da chave opaca do acervo.
+ *
+ * `tracks.track_uri` guarda `spotify:track:<id>` para tudo que foi salvo antes
+ * da migration 023 e `isrc:<ISRC>` para o que veio depois. O segundo formato não
+ * era tratado aqui, então a capa da faixa salva recente aparecia sem link.
+ */
+function hrefDaFaixaSalva(faixa: FaixaSalva): string | null {
+    const partes = (faixa.uri || '').split(':')
+
+    if (partes.length === 2 && partes[0] === 'isrc' && partes[1]) {
+        return enderecoDaFaixa(partes[1], faixa.artista, faixa.titulo)
+    }
+    // Id do Spotify não recebe slug: a rota troca a URL inteira por 308 assim
+    // que descobre o ISRC.
+    if (partes.length === 3 && partes[0] === 'spotify' && partes[2]) {
+        return `/track/${partes[2]}`
+    }
+    return null
 }
 
 const CAPA_VAZIA =
@@ -420,7 +436,7 @@ function LinhaDaPessoa({ pessoa }: { pessoa: Pessoa }) {
  * ------------------------------------------------------------------ */
 
 function Capa({ faixa }: { faixa: FaixaSalva }) {
-    const id = idDaFaixa(faixa.uri)
+    const href = hrefDaFaixaSalva(faixa)
 
     const miolo = (
         <>
@@ -453,8 +469,8 @@ function Capa({ faixa }: { faixa: FaixaSalva }) {
         </>
     )
 
-    return id ? (
-        <Link href={`/track/${id}`} className="group block">
+    return href ? (
+        <Link href={href} className="group block">
             {miolo}
         </Link>
     ) : (

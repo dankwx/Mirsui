@@ -26,6 +26,7 @@ import {
     coverFromMd5,
 } from '@/utils/deezerService'
 import { buscarFaixaObservada } from '@/utils/trackIdentity'
+import { enderecoDaFaixa } from '@/utils/trackHref'
 import { popScore } from '@/utils/popScore'
 
 export interface ArtistaDaPagina {
@@ -58,6 +59,21 @@ export interface DadosDaFaixa {
     spotifyTrackId: string | null
     /** de onde veio o grosso do que está na tela */
     fonte: 'deezer' | 'observatorio'
+    /**
+     * O endereço canônico desta gravação — null no caminho legado, que não tem
+     * ISRC para endereçar.
+     *
+     * É montado AQUI, e não na rota, porque só aqui as duas fontes estão à
+     * vista: o slug tem que sair do que o Observatório guardou, nunca do título
+     * ao vivo do Deezer. Os dois divergem de verdade — medido: "Oitavo Anjo" no
+     * acervo contra "Oitavo Anjo (Porque É Proibido Pisar Na Grama)" no Deezer —
+     * e como TODO link interno do site é montado a partir do acervo, deixar o
+     * canônico seguir o Deezer faria uma fatia dos cliques pagar um 308 à toa.
+     *
+     * É também o ponto inteiro da forma de URL escolhida: o endereço não pode se
+     * mexer porque um terceiro reescreveu uma string.
+     */
+    enderecoCanonico: string | null
 }
 
 /**
@@ -125,6 +141,13 @@ export const carregarFaixaPorIsrc = cache(async function carregarFaixaPorIsrc(
         previewUrl: doDeezer?.previewUrl ?? null,
         spotifyTrackId: local?.spotifyTrackId ?? null,
         fonte: doDeezer ? 'deezer' : 'observatorio',
+        // O acervo primeiro, o Deezer só como último recurso — o contrário do
+        // resto do objeto, e de propósito. Ver o comentário do campo.
+        enderecoCanonico: enderecoDaFaixa(
+            isrc,
+            local?.artistName ?? artists[0]?.name,
+            local?.title ?? doDeezer?.title
+        ),
     }
 })
 
@@ -176,5 +199,8 @@ export async function carregarFaixaLegada(
         previewUrl: null,
         spotifyTrackId: spotifyId,
         fonte: 'observatorio',
+        // Sem ISRC não há endereço canônico a apontar: esta gravação só existe
+        // pelo id do Spotify que alguém salvou um dia.
+        enderecoCanonico: null,
     }
 }

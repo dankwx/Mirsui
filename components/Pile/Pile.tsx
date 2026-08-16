@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, LayoutGrid, List, Shuffle, X } from 'lucide-react'
 import { HEAT_LABEL, type PileTrack } from '@/utils/pileTypes'
+import { enderecoDaFaixa } from '@/utils/trackHref'
 import { packPile } from './pileLayout'
 
 const nf = new Intl.NumberFormat('pt-BR')
@@ -140,7 +141,7 @@ function PieceSheet({
                     <div className="mt-5 flex gap-2.5">
                         {track.isrc ? (
                             <Link
-                                href={`/track/${track.isrc}`}
+                                href={enderecoDaFaixa(track.isrc, track.artist, track.title)}
                                 className="flex-1 rounded-full bg-mir-text px-5 py-3 text-center text-[14px] font-bold text-mir-bg transition hover:brightness-110 active:translate-y-px"
                             >
                                 Abrir a faixa
@@ -406,7 +407,7 @@ export default function Pile({ tracks }: { tracks: PileTrack[] }) {
                                             que ao menos mostra o que se sabe. */}
                                         {t.isrc ? (
                                             <Link
-                                                href={`/track/${t.isrc}`}
+                                                href={enderecoDaFaixa(t.isrc, t.artist, t.title)}
                                                 className={classe}
                                             >
                                                 {conteudo}

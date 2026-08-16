@@ -2,6 +2,7 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import Image from 'next/image'
+import { enderecoDaFaixa } from '@/utils/trackHref'
 
 interface ClaimedTrack {
     track_title: string
@@ -117,7 +118,11 @@ export default async function RecentActivity() {
                                                 // nunca resolveu nada.
                                                 href={
                                                     track.track_id
-                                                        ? `/track/${track.track_id}`
+                                                        ? enderecoDaFaixa(
+                                                              track.track_id,
+                                                              track.artist_name,
+                                                              track.track_title
+                                                          )
                                                         : '/feed'
                                                 }
                                                 className="hover:text-purple-200"
@@ -125,12 +130,17 @@ export default async function RecentActivity() {
                                                 {track.track_title}
                                             </Link>{' '}
                                             <span className="text-white/50">por</span>{' '}
-                                            <Link
-                                                href={`/artist/${track.artist_name}`}
-                                                className="text-purple-200 hover:text-purple-100"
-                                            >
+                                            {/* O nome do artista era um <Link> para
+                                                /artist/<nome>. A rota do artista é
+                                                endereçada pelo id do Deezer, então
+                                                um nome nunca resolveu: todo clique
+                                                aqui era 404, e link interno para 404
+                                                é rastreamento jogado fora. Esta
+                                                linha não tem o id — vira texto até
+                                                que a consulta traga um. */}
+                                            <span className="text-purple-200">
                                                 {track.artist_name}
-                                            </Link>
+                                            </span>
                                         </p>
 
                                         {track.claim_message && (

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Input } from '../ui/input'
 import { SearchIcon, Music, User, Loader2, ChevronDown, Filter } from 'lucide-react'
 import Image from 'next/image'
+import { enderecoDaFaixa } from '@/utils/trackHref'
+import { enderecoDoArtista } from '@/utils/artistHref'
 
 // A busca vem do Deezer desde a fase 3 do plano de independência do Spotify
 // (ver app/api/search/route.ts). A forma da resposta não mudou; o significado
@@ -172,15 +174,18 @@ export default function SearchWithResults() {
     }, [])
 
     const handleTrackClick = (track: FaixaDaBusca) => {
-        console.log('Track selecionada:', track)
         setShowResults(false)
-        router.push(`/track/${track.id}`)
+        // `track.id` é o ISRC quando o Deezer devolveu um, e o id do Deezer
+        // quando não (ver app/api/search/route.ts). `enderecoDaFaixa` decora só
+        // o primeiro caso — o segundo vai ser trocado por 308 mesmo.
+        router.push(
+            enderecoDaFaixa(track.id, track.artists[0]?.name, track.name)
+        )
     }
 
     const handleArtistClick = (artist: ArtistaDaBusca) => {
-        console.log('Artista selecionado:', artist)
         setShowResults(false)
-        router.push(`/artist/${artist.id}`)
+        router.push(enderecoDoArtista(artist.id, artist.name))
     }
 
     const formatDuration = (ms: number) => {

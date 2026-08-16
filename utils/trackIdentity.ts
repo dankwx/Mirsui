@@ -20,31 +20,63 @@ import 'server-only'
 import { unstable_cache } from 'next/cache'
 import { supabasePublic } from '@/utils/supabase/public'
 import { searchDeezerTracks, fetchDeezerTrackById } from '@/utils/deezerService'
+import { ISRC_RE } from '@/utils/trackHref'
 
-export const ISRC_RE = /^[A-Z]{2}[A-Z0-9]{3}\d{7}$/
+// O formato do ISRC vem de utils/trackHref.ts, que não é `server-only` e por
+// isso pode ser lido também por quem monta link no cliente. Reexportado aqui
+// para não quebrar quem já importava daqui.
+export { ISRC_RE }
 export const SPOTIFY_ID_RE = /^[A-Za-z0-9]{22}$/
 export const DEEZER_ID_RE = /^\d+$/
 
-export type FormatoDeId = 'isrc' | 'spotify' | 'deezer' | 'desconhecido'
+export type FormatoDeId = 'isrc' | 'slug' | 'spotify' | 'deezer' | 'desconhecido'
+
+/**
+ * O ISRC escondido no fim de um endereço, seja ele `slug-isrc` ou o ISRC puro.
+ *
+ * O parse é por posição, não por separador: os últimos 12 caracteres, testados
+ * contra o formato. Não há ambiguidade possível com as outras formas —
+ *
+ *   `usum72409273`                    12 chars, casa, slug vazio
+ *   `rodrigo-amarante-tuyo-usum...`   casa na cauda, slug é o resto
+ *   `2plbrEY59IikOBgBGLjaoe`          22 chars, cauda não casa (não tem 7 dígitos)
+ *   `2947516331`                      só dígitos, curto demais
+ *
+ * O hífen antes da cauda é exigido para que um título que por acaso termine em
+ * doze caracteres no formato de ISRC não seja lido como identificador.
+ */
+export function isrcDoEndereco(bruto: string): string | null {
+    const s = (bruto || '').trim()
+    if (s.length < 12) return null
+
+    const cauda = s.slice(-12).toUpperCase()
+    if (!ISRC_RE.test(cauda)) return null
+    if (s.length > 12 && s[s.length - 13] !== '-') return null
+
+    return cauda
+}
 
 /**
  * Em que formato veio o id da URL.
  *
  * A ordem importa: um ISRC tem 12 caracteres e um id do Spotify tem 22, então
  * testar ISRC primeiro nunca rouba um id do Spotify. Só dígitos é do Deezer.
+ * O slug fica por último porque é o único caso que aceita comprimento livre.
  */
 export function formatoDoId(bruto: string): FormatoDeId {
     const id = (bruto || '').trim()
     if (ISRC_RE.test(id.toUpperCase()) && id.length === 12) return 'isrc'
     if (DEEZER_ID_RE.test(id)) return 'deezer'
     if (SPOTIFY_ID_RE.test(id)) return 'spotify'
+    if (isrcDoEndereco(id)) return 'slug'
     return 'desconhecido'
 }
 
-/** O endereço canônico de uma gravação. */
-export function hrefDaFaixa(isrc: string | null | undefined): string | null {
-    return isrc ? `/track/${isrc.toUpperCase()}` : null
-}
+// `hrefDaFaixa(isrc)` saiu daqui. Montava `/track/<ISRC>` e nunca foi chamada
+// por ninguém — nasceu junto com a migration 023 e ficou órfã. Quem monta
+// endereço de faixa agora é `enderecoDaFaixa` em utils/trackHref.ts, que precisa
+// do título e do artista para o slug e, por isso, não pode morar num módulo
+// `server-only`: metade dos pontos que montam link são componentes de cliente.
 
 /* --------------------------------------------------- o que já é nosso (SQL) */
 

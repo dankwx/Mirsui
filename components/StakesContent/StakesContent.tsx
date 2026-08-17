@@ -12,8 +12,10 @@ import { formatMultiplier } from '@/utils/stakeMultiplier'
 import { capture } from '@/lib/posthog'
 import StakeChartModal from './StakeChartModal'
 
-// Regras da feature (ver Stake.md): 3 fichas, e só dá pra COLETAR os pontos
-// depois de 7 dias. Remover antes disso é permitido, mas zera os pontos.
+// Regras da feature (ver Stake.md): 3 fichas; a ficha rende quando a faixa bate
+// o próprio recorde de popularidade (marca d'água, migration 028) e o acumulado
+// nunca desce. Só dá pra COLETAR depois de 7 dias e com saldo > 0 — remover
+// antes disso é permitido, mas zera.
 const MAX_SLOTS = 3
 const MIN_DAYS = 7
 const START_EXPANDED = false
@@ -32,6 +34,7 @@ export type Stake = {
     album_name: string | null
     track_thumbnail: string | null
     baseline_popularity: number
+    peak_popularity: number
     artist_popularity: number
     multiplier: number | string
     accumulated_points: number
@@ -83,7 +86,11 @@ function hash(s: string): number {
     return h
 }
 
-type CoverStyles = { surf: CSSProperties; artistS: CSSProperties; titleS: CSSProperties }
+type CoverStyles = {
+    surf: CSSProperties
+    artistS: CSSProperties
+    titleS: CSSProperties
+}
 
 function coverStyles(p: Palette, size: CoverSize): CoverStyles {
     const map = {
@@ -104,7 +111,8 @@ function coverStyles(p: Palette, size: CoverSize): CoverStyles {
             overflow: 'hidden',
         },
         artistS: {
-            fontFamily: "var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
+            fontFamily:
+                "var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
             fontSize: s.a,
             letterSpacing: '.1em',
             textTransform: 'uppercase',
@@ -163,7 +171,8 @@ type Badge = {
 function badge(pop: number): Badge {
     const t = tier(pop)
     const base: CSSProperties = {
-        fontFamily: "var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
+        fontFamily:
+            "var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
         fontSize: '9.5px',
         fontWeight: 700,
         letterSpacing: '.1em',
@@ -217,61 +226,107 @@ function fmt(n: number): string {
 }
 
 // ---- movimento / feedback ----
-// Por que o stake deu (ou não deu) pontos. Os pontos só sobem quando a
-// popularidade da faixa cresce (ver Stake.md). Aqui a gente traduz o
-// baseline → agora numa frase humana + cor, pra explicar mesmo o "0".
+// A história que este bloco conta é a do RECORDE, não a da última medição.
+//
+// Antes ele comparava baseline → agora, e uma ficha que foi de 10 a 15 e voltou
+// pra 7 estampava "Caiu 10 → 7" em laranja, com os pontos ganhos escondidos num
+// subtítulo. Só que os pontos não tinham ido a lugar nenhum: `accumulated_points`
+// é catraca, nunca desce. O card contava a história da popularidade enquanto o
+// usuário queria a dos pontos, e a leitura de um segundo era "perdi".
+//
+// Com a marca d'água (migration 028) o modelo mental fica de uma linha só:
+// "você ganha quando ela bate o próprio recorde". Então é o recorde que aparece
+// em destaque, e a queda vira o que ela é — a distância que falta pra render de
+// novo, não um prejuízo.
 type Movement = {
-    tone: 'up' | 'flat' | 'down'
-    delta: number
+    tone: 'record' | 'below' | 'flat'
     color: string
     arrow: string
     headline: string
     sub: string
+    /** número à direita: quanto falta pro recorde, ou o quanto já subiu */
+    tag: string | null
 }
 
-function movement(s: Stake): Movement {
-    const from = Math.round(s.baseline_popularity)
-    const to = Math.round(s.last_popularity)
-    const delta = to - from
+const ACC = '#cdef36'
+const MUTED = 'rgba(236,227,210,.62)'
+
+/**
+ * Recorde da ficha. Fichas gravadas antes da migration 028 podem vir sem o
+ * campo, e o pico nunca é menor que os dois valores que já conhecemos —
+ * então o máximo dos três é sempre seguro.
+ */
+function picoDe(s: Stake): number {
+    return Math.max(
+        Math.round(s.peak_popularity ?? 0),
+        Math.round(s.baseline_popularity),
+        Math.round(s.last_popularity)
+    )
+}
+
+function movement(s: Stake, paused = false): Movement {
+    const base = Math.round(s.baseline_popularity)
+    const now = Math.round(s.last_popularity)
+    const peak = picoDe(s)
     const pts = fmt(s.accumulated_points)
     const ptsLabel = s.accumulated_points === 1 ? 'ponto' : 'pontos'
+    const guardados =
+        s.accumulated_points > 0
+            ? `${pts} ${ptsLabel} garantidos`
+            : 'Nada rendeu ainda'
 
-    if (delta > 0) {
+    // parou de medir: o saldo continua valendo, mas prometer "rende de novo se
+    // passar de X" seria mentira — não vai passar, porque não vai ser medida
+    if (paused) {
         return {
-            tone: 'up',
-            delta,
-            color: '#cdef36',
+            tone: 'below',
+            color: MUTED,
+            arrow: '•',
+            headline: `Parou de medir em ${now}`,
+            sub:
+                s.accumulated_points > 0
+                    ? `${guardados} · o que já rendeu continua seu`
+                    : 'Não chegou a render nada',
+            tag: null,
+        }
+    }
+
+    // no recorde agora: tudo que ela subir daqui vira ponto na hora
+    if (now >= peak && peak > base) {
+        return {
+            tone: 'record',
+            color: ACC,
             arrow: '↑',
-            headline: `Subiu ${from} → ${to}`,
-            sub:
-                s.accumulated_points > 0
-                    ? `Já rendeu ${pts} ${ptsLabel}`
-                    : 'Vira ponto na próxima medição',
+            headline: `No recorde: ${base} → ${now}`,
+            sub: `${guardados} · daqui pra cima rende na hora`,
+            tag: `+${peak - base}`,
         }
     }
-    if (delta < 0) {
+
+    // já bateu recorde e recuou: os pontos daquele pico continuam na conta
+    if (peak > base) {
         return {
-            tone: 'down',
-            delta,
-            color: '#d98359',
-            arrow: '↓',
-            headline: `Caiu ${from} → ${to}`,
-            sub:
-                s.accumulated_points > 0
-                    ? `Rendeu ${pts} ${ptsLabel} antes de cair`
-                    : 'Pontos só entram quando ela cresce',
+            tone: 'below',
+            color: MUTED,
+            arrow: '•',
+            headline: `Recorde ${peak} · agora ${now}`,
+            sub: `${guardados} · rende de novo passando de ${peak}`,
+            tag: `${peak - now} pro recorde`,
         }
     }
+
+    // nunca passou do ponto da ficha — o recorde ainda é o próprio baseline
     return {
         tone: 'flat',
-        delta: 0,
-        color: 'rgba(236,227,210,.62)',
-        arrow: '→',
-        headline: `Parada em ${to}`,
+        color: MUTED,
+        arrow: '•',
+        headline:
+            now === base ? `Parada em ${now}` : `Marca ${base} · agora ${now}`,
         sub:
             s.accumulated_points > 0
-                ? `Rendeu ${pts} ${ptsLabel} no caminho`
-                : 'Não se mexeu desde a sua ficha',
+                ? `${guardados} · rende de novo passando de ${base}`
+                : `Rende quando passar de ${base}`,
+        tag: now < base ? `${base - now} pra marca` : null,
     }
 }
 
@@ -436,7 +491,8 @@ export default function StakesContent({
     }, [query])
 
     // ---- ações ----
-    const isOpen = (id: string) => (open[id] !== undefined ? open[id] : START_EXPANDED)
+    const isOpen = (id: string) =>
+        open[id] !== undefined ? open[id] : START_EXPANDED
     const toggleInfo = (id: string) =>
         setOpen((prev) => ({ ...prev, [id]: !isOpen(id) }))
 
@@ -472,10 +528,14 @@ export default function StakesContent({
                 const data = await res.json()
                 if (data.matched) {
                     setPreviewMult(
-                        typeof data.multiplier === 'number' ? data.multiplier : null
+                        typeof data.multiplier === 'number'
+                            ? data.multiplier
+                            : null
                     )
                     setPreviewPop(
-                        typeof data.popularity === 'number' ? data.popularity : null
+                        typeof data.popularity === 'number'
+                            ? data.popularity
+                            : null
                     )
                 }
             }
@@ -625,8 +685,8 @@ export default function StakesContent({
                                             : 'fichas'}
                                     </b>{' '}
                                     pra botar nas faixas que você acha que vão
-                                    subir. Quanto mais escondida a faixa, maior o
-                                    multiplicador. Seu faro, em jogo.
+                                    subir. Quanto mais escondida a faixa, maior
+                                    o multiplicador. Seu faro, em jogo.
                                 </>
                             )}
                         </p>
@@ -668,8 +728,8 @@ export default function StakesContent({
                                 Não conseguimos carregar suas fichas
                             </p>
                             <p className="mx-auto mt-2 max-w-[46ch] text-[14px] leading-[1.55] text-mir-text2">
-                                O problema é do nosso lado. As fichas que você já
-                                botou seguem na mesa e os pontos continuam
+                                O problema é do nosso lado. As fichas que você
+                                já botou seguem na mesa e os pontos continuam
                                 acumulando.
                             </p>
                             <button
@@ -709,7 +769,9 @@ export default function StakesContent({
                                                 dela bombar
                                             </div>
                                             <span className="mt-4 inline-flex items-center gap-[7px] rounded-full bg-mir-text px-[22px] py-[11px] text-sm font-bold text-mir-bg">
-                                                {loading ? 'Carregando…' : 'Escolher faixa →'}
+                                                {loading
+                                                    ? 'Carregando…'
+                                                    : 'Escolher faixa →'}
                                             </span>
                                         </button>
                                     </div>
@@ -718,33 +780,51 @@ export default function StakesContent({
 
                             const removida = s.status === 'removida'
                             const podeColetar = s.can_collect
+                            // 7 dias cumpridos mas sem saldo: não é "livre pra
+                            // recolher", é vaga presa. O SQL apaga a linha nesse
+                            // caso, então o card não pode oferecer coleta.
+                            const semSaldo =
+                                !podeColetar && s.days_to_collect === 0
                             const b = badge(s.baseline_popularity)
                             const opened = isOpen(s.id)
                             const mult = Number(s.multiplier)
                             const busy = busyId === s.id
-                            const mv = removida ? null : movement(s)
+                            const mv = movement(s, removida)
 
-                            // estilo da borda: removida = apagado, livre = destaque, segurando = neutro
-                            const border = removida
+                            // Uma ficha `removida` COM saldo coletável não é um
+                            // card morto: tem dinheiro em cima dele. Só apaga o
+                            // que parou de medir e não tem o que recolher —
+                            // senão o card cinza escondia o botão que paga.
+                            const apagado = removida && !podeColetar
+
+                            // estilo da borda: apagado = sumido, livre = destaque, segurando = neutro
+                            const border = apagado
                                 ? '1px solid rgba(236,227,210,.08)'
                                 : podeColetar
                                   ? '1.5px solid rgba(205,239,54,.4)'
                                   : '1px solid rgba(236,227,210,.12)'
-                            const shadow =
-                                !removida && podeColetar
-                                    ? '0 20px 44px -24px rgba(205,239,54,.32)'
-                                    : 'none'
+                            const shadow = podeColetar
+                                ? '0 20px 44px -24px rgba(205,239,54,.32)'
+                                : 'none'
 
                             // status sobre a capa: ponto + texto limpo (sem pill)
-                            const statusDot = removida
+                            const statusDot = apagado
                                 ? '#8a8175'
                                 : podeColetar
                                   ? '#cdef36'
                                   : '#e0a84a'
-                            const statusLabel = removida
-                                ? 'Removida do Spotify'
-                                : podeColetar
-                                  ? 'Livre pra recolher'
+                            // "Removida do Spotify" era falso: a métrica é do
+                            // Deezer, e o que sumiu foi o id de lá (re-upload,
+                            // troca de distribuidora, licença por região). A
+                            // faixa segue tocando no Spotify — dizer o contrário
+                            // é a mentira mais fácil do mundo de o usuário
+                            // desmentir, e chegava junto com a perda de pontos.
+                            const statusLabel = podeColetar
+                                ? removida
+                                    ? 'Parou de medir · dá pra recolher'
+                                    : 'Livre pra recolher'
+                                : removida
+                                  ? 'Não dá mais pra medir'
                                   : `Segurando há ${s.days_held}d`
 
                             return (
@@ -754,14 +834,16 @@ export default function StakesContent({
                                     style={{
                                         border,
                                         boxShadow: shadow,
-                                        opacity: removida ? 0.55 : 1,
+                                        opacity: apagado ? 0.55 : 1,
                                     }}
                                 >
                                     {/* CAPA EM DESTAQUE */}
                                     <div
                                         className="relative aspect-square w-full flex-none overflow-hidden"
                                         style={{
-                                            filter: removida ? 'grayscale(1)' : 'none',
+                                            filter: apagado
+                                                ? 'grayscale(1)'
+                                                : 'none',
                                         }}
                                     >
                                         <CoverImage
@@ -783,7 +865,7 @@ export default function StakesContent({
                                             <span
                                                 className="inline-flex items-center gap-[9px] text-[14px] font-bold leading-none tracking-[-0.01em] [text-shadow:0_1px_4px_rgba(0,0,0,.55)]"
                                                 style={{
-                                                    color: removida
+                                                    color: apagado
                                                         ? 'rgba(236,227,210,.6)'
                                                         : '#f3ead6',
                                                 }}
@@ -792,7 +874,7 @@ export default function StakesContent({
                                                     className="h-[8px] w-[8px] flex-none rounded-full"
                                                     style={{
                                                         background: statusDot,
-                                                        boxShadow: removida
+                                                        boxShadow: apagado
                                                             ? 'none'
                                                             : `0 0 8px ${statusDot}`,
                                                     }}
@@ -810,11 +892,15 @@ export default function StakesContent({
                                                 <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[25px] font-extrabold leading-[1.05] tracking-[-0.03em] text-mir-text">
                                                     {s.track_title}
                                                 </div>
-                                                {!removida && s.last_day_gain > 0 && (
-                                                    <span className="flex-none rounded-full bg-mir-acc/20 px-2 py-[3px] font-mono text-[10px] font-bold text-mir-acc">
-                                                        +{fmt(s.last_day_gain)}
-                                                    </span>
-                                                )}
+                                                {!removida &&
+                                                    s.last_day_gain > 0 && (
+                                                        <span className="flex-none rounded-full bg-mir-acc/20 px-2 py-[3px] font-mono text-[10px] font-bold text-mir-acc">
+                                                            +
+                                                            {fmt(
+                                                                s.last_day_gain
+                                                            )}
+                                                        </span>
+                                                    )}
                                             </div>
                                             <div className="mt-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[11.5px] text-mir-text2/85">
                                                 {s.artist_name}
@@ -824,104 +910,159 @@ export default function StakesContent({
 
                                     {/* CONTEÚDO */}
                                     <div className="flex flex-col p-5 pt-[18px]">
-                                        {/* movimento: por que deu (ou não) pontos.
-                                            Clicável → abre o gráfico de evolução. */}
-                                        {mv && (
-                                            <button
-                                                onClick={() => {
-                                                    setChartStake(s)
-                                                    capture('stake_chart_opened', {
-                                                        stake_id: s.id,
-                                                        track_title: s.track_title,
-                                                    })
+                                        {/* o recorde e a distância até ele — é o que
+                                            decide se rende ponto. Clicável → abre o
+                                            gráfico de evolução. */}
+                                        <button
+                                            onClick={() => {
+                                                setChartStake(s)
+                                                capture('stake_chart_opened', {
+                                                    stake_id: s.id,
+                                                    track_title: s.track_title,
+                                                })
+                                            }}
+                                            className="group mb-4 flex w-full cursor-pointer items-center gap-3 rounded-xl border border-mir-line bg-mir-fill1/40 px-3.5 py-3 text-left transition-colors hover:border-mir-line2 hover:bg-mir-fill1"
+                                        >
+                                            <div
+                                                className="flex h-9 w-9 flex-none items-center justify-center rounded-lg text-[16px] font-bold leading-none"
+                                                style={{
+                                                    color: mv.color,
+                                                    background: `${mv.color}1f`,
                                                 }}
-                                                className="group mb-4 flex w-full cursor-pointer items-center gap-3 rounded-xl border border-mir-line bg-mir-fill1/40 px-3.5 py-3 text-left transition-colors hover:border-mir-line2 hover:bg-mir-fill1"
                                             >
+                                                {mv.arrow}
+                                            </div>
+                                            <div className="min-w-0 flex-1">
                                                 <div
-                                                    className="flex h-9 w-9 flex-none items-center justify-center rounded-lg text-[16px] font-bold leading-none"
+                                                    className="text-[13.5px] font-bold tracking-[-0.01em]"
                                                     style={{
-                                                        color: mv.color,
-                                                        background: `${mv.color}1f`,
+                                                        color:
+                                                            mv.tone === 'record'
+                                                                ? mv.color
+                                                                : '#ece3d2',
                                                     }}
                                                 >
-                                                    {mv.arrow}
+                                                    {mv.headline}
                                                 </div>
-                                                <div className="min-w-0 flex-1">
-                                                    <div
-                                                        className="text-[13.5px] font-bold tracking-[-0.01em]"
-                                                        style={{
-                                                            color:
-                                                                mv.tone === 'flat'
-                                                                    ? '#ece3d2'
-                                                                    : mv.color,
-                                                        }}
-                                                    >
-                                                        {mv.headline}
-                                                    </div>
-                                                    <div className="mt-0.5 font-mono text-[10.5px] leading-tight text-mir-text2/70">
-                                                        {mv.sub}
-                                                    </div>
+                                                <div className="mt-0.5 font-mono text-[10.5px] leading-tight text-mir-text2/70">
+                                                    {mv.sub}
                                                 </div>
-                                                {mv.delta !== 0 && (
-                                                    <span
-                                                        className="flex-none font-mono text-[12px] font-bold"
-                                                        style={{ color: mv.color }}
-                                                    >
-                                                        {mv.delta > 0 ? '+' : ''}
-                                                        {mv.delta}
-                                                    </span>
-                                                )}
-                                                {/* ícone de gráfico: sinaliza que dá pra abrir */}
-                                                <svg
-                                                    width="15"
-                                                    height="15"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="2.2"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    className="flex-none text-mir-text2/40 transition-colors group-hover:text-mir-text2/75"
+                                            </div>
+                                            {mv.tag && (
+                                                <span
+                                                    className="flex-none font-mono text-[11px] font-bold"
+                                                    style={{ color: mv.color }}
                                                 >
-                                                    <path d="M3 3v18h18" />
-                                                    <rect x="7" y="12" width="3" height="5" />
-                                                    <rect x="12" y="8" width="3" height="9" />
-                                                    <rect x="17" y="5" width="3" height="12" />
-                                                </svg>
-                                            </button>
-                                        )}
+                                                    {mv.tag}
+                                                </span>
+                                            )}
+                                            {/* ícone de gráfico: sinaliza que dá pra abrir */}
+                                            <svg
+                                                width="15"
+                                                height="15"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2.2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                className="flex-none text-mir-text2/40 transition-colors group-hover:text-mir-text2/75"
+                                            >
+                                                <path d="M3 3v18h18" />
+                                                <rect
+                                                    x="7"
+                                                    y="12"
+                                                    width="3"
+                                                    height="5"
+                                                />
+                                                <rect
+                                                    x="12"
+                                                    y="8"
+                                                    width="3"
+                                                    height="9"
+                                                />
+                                                <rect
+                                                    x="17"
+                                                    y="5"
+                                                    width="3"
+                                                    height="12"
+                                                />
+                                            </svg>
+                                        </button>
 
-                                        {/* action */}
-                                        {removida ? (
-                                            <>
-                                                <button
-                                                    onClick={() => recolher(s)}
-                                                    disabled={busy}
-                                                    className="h-11 w-full cursor-pointer rounded-full border border-mir-line2 bg-transparent text-sm font-bold text-mir-text/75 disabled:opacity-50"
-                                                >
-                                                    {busy ? 'Retirando…' : 'Retirar a ficha'}
-                                                </button>
-                                                <div className="mt-[9px] text-center font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55]">
-                                                    Faixa saiu do Spotify · não vale mais
-                                                </div>
-                                            </>
-                                        ) : podeColetar ? (
+                                        {/* action
+                                            A ordem importa: coletável vem antes
+                                            de `removida`, porque parar de medir
+                                            não anula saldo já ganho (028). */}
+                                        {podeColetar ? (
                                             <>
                                                 <div className="flex gap-[9px]">
                                                     <button
-                                                        onClick={() => recolher(s)}
+                                                        onClick={() =>
+                                                            recolher(s)
+                                                        }
                                                         disabled={busy}
                                                         className="h-11 flex-1 cursor-pointer rounded-full border-none bg-mir-text text-sm font-bold text-mir-bg disabled:opacity-60"
                                                     >
                                                         {busy
                                                             ? 'Recolhendo…'
                                                             : 'Recolher · ' +
-                                                              fmt(s.accumulated_points) +
+                                                              fmt(
+                                                                  s.accumulated_points
+                                                              ) +
                                                               ' pts'}
                                                     </button>
                                                 </div>
                                                 <div className="mt-[9px] text-center font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55]">
-                                                    Trava cumprida · recolha quando quiser
+                                                    {removida
+                                                        ? 'Parou de render · o que juntou é seu'
+                                                        : 'Trava cumprida · recolha quando quiser'}
+                                                </div>
+                                            </>
+                                        ) : removida ? (
+                                            <>
+                                                <button
+                                                    onClick={() => recolher(s)}
+                                                    disabled={busy}
+                                                    className="h-11 w-full cursor-pointer rounded-full border border-mir-line2 bg-transparent text-sm font-bold text-mir-text/75 disabled:opacity-50"
+                                                >
+                                                    {busy
+                                                        ? 'Liberando…'
+                                                        : 'Liberar a vaga'}
+                                                </button>
+                                                <div className="mt-[9px] text-center font-mono text-[10px] leading-[1.5] tracking-[0.04em] text-mir-text2/[0.55]">
+                                                    {s.accumulated_points > 0
+                                                        ? `Perdemos a medição dessa faixa · recolha os ${fmt(s.accumulated_points)} pts em ${s.days_to_collect} ${s.days_to_collect === 1 ? 'dia' : 'dias'}`
+                                                        : 'Perdemos a medição dessa faixa · não chegou a render'}
+                                                </div>
+                                            </>
+                                        ) : semSaldo ? (
+                                            <>
+                                                <button
+                                                    disabled
+                                                    className="h-11 w-full cursor-not-allowed rounded-full border border-mir-line2/80 bg-mir-fill1 text-sm font-bold text-mir-text2"
+                                                >
+                                                    Sem nada pra recolher
+                                                </button>
+                                                <div className="mt-[9px] flex items-center justify-center gap-2 text-center font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55]">
+                                                    <span>
+                                                        Ela ainda pode subir —
+                                                        ou você troca de faixa
+                                                    </span>
+                                                    <span className="opacity-40">
+                                                        ·
+                                                    </span>
+                                                    <button
+                                                        onClick={() =>
+                                                            recolher(s)
+                                                        }
+                                                        disabled={busy}
+                                                        className="cursor-pointer border-none bg-transparent p-0 font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55] underline disabled:opacity-50"
+                                                    >
+                                                        {busy
+                                                            ? 'liberando…'
+                                                            : 'liberar a vaga'}
+                                                    </button>
                                                 </div>
                                             </>
                                         ) : (
@@ -931,8 +1072,9 @@ export default function StakesContent({
                                                     className="h-11 w-full cursor-not-allowed rounded-full border border-mir-line2/80 bg-mir-fill1 text-sm font-bold text-mir-text2"
                                                 >
                                                     {s.accumulated_points > 0
-                                                        ? fmt(s.accumulated_points) +
-                                                          ' pts acumulados'
+                                                        ? fmt(
+                                                              s.accumulated_points
+                                                          ) + ' pts acumulados'
                                                         : 'Acumulando pontos…'}
                                                 </button>
                                                 <div className="mt-[9px] flex items-center justify-center gap-2 text-center font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55]">
@@ -943,13 +1085,19 @@ export default function StakesContent({
                                                             ? 'dia'
                                                             : 'dias'}
                                                     </span>
-                                                    <span className="opacity-40">·</span>
+                                                    <span className="opacity-40">
+                                                        ·
+                                                    </span>
                                                     <button
-                                                        onClick={() => recolher(s)}
+                                                        onClick={() =>
+                                                            recolher(s)
+                                                        }
                                                         disabled={busy}
                                                         className="cursor-pointer border-none bg-transparent p-0 font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55] underline disabled:opacity-50"
                                                     >
-                                                        {busy ? 'removendo…' : 'remover assim mesmo'}
+                                                        {busy
+                                                            ? 'removendo…'
+                                                            : 'remover assim mesmo'}
                                                     </button>
                                                 </div>
                                             </>
@@ -960,7 +1108,9 @@ export default function StakesContent({
                                             onClick={() => toggleInfo(s.id)}
                                             className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 border-t border-t-mir-line bg-transparent pt-3.5 font-mono text-[11px] tracking-[0.04em] text-mir-text2/70 transition-colors hover:text-mir-text2"
                                         >
-                                            {opened ? 'esconder infos' : 'ver infos da ficha'}
+                                            {opened
+                                                ? 'esconder infos'
+                                                : 'ver infos da ficha'}
                                             <svg
                                                 width="11"
                                                 height="11"
@@ -981,10 +1131,13 @@ export default function StakesContent({
                                                 <div className="flex items-start justify-between gap-3">
                                                     <div>
                                                         <div className="mb-[5px] font-mono text-[9.5px] tracking-[0.14em] text-mir-text2/[0.66]">
-                                                            MULTIPLICADOR DA FICHA
+                                                            MULTIPLICADOR DA
+                                                            FICHA
                                                         </div>
                                                         <div className="text-[34px] font-black leading-[0.85] tracking-[-0.04em] text-mir-acc">
-                                                            {formatMultiplier(mult)}
+                                                            {formatMultiplier(
+                                                                mult
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <span style={b.style}>
@@ -993,19 +1146,32 @@ export default function StakesContent({
                                                 </div>
                                                 <div>
                                                     <div className="mb-1.5 flex justify-between font-mono text-[9.5px] tracking-[0.1em] text-mir-text2/[0.7]">
-                                                        <span>POPULARIDADE</span>
+                                                        <span>
+                                                            POPULARIDADE
+                                                        </span>
                                                         <span>
                                                             {Math.round(
                                                                 s.baseline_popularity
                                                             )}{' '}
-                                                            na ficha →{' '}
+                                                            na ficha · recorde{' '}
+                                                            {picoDe(s)} · agora{' '}
                                                             {Math.round(
                                                                 s.last_popularity
-                                                            )}{' '}
-                                                            agora
+                                                            )}
                                                         </span>
                                                     </div>
                                                     <div className="relative h-1.5 rounded-sm bg-mir-text2/15">
+                                                        {/* trilha até o recorde: o
+                                                            território já conquistado,
+                                                            que é o que virou ponto */}
+                                                        <div
+                                                            className="absolute inset-y-0 left-0 rounded-sm bg-mir-acc/25"
+                                                            style={{
+                                                                width:
+                                                                    picoDe(s) +
+                                                                    '%',
+                                                            }}
+                                                        />
                                                         <div
                                                             className="absolute inset-y-0 left-0 rounded-sm"
                                                             style={{
@@ -1014,10 +1180,10 @@ export default function StakesContent({
                                                                         s.last_popularity
                                                                     ) + '%',
                                                                 background:
-                                                                    mv?.color ??
-                                                                    'rgba(236,227,210,.6)',
+                                                                    mv.color,
                                                             }}
                                                         />
+                                                        {/* onde a ficha foi botada */}
                                                         <div
                                                             className="absolute inset-y-[-2.5px] w-px bg-mir-text/60"
                                                             style={{
@@ -1026,10 +1192,26 @@ export default function StakesContent({
                                                                 )}% - 0.5px)`,
                                                             }}
                                                         />
+                                                        {/* o recorde: a marca que
+                                                            precisa ser batida pra
+                                                            render de novo */}
+                                                        {picoDe(s) >
+                                                            Math.round(
+                                                                s.baseline_popularity
+                                                            ) && (
+                                                            <div
+                                                                className="absolute inset-y-[-3.5px] w-[1.5px] bg-mir-acc"
+                                                                style={{
+                                                                    left: `calc(${picoDe(s)}% - 0.75px)`,
+                                                                }}
+                                                            />
+                                                        )}
                                                     </div>
-                                                    <div className="mt-1.5 font-mono text-[9px] tracking-[0.04em] text-mir-text2/55">
-                                                        a marca vertical é onde estava
-                                                        quando você botou a ficha
+                                                    <div className="mt-1.5 font-mono text-[9px] leading-[1.5] tracking-[0.04em] text-mir-text2/55">
+                                                        a marca clara é onde
+                                                        você botou a ficha; a
+                                                        verde é o recorde — só
+                                                        passar dele rende ponto
                                                     </div>
                                                 </div>
                                                 <div className="font-mono text-[11px] leading-[1.45] text-mir-text2/[0.9]">
@@ -1037,9 +1219,11 @@ export default function StakesContent({
                                                     {s.pessoas_deram_stake === 1
                                                         ? 'pessoa botou ficha'
                                                         : 'pessoas botaram ficha'}{' '}
-                                                    · {fmt(s.accumulated_points)} pontos
-                                                    acumulados
-                                                    {!removida && s.last_day_gain > 0
+                                                    ·{' '}
+                                                    {fmt(s.accumulated_points)}{' '}
+                                                    pontos acumulados
+                                                    {!removida &&
+                                                    s.last_day_gain > 0
                                                         ? ` · +${fmt(s.last_day_gain)} na última medição`
                                                         : ''}
                                                 </div>
@@ -1067,10 +1251,14 @@ export default function StakesContent({
                             <div>
                                 <div className="mb-[7px] font-mono text-[10px] tracking-[0.18em] text-mir-text3">
                                     BOTAR A FICHA{' '}
-                                    {modalSlot != null ? '0' + (modalSlot + 1) : ''}
+                                    {modalSlot != null
+                                        ? '0' + (modalSlot + 1)
+                                        : ''}
                                 </div>
                                 <h3 className="m-0 text-[25px] font-black tracking-[-0.035em]">
-                                    {selected ? 'Confira e bote a ficha' : 'Buscar faixa'}
+                                    {selected
+                                        ? 'Confira e bote a ficha'
+                                        : 'Buscar faixa'}
                                 </h3>
                             </div>
                             <button
@@ -1101,7 +1289,9 @@ export default function StakesContent({
                                         </svg>
                                         <input
                                             value={query}
-                                            onChange={(e) => setQuery(e.target.value)}
+                                            onChange={(e) =>
+                                                setQuery(e.target.value)
+                                            }
                                             autoFocus
                                             placeholder="Nome da faixa ou artista…"
                                             className="w-full border-none bg-transparent text-[16px] font-medium tracking-[-0.01em] text-mir-text outline-none placeholder:font-normal placeholder:text-mir-text3"
@@ -1110,7 +1300,7 @@ export default function StakesContent({
                                             <button
                                                 onClick={() => setQuery('')}
                                                 aria-label="Limpar busca"
-                                                className="flex h-[22px] w-[22px] flex-none cursor-pointer items-center justify-center rounded-full border-none bg-mir-text2/12 text-[11px] leading-[0] text-mir-text2/70 transition-colors hover:bg-mir-text2/20 hover:text-mir-text"
+                                                className="bg-mir-text2/12 flex h-[22px] w-[22px] flex-none cursor-pointer items-center justify-center rounded-full border-none text-[11px] leading-[0] text-mir-text2/70 transition-colors hover:bg-mir-text2/20 hover:text-mir-text"
                                             >
                                                 ✕
                                             </button>
@@ -1131,7 +1321,11 @@ export default function StakesContent({
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
                                                 >
-                                                    <circle cx="11" cy="11" r="7" />
+                                                    <circle
+                                                        cx="11"
+                                                        cy="11"
+                                                        r="7"
+                                                    />
                                                     <path d="M21 21l-3.5-3.5" />
                                                 </svg>
                                             </div>
@@ -1139,40 +1333,47 @@ export default function StakesContent({
                                                 Busque a faixa que vai bombar
                                             </div>
                                             <div className="mt-1.5 max-w-[280px] font-mono text-[12px] leading-[1.6] text-mir-text2/[0.66]">
-                                                Comece a digitar o nome. Você confere as
-                                                infos dela antes de botar a ficha.
+                                                Comece a digitar o nome. Você
+                                                confere as infos dela antes de
+                                                botar a ficha.
                                             </div>
                                         </div>
                                     )}
                                     {searching &&
-                                        Array.from({ length: 5 }).map((_, i) => (
-                                            <div
-                                                key={i}
-                                                className="flex w-full items-center gap-4 px-3.5 py-[14px]"
-                                                style={{
-                                                    opacity: 1 - i * 0.16,
-                                                    animationDelay: `${i * 90}ms`,
-                                                }}
-                                            >
-                                                <div className="anim-pulse h-[58px] w-[58px] flex-none rounded-md bg-mir-text2/10" />
-                                                <div className="min-w-0 flex-1">
-                                                    <div
-                                                        className="anim-pulse h-[15px] rounded bg-mir-text2/10"
-                                                        style={{ width: `${72 - i * 9}%` }}
-                                                    />
-                                                    <div
-                                                        className="anim-pulse mt-2.5 h-[11px] rounded bg-mir-text2/10"
-                                                        style={{ width: `${44 - i * 5}%` }}
-                                                    />
+                                        Array.from({ length: 5 }).map(
+                                            (_, i) => (
+                                                <div
+                                                    key={i}
+                                                    className="flex w-full items-center gap-4 px-3.5 py-[14px]"
+                                                    style={{
+                                                        opacity: 1 - i * 0.16,
+                                                        animationDelay: `${i * 90}ms`,
+                                                    }}
+                                                >
+                                                    <div className="anim-pulse h-[58px] w-[58px] flex-none rounded-md bg-mir-text2/10" />
+                                                    <div className="min-w-0 flex-1">
+                                                        <div
+                                                            className="anim-pulse h-[15px] rounded bg-mir-text2/10"
+                                                            style={{
+                                                                width: `${72 - i * 9}%`,
+                                                            }}
+                                                        />
+                                                        <div
+                                                            className="anim-pulse mt-2.5 h-[11px] rounded bg-mir-text2/10"
+                                                            style={{
+                                                                width: `${44 - i * 5}%`,
+                                                            }}
+                                                        />
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            )
+                                        )}
                                     {!searching &&
                                         results.map((r) => (
                                             <button
                                                 key={r.id}
                                                 onClick={() => selectTrack(r)}
-                                                className="flex w-full cursor-pointer items-center gap-4 rounded-[10px] border-none border-b border-b-mir-line bg-transparent px-3.5 py-[14px] text-left text-inherit"
+                                                className="flex w-full cursor-pointer items-center gap-4 rounded-[10px] border-b border-none border-b-mir-line bg-transparent px-3.5 py-[14px] text-left text-inherit"
                                             >
                                                 <div className="relative h-[58px] w-[58px] flex-none overflow-hidden rounded-md">
                                                     <CoverImage
@@ -1198,7 +1399,8 @@ export default function StakesContent({
                                         query.trim().length >= 2 &&
                                         results.length === 0 && (
                                             <div className="px-5 py-10 text-center font-mono text-[12px] text-mir-text2/[0.66]">
-                                                Nenhuma faixa encontrada pra &quot;
+                                                Nenhuma faixa encontrada pra
+                                                &quot;
                                                 {query}&quot;.
                                             </div>
                                         )}
@@ -1230,6 +1432,7 @@ export default function StakesContent({
                     artist={chartStake.artist_name}
                     baseline={chartStake.baseline_popularity}
                     current={chartStake.last_popularity}
+                    peak={picoDe(chartStake)}
                     multiplier={Number(chartStake.multiplier)}
                     accumulatedPoints={chartStake.accumulated_points}
                     initialSnapshots={chartStake.snapshots}
@@ -1276,7 +1479,11 @@ function DetailView({
             {/* HERO — capa em destaque (estilo Shazam) */}
             <div className="flex flex-col items-center text-center">
                 <div className="relative aspect-square w-[240px] max-w-full flex-none overflow-hidden rounded-2xl shadow-[0_28px_56px_-20px_rgba(0,0,0,.8)]">
-                    <CoverImage src={track.cover ?? track.thumbnail} track={track} size="big" />
+                    <CoverImage
+                        src={track.cover ?? track.thumbnail}
+                        track={track}
+                        size="big"
+                    />
                 </div>
                 <div className="mt-5 max-w-full px-1">
                     <div className="text-[30px] font-black leading-[1.04] tracking-[-0.03em]">
@@ -1320,9 +1527,14 @@ function DetailView({
             </div>
 
             <div className="mx-0.5 mb-5 mt-4 font-mono text-[12px] leading-[1.6] text-mir-text2/[0.7]">
-                O multiplicador trava no valor de agora e não muda mais. A partir
-                de {MIN_DAYS} dias você pode recolher os pontos — antes disso dá pra
-                remover, mas zera.
+                O multiplicador trava em {multLabel} e não muda mais. A ficha
+                rende toda vez que a faixa bate o próprio recorde de
+                popularidade —{' '}
+                <b className="font-bold text-mir-text2">
+                    cair nunca tira ponto
+                </b>
+                , só adia o próximo. A partir de {MIN_DAYS} dias você recolhe;
+                antes disso dá pra desistir, mas aí zera.
             </div>
 
             <button

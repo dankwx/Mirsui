@@ -20,6 +20,8 @@ type Props = {
     artist: string
     baseline: number
     current: number
+    /** maior popScore já atingido — é contra ele que o ganho é medido (028) */
+    peak: number
     multiplier: number
     accumulatedPoints: number
     // série já carregada (vem do GET /stakes). Se vier, abre instantâneo;
@@ -48,6 +50,7 @@ export default function StakeChartModal({
     artist,
     baseline,
     current,
+    peak,
     multiplier,
     accumulatedPoints,
     initialSnapshots,
@@ -58,6 +61,14 @@ export default function StakeChartModal({
     )
     const [error, setError] = useState(false)
     const [hover, setHover] = useState<number | null>(null)
+
+    // fichas de antes da 028 podem vir sem `peak`; nunca é menor que os dois
+    // valores que já conhecemos
+    const recorde = Math.max(
+        Math.round(peak ?? 0),
+        Math.round(baseline),
+        Math.round(current)
+    )
 
     // fecha no ESC
     useEffect(() => {
@@ -88,7 +99,9 @@ export default function StakeChartModal({
     // domínio do eixo Y com auto-zoom (estilo Apple Health): aperta na faixa
     // real dos dados pra mostrar movimento, mas com rótulos honestos 0–100.
     const scale = useMemo(() => {
-        const vals = (snaps ?? []).map((s) => s.popularity).concat(baseline, current)
+        const vals = (snaps ?? [])
+            .map((s) => s.popularity)
+            .concat(baseline, current, recorde)
         const lo = Math.min(...vals)
         const hi = Math.max(...vals)
         const span = hi - lo
@@ -97,10 +110,9 @@ export default function StakeChartModal({
         const yMax = Math.min(100, Math.ceil(hi + pad))
         const range = Math.max(1, yMax - yMin)
         return { yMin, yMax, range }
-    }, [snaps, baseline, current])
+    }, [snaps, baseline, current, recorde])
 
-    const yPct = (v: number) =>
-        ((v - scale.yMin) / scale.range) * 100 // 0–100% da altura do gráfico
+    const yPct = (v: number) => ((v - scale.yMin) / scale.range) * 100 // 0–100% da altura do gráfico
 
     // dia em foco: hover, ou o último por padrão
     const focusIdx =
@@ -112,7 +124,8 @@ export default function StakeChartModal({
     const focus = focusIdx != null && snaps ? snaps[focusIdx] : null
 
     const delta = Math.round(current) - Math.round(baseline)
-    const deltaColor = delta > 0 ? ACC : delta < 0 ? '#d98359' : 'rgba(236,227,210,.6)'
+    const deltaColor =
+        delta > 0 ? ACC : delta < 0 ? '#d98359' : 'rgba(236,227,210,.6)'
 
     return (
         <div
@@ -153,7 +166,9 @@ export default function StakeChartModal({
                             </div>
                             <div className="mt-1 flex items-baseline gap-2">
                                 <span className="text-[40px] font-black leading-[0.85] tracking-[-0.04em] text-mir-text">
-                                    {focus ? Math.round(focus.popularity) : Math.round(current)}
+                                    {focus
+                                        ? Math.round(focus.popularity)
+                                        : Math.round(current)}
                                 </span>
                                 <span className="font-mono text-[12px] text-mir-text2/60">
                                     / 100
@@ -184,7 +199,9 @@ export default function StakeChartModal({
                                 <div
                                     key={i}
                                     className="anim-pulse flex-1 rounded-t-[3px] bg-mir-text2/10"
-                                    style={{ height: `${28 + ((i * 37) % 60)}%` }}
+                                    style={{
+                                        height: `${28 + ((i * 37) % 60)}%`,
+                                    }}
                                 />
                             ))}
                         </div>
@@ -196,6 +213,7 @@ export default function StakeChartModal({
                         <Chart
                             snaps={snaps}
                             baseline={baseline}
+                            recorde={recorde}
                             yPct={yPct}
                             yMin={scale.yMin}
                             yMax={scale.yMax}
@@ -224,6 +242,15 @@ export default function StakeChartModal({
                             <span className="inline-block h-0 w-3.5 border-t border-dashed border-mir-text/50" />
                             seu stake ({Math.round(baseline)})
                         </span>
+                        {recorde > Math.round(baseline) && (
+                            <span className="flex items-center gap-1.5">
+                                <span
+                                    className="inline-block h-0 w-3.5 border-t"
+                                    style={{ borderColor: ACC }}
+                                />
+                                recorde ({recorde})
+                            </span>
+                        )}
                     </div>
 
                     <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[11px] text-mir-text2/[0.8]">
@@ -232,15 +259,27 @@ export default function StakeChartModal({
                             {Math.round(baseline)} → {Math.round(current)}
                         </span>
                         <span className="opacity-40">·</span>
-                        <span>multiplicador {formatMultiplier(Number(multiplier))}</span>
+                        <span>
+                            multiplicador {formatMultiplier(Number(multiplier))}
+                        </span>
                         <span className="opacity-40">·</span>
                         <span>{fmtInt(accumulatedPoints)} pts acumulados</span>
                     </div>
 
+                    {/* A régua é o recorde, não a última medição: recuperar
+                        terreno já andado não paga de novo (migration 028). Sem
+                        esta linha o gráfico mostra a subida e o card mostra "+0",
+                        e os dois parecem estar brigando. */}
+                    <div className="mt-2 font-mono text-[10.5px] leading-[1.5] text-mir-text2/55">
+                        {recorde > Math.round(current)
+                            ? `Falta ${recorde - Math.round(current)} pra bater o recorde de ${recorde} e voltar a render. O que já rendeu está guardado.`
+                            : 'Ela está no próprio recorde — daqui pra cima toda subida vira ponto.'}
+                    </div>
+
                     {snaps && snaps.length === 1 && (
                         <div className="mt-3 font-mono text-[10.5px] leading-[1.5] text-mir-text2/55">
-                            Medimos 1× por dia — volte amanhã pra ver a faixa começar
-                            a desenhar a curva.
+                            Medimos 1× por dia — volte amanhã pra ver a faixa
+                            começar a desenhar a curva.
                         </div>
                     )}
                 </div>
@@ -252,6 +291,7 @@ export default function StakeChartModal({
 function Chart({
     snaps,
     baseline,
+    recorde,
     yPct,
     yMin,
     yMax,
@@ -260,6 +300,7 @@ function Chart({
 }: {
     snaps: Snapshot[]
     baseline: number
+    recorde: number
     yPct: (v: number) => number
     yMin: number
     yMax: number
@@ -267,6 +308,7 @@ function Chart({
     setHover: (i: number | null) => void
 }) {
     const baseY = yPct(baseline)
+    const peakY = yPct(recorde)
     return (
         <div className="flex gap-3">
             {/* eixo Y */}
@@ -288,6 +330,14 @@ function Chart({
                         style={{ bottom: `${baseY}%` }}
                     />
 
+                    {/* linha do recorde — a régua que precisa ser batida */}
+                    {recorde > Math.round(baseline) && (
+                        <div
+                            className="pointer-events-none absolute inset-x-0 border-t"
+                            style={{ bottom: `${peakY}%`, borderColor: ACC }}
+                        />
+                    )}
+
                     {/* barras */}
                     <div className="absolute inset-0 flex items-end gap-[5px]">
                         {snaps.map((s, i) => {
@@ -308,7 +358,9 @@ function Chart({
                                             height: `${h}%`,
                                             background: earned ? ACC : MUTED,
                                             opacity:
-                                                hover == null || active ? 1 : 0.45,
+                                                hover == null || active
+                                                    ? 1
+                                                    : 0.45,
                                         }}
                                     />
                                 </button>

@@ -2,15 +2,11 @@ import Link from 'next/link'
 import MirsuiLogo from '../MirsuiLogo/MirsuiLogo'
 
 /**
- * "COMO FUNCIONA" apontava para /#como, a seção de três tempos da home. A home
- * deixou de ter seção de argumento, então a âncora não tinha mais alvo e o
- * clique não ia a lugar nenhum. Passou a apontar para a página que existe e
- * cobre o assunto.
+ * "COMO FUNCIONA" saiu. Apontava primeiro para /#como (âncora sem alvo depois
+ * que a home perdeu a seção de argumento) e depois para /how-it-works, que era
+ * de outra fase do produto e foi removida. Fica só o que existe.
  */
-const LANDING_LINKS = [
-    { label: 'A CENA', href: '/#cena' },
-    { label: 'COMO FUNCIONA', href: '/how-it-works' },
-]
+const LANDING_LINKS = [{ label: 'A CENA', href: '/#cena' }]
 const LEGAL_LINKS = [
     { label: 'TERMOS', href: '/termos' },
     { label: 'PRIVACIDADE', href: '/privacidade' },

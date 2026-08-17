@@ -4,7 +4,7 @@ import React, { useMemo, useState, useTransition } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, ArrowUpRight, Check, Loader2, Plus, RotateCw } from 'lucide-react'
+import { ArrowUpRight, Check, Loader2, Plus, RotateCw } from 'lucide-react'
 import { FeedPostWithInteractions } from '@/utils/feedService.backend'
 import { RecentClaim } from '@/utils/feedService.backend'
 import { formatTimestamp } from '@/utils/feedHelpers'
@@ -468,33 +468,14 @@ function PileBanner({ claims }: { claims: RecentClaim[] }) {
     )
 }
 
-/* ---------- Cartão Faro (rail, destaque lima) ----------
-   O único bloco de lima cheia da página, e é de propósito. O ticker, a chamada
-   da pilha e a aba ativa saíram do lima justamente para que sobrasse um lugar
-   onde ele significasse alguma coisa. A mensagem aqui é literalmente a promessa
-   do produto ("salve o que você achou primeiro"), que é o assunto do lima. */
-function FaroCard() {
-    return (
-        <Link
-            href="/claimtrack"
-            className="group block rounded-[14px] bg-mir-acc p-[22px] text-mir-on-acc transition hover:brightness-[1.04]"
-        >
-            <span className="font-mono text-[11px] font-bold uppercase tracking-[0.14em]">
-                Seu turno
-            </span>
-            <p className="mt-3 text-[22px] font-extrabold leading-[1.04] tracking-[-0.03em]">
-                Salve o que você achou primeiro.
-            </p>
-            <p className="mt-2 font-mono text-[11.5px] leading-[1.5] text-mir-on-acc/70">
-                Seu nome fica no histórico da faixa. Ouça cedo, prove o faro.
-            </p>
-            <span className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-mir-bg text-[13px] font-bold text-mir-acc">
-                Salvar agora
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </span>
-        </Link>
-    )
-}
+/* O cartão Faro morava aqui: era o único bloco de lima cheia da página, e o
+   destino dele era /claimtrack. Com a página removida, sobrava um botão sem
+   para onde ir — não existe mais "página de salvar": salvar se faz na ficha da
+   faixa, e o caminho até ela é a busca do header ou a pilha.
+
+   Fica a vaga: o rail perdeu o único ponto de lima cheia do feed, que era
+   deliberado (o ticker, a chamada da pilha e a aba ativa saíram do lima
+   justamente para que sobrasse um lugar onde ele significasse alguma coisa). */
 
 /* ---------- Estado vazio ---------- */
 function EmptyState({ title, body }: { title: string; body: string }) {
@@ -793,7 +774,6 @@ export default function FeedContent({ initialPosts, recentClaims, currentUserId,
 
                     <aside className="flex flex-col gap-[22px] lg:sticky lg:top-[92px]">
                         <RecentClaims claims={recentClaims} loadFailed={recentClaimsFailed} />
-                        <FaroCard />
                     </aside>
                 </div>
             </div>

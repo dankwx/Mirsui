@@ -236,19 +236,6 @@ export async function fetchDeezerAlbumGenres(
     return nomes && nomes.length > 0 ? nomes : null
 }
 
-/**
- * Gêneros a partir do ISRC (duas requisições). Mantida porque `src/routes` e a
- * página antiga chamavam assim; quem já tem o álbum em mãos deve usar
- * fetchDeezerAlbumGenres() e economizar a primeira.
- */
-export async function fetchDeezerGenresByISRC(
-    isrc: string
-): Promise<string[] | null> {
-    const faixa = await fetchDeezerTrackByISRC(isrc)
-    if (!faixa?.albumId) return null
-    return fetchDeezerAlbumGenres(faixa.albumId)
-}
-
 /* ---------------------------------------------------------------- artistas */
 
 export interface ArtistaDeezer {

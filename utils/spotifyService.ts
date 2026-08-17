@@ -103,14 +103,6 @@ export interface SpotifyArtist {
 let cachedSpotifyAccessToken: string | null = null
 let cachedTokenExpiryTime: number | null = null
 
-/** Há credencial configurada? Sem ela nada aqui roda, e isso não é erro. */
-export function spotifyConfigurado(): boolean {
-    return (
-        !!(process.env.SPOTIFY_CLIENT_ID || process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID) &&
-        !!(process.env.SPOTIFY_CLIENT_SECRET || process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET)
-    )
-}
-
 async function getSpotifyAccessToken(): Promise<string | null> {
     // Fallback para os nomes NEXT_PUBLIC_ antigos enquanto as variáveis
     // do ambiente de deploy não forem renomeadas

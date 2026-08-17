@@ -3,7 +3,7 @@
 import SearchWithResults from '../SearchWithResults/SearchWithResults'
 import MirsuiLogo from '../MirsuiLogo/MirsuiLogo'
 import LoginModal from '../ModalLogin/ModalLogin'
-import { Gauge, LogOut, Settings, UserRound } from 'lucide-react'
+import { Gauge, LogOut, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -73,33 +73,34 @@ const navLinks: NavLink[] = [
         match: (p) => p.startsWith('/pilha'),
     },
     {
-        title: 'Acervo',
-        url: '/library',
-        match: (p) => p.startsWith('/library') || p.startsWith('/user'),
-    },
-    {
         // a rota segue /stakes (link público, não muda); o rótulo é o nome
         // em português da feature
         title: 'Fichas',
         url: '/stakes',
         match: (p) => p.startsWith('/stakes'),
     },
-    {
-        // idem: a rota segue /claimtrack. "Carimbar" saiu porque o verbo do
-        // site é "salvar" — ver a nota de vocabulário no topo do arquivo
-        title: 'Salvar faixa',
-        url: '/claimtrack',
-        match: (p) => p.startsWith('/claimtrack'),
-    },
 ]
+
+/* Saíram daqui:
+ *
+ *   "Acervo" → /library    a página era um gerenciador de playlists de outra
+ *                          fase. O acervo de verdade — os achados de alguém —
+ *                          mora em /user/<username>, que já está no menu do
+ *                          avatar como "Perfil".
+ *   "Salvar faixa" → /claimtrack
+ *                          página de outra fase, com número inventado no corpo
+ *                          e uma seção que chamava uma RPC inexistente. Salvar
+ *                          se faz na ficha da faixa; a busca do header é o
+ *                          caminho para chegar nela.
+ */
 
 /**
  * Nav de quem chega sem sessão.
  *
  * O conteúdo do site abriu (faixa, artista, perfil, feed e acervo dos outros),
- * mas /pilha, /library, /stakes e /claimtrack seguem exigindo login. Mostrar a
- * nav completa para um visitante seria oferecer quatro becos sem saída: os
- * quatro itens levam a um redirect de volta para a landing.
+ * mas /pilha e /stakes seguem exigindo login. Mostrar a nav completa para um
+ * visitante seria oferecer becos sem saída: os itens levam a um redirect de
+ * volta para a landing.
  *
  * Aqui "Início" é a landing — e não o feed, como no caso logado —, então o feed
  * ganha item próprio. Para quem tem sessão isso sairia repetido, que é o motivo
@@ -249,14 +250,10 @@ export default function Header({ userProfile, isDono = false }: HeaderProps) {
                                             <UserRound className="h-4 w-4" />
                                             Perfil
                                         </Link>
-                                        <Link
-                                            href="/settings"
-                                            className="flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors hover:bg-mir-fill2 hover:text-mir-text"
-                                            onClick={() => setIsMenuOpen(false)}
-                                        >
-                                            <Settings className="h-4 w-4" />
-                                            Configurações
-                                        </Link>
+                                        {/* "Configurações" saiu: apontava para
+                                            /settings, que nunca existiu — todo
+                                            clique caía num 404. Volta quando a
+                                            página existir. */}
                                         {isDono && (
                                             <Link
                                                 href="/admin"

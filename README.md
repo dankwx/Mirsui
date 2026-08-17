@@ -6,46 +6,72 @@
 <br/>
 Discover before the world does.
 
-## Setup
+## O que é
 
-### Google Analytics Setup
+Frontend do Mirsui, em Next.js 14 (App Router). O backend fica em um repositório
+separado, `mirsui-backend`, e é ele quem fala com o Postgres na maior parte dos
+casos — o frontend só usa o Supabase direto para sessão e para leituras públicas
+da landing.
 
-1. Crie uma conta no [Google Analytics](https://analytics.google.com/)
-2. Crie uma nova propriedade para seu site
-3. Copie o ID de rastreamento (formato: G-XXXXXXXXXX)
-4. Adicione o ID no arquivo `.env.local`:
+## Rodar
 
 ```bash
-NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+npm install
+npm run dev     # sobe em :3001
 ```
 
-5. O Google Analytics já está configurado automaticamente no projeto!
+## Variáveis de ambiente
 
-### Eventos personalizados disponíveis:
+```bash
+# Supabase (sessão e leituras públicas)
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
-- `trackMusicPlay(trackName, artistName)` - Rastreia reprodução de música
-- `trackClaimTrack(trackName, artistName)` - Rastreia claims de tracks
-- `trackSearch(searchTerm, resultsCount)` - Rastreia pesquisas
-- `trackExternalLink(url, platform)` - Rastreia cliques em links externos
+# Backend
+BACKEND_URL=
+NEXT_PUBLIC_BACKEND_URL=
 
-Veja exemplos de uso em `examples/analytics-usage.tsx`
+# Site (canonical, OG)
+NEXT_PUBLIC_SITE_URL=
+
+# Quem abre /admin — lista de e-mails separada por vírgula. É uma cópia
+# deliberada da lista do backend, não um import: ver lib/admin.ts.
+ADMIN_EMAILS=
+
+# Analytics (ambos opcionais; sem chave, cada um desliga sozinho)
+NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+NEXT_PUBLIC_POSTHOG_KEY=
+NEXT_PUBLIC_POSTHOG_HOST=
+NEXT_PUBLIC_POSTHOG_UI_HOST=
+
+# APIs externas (reserva; a fonte principal de catálogo é o Deezer, que não
+# pede credencial)
+SPOTIFY_CLIENT_ID=
+SPOTIFY_CLIENT_SECRET=
+YOUTUBE_API_KEY=
+```
+
+## Analytics
+
+Duas ferramentas, com papéis diferentes:
+
+- **Google Analytics** — só pageview, em `lib/gtag.ts` + `hooks/use-analytics.tsx`.
+- **PostHog** — eventos de produto, via `capture()` de `lib/posthog.ts`. É onde
+  moram os eventos de salvar, botar ficha, compartilhar e login.
+
+## Documentos
+
+- `docs/plano-de-urls-e-seo.md` — a forma das URLs e por que a indexação está
+  segurada.
+- `docs/analise-entidade-da-faixa.md` — página derivada ou registro.
+- `Stake.md` — as regras das fichas.
 
 ## To-do
 
--   [x] User Description section for profile
--   [ ] Admin page
 -   [ ] Send Suggestion page
--   [x] Add followers system
--   [ ] Complete home page
--   [ ] Add Privacy Policies page
--   [ ] Add Profile User Configuration page
--   [ ] Index page on Google Search
--   [x] Add following and followers listing on profile
--   [ ] Add responsive website theme based on system color preference white/dark
--   [x] Add user profile custom avatar image
--   [x] **NEW: Personal Music Library page (/library)** - **Focused on Playlists Management** with modern Spotify-like interface
--   [ ] implement daisy ui
--   [ ] finish artist page
--   [ ] finish artist page
--   [ ] create documentation for the project
--   [ ] migrate project from supabase to docker
+-   [ ] Página de configurações do perfil (o item saiu do menu do avatar até
+        existir — apontava para `/settings`, que nunca foi criada)
+-   [ ] Index page on Google Search (ver `docs/plano-de-urls-e-seo.md` §10)
+-   [ ] Tema claro por preferência do sistema
+-   [ ] Terminar a página do artista
+-   [ ] Documentação do projeto

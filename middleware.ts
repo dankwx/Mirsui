@@ -10,18 +10,16 @@ import { createServerClient } from '@supabase/ssr'
 // landing, e o único canal de crescimento que um site deste tamanho tem é o
 // compartilhamento.
 //
-// As páginas já estavam prontas para isso — track, artist, user e library
-// calculam `isLoggedIn` e adaptam a interface. O cadeado era só este arquivo.
+// As páginas já estavam prontas para isso — track, artist e user calculam
+// `isLoggedIn` e adaptam a interface. O cadeado era só este arquivo.
 
 /** Rotas públicas por correspondência exata. */
 const PUBLIC_EXACT = [
   '/',
-  '/how-it-works',
   '/termos',
   '/privacidade',
   '/auth/check-email',
   '/reset-password',
-  '/check-email',
 ]
 
 /** Prefixos públicos: a própria rota e tudo abaixo dela. */
@@ -31,17 +29,12 @@ const PUBLIC_PREFIXES = [
   '/user', // perfil público
   '/feed', // o que a cena andou salvando
   '/pilha', // o catálogo que o Observatório mede
-  // `/library` sozinho resolve para a biblioteca de QUEM ESTÁ LOGADO e já se
-  // protege sozinho (redirect para '/' quando não há sessão). O que interessa
-  // abrir aqui é `/library/<username>`, o acervo de uma pessoa.
-  '/library',
   '/auth/confirm',
   '/auth/callback',
 ]
 
-// Seguem exigindo sessão, e cada um por um motivo:
-//   /stakes     — estado de jogo pessoal (as fichas de quem está logado)
-//   /claimtrack — página de ação, e herdada de outra fase do produto
+// Segue exigindo sessão:
+//   /stakes — estado de jogo pessoal (as fichas de quem está logado)
 
 // Rotas de API públicas
 const PUBLIC_API_ROUTES = [

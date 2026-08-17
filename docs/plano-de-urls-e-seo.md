@@ -70,10 +70,13 @@ mostra nada.
 
 ### 3.2 Um link interno gera 404 sempre
 
-`components/RecentActivity/RecentActivity.tsx:129` monta `/artist/${track.artist_name}`.
+`components/RecentActivity/RecentActivity.tsx:129` montava `/artist/${track.artist_name}`.
 A rota de artista aceita id numérico do Deezer ou id de 22 caracteres do
 Spotify — um nome não casa nenhum dos dois e cai em `notFound()`. Todo clique ali
-é um 404, e link interno para 404 é desperdício de rastreamento.
+era um 404, e link interno para 404 é desperdício de rastreamento.
+
+**Resolvido:** o componente era exclusivo de `/claimtrack` e saiu junto com ela.
+Não há mais nenhum ponto que monte `/artist/<nome>`.
 
 ### 3.3 A janela
 
@@ -238,7 +241,8 @@ rota corrige com 308. Ou seja, nenhum ponto de chamada quebra — os que ainda n
 passarem os campos apenas geram um redirecionamento a mais até serem
 atualizados. A mudança é incremental por construção.
 
-**Corrigir junto:** `RecentActivity.tsx:129`, o `/artist/${artist_name}` do §3.2.
+**Corrigir junto:** ~~`RecentActivity.tsx:129`, o `/artist/${artist_name}` do
+§3.2.~~ Resolvido: o arquivo foi removido com `/claimtrack`.
 
 ### Fase 4 — verificação
 
@@ -329,8 +333,13 @@ Ficam em aberto, deliberadamente:
   importa mais quando o site tiver duas línguas. Fica então uma dívida de
   coerência conhecida: `/pilha`, `/termos` e `/privacidade` são as exceções em
   português, e se um dia forem unificadas, é para o inglês que vão.
-- **`/how-it-works`, `/claimtrack` e `/library`** são de outra fase do produto e
-  precisam ser refeitas. Fora do escopo daqui.
+- ~~**`/how-it-works`, `/claimtrack` e `/library`** são de outra fase do produto
+  e precisam ser refeitas.~~ **Resolvido por remoção.** As três saíram do
+  projeto em vez de serem refeitas: `/claimtrack` servia número inventado e
+  chamava uma RPC que não existe; `/library` era um gerenciador de playlists
+  que escrevia no Postgres direto do browser, sozinho no projeto nisso; e
+  `/how-it-works` só era visível para deslogado, com o rodapé como única porta.
+  O acervo de uma pessoa continua em `/user/<username>`.
 - **A régua de indexação** (§10) é o assunto do plano de SEO, não deste.
 
 ---

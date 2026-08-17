@@ -326,11 +326,14 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
                         <p className="m-0 text-[15px] text-mir-text2">
                             Nenhuma faixa salva ainda.
                         </p>
+                        {/* Ia para /claimtrack, que era a "página de salvar" e
+                            não existe mais. Salvar se faz na ficha da faixa, e
+                            a pilha é o lugar onde se acha uma para abrir. */}
                         <Link
-                            href="/claimtrack"
+                            href="/pilha"
                             className="mt-5 inline-flex rounded-full bg-mir-text px-5 py-2.5 text-[13.5px] font-bold text-mir-bg transition hover:brightness-105 active:translate-y-px"
                         >
-                            Salvar a primeira
+                            Revirar a pilha
                         </Link>
                     </div>
                 </div>

@@ -122,7 +122,21 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - ingest (proxy do PostHog)
+     *
+     * O /ingest fica de fora aqui, e não em PUBLIC_PREFIXES, porque assim o
+     * middleware nem chega a ser invocado — e invocação é o que a Vercel
+     * cobra.
+     *
+     * Ele é o reverse proxy do PostHog montado no next.config.mjs, e o
+     * visitante deslogado é o caso NORMAL dele: o conteúdo é aberto, então
+     * quase todo evento de analytics nasce sem sessão. Sem esta exceção o
+     * middleware não reconhecia a rota como pública, respondia 307 para "/",
+     * e cada evento — pageview, pageleave, cada clique do autocapture —
+     * virava um render inteiro da landing. Eram 36 mil renders por dia, 241
+     * KB de egress no Supabase e 239 KB de HTML em cada um: as três cotas
+     * do plano gratuito estouradas de uma vez, por analytics.
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\..*|api/auth).*)',
+    '/((?!_next/static|_next/image|favicon.ico|ingest|.*\\..*|api/auth).*)',
   ],
 }

@@ -13,9 +13,13 @@ import { createServerClient } from '@supabase/ssr'
 // As páginas já estavam prontas para isso — track, artist e user calculam
 // `isLoggedIn` e adaptam a interface. O cadeado era só este arquivo.
 
-/** Rotas públicas por correspondência exata. */
+/**
+ * Rotas públicas por correspondência exata.
+ *
+ * A '/' não está aqui: ela tem tratamento próprio mais abaixo, porque além de
+ * ser pública é a única que manda quem já está logado para outro lugar.
+ */
 const PUBLIC_EXACT = [
-  '/',
   '/termos',
   '/privacidade',
   '/auth/check-email',
@@ -57,24 +61,33 @@ function isPublicPath(pathname: string): boolean {
   return isPublicPrefix || isPublicApiRoute
 }
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+/**
+ * Existe cookie de sessão do Supabase nesta requisição?
+ *
+ * É uma pergunta de string, sem ida à rede, e é ela que separa as duas
+ * populações que pedem a home. Robô e visitante deslogado não têm cookie: saem
+ * daqui direto para o HTML estático do CDN, sem tocar no Supabase. Só quem
+ * traz cookie paga a validação, e são algumas dezenas por dia.
+ *
+ * O nome é `sb-<ref>-auth-token`, e o @supabase/ssr o fatia em `.0`, `.1`
+ * quando o token não cabe num cookie só — daí a checagem ser por pedaço do
+ * nome, e não por igualdade.
+ */
+function temCookieDeSessao(request: NextRequest): boolean {
+  return request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith('sb-') && c.name.includes('-auth-token'))
+}
 
-  // Permitir arquivos estáticos e imagens
-  if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/assets') ||
-    pathname.includes('.')
-  ) {
-    return NextResponse.next()
-  }
-
-  if (isPublicPath(pathname)) {
-    return NextResponse.next()
-  }
-
-  // Criar cliente Supabase para validar sessão
-  let response = NextResponse.next({
+/**
+ * Valida a sessão junto ao Supabase.
+ *
+ * getUser() bate no servidor de auth. getSession() apenas lê o cookie, sem
+ * validar, e não serve para proteger rota. Devolve também a `response` porque
+ * é nela que o @supabase/ssr grava o token renovado.
+ */
+async function validarSessao(request: NextRequest) {
+  const response = NextResponse.next({
     request: {
       headers: request.headers,
     },
@@ -98,11 +111,56 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // getUser() valida o token junto ao Supabase (getSession() apenas lê o cookie,
-  // sem validar — não deve ser usado para proteger rotas)
   const {
     data: { user },
   } = await supabase.auth.getUser()
+
+  return { user, response }
+}
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Permitir arquivos estáticos e imagens
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/assets') ||
+    pathname.includes('.')
+  ) {
+    return NextResponse.next()
+  }
+
+  /**
+   * A home, que é estática (ver app/(public)/page.tsx).
+   *
+   * O "quem já está logado vai para o /feed" morava dentro da página, e era
+   * ele que a obrigava a renderizar do zero para TODO visitante — uma regra
+   * que interessa a algumas dezenas de pessoas por dia fazia milhares de robôs
+   * pagarem 241 KB de banco cada um. Aqui em cima a mesma regra custa uma
+   * leitura de cookie.
+   *
+   * A ordem importa: sem cookie devolvemos `NextResponse.next()` PURO.
+   * Qualquer resposta que escreva cookie faz a Vercel pular o cache e servir a
+   * página pelo servidor, que é justamente o que paramos de fazer — por isso o
+   * cliente do Supabase nem chega a ser criado neste caminho.
+   */
+  if (pathname === '/') {
+    if (!temCookieDeSessao(request)) return NextResponse.next()
+
+    const { user, response } = await validarSessao(request)
+    if (user) return NextResponse.redirect(new URL('/feed', request.url))
+
+    // Cookie vencido ou inválido: segue para a landing mesmo. A `response`
+    // leva junto a limpeza que o @supabase/ssr fez dos cookies mortos, senão
+    // a pessoa ficaria presa pagando esta validação a cada visita.
+    return response
+  }
+
+  if (isPublicPath(pathname)) {
+    return NextResponse.next()
+  }
+
+  const { user, response } = await validarSessao(request)
 
   if (!user) {
     // Não há mais página de login: usuários não autenticados voltam para a

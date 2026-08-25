@@ -1,5 +1,3 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/utils/supabase/server'
 import { getRecentActivity } from '@/utils/homepageService'
 import { getLandingObservatory } from '@/utils/observatoryService'
 import {
@@ -62,13 +60,36 @@ export const metadata: Metadata = {
     },
 }
 
-export default async function HomePage() {
-    const supabase = await createClient()
-    const { data } = await supabase.auth.getUser()
-    if (data.user) {
-        redirect('/feed')
-    }
+/**
+ * A home é ESTÁTICA, regerada a cada dez minutos.
+ *
+ * Ela era `ƒ (Dynamic)`: renderizava do zero a cada requisição, e cada uma
+ * custava 241 KB de egress no Supabase — 20 queries, entre elas cinco páginas
+ * de mil linhas para contar gênero. Como o site é aberto e não havia
+ * robots.txt, quem pagava esse render eram ~1.700 robôs por hora. Deu 8 GB por
+ * dia numa cota de 5 GB por mês.
+ *
+ * O que forçava o modo dinâmico era o `getUser()` logo abaixo, que lia cookie
+ * para mandar quem está logado ao /feed. Uma checagem que interessa a uma
+ * dúzia de pessoas por dia obrigava TODO visitante — robô inclusive — a um
+ * render personalizado. Essa decisão foi para o middleware, que só paga a
+ * validação quando existe cookie de sessão; quem chega sem cookie recebe o
+ * HTML do CDN e não toca no banco.
+ *
+ * DEZ MINUTOS, e não um. Os dados desta página já eram declarados velhos: os
+ * achados recentes com 60s (homepageService.ts) e todo o resto com uma hora
+ * (homeService.ts). O que muda é só o teto dos achados, e o combinado foi que
+ * ninguém repara. A conta que escolheu o número:
+ *
+ *     revalidate=60   1.440 renders/dia × 241 KB = 347 MB/dia   estoura
+ *     revalidate=600    144 renders/dia × 241 KB =  35 MB/dia   cabe folgado
+ *
+ * (o orçamento é ~170 MB/dia). E regerar é preguiçoso: só acontece se alguém
+ * pedir a página depois de vencida, então o custo real é sempre menor que isso.
+ */
+export const revalidate = 600
 
+export default async function HomePage() {
     const [mosaico, generos, achados, pessoas, observatorio] = await Promise.all([
         getParedeDoAcervo(60),
         getGenerosDoAcervo(8, 8),

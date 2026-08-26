@@ -28,7 +28,6 @@ import { permanentRedirect, notFound } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { fetchAuthData } from '@/utils/profileService'
 import { searchYouTubeVideo } from '@/utils/youtubeService'
-import { getTrackCurve } from '@/utils/observatoryService'
 import {
     formatoDoId,
     isrcDoEndereco,
@@ -40,6 +39,7 @@ import { enderecoDoArtista } from '@/utils/artistHref'
 import {
     carregarFaixaPorIsrc,
     carregarFaixaLegada,
+    carregarDadosDaFaixa,
     type DadosDaFaixa,
 } from '@/utils/trackPageService'
 import {
@@ -259,18 +259,36 @@ export default async function TrackDetailsPage({
           ? `isrc:${isrc}`
           : null
 
-    // Curva do Observatório — o histórico de audiência que o Mirsui mede todo
-    // dia, casado por ISRC. Independe do Deezer estar respondendo agora: isto
-    // já está no nosso banco.
-    const curva = await getTrackCurve(isrc)
+    /**
+     * Tudo que é nosso: a curva do Observatório (o histórico de audiência que o
+     * Mirsui mede todo dia, casado por ISRC — independe do Deezer estar
+     * respondendo agora), a contagem de salvamentos e quem salvou.
+     *
+     * Vem tudo da MESMA requisição que já montou a ficha técnica lá em cima:
+     * `carregarDadosDaFaixa` é `cache()` do React e `carregarFaixaPorIsrc` já a
+     * chamou neste mesmo request. Aqui não há ida ao banco nenhuma.
+     */
+    const dados = isrc ? await carregarDadosDaFaixa(isrc) : null
+    const curva = dados?.curva ?? null
 
-    const [totalClaims, topClaimers, meuSalvamento] = await Promise.all([
-        contarSalvamentos(trackUri, isrc),
-        quemSalvou(trackUri, isrc, 8),
+    /**
+     * O caminho legado não tem ISRC para chavear a RPC e continua nas consultas
+     * avulsas. São ~30 renders por dia contra ~19.700 do caminho canônico, e a
+     * RPC só existe por causa do volume — ver migration 029.
+     */
+    const [totalClaims, topClaimers] = dados
+        ? [dados.salvamentos, dados.quemSalvou]
+        : await Promise.all([
+              contarSalvamentos(trackUri, isrc),
+              quemSalvou(trackUri, isrc, 8),
+          ])
+
+    // Fora da RPC de propósito: é a única coisa da página que depende de quem
+    // está olhando, e só roda para quem está logado.
+    const meuSalvamento =
         isLoggedIn && authData.user?.id
-            ? salvamentoDoUsuario(authData.user.id, trackUri, isrc)
-            : Promise.resolve(null),
-    ])
+            ? await salvamentoDoUsuario(authData.user.id, trackUri, isrc)
+            : null
 
     const hasUserClaimed = !!meuSalvamento
     const userClaimPosition = meuSalvamento?.position ?? null

@@ -19,13 +19,19 @@
 
 import 'server-only'
 import { cache } from 'react'
+import { supabasePublic } from '@/utils/supabase/public'
 import {
     fetchDeezerTrackByISRC,
     fetchDeezerAlbumGenres,
     fetchDeezerArtist,
     coverFromMd5,
 } from '@/utils/deezerService'
-import { buscarFaixaObservada } from '@/utils/trackIdentity'
+import {
+    montarFaixaObservada,
+    type FaixaObservada,
+} from '@/utils/trackIdentity'
+import { montarCurva, type CurvaDaFaixa } from '@/utils/observatoryService'
+import type { QuemSalvou } from '@/utils/trackClaims'
 import { enderecoDaFaixa } from '@/utils/trackHref'
 import { popScore } from '@/utils/popScore'
 
@@ -76,6 +82,82 @@ export interface DadosDaFaixa {
     enderecoCanonico: string | null
 }
 
+/* ------------------------------------------- tudo que é nosso, numa consulta */
+
+export interface DadosDaPagina {
+    /** a linha do Observatório, ou null se ele ainda não viu esta gravação */
+    observada: FaixaObservada | null
+    /** a série de audiência medida; null quando não há medição */
+    curva: CurvaDaFaixa | null
+    /** quantas pessoas salvaram esta gravação, somando as duas formas de chave */
+    salvamentos: number
+    /** os oito primeiros a salvar, em ordem de chegada */
+    quemSalvou: QuemSalvou[]
+}
+
+const NADA: DadosDaPagina = {
+    observada: null,
+    curva: null,
+    salvamentos: 0,
+    quemSalvou: [],
+}
+
+/**
+ * Tudo que esta página lê do NOSSO banco, numa requisição só.
+ *
+ * Eram quatro: a linha do Observatório, a curva, a contagem de salvamentos e a
+ * lista de quem salvou. Todas chaveadas pelo mesmo ISRC, e três delas partindo
+ * literalmente da mesma linha canônica.
+ *
+ * O motivo de juntar não é o tamanho do dado — é o número de requisições.
+ * Medido em 25/08/2026: as quatro somavam ~640 bytes de corpo e ~4.000 bytes de
+ * cabeçalho HTTP, porque o PostgREST responde com 1.012 bytes de cabeçalho toda
+ * vez, venha o que vier no corpo. 89% do egress do projeto era protocolo. Ver
+ * mirsui-backend/migrations/029_pagina_da_faixa_numa_requisicao.sql.
+ *
+ * `supabasePublic` e não o cliente com cookie: as três tabelas lidas
+ * (`observed_tracks`, `tracks`, `profiles`) têm política de SELECT `true` para
+ * anon e authenticated, então o papel não muda uma linha do resultado — foi
+ * conferido antes de trocar. A RPC é `security invoker` justamente para que
+ * continue assim se alguma dessas políticas fechar um dia.
+ *
+ * `cache()` do React, e só ele: `generateMetadata` e o componente da página
+ * pedem os mesmos dados no mesmo request. Não há `unstable_cache` aqui de
+ * propósito — quem salvou uma faixa precisa ver o próprio nome na lista ao
+ * recarregar, e era assim que estas consultas já se comportavam.
+ */
+export const carregarDadosDaFaixa = cache(async function carregarDadosDaFaixa(
+    isrc: string
+): Promise<DadosDaPagina> {
+    const { data, error } = await supabasePublic.rpc('get_track_page', {
+        p_isrc: isrc,
+    })
+
+    if (error) {
+        console.error('[faixa] falha ao carregar a página:', error.message)
+        return NADA
+    }
+    if (!data) return NADA
+
+    const b = data as {
+        observada?: unknown
+        curva?: unknown
+        salvamentos?: number | string
+        quem_salvou?: unknown
+    }
+
+    return {
+        observada: montarFaixaObservada(
+            (b.observada ?? null) as Parameters<typeof montarFaixaObservada>[0]
+        ),
+        curva: montarCurva(b.curva ?? null),
+        salvamentos: Number(b.salvamentos) || 0,
+        quemSalvou: Array.isArray(b.quem_salvou)
+            ? (b.quem_salvou as QuemSalvou[])
+            : [],
+    }
+})
+
 /**
  * A ficha completa de uma gravação. Devolve null só quando nem o Deezer nem o
  * Observatório conhecem o ISRC — e aí a rota responde 404 de verdade, em vez de
@@ -87,10 +169,11 @@ export interface DadosDaFaixa {
 export const carregarFaixaPorIsrc = cache(async function carregarFaixaPorIsrc(
     isrc: string
 ): Promise<DadosDaFaixa | null> {
-    const [doDeezer, local] = await Promise.all([
+    const [doDeezer, dados] = await Promise.all([
         fetchDeezerTrackByISRC(isrc),
-        buscarFaixaObservada(isrc),
+        carregarDadosDaFaixa(isrc),
     ])
+    const local = dados.observada
 
     if (!doDeezer && !local) return null
 

@@ -30,7 +30,17 @@ export function filtroDaGravacao(
     return partes.length > 0 ? partes.join(',') : null
 }
 
-/** Quantas pessoas salvaram esta gravação. */
+/**
+ * Quantas pessoas salvaram esta gravação.
+ *
+ * Desde 25/08/2026 o caminho normal da página NÃO passa mais por aqui: a
+ * contagem vem no mesmo JSON da RPC `get_track_page` (migration 029), porque
+ * cada consulta avulsa custava 1.012 bytes de cabeçalho HTTP para devolver um
+ * número. Esta função sobrou para o caminho legado — id do Spotify que não deu
+ * para converter em ISRC —, que não tem chave para a RPC e é ~30 renders por
+ * dia. A regra de o que conta como a mesma gravação continua sendo a
+ * `filtroDaGravacao` acima, e a RPC reproduz exatamente ela.
+ */
 export async function contarSalvamentos(
     trackUri: string | null,
     isrc: string | null
@@ -58,7 +68,7 @@ export interface QuemSalvou {
     profiles: unknown
 }
 
-/** Os primeiros a salvar, em ordem de chegada. */
+/** Os primeiros a salvar, em ordem de chegada. Só o caminho legado — ver acima. */
 export async function quemSalvou(
     trackUri: string | null,
     isrc: string | null,

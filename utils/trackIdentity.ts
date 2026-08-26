@@ -94,9 +94,6 @@ export interface FaixaObservada {
     lastPopularity: number | null
 }
 
-const COLUNAS =
-    'deezer_track_id, deezer_artist_id, isrc, title, artist_name, album_name, cover_md5, genre, spotify_track_id, last_rank, last_popularity'
-
 interface LinhaObservada {
     deezer_track_id: string
     deezer_artist_id: string | null
@@ -111,7 +108,18 @@ interface LinhaObservada {
     last_popularity: number | null
 }
 
-function montar(r: LinhaObservada | null | undefined): FaixaObservada | null {
+/**
+ * Da linha de `observed_tracks` para o objeto da gravação.
+ *
+ * Exportada porque quem lê aquela linha não é mais este módulo: ela vem dentro
+ * de `get_track_page` junto com a curva e os salvamentos (migration 029), e
+ * quem desempacota é o `utils/trackPageService.ts`. A regra de o que conta como
+ * linha aproveitável — precisa ter ISRC, título e artista — continua sendo
+ * assunto daqui, que é o módulo da identidade da faixa.
+ */
+export function montarFaixaObservada(
+    r: LinhaObservada | null | undefined
+): FaixaObservada | null {
     if (!r?.isrc || !r.title || !r.artist_name) return null
     return {
         deezerTrackId: r.deezer_track_id,
@@ -128,38 +136,16 @@ function montar(r: LinhaObservada | null | undefined): FaixaObservada | null {
     }
 }
 
-/**
- * A linha do Observatório para uma gravação — título, artista, capa e rank, sem
- * chamada nenhuma para fora.
- *
- * É este dado que garante que a página não vá a branco: se o Deezer estiver
- * fora do ar ou em quota, ela ainda tem o essencial, porque isto foi medido por
- * nós e está em casa.
- *
- * O desempate por `last_rank desc` é o mesmo da migration 011: o Deezer mantém
- * mais de um id para a mesma gravação (single e faixa de álbum), e o id de
- * maior rank é o que as pessoas tocam.
- */
-export const buscarFaixaObservada = unstable_cache(
-    async (isrc: string): Promise<FaixaObservada | null> => {
-        const { data, error } = await supabasePublic
-            .from('observed_tracks')
-            .select(COLUNAS)
-            .eq('isrc', isrc)
-            .eq('active', true)
-            .order('last_rank', { ascending: false, nullsFirst: false })
-            .limit(1)
-            .maybeSingle()
-
-        if (error) {
-            console.error('[identidade] falha ao ler observed_tracks:', error.message)
-            return null
-        }
-        return montar(data as LinhaObservada | null)
-    },
-    ['faixa-observada'],
-    { revalidate: 3600, tags: ['observatorio'] }
-)
+// `buscarFaixaObservada(isrc)` saiu daqui em 25/08/2026. Era uma consulta
+// própria a `observed_tracks` por ISRC, e virou o campo `observada` da RPC
+// `get_track_page` — mesma linha, mesmo desempate por `last_rank desc` da
+// migration 011 (o Deezer mantém mais de um id para a mesma gravação, single e
+// faixa de álbum, e o de maior rank é o que as pessoas tocam), só que agora
+// chegando na mesma resposta que a curva e os salvamentos. Ver migration 029.
+//
+// O que ela garantia continua valendo: se o Deezer estiver fora do ar ou em
+// quota, a página ainda tem título, artista, capa e rank, porque isso foi
+// medido por nós e está em casa.
 
 /* ------------------------------------------------------- id antigo -> ISRC */
 

@@ -46,45 +46,35 @@ interface CurvaBruta {
     series?: PontoDaCurva[]
 }
 
-const buscar = unstable_cache(
-    async (isrc: string): Promise<CurvaDaFaixa | null> => {
-        const { data, error } = await supabasePublic.rpc('get_track_curve', {
-            p_isrc: isrc,
-        })
-
-        if (error) {
-            console.error('[observatorio] falha ao ler a curva:', error.message)
-            return null
-        }
-        // Faixa que o Observatório ainda não viu: a RPC devolve null.
-        if (!data) return null
-
-        const bruta = data as CurvaBruta
-        if (!bruta.deezer_track_id) return null
-
-        return {
-            deezerTrackId: bruta.deezer_track_id,
-            genre: bruta.genre ?? null,
-            observedSince: bruta.observed_since ?? '',
-            firstRank: bruta.first_rank ?? null,
-            lastRank: bruta.last_rank ?? null,
-            series: Array.isArray(bruta.series) ? bruta.series : [],
-        }
-    },
-    ['observatorio-curva'],
-    { revalidate: REVALIDAR_SEGUNDOS, tags: ['observatorio'] }
-)
-
 /**
- * Curva de uma gravação pelo ISRC. Devolve null quando não há ISRC (o Spotify
- * nem sempre expõe) ou quando o Observatório ainda não mediu esta faixa — nos
- * dois casos a página simplesmente não mostra o bloco.
+ * Da resposta da RPC para o objeto da curva.
+ *
+ * Só a montagem mora aqui — a chamada não. A curva deixou de ter requisição
+ * própria em 25/08/2026: ela viaja dentro de `get_track_page` junto com o resto
+ * da página (migration 029), porque o custo da página de faixa era o NÚMERO de
+ * idas ao banco, não o tamanho delas. Quem desempacota aquele JSON é o
+ * `utils/trackPageService.ts`, e chama esta função para a parte da curva.
+ *
+ * O que continua sendo assunto deste módulo é a FORMA da curva: o tipo, esta
+ * montagem e a `variacaoDaCurva`. Assim não existem duas leituras do mesmo JSON.
+ *
+ * Devolve null quando o Observatório ainda não mediu a gravação — e aí a página
+ * simplesmente não mostra o bloco.
  */
-export async function getTrackCurve(
-    isrc: string | null | undefined
-): Promise<CurvaDaFaixa | null> {
-    if (!isrc) return null
-    return buscar(isrc)
+export function montarCurva(bruta: unknown): CurvaDaFaixa | null {
+    if (!bruta) return null
+
+    const b = bruta as CurvaBruta
+    if (!b.deezer_track_id) return null
+
+    return {
+        deezerTrackId: b.deezer_track_id,
+        genre: b.genre ?? null,
+        observedSince: b.observed_since ?? '',
+        firstRank: b.first_rank ?? null,
+        lastRank: b.last_rank ?? null,
+        series: Array.isArray(b.series) ? b.series : [],
+    }
 }
 
 /* ------------------------------------------------------------------ landing */

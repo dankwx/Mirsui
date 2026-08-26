@@ -173,6 +173,13 @@ const generosCacheados = unstable_cache(
                 .select('genre')
                 .eq('active', true)
                 .not('genre', 'is', null)
+                // Ordem explícita, pela PK. Paginar sem order by devolve o que o
+                // Postgres achar mais barato, e ele não promete a mesma ordem
+                // entre duas execuções — o Observatório reescreve last_checked_at
+                // desta tabela inteira toda madrugada, que é exatamente quando
+                // uma página pode repetir linha e outra pular. Aí a contagem
+                // volta a mentir, do mesmo jeito que mentia truncada.
+                .order('deezer_track_id', { ascending: true })
                 .range(de, de + PAGINA - 1)
 
             if (error) {

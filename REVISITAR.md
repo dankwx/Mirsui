@@ -1,10 +1,17 @@
 # IMPORTANTE — revisitar antes de crescer
 
 **Aberto em:** 24 de agosto de 2026
+**Última medição:** 25 de agosto de 2026
 **Motivo:** as três cotas do plano gratuito (Supabase e Vercel) estouraram no
 mesmo dia. A causa principal foi corrigida. O que sobrou está aqui.
-**Prazo real:** a Fair Use Policy do Supabase começa a valer em **23 de setembro
-de 2026**. Até lá o excedente é tolerado.
+**Prazo real:** o Supabase **encurtou o prazo** no e-mail de 25/08 — de 23 de
+setembro para **28 de agosto de 2026**, com o egress em 11,9 GB de 5,5 GB.
+
+> **O contador não anda para trás.** Egress é cumulativo do ciclo de
+> faturamento, e os 11,9 GB são quase todos dos dias de 8 GB/dia anteriores aos
+> consertos. Em 28/08 o número vai continuar lá mesmo com o site consumindo
+> zero. As saídas são upgrade, esperar o ciclo virar, ou escrever para o
+> suporte — a causa está corrigida e a queda é demonstrável nos logs deles.
 
 > Este arquivo não é lista de desejo. É a lista do que quebra **no dia em que o
 > Mirsui der certo** — e o dia em que um link seu pega é exatamente o dia em que
@@ -25,6 +32,41 @@ visita, 20 queries e 241 KB de egress por render, ~36.700 renders por dia. Deu
 **Os crons do backend estavam inocentes** — 12 chamadas no dia inteiro. Vale
 registrar porque foi a primeira suspeita e custou tempo.
 
+## 1.1 A descoberta que muda qual é a alavanca
+
+Na medição de 25/08, com a home já resolvida, o egress restante **não era
+dado**. Era cabeçalho.
+
+O PostgREST responde com **1.012 bytes de cabeçalho em toda requisição**,
+independente do que vier no corpo. Só o `set-cookie: __cf_bm` do Cloudflare são
+~330 deles. A página de faixa fazia 5,4 requisições REST por render para
+trafegar isto:
+
+```
+observed_tracks?isrc=eq.X      252 bytes de corpo
+rpc/get_track_curve            224 bytes
+tracks (quem salvou, limit 8)   28 bytes
+tracks HEAD (count exact)        0 bytes
+                             -------
+                               504 bytes de dado   contra ~5.500 de cabeçalho
+```
+
+**89% do egress do projeto era protocolo, não conteúdo.**
+
+A consequência é uma regra, e ela vale para tudo que ainda for otimizado aqui:
+**enxugar `select` não adianta neste projeto — o que precisa cair é a CONTAGEM
+de idas ao banco.** Antes de propor menos colunas ou paginação, contar quantas
+requisições a página faz. Foi isso que a medição de 24/08 não olhou: ela parou
+na contagem de requisições e não perguntou quanto custava cada uma.
+
+Verificação, quando a dúvida voltar:
+
+```bash
+curl -s -o /dev/null -w "%{size_header}\n" \
+  -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+  "$URL/rest/v1/observed_tracks?select=isrc&limit=1"
+```
+
 ## 2. O que já foi feito
 
 | commit | o quê |
@@ -32,10 +74,16 @@ registrar porque foi a primeira suspeita e custou tempo.
 | `7307d90` | `/ingest` sai do middleware. Todo evento do PostHog de visitante deslogado virava um render inteiro da landing. Era bug de analytics, não a causa do volume. |
 | `a9689dd` | `robots.txt` — não existia nenhum, e `/robots.txt` caía no 404 do Next. |
 | `63e5556` | A home vira estática (`revalidate = 600`). O `getUser()` que a prendia no modo dinâmico foi para o middleware, que só valida quando existe cookie. |
+| `a7345bc` + `4a8c039` (backend) | A página de faixa cabe numa consulta. As 4 requisições REST viram a RPC `get_track_page` — ver §1.1 para o porquê de o número de requisições ser o que importa. |
 
 Confirmado em produção depois do deploy: a home responde `X-Vercel-Cache: HIT`
 (era `MISS` em toda requisição) e 15 ms na segunda visita sem cookie, contra
 ~600 ms antes.
+
+E na medição de 25/08, com tudo isso no ar: **121.415 requisições/dia** contra
+1.206.890 na véspera, a home renderizando **2 a 4 vezes por hora** em vez de
+36.700 por dia, e a página de faixa saindo de ~6.100 para ~1.560 bytes por
+render.
 
 ### A tabela que evita a próxima confusão
 
@@ -56,10 +104,16 @@ página não reduz Edge Request nenhum.
 ## 3. O item que importa: a página de faixa
 
 **Estado:** `X-Vercel-Cache: MISS` em toda visita. 40 KB de HTML por render,
-mais ~3 KB de Supabase.
+mais ~1,5 KB de Supabase (era ~6 KB antes de `a7345bc`).
 
 Ela é 6× mais leve que a home era, e por isso não foi o gargalo até agora. O
 problema não é o custo por visita — é que ele **escala 1:1 com o seu sucesso.**
+
+> **O que a RPC resolveu e o que ela não resolveu.** `a7345bc` cortou o lado
+> Supabase em ~4× e tirou a página da lista de urgências do egress. Não encostou
+> no lado Vercel: os 40 KB de HTML por render continuam idênticos, porque a
+> página segue renderizando do zero a cada visita. **O teto medido logo abaixo é
+> o da Vercel, e ele não se mexeu.** Esta seção continua valendo inteira.
 
 ### A ironia, que é o argumento inteiro
 
@@ -130,18 +184,21 @@ Vale pouco sozinho. Vale junto com §3, porque todo link do WhatsApp entra por a
 
 ### 5.1 A contagem de gênero puxa 5.000 linhas
 
-`utils/homeService.ts:159` — cinco páginas de mil linhas (106 KB) por render, só
-para fazer `Map.set(g, +1)` em memória. É um `count group by` numa RPC, e viraria
-~200 bytes.
+`utils/homeService.ts:159` — cinco páginas de mil linhas (106 KB cruas, ~8 KB
+comprimidas) por render, só para fazer `Map.set(g, +1)` em memória. É um
+`count group by` numa RPC, e viraria ~200 bytes.
 
-Ficou menos urgente porque a home agora roda isso no máximo 144 vezes por dia em
-vez de 36.700. Mas é o que dá folga para baixar o `revalidate` de volta para 60s
-se um dia os achados recentes precisarem ser mais frescos.
+**Perdeu a urgência de vez.** Medido em 25/08: a home renderiza 2 a 4 vezes por
+hora, não 144 por dia e muito menos 36.700 — as queries da landing só aparecem
+concentradas na hora do deploy, aquecendo o ISR por região. O que sobra disto é
+a folga para baixar o `revalidate` de volta para 60s se um dia os achados
+recentes precisarem ser mais frescos.
 
 ### 5.2 `pessoasCacheadas` sem `.limit()`
 
 `utils/homeService.ts:251` — varre a tabela de claims inteira para mostrar 5
-pessoas. Hoje são 13 KB. Cresce sozinho, sem teto.
+pessoas. Hoje são 13 KB crus, 592 bytes comprimidos. Cresce sozinho, sem teto —
+e é por isso que continua na lista mesmo custando pouco hoje.
 
 ### 5.3 O canonical aponta para um endereço que redireciona
 
@@ -183,6 +240,18 @@ importa por que o cache não pegava.
 `trackIdentity`. Se algum plano futuro depender dele para segurar custo, **meça
 antes de confiar.**
 
+**Confirmado de novo em 25/08, numa função diferente.** A `buscarFaixaObservada`
+era `unstable_cache` com `revalidate: 3600` e foi chamada 24.599 vezes em 24h
+para 19.738 renders de faixa — 1,25 por render. Se estivesse cacheando, seriam
+~24 por dia. Ou seja: o que ela deduplicava era o par
+`generateMetadata` + componente **dentro do mesmo request**, que é trabalho do
+`cache()` do React, não dela. O `unstable_cache` não segurava nada.
+
+Isso decidiu o desenho de `a7345bc`: a RPC nova usa **só `cache()` do React**, e
+de propósito. Não é resignação — é que a página precisa mesmo ser fresca (quem
+salva tem que ver o próprio nome ao recarregar), e fingir um cache que não
+funciona seria pior que não ter nenhum.
+
 ---
 
 ## 7. Quando agir
@@ -195,7 +264,15 @@ Não é "quando sobrar tempo". Os gatilhos:
   honesto obedece em horas ou dias; robô mal-educado ignora. Se não cair, o
   próximo passo é firewall na Vercel, não código.
 - **Se o egress do Supabase ficar acima de ~170 MB/dia** depois que tudo
-  assentar. É o orçamento diário de uma cota de 5 GB/mês.
+  assentar. É o orçamento diário de uma cota de 5 GB/mês. Estimativa em 25/08,
+  já com `a7345bc`: **~31 MB/dia**, ou 18% do orçamento. Tem folga, e a folga é
+  o que compra tempo para o §3.
+- **Se as ~19.700 renders/dia de faixa não caírem.** É varredura: 19.933 ISRCs
+  distintos em 24h, 1,2 acesso cada, plana nas 24 horas com pico às 03:00. O
+  catálogo tem 13.469 ISRCs ativos, então ~6.500 dos endereços pedidos **nem
+  existem no banco** e mesmo assim pagam render inteiro. Se isto persistir, é
+  firewall e §5.4 (sitemap), não otimização de consulta — a consulta já está
+  no osso.
 
 ---
 
@@ -234,3 +311,54 @@ curl -s -o /dev/null -D - https://www.mirsui.com/ | grep -i "x-vercel-cache"
 # HIT  = servida do CDN, não custa nada
 # MISS = renderizada do zero, custa banco e transferência
 ```
+
+### As três consultas que economizaram tempo em 25/08
+
+**Quem está batendo: nós ou os crons?** Encerra a suspeita dos crons em uma
+consulta, em vez de ler o código do backend de novo.
+
+```sql
+select log_attributes['request.sb.jwt.apikey.payload.role'] as papel,
+       log_attributes['request.path'] as path, count(*) as reqs
+from logs where source = 'edge_logs'
+group by papel, path order by reqs desc limit 12
+-- 25/08: anon 121.361, service_role 54. Os crons são inocentes, de novo.
+```
+
+**Quantas linhas cada consulta devolveu.** Os `edge_logs` não têm
+`content_length` (a resposta é `chunked`), mas têm `content_range`, que dá a
+contagem de linhas — e é ela que denuncia a consulta que puxa mil linhas para
+contar um número.
+
+```sql
+select log_attributes['request.path'] as path,
+       log_attributes['response.headers.content_range'] as faixa,
+       count(*) as reqs
+from logs where source = 'edge_logs'
+group by path, faixa order by reqs desc limit 25
+```
+
+**É robô ou é gente?** Um ISRC visitado ~1 vez, milhares de ISRCs distintos e
+distribuição plana = varredura.
+
+```sql
+select count(*) as reqs,
+       uniq(log_attributes['request.search']) as distintos,
+       round(count(*) / uniq(log_attributes['request.search']), 1) as por_faixa
+from logs where source = 'edge_logs'
+  and log_attributes['request.path'] = '/rest/v1/observed_tracks'
+  and log_attributes['request.search'] like '%isrc=eq.%'
+```
+
+### Medir bytes de verdade
+
+O `fetch` do Node manda `accept-encoding: gzip, deflate` (confere com
+`node -e "..."` subindo um servidor local), então o que trafega é o tamanho
+**comprimido** — medir com `--compressed`, senão o número sai 5 a 10× maior:
+
+```bash
+curl -s -o /dev/null -w "corpo=%{size_download} cabecalho=%{size_header}\n" \
+  --compressed -H "apikey: $ANON" -H "Authorization: Bearer $ANON" "$URL/rest/v1/..."
+```
+
+E **somar o cabeçalho**. Foi não fazer isso que escondeu o problema do §1.1.

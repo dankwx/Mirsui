@@ -1,7 +1,7 @@
 # IMPORTANTE — revisitar antes de crescer
 
 **Aberto em:** 24 de agosto de 2026
-**Última medição:** 25 de agosto de 2026
+**Última medição:** 26 de agosto de 2026
 **Motivo:** as três cotas do plano gratuito (Supabase e Vercel) estouraram no
 mesmo dia. A causa principal foi corrigida. O que sobrou está aqui.
 **Prazo real:** o Supabase **encurtou o prazo** no e-mail de 25/08 — de 23 de
@@ -84,6 +84,15 @@ E na medição de 25/08, com tudo isso no ar: **121.415 requisições/dia** cont
 1.206.890 na véspera, a home renderizando **2 a 4 vezes por hora** em vez de
 36.700 por dia, e a página de faixa saindo de ~6.100 para ~1.560 bytes por
 render.
+
+**Medição de 26/08, com `a7345bc` no ar desde ~01:00 UTC:** ~72.000
+requisições/dia, extrapolado da taxa pós-deploy de ~3.000/hora. A queda continua
+— 1,2 milhão, 121 mil, 72 mil em três dias.
+
+Mas **a composição mudou, e é ela que importa agora**: a queda veio toda de
+requisições *por render*, e nenhuma de renders. A página de faixa renderiza mais
+do que nunca — ~49.000 vezes por dia contra as 19.700 de 25/08. O §4.1 é o que
+essa medição revelou, e o gatilho do §7 sobre varredura **disparou**.
 
 ### A tabela que evita a próxima confusão
 
@@ -180,6 +189,87 @@ Vale pouco sozinho. Vale junto com §3, porque todo link do WhatsApp entra por a
 
 ---
 
+## 4.1 De onde vêm os 308: a página de artista
+
+Medido em 26/08, nas 12 horas seguintes ao deploy de `a7345bc`:
+
+```
+observed_tracks?select=isrc&deezer_track_id=eq.X   6.519 requisições
+                                                   6.314 ids distintos
+                                                    1,03 por id
+```
+
+1,03 acesso por id distinto é a assinatura de varredura do §7 — a mesma de
+25/08, só que agora **por id do Deezer, não por ISRC**. Projetado para o dia:
+~13.000.
+
+Estas requisições são `isrcDeIdDeezer` (`utils/trackIdentity.ts:225`), o degrau
+que resolve `/track/<id do Deezer>` antes do 308. Elas rodam **antes** da RPC do
+§2 e não são cobertas por ela — é por isso que a página de faixa não virou
+uma requisição só, e sim uma para quem entra pelo ISRC e duas para quem entra
+pelo id do Deezer.
+
+### A origem é nossa
+
+`carregarArtista` (`utils/artistPageService.ts:180`) pede
+`/artist/{id}/top?limit=99`, e esse é o único endpoint do Deezer que **não
+devolve ISRC** — o plano de independência do Spotify já tinha registrado isso, e
+tratado como resolvido. `buscarIsrcsLocais` (`utils/artistPageService.ts:148`)
+casa contra `observed_tracks` o que der; o que não estiver no catálogo sai
+linkado pelo id do Deezer. O comentário da linha 161 diz, sem alarme:
+
+> *"Sem isto os links caem no id do Deezer, que também abre."*
+
+Abrem. E cada um custa, quando alguém segue:
+
+```
+1 consulta a observed_tracks (deezer_track_id=eq.)   ~1.050 bytes
+1 chamada ao Deezer, quando a consulta não acha       fora da nossa cota
+1 resposta 308 com o shell do Next                    10.097 bytes   (§4)
+1 render inteiro da página de destino                ~40 KB de HTML + ~1,5 KB
+```
+
+A página de artista renderizou **2.558 vezes em 12h** (~5.100/dia, contadas pelo
+`deezer_track_id=in.(...)` do `buscarIsrcsLocais`), cada uma emitindo até 99
+links desses. O rastreador segue uma fração e volta no dia seguinte.
+
+**Isto não aparece em nenhuma análise de escala** — nem aqui nem em
+`mirsui-backend/docs/analise-escala-apis-e-banco.md` —, porque as duas contam o
+job noturno. Este é custo do **caminho de render**, e ninguém tinha olhado para
+ele.
+
+Uma coisa não foi medida e vale medir antes de decidir: `carregarArtista` faz 3
+chamadas ao Deezer por render, e elas passam pelo Data Cache do Next
+(`next: { revalidate }`, em `utils/deezerService.ts:91`). Quanto disso vira
+requisição de verdade é desconhecido — e o §6 deste arquivo é justamente sobre
+não confiar em cache aqui sem medir.
+
+### A ironia, de novo
+
+A página de artista está no to-do do README como *"Terminar a página do
+artista"*, e é hoje **a maior origem identificável do tráfego de robô do site**:
+~13.000 das ~49.000 renders diárias de faixa entram pelos endereços que ela
+publica, ou 27%. O resto do §3 continua sendo a fatia maior — mas é a única
+fatia cuja origem a gente conhece pelo nome.
+
+### O conserto
+
+Nenhum dos dois é otimização de consulta:
+
+1. **`Disallow: /artist/` em `app/robots.ts`.** A página não tem o que indexar
+   hoje: nome, capa e listas que vêm inteiras do Deezer. Não é conteúdo nosso, e
+   o §10 do `docs/plano-de-urls-e-seo.md` já argumenta que publicar página fraca
+   penaliza também as boas.
+2. **Não emitir link para faixa sem ISRC local.** Hoje o fallback é o id do
+   Deezer; poderia ser texto sem link, ou o link do próprio Deezer, que é
+   externo e não paga render nosso. É decisão de produto — a faixa fica sem
+   página do Mirsui até o Observatório alcançá-la — e por isso vem depois de 1.
+
+O item 1 é reversível numa linha e resolve hoje. O item 2 é o conserto de
+verdade, porque um robô que ignore o robots.txt continua entrando pelos links.
+
+---
+
 ## 5. Pendências menores
 
 ### 5.1 A contagem de gênero puxa 5.000 linhas
@@ -189,7 +279,9 @@ comprimidas) por render, só para fazer `Map.set(g, +1)` em memória. É um
 `count group by` numa RPC, e viraria ~200 bytes.
 
 **Perdeu a urgência de vez.** Medido em 25/08: a home renderiza 2 a 4 vezes por
-hora, não 144 por dia e muito menos 36.700 — as queries da landing só aparecem
+hora — e em 26/08, **8,5 por hora** (102 renders em 12h; o `revalidate = 600`
+dá 6/hora por região, então o que subiu foi o número de regiões servindo, não a
+frequência). São ~8 MB/dia de egress. Não é 144 por dia e muito menos 36.700 — as queries da landing só aparecem
 concentradas na hora do deploy, aquecendo o ISR por região. O que sobra disto é
 a folga para baixar o `revalidate` de volta para 60s se um dia os achados
 recentes precisarem ser mais frescos.
@@ -260,19 +352,27 @@ Não é "quando sobrar tempo". Os gatilhos:
 
 - **Antes de divulgar o Mirsui em qualquer lugar com audiência.** É o cenário do
   §3, e é o pior momento possível para descobrir o teto.
-- **Se as Edge Requests não caírem em 48h** depois do `robots.txt` (24/08). Robô
-  honesto obedece em horas ou dias; robô mal-educado ignora. Se não cair, o
-  próximo passo é firewall na Vercel, não código.
+- ~~**Se as Edge Requests não caírem em 48h** depois do `robots.txt` (24/08).~~
+  **As 48h passaram e a varredura continua** — mudou de forma, não de volume
+  (§4.1: 6.314 ids do Deezer distintos em 12h, 1,03 acesso cada). Ou o robô
+  ignora o `robots.txt`, ou é um que não está na lista. O próximo passo é o que
+  esta linha já dizia: **firewall na Vercel, não código** — e agora com o §4.1
+  ao lado, que é a parte que *é* código.
 - **Se o egress do Supabase ficar acima de ~170 MB/dia** depois que tudo
   assentar. É o orçamento diário de uma cota de 5 GB/mês. Estimativa em 25/08,
-  já com `a7345bc`: **~31 MB/dia**, ou 18% do orçamento. Tem folga, e a folga é
-  o que compra tempo para o §3.
-- **Se as ~19.700 renders/dia de faixa não caírem.** É varredura: 19.933 ISRCs
-  distintos em 24h, 1,2 acesso cada, plana nas 24 horas com pico às 03:00. O
-  catálogo tem 13.469 ISRCs ativos, então ~6.500 dos endereços pedidos **nem
-  existem no banco** e mesmo assim pagam render inteiro. Se isto persistir, é
-  firewall e §5.4 (sitemap), não otimização de consulta — a consulta já está
-  no osso.
+  já com `a7345bc`: ~31 MB/dia, ou 18% do orçamento. **Em 26/08: ~110 MB/dia,
+  ou 65%.** A folga encolheu 3,5× em um dia sem nenhum código novo — foi só o
+  número de renders subindo. O valor é **derivado, não medido**: é a contagem de
+  requisições de 26/08 multiplicada pelos bytes por requisição medidos em 25/08
+  (~76 MB da RPC da faixa, ~14 MB do degrau do id do Deezer, ~13 MB da página de
+  artista, ~8 MB da home).
+- ~~**Se as ~19.700 renders/dia de faixa não caírem.**~~ **Disparou em 26/08:
+  não caíram, subiram para ~49.000/dia.** A varredura continua plana nas 24
+  horas (1.870 a 2.243 renders por hora, das 02:00 às 19:00, sem noite) e trocou
+  de porta: agora entra por `/track/<id do Deezer>`, e o §4.1 mostra que somos
+  nós que publicamos esses endereços. A conclusão desta linha continua correta e
+  agora tem endereço: **firewall e §5.4 (sitemap), mais o §4.1** — não
+  otimização de consulta, que já está no osso.
 
 ---
 
@@ -312,7 +412,7 @@ curl -s -o /dev/null -D - https://www.mirsui.com/ | grep -i "x-vercel-cache"
 # MISS = renderizada do zero, custa banco e transferência
 ```
 
-### As três consultas que economizaram tempo em 25/08
+### As consultas que economizaram tempo (25/08 e 26/08)
 
 **Quem está batendo: nós ou os crons?** Encerra a suspeita dos crons em uma
 consulta, em vez de ler o código do backend de novo.
@@ -337,6 +437,32 @@ select log_attributes['request.path'] as path,
 from logs where source = 'edge_logs'
 group by path, faixa order by reqs desc limit 25
 ```
+
+**Quem está fazendo a requisição, quando o path sozinho não diz.** Foi esta que
+achou o §4.1: `observed_tracks` recebe consultas de cinco lugares diferentes do
+site, e agrupar por path só mostra um número grande e mudo. Agrupar por forma do
+`request.search` separa cada chamador.
+
+```sql
+select
+  multiIf(
+    position(log_attributes['request.search'], 'isrc=eq.') > 0, 'por isrc',
+    position(log_attributes['request.search'], 'select=genre') > 0, 'home: contagem de genero',
+    position(log_attributes['request.search'], 'spotify_track_id=eq.') > 0, 'ponte spotify',
+    position(log_attributes['request.search'], 'deezer_track_id=eq.') > 0, 'degrau do id do deezer',
+    position(log_attributes['request.search'], 'deezer_track_id=in.') > 0, 'pagina de artista',
+    'outro') as padrao,
+  count(*) as reqs,
+  any(substring(log_attributes['request.search'], 1, 90)) as exemplo
+from logs where source = 'edge_logs'
+  and log_attributes['request.path'] = '/rest/v1/observed_tracks'
+  and timestamp > now() - interval 12 hour
+group by padrao order by reqs desc
+```
+
+Uma RPC não aparece aqui: `get_track_page` é POST e o corpo não vai para o log,
+então `request.search` vem vazio. Para ela o que dá para contar é o volume, não
+a distinção — a varredura tem que ser detectada no degrau anterior.
 
 **É robô ou é gente?** Um ISRC visitado ~1 vez, milhares de ISRCs distintos e
 distribuição plana = varredura.

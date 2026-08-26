@@ -354,6 +354,29 @@ barato é o que aconteceria se fosse resolvido hoje: seriam ~9.500 URLs
 publicadas de uma vez, sustentadas por 46 salvamentos, 15 perfis e uma curva do
 Observatório que hoje tem **1 ponto por faixa em 76% dos casos**.
 
+> **Atualização de 26/08/2026.** O `robots.txt` passou a existir (`a9689dd`), e
+> não por SEO: era uma das causas do estouro das cotas do plano gratuito
+> (`REVISITAR.md`). `sitemap.xml` e Search Console continuam sem existir.
+>
+> A régua desta seção, remedida: o catálogo ativo foi de ~9.500 para **15.635
+> faixas**, e a curva de **76% para 63,6% com um ponto só** — média de 1,62
+> pontos por faixa, máximo 7. Melhorou devagar, e o denominador cresceu mais
+> rápido que o numerador. Duas ressalvas para o número não ser lido errado:
+>
+> 1. Desde a migration 021 o histórico grava **mudança**, não medição. "Um
+>    ponto" agora quer dizer "nunca mudou de rank" *ou* "foi medida uma vez só".
+>    As duas desenham a mesma reta na tela, que é o que a régua mede — mas são
+>    problemas diferentes.
+> 2. A fila de medição do Observatório **parou de drenar** em algum momento
+>    depois de 16/08: 6.285 faixas estão há mais de 3 dias sem medição, a mais
+>    antiga há 7. Ver a revisão de 26/08 em
+>    `mirsui-backend/docs/analise-escala-apis-e-banco.md`. Enquanto isso não for
+>    consertado, **o prazo de 90 dias desta seção não está correndo** — o
+>    catálogo cresce ~1.100 faixas/dia e a medição não acompanha, então a
+>    proporção de páginas fracas está aumentando, não diminuindo.
+>
+> A ordem da seção não muda; a data de chegada, sim.
+
 O Google rastrearia, indexaria pouco, e classificaria o domínio como de baixo
 valor — o que depois penaliza também as páginas boas. É algorítmico, não tem
 recurso, e reverte em meses.

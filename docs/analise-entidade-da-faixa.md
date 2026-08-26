@@ -234,8 +234,24 @@ a régua: **o conjunto de URLs válidas do site é "tudo que o Deezer conhece"**
 isso não é enumerável. As 7.131 do Observatório dão um sitemap; as faixas que só
 a busca abre não existem em lugar nenhum para serem listadas.
 
-Nenhum link interno aponta para elas. São páginas que o Google não tem como
-encontrar, nem quando a régua do §10 for atingida.
+~~Nenhum link interno aponta para elas. São páginas que o Google não tem como
+encontrar, nem quando a régua do §10 for atingida.~~
+
+> **Errado, e descoberto em 26/08/2026.** Existe um link interno, e ele é
+> abundante: a página de artista pede `/artist/{id}/top?limit=99` ao Deezer, e
+> para toda faixa que **não** está em `observed_tracks` ela publica um link na
+> forma `/track/<id do Deezer>` (`utils/artistPageService.ts:199`). Ou seja, o
+> site linka exatamente o conjunto que esta seção descreve como inalcançável.
+>
+> Isso muda o sinal do problema. Não é que essas páginas sejam invisíveis — é
+> que elas são **visíveis e não enumeráveis**: o Google as encontra uma a uma
+> pelo rastejo, que é o caminho mais caro, e o sitemap continua sem poder
+> listá-las. Medido em 12h: 6.314 ids do Deezer distintos pedidos, 1,03 acesso
+> cada. O custo disso está em `REVISITAR.md` §4.1.
+>
+> A conclusão desta seção sobrevive e fica mais forte: o sitemap é impossível
+> por construção, e agora há tráfego real provando que a ausência de registro
+> não impede o rastejo, só impede o controle dele.
 
 ### 5.5 O caminho de render depende do Deezer para existir
 
@@ -244,6 +260,11 @@ do ar não degrada a página, **remove** a página (404). O plano de independên
 do Spotify foi escrito inteiro em cima da tese "nada de terceiro pode apagar dado
 que já é nosso". Ela vale hoje para as 7.131 gravações que têm linha local. Para
 as demais, a dependência é total — só trocou de dono.
+
+*(26/08/2026: são 15.635 gravações com linha local agora, 2,2x o número desta
+medição. O buraco encolheu em proporção, mas não em natureza — e a página de
+artista, pela correção do §5.4 acima, publica links justamente para as que
+estão fora dele.)*
 
 ---
 

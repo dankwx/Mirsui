@@ -75,5 +75,8 @@ Duas ferramentas, com papéis diferentes:
         existir — apontava para `/settings`, que nunca foi criada)
 -   [ ] Index page on Google Search (ver `docs/plano-de-urls-e-seo.md` §10)
 -   [ ] Tema claro por preferência do sistema
--   [ ] Terminar a página do artista
+-   [ ] Terminar a página do artista — e virou urgente por um motivo que não é
+        de acabamento: em 26/08 ela é a maior fonte de tráfego de robô do site,
+        porque publica link por id do Deezer para toda faixa fora do catálogo.
+        Ver `REVISITAR.md` §4.1.
 -   [ ] Documentação do projeto

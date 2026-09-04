@@ -2163,10 +2163,18 @@ O log fica em `/var/log/mirsui-backup.log`, com `logrotate` mensal já
 configurado, e cada sucesso carimba `/var/backups/mirsui/ULTIMO_SUCESSO` — um
 arquivo que a fase 10 vai conseguir monitorar sem precisar entender nada disto.
 
-> **O script mora só na máquina**, como o `deploy.sh` da fase 4 — mesma escolha,
-> mesma consequência: se a VPS morrer, ele morre junto e o backup do banco não o
-> traz de volta. São 80 linhas sem segredo nenhum dentro; versioná-lo no repo é
-> uma linha de decisão que continua em aberto.
+**O script está versionado**, em `ops/mirsui-backup.sh`. O que roda é a cópia
+instalada em `/usr/local/bin/mirsui-backup.sh` — depois de mexer no arquivo do
+repo, reinstalar é uma linha:
+
+```bash
+sudo install -o root -g root -m 755 ops/mirsui-backup.sh /usr/local/bin/mirsui-backup.sh
+```
+
+Ficou assim porque a alternativa era a do `deploy.sh` da fase 4, que mora só na
+máquina: se a VPS morrer, ele morre junto, e o backup do banco não traz de volta
+o script que fez o backup. O `deploy.sh` continua fora do repo — mesma
+consequência, decisão ainda em aberto.
 
 #### O restore, que é o item que ninguém faz — e foi ele que achou o erro
 

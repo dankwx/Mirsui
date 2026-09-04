@@ -613,8 +613,11 @@ Fase 0  [x] imagens confirmadas em arm64 — TODAS as 11, nenhuma removida
         [x] aarch64 confirmado · Docker 29.1.3 · Compose 2.40.3 · Node v20.20.2
         [x] portas livres confirmadas: 3002 · 54321 · 5432 · 54323
         [x] postgresql-client-16 instalado (16.15, servidor é 15.8)
-        [ ] API_GW_HTTP_PORT=54321 e STUDIO_PORT=54323 no .env do compose
-        [ ] firewall: NÃO abrir as portas novas (firewalld + NSG da Oracle)
+        [x] API_GW_HTTP_PORT=54321 e STUDIO_PORT=54323 no .env do compose
+            — fechado na fase 1; o Kong responde em 127.0.0.1:54321
+        [x] firewall: as portas novas seguem fechadas — 54321, 5432 e 54323 só
+            escutam em loopback, e a 3000 do backend, que escuta em 0.0.0.0,
+            não responde de fora (testado em 146.235.44.203:3000)
 
 Fase 1  [x] /opt/mirsui-db criado · fonte clonada (self-hosted/v0.8.0)
         [x] .env com segredos próprios gerados via setup.sh
@@ -715,7 +718,9 @@ Fase 6  [x] DNS virado — em 4/09, sem esperar, porque não havia o que
         [x] log próprio para o vhost — o access_log era um só para os 8
             sites, e sem isso não há como monitorar nada daqui pra frente
 
-Fase 7  [ ] projeto na nuvem parado, NÃO apagado
+Fase 7  [x] projeto na nuvem intacto — está ACTIVE_HEALTHY, nem parado nem
+            apagado. No plano grátis parar não economiza nada, e de pé ele
+            é um rollback melhor do que parado.
         [ ] apagar só depois de 2 semanas limpas — ou seja, não antes de
             18/09/2026. É um item de NÃO fazer nada; a data é o conteúdo.
 ```
@@ -1988,30 +1993,23 @@ mora num container sem cópia.
 [ ] um restore testado de verdade
 ```
 
-**2. A Cloudflare — o que resta da fase 5.** Exige mover os nameservers do
-`mirsui.com` para ela, e a ordem escolhida foi: certificado primeiro (feito, com
-o DNS direto), Cloudflare depois. A razão é a colisão que o §5 avisa e que tem
-nome: **o Bot Fight Mode é justamente o que pode barrar o
-`/.well-known/acme-challenge`.**
+**2. A Cloudflare — FEITA, e esta lista ficou para trás.** Toda ela entrou em
+4 de setembro e está registrada em `§13 — a Cloudflare entrou` e em
+`§13 — fase 5 concluída`: nameservers trocados, zona conferida registro a
+registro, nuvem laranja no `www` e no apex, `api` e `db` cinza, Bot Fight Mode,
+regra de rate limit provada com o IP bloqueado, cache rule de `/_next/static/`
+em HIT.
 
-```
-[ ] adicionar o mirsui.com na Cloudflare e trocar os nameservers na Hostinger
-[ ] nuvem laranja no www e no apex
-[ ] api. e db. ficam CINZA por enquanto — ver a ressalva abaixo
-[ ] Bot Fight Mode + uma regra de rate limit (o §7 do REVISITAR)
-[ ] cache rule em /_next/static/*
-[ ] trocar a renovação para DNS-01: instalar python3-certbot-dns-cloudflare,
-    um token de Zone:DNS:Edit, e refazer o renewal do www/apex e o do db
-```
-
-> **A ressalva sobre o `db`.** O §5 mandava nuvem laranja no `db` também. No
-> plano gratuito o **Bot Fight Mode é um botão de zona inteira** — não dá para
-> escopá-lo por hostname. Ligá-lo com o `db` laranja põe um detector de robô na
-> frente de **toda** chamada do `supabase-js` feita pelo navegador, inclusive as
-> de auth. O SSR já está protegido disso pelo `/etc/hosts`, mas o navegador não.
-> Deixar o `db` cinza até haver como escopar a regra é a escolha conservadora, e
-> custa só a proteção de DDoS num hostname que não é o alvo do problema — o que
-> estourou a cota foi tráfego de site, não de API.
+O último item da lista original — **trocar a renovação para DNS-01** — não é
+mais para fazer, e não por desistência: mediu-se que o **HTTP-01 atravessa a
+nuvem laranja com o Bot Fight ligado**, o `--dry-run` foi refeito depois de
+ativá-lo, e `api` e `db` estão cinza e renovam direto. Instalar o
+`python3-certbot-dns-cloudflare` e emitir um token de `Zone:DNS:Edit` seria
+adicionar uma peça e um segredo para resolver um problema que a medição mostrou
+não existir. **A ressalva sobre o `db` continua valendo** e virou decisão: ele
+fica cinza enquanto o Bot Fight for um botão de zona inteira, porque ligá-lo com
+o `db` laranja põe um detector de robô na frente de toda chamada do
+`supabase-js` feita pelo navegador, inclusive as de auth.
 
 **3. O que já estava pendente e continua:**
 

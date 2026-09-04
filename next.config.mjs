@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    // Empacota em .next/standalone com só os módulos que o runtime traça —
+    // 435 MB de node_modules viram algo entre 80 e 150 MB. Ver fase 4 do
+    // docs/migracao-para-vps.md.
+    output: 'standalone',
     images: {
         // cdn-images.dzcdn.net: capas do Deezer, que é a fonte do Observatório.
         // Sem o domínio aqui o <Image> quebra em runtime — a Pilha escapa disso

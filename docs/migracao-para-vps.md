@@ -1,21 +1,28 @@
 # Migração para a VPS — Vercel e Supabase saem, a Oracle assume tudo
 
-**Status:** em execução. **Fases 0 a 3 concluídas** — o Supabase self-hosted está
-de pé na VPS em `https://db.mirsui.com`, com o banco restaurado, mandando e-mail
-em português e com os quatro caminhos de auth testados. **Nada em produção foi
-tocado:** o site segue na Vercel apontando para a nuvem. **A próxima é a fase
-4** (o Next na máquina), que não depende de mais ninguém. Um item continua
-bloqueado por fora: os 12 arquivos do Storage, por HTTP 402 na origem. O §13 é o
-registro do que foi feito — inclusive o trigger de `auth.users` que o dump não
-levou e que só apareceu porque a fase 3 testou um cadastro de verdade.
+**Status:** **o site saiu da Vercel em 4 de setembro de 2026.**
+`https://www.mirsui.com` é servido pela VPS, com certificado próprio, em cima do
+Supabase self-hosted de `https://db.mirsui.com`. **Fases 0 a 5 concluídas, menos
+a Cloudflare** — que é a única parte da fase 5 que não depende desta máquina:
+exige mover os nameservers, e com ela vai junto a decisão de como o Certbot
+renova por trás da nuvem laranja (§5). **A fase 6 perdeu o objeto:** o DNS já
+virou, e virou sem cerimônia porque a Vercel já respondia 402 — não havia
+produção para proteger. O que resta antes de encerrar a migração é o **§8, o
+backup**, que segue em zero e é o maior risco do documento. Dois itens continuam
+bloqueados por fora: os 12 arquivos do Storage (HTTP 402 na origem) e os dois
+`UPDATE` de URL do §13. O §13 é o registro do que foi feito — inclusive o
+trigger de `auth.users` que o dump não levou e que só apareceu porque a fase 3
+testou um cadastro de verdade.
 **Escopo:** frontend Next.js, backend Fastify e banco Supabase, os três na
 mesma VPS Oracle Ampere A1 (4 vCPU / 24 GB / Ubuntu).
 **Verificado na máquina em 3 de setembro de 2026.** A primeira versão deste
 documento foi escrita sem olhar a VPS e errou cinco coisas — portas, servidor
 web, firewall, disco e, o pior, o hostname. O §4.1 lista o que existe lá de
 verdade, e é ele que manda.
-**Motivo:** as quatro cotas do plano gratuito estouraram. O site está fora do
-ar há cerca de uma semana e a data de reset não está sob nosso controle.
+**Motivo:** as quatro cotas do plano gratuito estouraram. O site ficou fora do
+ar por cerca de dez dias — a Vercel respondia 402 `DEPLOYMENT_DISABLED` — e a
+data de reset não estava sob nosso controle. **Voltou em 4 de setembro, na
+VPS.**
 **Documento irmão:** `REVISITAR.md`. Este plano encerra boa parte dele — ver §11.
 **Decisão adjacente:** o Supabase continua sendo Supabase, self-hosted. Não é
 migração para Postgres puro. O §3 explica por que essa distinção é o documento
@@ -659,22 +666,29 @@ Fase 4  [x] frontend clonado em /home/ubuntu/mirsui-web · npm ci · build
 
 Fase 5  [x] sites-enabled mirsui-db (db→54321) — adiantado na fase 3, que
             não tinha como testar OAuth sem ele
-        [ ] sites-enabled mirsui-web (www→3002)
-        [x] nginx -t ANTES do reload — há 6 sites na máquina (agora 7)
+        [x] sites-enabled mirsui-web (www→3002)
+        [x] nginx -t ANTES do reload — 8 sites na máquina agora
         [x] certbot para db (o de www fica para quando o Next subir)
-        [ ] certbot para www
-        [ ] decidido como o Certbot renova com a Cloudflare na frente —
-            o de db já está emitido e renova sozinho ENQUANTO o DNS for
-            direto; pôr a Cloudflare na frente mexe nisso
+        [x] certbot para www — e para o apex junto, por --expand
+        [x] canonical do §5.3 decidido: o www. O apex faz 301, em UM salto
+        [x] HSTS de volta, que a Vercel mandava e a troca teria comido
+        [x] real_ip da Cloudflare pronto, com script e cron mensal
+        [x] SSR do Next falando com o Supabase pelo loopback (/etc/hosts)
         [ ] Cloudflare proxy + Bot Fight + rate limit
-        [ ] canonical do §5.3 decidido
+        [ ] decidido como o Certbot renova com a Cloudflare na frente —
+            hoje www, apex e db renovam por HTTP-01 e isso funciona
+            ENQUANTO o DNS for direto; pôr a Cloudflare na frente mexe nisso
 
 BACKUP  [ ] cron noturno de pg_dump rodando
         [ ] destino FORA da máquina
         [ ] um restore testado de verdade
+        >>> agora é o item de maior risco em aberto: o site está no ar
+            servindo de um banco que não tem backup nenhum
 
-Fase 6  [ ] TTL baixado 24h antes
-        [ ] DNS virado
+Fase 6  [x] DNS virado — em 4/09, sem esperar, porque não havia o que
+            proteger: a Vercel já respondia 402 nos dois nomes
+        [~] TTL: o do www já era 300; o do apex foi de 14400 para 300 na
+            mesma edição, então não houve as 24h de antecedência
         [ ] uma hora de acompanhamento
 
 Fase 7  [ ] projeto na nuvem parado, NÃO apagado
@@ -1336,39 +1350,288 @@ produção     ainda na Vercel, ainda na nuvem
 
 ---
 
+### 4 de setembro, manhã — **fase 5: o site voltou ao ar, na VPS**
+
+*(a entrada acima é da madrugada deste mesmo dia: o build da fase 4 tem
+`Last-Modified` de 04/09 02:06 GMT. Esta aqui é das 09h37 às 10h40, BRT.)*
+
+`https://www.mirsui.com` é servido pela máquina, com certificado próprio. O
+Mirsui saiu da Vercel. Falta da fase 5 só a Cloudflare, que é a única parte
+dela que não depende desta máquina.
+
+#### A premissa que mudou, e mudou antes de qualquer comando
+
+O plano tratava a virada de DNS como o momento de risco e a reservava para a
+fase 6. A primeira medição da sessão desmontou isso:
+
+```
+$ curl -sI https://www.mirsui.com/
+HTTP/2 402
+x-vercel-error: DEPLOYMENT_DISABLED
+strict-transport-security: max-age=63072000
+```
+
+**No `www` e no apex.** Não havia produção para derrubar: o site estava fora do
+ar desde que a cota estourou. Isso não muda o plano — muda o preço de errar.
+Apontar o DNS para a VPS deixou de ser um risco a administrar e virou o
+conserto. A fase 6 acabou acontecendo dentro da fase 5, sem as 24h de TTL
+baixado que ela pedia, e a razão fica registrada aqui para quem reler não achar
+que foi pressa: foi um custo de espera que não comprava nada.
+
+Esse mesmo `curl` guardou a segunda informação da sessão, que só ia render mais
+adiante: a Vercel mandava HSTS.
+
+#### O vhost, e o que ele tem além do padrão do `mirsui-api`
+
+`/etc/nginx/sites-available/mirsui-web`, `www.mirsui.com` → `127.0.0.1:3002`.
+Dois desvios do modelo, os dois com motivo:
+
+| | |
+|---|---|
+| `proxy_buffer_size 32k` + `proxy_buffers 16 32k` | a home sai com **240 KB** de HTML. Com os buffers padrão (32 KB) o nginx despeja o excedente em arquivo temporário **a cada requisição**. 512 KB seguram a página em memória. |
+| `location /_next/static/` com `access_log off` | e **nada de `Cache-Control`**: o Next já responde `max-age=31536000, immutable` ali. Um `add_header` só duplicaria o cabeçalho. |
+
+Antes de recarregar, `nginx -t` — são 8 sites na máquina agora, e um erro de
+sintaxe aqui derruba o FreshRSS, o Portainer e o `api.mirsui.com` junto.
+
+#### O canônico é o `www` (§5.3 do REVISITAR)
+
+Decidido pelo que custa menos, não pelo que soa melhor: o `www` já é o que está
+indexado, já é o que o `.env.production` carrega em `NEXT_PUBLIC_SITE_URL`, e já
+era para onde o apex redirecionava na Vercel. Escolher o apex custaria rebuild e
+jogaria fora o que o Google já conhece.
+
+O resultado é o §5.3 fechado de ponta a ponta:
+
+```
+<link rel="canonical" href="https://www.mirsui.com"/>   ← o que o site emite
+https://www.mirsui.com                                   ← o que serve
+```
+
+#### Dois achados que a Cloudflare torna reais, e que o §5 não listava
+
+**1. O nginx vai parar de saber quem é o cliente.** Com a nuvem laranja, todo
+`$remote_addr` vira um IP da Cloudflare. Isso estraga o `access_log` e, pior,
+estraga o rate limit por IP do GoTrue em `db.mirsui.com`: uma sequência de
+logins errados de um usuário passaria a bloquear todo mundo. O conserto é o
+módulo `real_ip`, e ele mora em `/usr/local/sbin/cf-realip-update.sh`:
+
+- gera `conf.d/cloudflare-realip.conf` a partir de `cloudflare.com/ips-v4|v6`
+- recusa a lista se ela não parecer uma lista de CIDRs
+- **só troca o arquivo se `nginx -t` aceitar o resultado**, e reverte se não
+- roda todo dia 1º por `/etc/cron.d/cf-realip`
+
+Está inerte enquanto a Cloudflare não entrar: `set_real_ip_from` só reescreve o
+IP quando a conexão vem de uma das faixas.
+
+**2. O SSR do Next fala com o Supabase pela URL pública.**
+`utils/supabase/server.ts` lê `NEXT_PUBLIC_SUPABASE_URL`, que é
+`https://db.mirsui.com` — e não dá para trocar por loopback como o §7 fez no
+Fastify, porque a mesma variável vai para o bundle do navegador. Com a
+Cloudflare na frente, cada consulta de renderização sairia da máquina para um
+PoP e voltaria, **sujeita ao Bot Fight Mode, que não tem como distinguir SSR de
+robô.** Entrou uma linha no `/etc/hosts` da VPS:
+
+```
+127.0.0.1 db.mirsui.com
+```
+
+O TLS continua validando, porque quem atende no loopback é o mesmo nginx com o
+mesmo certificado. **O ganho hoje é ~1 ms, não 35** — medido, e vale registrar
+por quê: a diferença de 37 ms para 1 ms entre `https://db.mirsui.com` e
+`http://127.0.0.1:54321` é quase toda handshake TLS, que é custo de CPU e não de
+rede, e continua sendo cobrado no loopback. O motivo de manter a linha é a
+Cloudflare, não a latência de hoje.
+
+É o mesmo raciocínio do "refinamento para depois" do §11 — e o §11 dizia para
+não mexer nisso na semana em que o site muda de casa. A objeção dele era ao
+custo de mexer em **código**: dois arquivos, uma variável nova e um rebuild. Uma
+linha no `/etc/hosts` faz o mesmo desvio sem tocar no build e sai com um `sed`.
+O refinamento do §11 continua de pé para quem quiser fazer direito.
+
+> **Ao depurar, lembre:** um `curl https://db.mirsui.com` feito **desta máquina**
+> não passa mais pelo caminho público. Para testar o caminho público de dentro,
+> `--resolve db.mirsui.com:443:146.235.44.203`.
+
+#### A virada, e a armadilha de medir do lugar errado
+
+Os dois registros trocados na Hostinger — o `www` deixou de ser CNAME da Vercel
+e virou A; o apex saiu de `216.198.79.1`; os dois com TTL 300. E aí a zona
+passou vinte minutos respondendo duas coisas diferentes:
+
+```
+ns1.dns-parking.com   → CNAME da Vercel            (consultado DA VPS)
+ns2.dns-parking.com   → alternando entre os dois   (consultado DA VPS)
+8.8.8.8 · 1.1.1.1 · 9.9.9.9 · OpenDNS  → todos já no IP da VPS
+```
+
+Isso é impossível pela ordem natural das coisas: um resolvedor público não pode
+ter um dado que o autoritativo não serve. A explicação apareceu num `dig`:
+
+```
+ns1.dns-parking.com  →  162.159.24.201     ← faixa da Cloudflare
+ns2.dns-parking.com  →  162.159.25.42      ← idem
+```
+
+O DNS da Hostinger roda em anycast da Cloudflare, e **a VPS estava batendo num
+nó com a zona defasada.** O mundo já via o registro novo; só ela não via. A
+lição operacional: numa virada de DNS, **medir de fora da máquina que está sendo
+migrada** — a consulta a partir dela é o pior ponto de observação possível,
+porque é o único que não representa nenhum usuário.
+
+Acreditar no ponto errado teria custado concreto: emitir com a zona
+"inconsistente" gastaria uma das 5 validações por hora do Let's Encrypt. Por
+isso a emissão só saiu depois de três rodadas limpas seguidas, e por isso o
+`www` foi emitido sozinho primeiro — o apex tinha TTL de 14400 e podia demorar
+muito mais, e não valia segurar o HTTPS do site esperando por ele.
+
+#### Os certificados
+
+```
+certbot --nginx -d www.mirsui.com                          → emitido
+certbot --nginx -d www.mirsui.com -d mirsui.com --expand   → um cert, dois nomes
+```
+
+```
+subject=CN = www.mirsui.com
+X509v3 Subject Alternative Name: DNS:mirsui.com, DNS:www.mirsui.com
+notAfter=Dec  3 12:28:59 2026 GMT
+```
+
+`certbot renew --dry-run` passa nos dois nomes. Isso vale **enquanto o DNS for
+direto**; é exatamente o que a Cloudflare vai mexer, e é o item que ficou em
+aberto na fase.
+
+Entre a virada do DNS e o certificado houve uma janela em que
+`https://www.mirsui.com` apresentava o certificado do `gerar-adunit.duckdns.org`
+— o primeiro vhost com TLS da máquina, que é quem atende o 443 para um nome sem
+bloco próprio. **Combinado com o HSTS que a Vercel deixou nos navegadores, isso
+é um erro de certificado sem botão de prosseguir.** Não foi regressão (o 402
+anterior também deixava o site inacessível), mas é uma janela para fechar
+depressa, e é mais um argumento para o certificado sair no mesmo movimento que
+o DNS.
+
+#### O HSTS que a troca teria comido em silêncio
+
+A Vercel mandava `Strict-Transport-Security: max-age=63072000`, e os navegadores
+de quem já visitou o site guardaram isso por **dois anos**. O nginx não manda
+nada disso por padrão: a migração teria trocado o site de casa e desligado o
+HSTS sem uma linha de aviso, e o sintoma só apareceria quando os dois anos
+fossem vencendo, um visitante de cada vez.
+
+Voltou no bloco 443 do `www`, e também no do apex, para o navegador subir para
+HTTPS sozinho nos dois nomes. **Sem `includeSubDomains`**, que a Vercel também
+não mandava: ligá-lo forçaria HTTPS em `api.` e `db.` com um prazo de dois anos
+difícil de desfazer, e essa não é decisão para tomar de passagem.
+
+#### O salto que sobrava no apex
+
+O `--redirect` do certbot escreve o bloco da porta 80 do apex mandando para
+`https://$host`, isto é, `https://mirsui.com` — que o bloco 443 então manda para
+o `www`. Dois saltos, que é literalmente a queixa do §5.3. O bloco da 80 passou
+a apontar direto para o `www`:
+
+```
+http://mirsui.com/pilha  →  https://www.mirsui.com/pilha    (1 salto, 266 ms)
+```
+
+#### O que respondeu
+
+Tudo pelo caminho público real, de fora da VPS:
+
+| | |
+|---|---|
+| `/` · `/feed` · `/pilha` · `/termos` · `/privacidade` | 200 |
+| `/robots.txt` · `/auth/check-email` · `/api/auth/me` | 200 |
+| `/user/coelho` — dinâmica, lê o Supabase novo | 200 |
+| `/_next/static/chunks/…` · `/assets/track-art2.webp` | 200 |
+| `/_next/image?url=…&w=640` | 200 `image/jpeg` |
+| `/ingest/static/array.js` — o proxy do PostHog | 200 |
+| os quatro caminhos (http/https × apex/www) | convergem no `www` em **1 salto** |
+
+E a verificação que o `curl` não faz: a home aberta no navegador, com CSS, JS, o
+mosaico de capas passando pelo otimizador e os dados do Supabase novo na página.
+Console limpo — a única mensagem vinha de uma extensão do Chrome.
+
+O `SITE_URL` do GoTrue já era `https://www.mirsui.com` e o
+`ADDITIONAL_REDIRECT_URLS` já era `https://www.mirsui.com/**`: os links de
+e-mail e o callback do Google que a fase 3 testou apontavam para um endereço que
+só passou a existir agora.
+
+#### Estado ao fechar
+
+```
+nginx        8 sites · mirsui-web novo · cloudflare-realip.conf inerte
+cert         www.mirsui.com + mirsui.com, vence 03/12/2026, dry-run ok
+DNS          www e apex → 146.235.44.203, TTL 300, nameservers na Hostinger
+produção     https://www.mirsui.com, servida pela VPS
+Vercel       ainda existe, ainda com o projeto — é o rollback
+```
+
+Rollback continua barato e continua sendo DNS: repor o CNAME
+`521429e3b1f742b6.vercel-dns-017.com` no `www` e o A `216.198.79.1` no apex. Com
+TTL 300, cinco minutos. O que ele **não** devolve é a Vercel funcionando — ela
+responde 402 até a cota resetar. O rollback de verdade, hoje, é para um site
+fora do ar. É mais um motivo para o §8 deixar de ser um item aberto.
+
+---
+
 ### Retomada — a próxima sessão começa aqui
 
-**A fase 4 acabou. O próximo passo é a fase 5**, que é a primeira a mexer em
-coisa que o mundo enxerga:
+**O site está no ar na VPS.** O que falta se divide em três, e a ordem entre
+elas importa:
+
+**1. O backup (§8) — o maior risco em aberto, e agora com o site dependendo
+dele.** Nenhum item feito: nem o `pg_dump` noturno, nem o destino fora da
+máquina, nem um restore testado. Enquanto isso não existir, o Mirsui inteiro
+mora num container sem cópia.
 
 ```
-[ ] sites-enabled mirsui-web: www.mirsui.com → 127.0.0.1:3002, no mesmo
-    padrão do mirsui-api. nginx -t ANTES do reload — são 7 sites na máquina.
-[ ] registro A de www.mirsui.com apontando para a VPS
-[ ] certbot --nginx -d www.mirsui.com
-[ ] decidir o canônico do §5.3 (apex ou www) — o build atual já saiu com
-    NEXT_PUBLIC_SITE_URL=https://www.mirsui.com, que é a aposta do §7. Se a
-    decisão for o apex, é rebuildar, não só trocar o nginx.
-[ ] Cloudflare: proxy + Bot Fight + rate limit, e resolver como o Certbot
-    renova com a nuvem laranja na frente
+[ ] cron noturno de pg_dump
+[ ] destino FORA da máquina
+[ ] um restore testado de verdade
 ```
 
-Antes de virar o DNS (fase 6), continua pendente, e nada disso é da fase 5:
+**2. A Cloudflare — o que resta da fase 5.** Exige mover os nameservers do
+`mirsui.com` para ela, e a ordem escolhida foi: certificado primeiro (feito, com
+o DNS direto), Cloudflare depois. A razão é a colisão que o §5 avisa e que tem
+nome: **o Bot Fight Mode é justamente o que pode barrar o
+`/.well-known/acme-challenge`.**
 
 ```
-[ ] BACKUP: o §8 inteiro. O banco novo segue sem backup nenhum, e é o item
-    de maior risco do documento.
+[ ] adicionar o mirsui.com na Cloudflare e trocar os nameservers na Hostinger
+[ ] nuvem laranja no www e no apex
+[ ] api. e db. ficam CINZA por enquanto — ver a ressalva abaixo
+[ ] Bot Fight Mode + uma regra de rate limit (o §7 do REVISITAR)
+[ ] cache rule em /_next/static/*
+[ ] trocar a renovação para DNS-01: instalar python3-certbot-dns-cloudflare,
+    um token de Zone:DNS:Edit, e refazer o renewal do www/apex e o do db
+```
+
+> **A ressalva sobre o `db`.** O §5 mandava nuvem laranja no `db` também. No
+> plano gratuito o **Bot Fight Mode é um botão de zona inteira** — não dá para
+> escopá-lo por hostname. Ligá-lo com o `db` laranja põe um detector de robô na
+> frente de **toda** chamada do `supabase-js` feita pelo navegador, inclusive as
+> de auth. O SSR já está protegido disso pelo `/etc/hosts`, mas o navegador não.
+> Deixar o `db` cinza até haver como escopar a regra é a escolha conservadora, e
+> custa só a proteção de DDoS num hostname que não é o alvo do problema — o que
+> estourou a cota foi tráfego de site, não de API.
+
+**3. O que já estava pendente e continua:**
+
+```
 [ ] Storage: rodar /tmp/migra-storage.sh quando a cota da nuvem virar
-[ ] URLs: os dois UPDATE do §13. A fase 4 provou que só falta o dado — não
-    há mais referência ao host velho em código.
-[ ] tirar tqprioqqitimssshcrcr.supabase.co do next.config.mjs — mas **só
-    depois** dos UPDATE, senão as imagens que ainda apontam para lá param de
-    passar pelo otimizador.
+[ ] URLs: os dois UPDATE do §13 (a fase 4 provou que só falta o dado)
+[ ] tirar tqprioqqitimssshcrcr.supabase.co do next.config.mjs — só DEPOIS
+    dos UPDATE, senão as imagens que ainda apontam para lá param de passar
+    pelo otimizador
 [ ] um reboot combinado, para ver o pm2-ubuntu ressuscitar os dois de verdade
-[ ] empurrar o commit do output:'standalone' quando o deploy da Vercel deixar
-    de importar
+    — agora com o site no ar, isto deixou de ser de graça: combine a janela
+[ ] empurrar o commit do output:'standalone'. O deploy da Vercel deixou de
+    importar no minuto em que o DNS virou, então este item destravou sozinho
+[ ] fase 7: NÃO apagar o projeto da nuvem por duas semanas
 ```
 
-> **E o que já dava para fazer hoje:** rotacionar a senha do banco na nuvem, o
-> client secret do Google e a API key do Resend. Os três circularam em texto
-> claro durante o planejamento.
+> **E o que já dava para fazer desde a fase 3:** rotacionar a senha do banco na
+> nuvem, o client secret do Google e a API key do Resend. Os três circularam em
+> texto claro durante o planejamento.

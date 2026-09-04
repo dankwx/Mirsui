@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
+<body style="margin:0;padding:0;background:#f4f4f2;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f2;">
+    <tr><td align="center" style="padding:40px 16px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;background:#ffffff;border:1px solid #e4e4e0;border-radius:12px;">
+        <tr><td style="padding:32px 32px 8px 32px;">
+          <div style="font:600 15px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#111111;letter-spacing:-0.01em;">Mirsui</div>
+        </td></tr>
+        <tr><td style="padding:16px 32px 0 32px;font:400 16px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#333333;">
+          <p style="margin:0 0 12px 0;">Você pediu para trocar o e-mail da sua conta no Mirsui para <strong style="color:#111111;">{{ .NewEmail }}</strong>.</p>
+          <p style="margin:0 0 12px 0;">Confirme pelo botão abaixo. Enquanto isso não acontecer, o endereço antigo continua sendo o da conta.</p>
+        </td></tr>
+        <tr><td style="padding:24px 32px 8px 32px;">
+          <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#111111;color:#ffffff;text-decoration:none;font:600 15px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;padding:14px 24px;border-radius:8px;">Confirmar novo e-mail</a>
+        </td></tr>
+        <tr><td style="padding:8px 32px 32px 32px;font:400 13px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#8a8a85;">
+          <p style="margin:0 0 6px 0;">Se o botão não abrir, copie este endereço:</p>
+          <p style="margin:0;word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#8a8a85;">{{ .ConfirmationURL }}</a></p>
+          <p style="margin:16px 0 0 0;">Se não foi você quem pediu, ignore este e-mail — nada muda sem a confirmação.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>

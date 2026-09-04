@@ -2,12 +2,13 @@
 
 **Status:** **o site saiu da Vercel em 4 de setembro de 2026.**
 `https://www.mirsui.com` é servido pela VPS, atrás da Cloudflare, em cima do
-Supabase self-hosted de `https://db.mirsui.com`. **Fases 0 a 5 concluídas.** A
+Supabase self-hosted de `https://db.mirsui.com`. **Fases 0 a 6 concluídas.** A
 Cloudflare entrou com rate limit e cache rule testados por comportamento, e o
 Certbot renova por HTTP-01 atravessando a nuvem laranja com o Bot Fight ligado —
 que era o item que o §5 deixava em aberto, agora resolvido por medição e não por
-palpite. **A fase 6 perdeu o objeto:** o DNS já virou, e virou sem cerimônia
-porque a Vercel já respondia 402 — não havia produção para proteger. O que resta antes de encerrar a migração é o **§8, o
+palpite. A fase 6 aconteceu dentro da fase 5, porque a Vercel já respondia 402 e
+não havia produção para proteger; a hora de acompanhamento foi feita e está no
+§13. **Resta a fase 7, que é não apagar nada até 18/09** — e o §8. O que resta antes de encerrar a migração é o **§8, o
 backup**, que segue em zero e é o maior risco do documento. Dois itens continuam
 bloqueados por fora: os 12 arquivos do Storage (HTTP 402 na origem) e os dois
 `UPDATE` de URL do §13. O §13 é o registro do que foi feito — inclusive o
@@ -705,11 +706,18 @@ BACKUP  [ ] cron noturno de pg_dump rodando
 Fase 6  [x] DNS virado — em 4/09, sem esperar, porque não havia o que
             proteger: a Vercel já respondia 402 nos dois nomes
         [~] TTL: o do www já era 300; o do apex foi de 14400 para 300 na
-            mesma edição, então não houve as 24h de antecedência
-        [ ] uma hora de acompanhamento
+            mesma edição, então não houve as 24h de antecedência. Ficou
+            sem efeito: com a nuvem laranja o rollback nem passa por
+            propagação de DNS.
+        [x] uma hora de acompanhamento — 1.988 requisições, 1 único 5xx
+            (transitório, numa janela de reload), zero 404 do próprio
+            site, nenhum reinício de processo, carga em 0,31
+        [x] log próprio para o vhost — o access_log era um só para os 8
+            sites, e sem isso não há como monitorar nada daqui pra frente
 
 Fase 7  [ ] projeto na nuvem parado, NÃO apagado
-        [ ] apagar só depois de 2 semanas limpas
+        [ ] apagar só depois de 2 semanas limpas — ou seja, não antes de
+            18/09/2026. É um item de NÃO fazer nada; a data é o conteúdo.
 ```
 
 ---
@@ -1864,6 +1872,103 @@ site       https://www.mirsui.com, 200 em todas as rotas
 
 O único item aberto que sobrou na migração inteira é o **§8: o backup.** O
 Mirsui está no ar, servindo de um banco que não tem cópia nenhuma.
+
+---
+
+### 4 de setembro, 11h34 — **fase 6 concluída**: a hora de acompanhamento
+
+A fase 6 não precisou ser começada: ela aconteceu dentro da fase 5, quando o
+DNS virou às 10h17. O que faltava dela era o único item que não é um comando —
+**acompanhar por uma hora** — e aqui está, com o que os logs mostraram nas duas
+primeiras horas no ar.
+
+#### O que passou pela máquina
+
+1.988 requisições desde a virada, no `access_log` (que é compartilhado pelos 8
+sites da máquina — ver mais abaixo):
+
+| status | quantas | o que é |
+|---|---|---|
+| 200 | 1.503 | |
+| 404 | 193 | **nenhum é do site** — ver abaixo |
+| 301 | 182 | o apex e o `http→https` |
+| 307 · 308 | 58 | middleware e trailing slash |
+| 204 · 401 · 400 · 403 | 37 | auth sem token, requisição malformada, varredura |
+| **5xx** | **1** | |
+
+#### O único 5xx, e por que ele não preocupa
+
+```
+127.0.0.1 - - [04/Sep/2026:10:34:10] "HEAD /rest/v1/tracks?select=id&track_uri=eq…" 503 0 "-" "node"
+```
+
+Um 503, vindo do **loopback**, com `User-Agent: node` — ou seja, o SSR do Next
+falando com o PostgREST. Às 10h34, que cai dentro da janela em que o nginx foi
+recarregado três vezes (o `--expand` do certbot, o HSTS e o salto do apex).
+**Os 11 containers do Supabase estão `healthy` com 13–14 horas de uptime e
+nenhum reinício**, então não houve queda do lado do banco. Um em 1.988, numa
+janela de recarga, é transitório.
+
+#### Os 404 são todos varredura — e isso é a boa notícia
+
+```
+19  /_internal/api/setup.php?action=exists
+10  /tracking.php · /set_captcha_validated.php · /.rt/verify · /.amper/challenge/fp.js
+ 5  /.env
+ 2  /xmlrpc.php · /backup.zip · /.git/HEAD · /.env.production · /config.json
+```
+
+**Nenhum link interno quebrado.** Numa troca de hospedagem é justamente aí que
+aparece o estrago — arquivo que existia na Vercel e não veio, rota que
+dependia de uma configuração de plataforma. Não apareceu nada. E `.env`,
+`.env.production` e `.git/HEAD` respondem 404, que é o certo.
+
+O `error_log` teve 3 linhas na janela, todas `access forbidden by rule` de quem
+bateu no **IP cru** da máquina e caiu no vhost padrão — nada a ver com o
+Mirsui.
+
+#### Processos e recursos
+
+```
+mirsui-web       96 min de uptime, nenhum reinício desde a virada, 196 MB
+mirsui-backend   8 dias, nenhum reinício novo
+supabase         11 containers, todos healthy, 13–14h
+load             0,31  ·  RAM livre 18,8 GB de 24  ·  disco 98 GB livres
+```
+
+Os 196 MB do Next estão abaixo dos ~350 MB que o §4.2 estimou, e a carga não
+saiu do lugar. A folga de 50 a 100× que o §4.2 projetou continua de pé.
+
+#### O buraco que o acompanhamento encontrou
+
+**O `access_log` é um só para os 8 sites da máquina**, e o formato padrão não
+grava o `host`. Ou seja: não havia como responder "quanto tráfego o site teve"
+nem "o site está dando erro" sem misturar FreshRSS, Portainer e o resto. Isso
+não é um detalhe de hoje — é a condição de qualquer monitoramento daqui para a
+frente.
+
+O vhost passou a ter log próprio:
+
+```
+access_log /var/log/nginx/mirsui-web.access.log;
+error_log  /var/log/nginx/mirsui-web.error.log;
+```
+
+O `/_next/static/` continua fora do log, por volume, e o `logrotate` do nginx
+já cobre `/var/log/nginx/*.log`, então não fica arquivo crescendo sem teto.
+
+#### O rollback ficou melhor do que o §10 supunha
+
+O §10 desenha o rollback como uma troca de DNS que espera propagação. Com a
+nuvem laranja isso mudou: os IPs que o mundo resolve são os da Cloudflare e
+**não mudam**. Trocar o destino no painel dela vale em segundos, sem
+propagação nenhuma.
+
+O que continua valendo do §10 é a ressalva mais importante, e ela não é
+técnica: **o rollback devolve um site que responde 402.** A Vercel só volta a
+servir quando a cota resetar. Na prática, hoje, não existe para onde voltar — o
+que faz do §8 (backup) não só o último item, mas o único que ainda protege
+alguma coisa.
 
 ---
 

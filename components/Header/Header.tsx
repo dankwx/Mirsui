@@ -8,6 +8,7 @@ import { useEffect, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut } from '@/app/auth/actions'
+import FotoDePerfil from '@/components/FotoDePerfil'
 
 // Tipo para o perfil do usuário
 interface UserProfile {
@@ -212,19 +213,19 @@ export default function Header({ userProfile, isDono = false }: HeaderProps) {
                                 aria-label="Menu do perfil"
                                 className="block h-[38px] w-[38px] overflow-hidden rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mir-acc/60"
                                 style={{
-                                    background: userProfile?.avatar_url
-                                        ? '#16120c'
-                                        : 'radial-gradient(130% 130% at 32% 24%,#f3ecdb 0%,#cdef36 22%,#c14a26 54%,#16120c 88%)',
+                                    // O orbe fica sempre por baixo, e não só
+                                    // quando falta foto: assim a imagem que
+                                    // não carrega revela o gradiente, não um
+                                    // buraco chapado.
+                                    background:
+                                        'radial-gradient(130% 130% at 32% 24%,#f3ecdb 0%,#cdef36 22%,#c14a26 54%,#16120c 88%)',
                                     boxShadow: '0 0 0 1.5px rgba(236,227,210,0.18)',
                                 }}
                             >
-                                {userProfile?.avatar_url && (
-                                    <img
-                                        src={userProfile.avatar_url}
-                                        alt="User avatar"
-                                        className="h-full w-full rounded-full object-cover"
-                                    />
-                                )}
+                                <FotoDePerfil
+                                    src={userProfile?.avatar_url}
+                                    className="h-full w-full rounded-full object-cover"
+                                />
                             </button>
 
                             {isMenuOpen && (

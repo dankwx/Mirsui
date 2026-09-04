@@ -5,6 +5,7 @@ import { Pin, PinOff, Trash2 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { addRecado, deleteRecado, togglePinRecado } from './actions'
 import { RECADO_SELECT, RECADOS_PAGE_SIZE, type Recado } from '@/utils/profileComments'
+import FotoDePerfil from '@/components/FotoDePerfil'
 
 const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
 
@@ -204,20 +205,17 @@ const Recados: React.FC<RecadosProps> = ({
                                 }`}
                             >
                                 {/* Avatar */}
-                                {recado.author?.avatar_url ? (
-                                    <img
-                                        src={recado.author.avatar_url}
-                                        alt={name}
-                                        className="h-[38px] w-[38px] flex-none rounded-[9px] border border-mir-line object-cover"
-                                    />
-                                ) : (
+                                <FotoDePerfil
+                                    src={recado.author?.avatar_url}
+                                    className="h-[38px] w-[38px] flex-none rounded-[9px] border border-mir-line object-cover"
+                                >
                                     <div
                                         className="grid h-[38px] w-[38px] flex-none place-items-center rounded-[9px] border border-mir-line font-mono text-[11px] font-bold uppercase text-mir-text2"
                                         style={{ backgroundColor: tone(name) }}
                                     >
                                         {initialsOf(recado.author)}
                                     </div>
-                                )}
+                                </FotoDePerfil>
 
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2">

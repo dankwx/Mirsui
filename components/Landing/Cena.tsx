@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import FotoDePerfil from '@/components/FotoDePerfil'
 import Capa from './Capa'
 import { diaMes, trackHref } from './landingHelpers'
 import type { RecentActivityItem } from '@/utils/homepageService'
@@ -28,14 +29,9 @@ function Avatar({
         <span
             className={`${tamanho} grid flex-none place-items-center overflow-hidden rounded-full bg-mir-card text-[10px] font-bold uppercase text-mir-text2 ring-1 ring-mir-line`}
         >
-            {src ? (
-                // <img> cru: avatar de OAuth vem de domínios variados que não
-                // estão liberados em next.config, e o otimizador quebraria.
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={src} alt="" className="h-full w-full object-cover" />
-            ) : (
-                nome.charAt(0)
-            )}
+            <FotoDePerfil src={src} className="h-full w-full object-cover">
+                {nome.charAt(0)}
+            </FotoDePerfil>
         </span>
     )
 }

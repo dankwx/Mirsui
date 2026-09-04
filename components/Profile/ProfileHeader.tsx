@@ -20,6 +20,7 @@ import { updateDisplayName, updateDescription } from './actions'
 import { trackHref } from './trackHref'
 import type { User, Achievement, Rating, Song } from '@/types/profile'
 import type { ProfileStats } from '@/utils/profileStats'
+import FotoDePerfil from '@/components/FotoDePerfil'
 
 /* Raio de canto desta página, para não virar sopa:
  *   capa de faixa      4px
@@ -142,18 +143,14 @@ export default function ProfileHeader({
                                     : 'cursor-default'
                             }`}
                             style={{
-                                background: userData.avatar_url
-                                    ? '#16120c'
-                                    : AVATAR_GRADIENT,
+                                // Sempre o gradiente por baixo — ver Header.
+                                background: AVATAR_GRADIENT,
                             }}
                         >
-                            {userData.avatar_url && (
-                                <img
-                                    src={userData.avatar_url}
-                                    alt={currentDisplayName}
-                                    className="h-full w-full object-cover"
-                                />
-                            )}
+                            <FotoDePerfil
+                                src={userData.avatar_url}
+                                className="h-full w-full object-cover"
+                            />
                         </button>
 
                         <div className="min-w-0 flex-1 pt-0.5">

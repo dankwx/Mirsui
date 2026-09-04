@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { LoaderCircle, Upload, Check, ImageIcon } from 'lucide-react'
+import FotoDePerfil from '@/components/FotoDePerfil'
 
 const MAX_BYTES = 5 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
@@ -129,17 +130,14 @@ export default function ModalChangeAvatar({
                 <div className="flex flex-col items-center gap-5 px-6 pb-6 pt-6">
                     {/* PREVIEW */}
                     <div className="relative h-[140px] w-[140px] flex-none overflow-hidden rounded-full border border-mir-line2/70 bg-[#241c12] shadow-[0_28px_56px_-20px_rgba(0,0,0,.8)]">
-                        {previewUrl || avatar_url ? (
-                            <img
-                                src={previewUrl || avatar_url || ''}
-                                alt="Preview"
-                                className="h-full w-full object-cover"
-                            />
-                        ) : (
+                        <FotoDePerfil
+                            src={previewUrl || avatar_url}
+                            className="h-full w-full object-cover"
+                        >
                             <div className="flex h-full w-full items-center justify-center text-mir-text2/50">
                                 <ImageIcon className="h-9 w-9" />
                             </div>
-                        )}
+                        </FotoDePerfil>
                     </div>
 
                     {/* FILE PICKER */}

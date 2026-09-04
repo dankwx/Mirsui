@@ -56,6 +56,7 @@ import type { Metadata } from 'next'
 
 import Link from 'next/link'
 import { ArrowLeft, Clock, Crown } from 'lucide-react'
+import FotoDePerfil from '@/components/FotoDePerfil'
 
 /* ------------------------------------------------------------- resolução */
 
@@ -694,13 +695,10 @@ export default async function TrackDetailsPage({
                                             )}
                                         </span>
                                         <span className="flex h-[46px] w-[46px] flex-none items-center justify-center overflow-hidden rounded-full border border-mir-bg/10 bg-[radial-gradient(130%_130%_at_30%_22%,#f3ecdb_0%,#cdef36_20%,#c14a26_52%,#16120c_88%)] text-[15px] font-bold text-mir-text">
-                                            {profile?.avatar_url ? (
-                                                <img
-                                                    src={profile.avatar_url}
-                                                    alt={name}
-                                                    className="h-full w-full object-cover"
-                                                />
-                                            ) : null}
+                                            <FotoDePerfil
+                                                src={profile?.avatar_url}
+                                                className="h-full w-full object-cover"
+                                            />
                                         </span>
                                         <Link
                                             href={`/user/${profile?.username || claimer.user_id}`}

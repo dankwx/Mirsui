@@ -12,6 +12,7 @@ import RecentClaims from '@/components/RecentClaims/RecentClaims'
 import { createClient } from '@/utils/supabase/client'
 import { saveTrack } from '@/utils/trackActions'
 import { trackHref } from '@/utils/trackHref'
+import FotoDePerfil from '@/components/FotoDePerfil'
 
 interface FeedContentProps {
     initialPosts: FeedPostWithInteractions[]
@@ -329,20 +330,12 @@ function FeedItem({ post, isOwn, save }: { post: FeedPost; isOwn: boolean; save:
                         className="flex items-center gap-2 transition-colors hover:text-mir-text"
                     >
                         <span className="flex h-6 w-6 flex-none items-center justify-center overflow-hidden rounded-full bg-[radial-gradient(120%_120%_at_30%_22%,#322c22,#1b1813)] text-[10px] font-extrabold tracking-[-0.03em] text-mir-text">
-                            {post.avatar_url ? (
-                                // <img> cru de propósito: avatar de OAuth vem de
-                                // domínios variados (googleusercontent etc.) que não
-                                // estão liberados em next.config, e o otimizador
-                                // quebraria em runtime. São 24px, não vale o risco.
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                    src={post.avatar_url}
-                                    alt=""
-                                    className="h-full w-full object-cover"
-                                />
-                            ) : (
-                                (who || 'U').charAt(0).toUpperCase()
-                            )}
+                            <FotoDePerfil
+                                src={post.avatar_url}
+                                className="h-full w-full object-cover"
+                            >
+                                {(who || 'U').charAt(0).toUpperCase()}
+                            </FotoDePerfil>
                         </span>
                         <span>
                             <b className="font-semibold text-mir-text">{who}</b> salvou

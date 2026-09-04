@@ -12,9 +12,10 @@ não havia produção para proteger; a hora de acompanhamento foi feita e está 
 §14** — as fases 7 a 12, com ordem entre elas. **A fase 8, o backup, está
 feita**: cron às 03:30, dois arquivos por dia no `gdrive:mirsui-backup` e um
 restore testado de propósito, que foi quem descobriu que o dump precisa sair como
-`supabase_admin`. A próxima é a **fase 9**, e é a única visível de fora: as imagens do site estão quebradas hoje, porque os 12 arquivos do Storage
-nunca vieram (HTTP 402 na origem, e o que está no disco da VPS são 12 cópias do
-corpo do erro) e as 17 URLs ainda apontam para o host morto. O §13 é o registro
+`supabase_admin`. **A fase 9, as imagens, também está feita na parte que se via de fora**: o
+avatar quebrado caía no ícone de imagem partida porque o fallback só tratava
+URL ausente, não URL morta — corrigido em `d40ddc7`. Falta só o resgate dos
+bytes, que depende de a cota da nuvem virar, provavelmente dia 27. O §13 é o registro
 do que foi feito — inclusive o trigger de `auth.users` que o dump não levou e que
 só apareceu porque a fase 3 testou um cadastro de verdade, e a conferência da
 noite de 4/09, que encontrou o repositório partido em dois e o consertou.
@@ -923,10 +924,29 @@ Três saídas, em ordem de preferência:
 
 1. **Esperar a cota virar** e rodar `/tmp/migra-storage.sh`, que já está pronto
    na VPS e faz download-e-upload dos 12 de uma vez.
-2. **Tirar o spend cap por um dia** no painel do Supabase, rodar o script,
-   recolocar. É a saída rápida se houver pressa.
+2. ~~**Tirar o spend cap por um dia** no painel do Supabase, rodar o script,
+   recolocar.~~ **Esta saída não existe** — ver a correção logo abaixo.
 3. **Aceitar a perda.** Ninguém fica sem site: o `default.jpg` pode ser
    resubido de qualquer imagem, e quem tinha foto volta a ter quando trocar.
+
+> **Correção de 4/09 — a saída 2 era ficção, e foi escrita a partir da
+> mensagem de erro em vez da conta.** A org `dankwx's Org` está no **plano
+> free**, e spend cap é controle de plano Pro. No free não existe cobrança por
+> excedente nenhuma: estourar a cota *restringe* o projeto em vez de faturar —
+> o bloqueio **é** a proteção. A frase do 402 (*"must upgrade their plan or
+> remove spend caps"*) é texto genérico que a Supabase mostra para todo mundo,
+> e só a primeira metade se aplica aqui. Consultado por API, não por palpite.
+>
+> Sobram duas saídas de verdade: **esperar a cota virar**, que custa zero, ou
+> **pagar Pro por um mês** (US$ 25, previsível) e depois fazer downgrade.
+>
+> **Quando a cota vira.** Não virou em 01/09 — o 402 continuava de pé no dia 4
+> —, então o ciclo não é alinhado ao mês civil. Com o projeto criado em
+> 27/06/2024, o palpite forte é **dia 27**. Isso é inferência; quem confirma é
+> o painel em *Organization → Usage*, que mostra as datas do período. Se for o
+> 27, é **depois** da marca de 18/09 da fase 7 — e tudo bem: aquela data é uma
+> escolha de "duas semanas limpas", não prazo de terceiro, e a própria fase 7
+> registra que manter o projeto de pé no free custa nada.
 
 > **Enquanto isso, os metadados NÃO foram restaurados de propósito.**
 > `storage.objects` está em 0 e é assim que tem que ficar. Restaurar as 12
@@ -2235,9 +2255,17 @@ Três saídas, nenhuma urgente hoje:
 
 **O site está no ar na VPS, e a migração está feita.** O que falta deixou de ser
 uma lista solta e virou o **§14**: seis fases numeradas, com ordem entre elas e
-critério de pronto em cada uma. **A fase 8, o backup, está feita** — o registro
-está logo acima. A próxima é a **fase 9**, as imagens, que é a única que se vê
-de fora.
+critério de pronto em cada uma. **As fases 8 e 9 estão feitas** — o backup e as
+imagens.
+
+**A fase 9 fechou a parte que se via de fora** (`d40ddc7`): o avatar quebrado
+caía no ícone de imagem partida em vez do fallback, e agora cai no fallback.
+Falta só o resgate dos bytes, que **depende da cota da nuvem virar — dia 27,
+provavelmente**. Marque isso: é a única pendência deste documento com data de
+terceiro, e ela conflita com o 18/09 da fase 7.
+
+**A próxima é a fase 10**, o monitor de fora, que não depende de ninguém. Depois
+a 11 (o reboot combinado, que precisa de janela) e a 12 (os três segredos).
 
 Duas decisões da fase 5 fecharam aqui e não voltam à mesa:
 
@@ -2271,9 +2299,19 @@ conferência somou um motivo que a data não cobre:
 > de usuário e as 3 capas de playlist somem para sempre. **A fase 7 não termina
 > em 18/09 — ela termina quando a fase 9 tiver os bytes.**
 
+**Atualização de 4/09 — a trava encolheu, mas não sumiu.** O inventário da fase
+9 mostrou que 3 dos 12 são capas de playlist, e playlist saiu do produto; o
+`default.jpg` não é dado de ninguém; e o avatar do único usuário de fora nunca
+esteve no Storage. Sobram **5 fotos, todas de contas do próprio dono ou da única
+outra pessoa que viu o projeto**. E como a data provável de virada da cota é
+**27/09** — depois do 18/09 —, a escolha é explícita: ou o 18/09 estica até lá,
+ou as 5 fotos são abandonadas de propósito. **Não é para decidir isso por
+omissão**, que é exatamente o que acontece se alguém apagar o projeto na data.
+
 ```
 [ ] não apagar antes de 18/09/2026
-[ ] e não apagar antes de a fase 9 ter resgatado os 12 arquivos
+[ ] e não apagar antes de a fase 9 resgatar as 5 fotos — ou de a perda delas
+    ser uma decisão tomada, não um esquecimento
 ```
 
 ### Fase 8 — o backup  ·  **FEITA em 4/09 às 19h17**
@@ -2299,27 +2337,65 @@ motivos que não cabem numa caixa marcada:
 - **`rclone copy`, nunca `sync`.** O `sync-gdrive.sh` vizinho usa `sync`, e `sync`
   espelha remoções: a limpeza local dos 14 dias apagaria a cópia de fora junto.
 
-### Fase 9 — as imagens, que estão quebradas em produção
-
-A ordem importa, e metade não depende da nuvem:
+### Fase 9 — as imagens  ·  **o feio saiu do ar em 4/09; falta o resgate**
 
 ```
-[ ] 1. db.mirsui.com entra em images.domains do next.config.mjs (o host antigo
+[x] 1. db.mirsui.com entra em images.domains do next.config.mjs (o host antigo
        FICA, por enquanto) — sem isso o <Image> recusa a URL nova
-[ ] 2. tirar /tmp/migra-storage.sh de /tmp, antes que a fase 11 o apague
-[ ] 3. apagar /home/ubuntu/mirsui-storage/ — são 12 corpos de erro 402, e é a
-       armadilha descrita acima
-[ ] 4. recriar um default.jpg e subir no bucket user-profile-images
-[ ] 5. UPDATE só das linhas que terminam em default.jpg → 9 dos 14 avatares
-       consertados sem depender de ninguém
---- daqui para baixo depende de a cota da nuvem virar ---
-[ ] 6. rodar o migra-storage.sh e conferir que os arquivos têm tamanho de
-       imagem, não 189 bytes
+[x] 2. tirar migra-storage.sh de /tmp, antes que a fase 11 o apague
+       → agora é /usr/local/bin/mirsui-migra-storage.sh, mesma convenção do
+         backup da fase 8, e versionado em ops/
+[x] 3. apagar /home/ubuntu/mirsui-storage/ — 12 corpos de erro 402
+       → conferido antes de apagar: 12 arquivos, 189 bytes, md5 único
+         a850e1cb…, e só então removido
+[x] 4. ~~recriar um default.jpg~~ — **cancelado, e o motivo está abaixo**
+[x] 5. ~~UPDATE das linhas de default.jpg~~ — **não é mais preciso**
+--- daqui para baixo depende de a cota da nuvem virar (dia 27, provavelmente) --
+[ ] 6. rodar o mirsui-migra-storage.sh e conferir que os arquivos têm tamanho
+       de imagem, não 189 bytes
 [ ] 7. os dois UPDATE completos do §13
 [ ] 8. só então tirar tqprioqqitimssshcrcr.supabase.co do next.config.mjs
 [ ] 9. npm run build + deploy.sh — os passos 1 e 8 são config do Next, e config
        do Next só vale depois do build
 ```
+
+**Os passos 4 e 5 morreram porque o problema era outro.** O plano supunha que
+os avatares estavam feios por falta de dado. Não estavam: estavam feios por
+falta de tratamento de erro. O fallback de avatar já existia em todas as telas,
+mas só disparava com `avatar_url` **nulo** — e aqui a URL existe e está morta.
+O React desenhava o `<img>`, o navegador tomava 402, e sobrava o ícone de
+imagem partida. Ou seja, o fallback bonito nunca era chamado.
+
+O conserto foi `components/FotoDePerfil.tsx`, que trata `onError` e entrega o
+fallback de cada tela como `children` — cada uma manteve o desenho que já tinha.
+Está em produção desde `d40ddc7`. Com isso, recriar um `default.jpg` seria
+inventar um arquivo órfão para competir com um fallback melhor que já existe, e
+os `UPDATE` deixaram de ser urgentes: **o banco não foi tocado**, as 14 URLs
+seguem intactas, e quando a cota virar é rodar o script e o `UPDATE` do §13 —
+as fotos voltam e o fallback apenas para de aparecer. Nada a desfazer.
+
+> **`UserFollowers.tsx` já estava certo** e ficou de fora: usa o `Avatar` do
+> shadcn, e o Radix trata erro de carregamento sozinho. Foi o que mostrou qual
+> era o conserto.
+
+**O inventário mudou de figura quando se olhou de quem são as imagens.** O
+único usuário de fora do projeto, display name `_mouretsu`, entrou por **Google**
+em 30/07/2026 — e avatar de Google mora no `lh3.googleusercontent.com`, que
+responde 200 e nunca passou pelo Storage. **Não há nada dele para resgatar.**
+As 8 imagens que sumiram de verdade são todas de contas do próprio dono ou da
+única outra pessoa que viu o projeto:
+
+```
+4 fotos de perfil   dankwx130, danlu, abcabc, kondlapp2
+1 foto de perfil    coelho
+2 capas de playlist do danlu     ← playlist saiu do produto, ignorar
+1 capa de playlist  do coelho    ← idem
+9 default.jpg       contas de teste
+```
+
+Ou seja: **as capas de playlist saem do escopo** — a funcionalidade não existe
+mais no produto. E a fase 7 destrava parcialmente, porque o que o §14 chamava de
+"os bytes que só existem lá" encolheu para 5 fotos de conta própria.
 
 ### Fase 10 — alguém olhando
 

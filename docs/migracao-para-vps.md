@@ -674,10 +674,23 @@ Fase 5  [x] sites-enabled mirsui-db (db→54321) — adiantado na fase 3, que
         [x] HSTS de volta, que a Vercel mandava e a troca teria comido
         [x] real_ip da Cloudflare pronto, com script e cron mensal
         [x] SSR do Next falando com o Supabase pelo loopback (/etc/hosts)
-        [ ] Cloudflare proxy + Bot Fight + rate limit
-        [ ] decidido como o Certbot renova com a Cloudflare na frente —
-            hoje www, apex e db renovam por HTTP-01 e isso funciona
-            ENQUANTO o DNS for direto; pôr a Cloudflare na frente mexe nisso
+        [x] nameservers na Cloudflare, zona importada e CONFERIDA registro
+            a registro — a varredura automática perdeu o send.mirsui.com
+        [x] SSL/TLS não está em Flexible (testado: sem loop de redirect)
+        [x] real_ip acordou — access_log mostra visitante, não Cloudflare
+        [x] /_next/static/ cacheando (MISS→HIT), mesmo sem regra
+        [x] RESOLVIDO como o Certbot renova com a Cloudflare na frente:
+            HTTP-01 atravessa. --dry-run passa nos 5 certificados, 3 deles
+            já atrás da nuvem laranja. Sem DNS-01, sem plugin, sem token.
+            RESSALVA: testado com o Bot Fight AINDA DESLIGADO — refazer.
+        [ ] recriar o CNAME send → send.forge.rmta.net, CINZA (o Resend)
+        [ ] autoconfig e autodiscover para CINZA (vieram laranja, e isso
+            quebra a autoconfiguração de cliente de e-mail)
+        [ ] api e db para CINZA (o Bot Fight é botão de zona inteira)
+        [ ] Bot Fight Mode + regra de rate limit + cache rule
+        [ ] desligar o "Block training in robots.txt" da Cloudflare — ele
+            põe um segundo grupo User-agent:* ANTES do do app, sem nenhum
+            Disallow, e o app já bloqueia 23 scrapers contra os 9 dela
 
 BACKUP  [ ] cron noturno de pg_dump rodando
         [ ] destino FORA da máquina
@@ -1573,6 +1586,127 @@ Rollback continua barato e continua sendo DNS: repor o CNAME
 TTL 300, cinco minutos. O que ele **não** devolve é a Vercel funcionando — ela
 responde 402 até a cota resetar. O rollback de verdade, hoje, é para um site
 fora do ar. É mais um motivo para o §8 deixar de ser um item aberto.
+
+---
+
+### 4 de setembro, meio-dia — a Cloudflare entrou, e a importação comeu um registro
+
+Nameservers trocados para `corey.ns.cloudflare.com` e
+`daniella.ns.cloudflare.com`. A borda funciona: `cf-ray` nas respostas, PoP em
+GRU, e o site inteiro respondendo através dela.
+
+#### O achado: a varredura automática perdeu o `send`
+
+```
+$ dig +noall +comments A send.mirsui.com @corey.ns.cloudflare.com
+status: NXDOMAIN
+```
+
+Antes da troca esse nome existia:
+
+```
+send.mirsui.com.  3600  IN  CNAME  send.forge.rmta.net.
+```
+
+É o **return path do Resend** — o caminho por onde volta o bounce dos e-mails
+que o GoTrue manda. Sem ele, o alinhamento de SPF/DMARC do remetente
+`noreply@mirsui.com` fica sem apoio, e o que quebra é o cadastro e a
+recuperação de senha: exatamente os quatro caminhos que a fase 3 passou uma
+sessão inteira testando.
+
+**Por que sumiu:** a Cloudflare não faz transferência de zona. Ela adivinha
+nomes comuns e importa o que acerta. `www`, `api`, `db`, MX, SPF, DKIM e DMARC
+vieram todos. `send` não é um nome comum, e não veio. **Esta é a falha padrão
+de toda migração de DNS**, e o motivo de a lista de conferência existir — só
+que a conferência tem que ser feita contra a zona velha, não contra a memória.
+
+MX, SPF, DKIM e DMARC vieram inteiros e foram conferidos um a um.
+
+#### Dois nomes que vieram, e vieram errados
+
+`autoconfig.mirsui.com` e `autodiscover.mirsui.com` foram importados **com a
+nuvem laranja**. São os endereços que Thunderbird e Outlook consultam para
+configurar a conta de e-mail sozinhos, e apontam para a Hostinger. Proxiar isso
+manda o cliente de e-mail para a Cloudflare, que tenta servir um host que não é
+dela — com `Full (strict)` isso falha no certificado. Têm que ficar cinzas.
+
+#### O que veio certo
+
+| | |
+|---|---|
+| `SSL/TLS` **não** está em Flexible | testado pelo comportamento: `http://` termina em 200 com **um** salto. Flexible daria loop infinito contra o 301 do nginx. |
+| `real_ip` acordou sozinho | o `access_log` passou a mostrar `103.196.9.75` e `2a03:cfc0:…` — visitantes de verdade, não IPs da Cloudflare. O script de faixas feito de manhã funcionou sem precisar de ajuste. |
+| `/_next/static/` já cacheia | `MISS` na primeira, `HIT` na segunda, **sem regra nenhuma configurada** — a Cloudflare cacheia `.js` por extensão no padrão dela. A regra explícita continua valendo a pena, mas para fixar o comportamento, não para criá-lo. |
+
+#### A renovação atrás da nuvem laranja — o item em aberto do §5, resolvido
+
+O §5 avisava que a renovação podia falhar em silêncio com a Cloudflare na
+frente. Em vez de adivinhar, o teste, que usa o servidor de staging e não gasta
+cota:
+
+```
+$ sudo certbot renew --dry-run --no-random-sleep-on-renew
+Congratulations, all simulated renewals succeeded:
+  api.mirsui.com · db.mirsui.com · www.mirsui.com (+ apex)
+  gerar-adunit.duckdns.org · prospector-pads.duckdns.org
+```
+
+**Os cinco passam, e três deles já estão atrás da nuvem laranja.** O HTTP-01
+atravessa. Não é preciso DNS-01, nem plugin, nem token de API — o que também
+significa que nenhum segredo novo precisou circular.
+
+> **A ressalva, e ela importa:** este teste passou com o **Bot Fight Mode ainda
+> desligado** — provado no mesmo momento, porque `curl`, `python-requests` e um
+> `User-Agent: Scrapy/2.11` recebem 200. É justamente o Bot Fight que o §5
+> aponta como o risco para o `/.well-known/acme-challenge`. **Refazer este
+> `--dry-run` depois de ligá-lo.** Há 90 dias de margem.
+
+#### O `robots.txt`, que a Cloudflare passou a reescrever
+
+O toggle "Block training in robots.txt" está ligado, e ela **acrescenta** o
+bloco dela **antes** do que o app gera. A boa notícia primeiro: as regras do
+`app/robots.ts` sobreviveram inteiras — `/api/`, `/auth/`, `/ingest`,
+`/stakes`, `/admin` continuam lá. O conserto de agosto não foi perdido.
+
+A má notícia é o formato. O arquivo servido tem **dois grupos
+`User-agent: *`**, e o primeiro é o da Cloudflare:
+
+```
+User-agent: *                    ← o da Cloudflare, PRIMEIRO
+Content-Signal: search=yes,ai-train=no,use=reference
+Allow: /
+…
+User-Agent: *                    ← o do app, DEPOIS
+Allow: /
+Disallow: /api/
+Disallow: /ingest
+…
+```
+
+O Google funde grupos com o mesmo token e obedeceria aos dois. **Nem todo
+crawler funde** — a leitura clássica é que vale o primeiro grupo que casa, e
+nesse caso o que vale é um `Allow: /` sem nenhum `Disallow`. O que estaria
+liberado por acidente inclui o `/ingest`, que é literalmente o caminho que
+estourou as quatro cotas em agosto.
+
+E a troca não compra quase nada, porque o `robots.ts` já é mais rigoroso:
+
+| | Cloudflare | `app/robots.ts` |
+|---|---|---|
+| scrapers de IA bloqueados | 9 | **23** |
+| ferramentas de SEO bloqueadas | 0 | **7** |
+| o que ela tem e o app não | `CloudflareBrowserRenderingCrawler` e as linhas `Content-Signal` | — |
+
+**Recomendação: desligar o toggle.** O app já bloqueia Amazonbot, Bytespider,
+Meta-ExternalAgent e todo o resto da lista dela, num arquivo versionado, com o
+raciocínio documentado regra por regra. Ter duas fontes para o mesmo arquivo é
+o problema; a segunda fonte é a que não acrescenta nada.
+
+#### `ads.txt`
+
+404 pelos dois caminhos, e é o certo: o Mirsui não tem anúncio. Nada a fazer —
+e é a mesma razão pela qual a política `Training: "Block on pages with ads"` da
+tela de configuração não bloqueia nada aqui.
 
 ---
 

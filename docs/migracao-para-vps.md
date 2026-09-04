@@ -9,9 +9,10 @@ que era o item que o §5 deixava em aberto, agora resolvido por medição e não
 palpite. A fase 6 aconteceu dentro da fase 5, porque a Vercel já respondia 402 e
 não havia produção para proteger; a hora de acompanhamento foi feita e está no
 §13. **A migração está feita. O que falta é o que a torna segura, e virou o
-§14** — as fases 7 a 12, com ordem entre elas. **Comece pela fase 8, o backup**,
-que segue em zero e é o maior risco do documento. A fase 9 é a única visível de
-fora: as imagens do site estão quebradas hoje, porque os 12 arquivos do Storage
+§14** — as fases 7 a 12, com ordem entre elas. **A fase 8, o backup, está
+feita**: cron às 03:30, dois arquivos por dia no `gdrive:mirsui-backup` e um
+restore testado de propósito, que foi quem descobriu que o dump precisa sair como
+`supabase_admin`. A próxima é a **fase 9**, e é a única visível de fora: as imagens do site estão quebradas hoje, porque os 12 arquivos do Storage
 nunca vieram (HTTP 402 na origem, e o que está no disco da VPS são 12 cópias do
 corpo do erro) e as 17 URLs ainda apontam para o host morto. O §13 é o registro
 do que foi feito — inclusive o trigger de `auth.users` que o dump não levou e que
@@ -708,12 +709,12 @@ Fase 5  [x] sites-enabled mirsui-db (db→54321) — adiantado na fase 3, que
         [x] cache rule de /_next/static/ — HIT, e todo o HTML segue
             DYNAMIC, que é o lado perigoso e foi o que se conferiu
 
-BACKUP  [ ] cron noturno de pg_dump rodando
-        [ ] destino FORA da máquina
-        [ ] um restore testado de verdade
-        >>> segue sendo o item de maior risco em aberto: o site está no ar
-            servindo de um banco que não tem backup nenhum. Virou a
-            **fase 8** do §14, com o caminho já escolhido (rclone + gdrive:)
+BACKUP  [x] cron noturno de pg_dump rodando — 03:30, banco e papéis
+        [x] destino FORA da máquina — gdrive:mirsui-backup, por rclone COPY
+        [x] um restore testado de verdade — e foi ele que descobriu que o
+            dump tem de sair como supabase_admin, não como postgres
+        >>> fechado em 4/09 às 19h17. Deixou UM item de decisão: o
+            /opt/mirsui-db/.env, com o JWT_SECRET, não está no backup
 
 Fase 6  [x] DNS virado — em 4/09, sem esperar, porque não havia o que
             proteger: a Vercel já respondia 402 nos dois nomes
@@ -2110,11 +2111,125 @@ teoria — ver a fase 11.
 
 ---
 
+### 4 de setembro, 19h17 — **fase 8 concluída**: o backup existe, e foi restaurado de propósito
+
+O item que o §8 chamava de "o único deste plano que pode matar o projeto" saiu de
+zero. São três peças, e a terceira é a que faz das outras duas um backup.
+
+#### O que roda
+
+`/usr/local/bin/mirsui-backup.sh`, no cron do `ubuntu`, **03:30 todo dia** — fora
+do 00:00 do logrotate e longe do job das 07:00 que já existia. Leva 9 segundos.
+O crontab foi de 5 para 6 linhas, com cópia do anterior em
+`~/.crontab-antes-do-backup-2026-09-04`.
+
+Dois arquivos, porque um só não restaura:
+
+| arquivo | o que é | tamanho |
+|---|---|---|
+| `mirsui-<data>.sql.gz` | o banco inteiro — `public`, `auth`, `storage`, `realtime`, `vault` | 2,4 MB |
+| `mirsui-globals-<data>.sql.gz` | os papéis do cluster — `anon`, `authenticated`, `service_role`, `supabase_admin` | 1,5 KB |
+
+Os papéis moram **fora** do banco. Sem eles os `GRANT` do dump apontam para
+papéis que não existem — que é exatamente o buraco da fase 2, quando o dump da
+nuvem chegou sem os grants do schema `public`.
+
+#### O que o script se recusa a chamar de backup
+
+Um arquivo só recebe o nome definitivo depois de passar por quatro provas:
+
+```
+sai como .parcial          um pg_dump que morre no meio não pode deixar um
+                           .sql.gz truncado com nome de backup bom
+gzip -t                    o arquivo abre
+zgrep "dump complete"      o pg_dump chegou até a última linha
+tamanho > 500 KB           não é um dump vazio com cara de dump
+```
+
+E depois do upload, o tamanho no Drive tem que bater com o do disco — "enviei"
+não é o mesmo que "está lá". Qualquer uma dessas falhando, o script apaga o
+parcial e sai com falha, sem sobrescrever o backup bom do dia anterior.
+
+#### O destino, e a armadilha do `rclone`
+
+`gdrive:mirsui-backup`, com **`rclone copy`**. Nunca `sync`: o script vizinho da
+máquina (`sync-gdrive.sh`) usa `sync`, e `sync` espelha remoções — a limpeza
+local dos 14 dias apagaria a cópia de fora junto, e "fora da máquina" viraria
+decoração. Retenção: **14 dias na máquina, 90 no Drive** (~220 MB, contra 283 GB
+livres na conta). O `rclone delete` é escopado por `--include "mirsui-*.sql.gz"`,
+para nunca ser problema de outra coisa que apareça naquela pasta.
+
+O log fica em `/var/log/mirsui-backup.log`, com `logrotate` mensal já
+configurado, e cada sucesso carimba `/var/backups/mirsui/ULTIMO_SUCESSO` — um
+arquivo que a fase 10 vai conseguir monitorar sem precisar entender nada disto.
+
+> **O script mora só na máquina**, como o `deploy.sh` da fase 4 — mesma escolha,
+> mesma consequência: se a VPS morrer, ele morre junto e o backup do banco não o
+> traz de volta. São 80 linhas sem segredo nenhum dentro; versioná-lo no repo é
+> uma linha de decisão que continua em aberto.
+
+#### O restore, que é o item que ninguém faz — e foi ele que achou o erro
+
+Feito de propósito, num banco descartável do próprio container, sem encostar no
+banco de produção. E pagou por si na primeira tentativa:
+
+| dump e restore feitos como | linhas de erro |
+|---|---|
+| `postgres` | **295** |
+| `supabase_admin` | **4** |
+
+No Supabase self-hosted o **`postgres` não é superusuário**. Quem é, e quem é
+dono dos schemas `auth`, `storage` e `realtime`, é o `supabase_admin`. Restaurando
+como `postgres`, as 295 linhas são `must be member of role`: **os dados chegam e
+os donos não** — e um GoTrue apontado para aquele banco não sobe. É a pior
+espécie de backup ruim, porque a contagem de linhas bate e parece que funcionou.
+
+Com o papel certo sobram 4 linhas, todas
+`function graphql_public.graphql(…) does not exist`: um `GRANT` no wrapper do
+endpoint GraphQL, que o Mirsui não usa — o `supabase-js` daqui fala com o
+PostgREST.
+
+A prova, no banco restaurado contra o de produção:
+
+```
+auth.users        15  =  15
+public.profiles   15  =  15
+public.playlists   4  =   4
+policies public   36  =  36
+tabelas public    17  =  17
+triggers em auth   1  ← o on_auth_user_created, o mesmo que o dump da migração
+                        tinha perdido e que só apareceu testando um cadastro
+```
+
+O banco de teste foi apagado no fim: o cluster voltou aos mesmos quatro
+(`postgres`, `_supabase`, `template0`, `template1`).
+
+#### O que ainda NÃO está no backup, e é uma decisão sua
+
+`/opt/mirsui-db/.env`. É ele que carrega o `JWT_SECRET`, e sem esse segredo um
+banco restaurado não valida token nenhum — nem os que o navegador já tem, porque
+a `anon key` do `.env.production` foi assinada com ele. Ficou de fora **por
+decisão, não por esquecimento**: subir esse arquivo para o Drive é pôr a chave de
+assinatura numa conta do Google, e essa escolha não é técnica.
+
+Três saídas, nenhuma urgente hoje:
+
+```
+[ ] subir cifrado — gpg -c antes do rclone, com a senha guardada fora da máquina
+[ ] guardar fora do Drive — um gerenciador de senhas resolve, são poucos bytes
+[ ] aceitar: no dia do restore, reemitir JWT_SECRET, anon key e service role,
+    e refazer o build do front. Funciona, custa uma tarde e derruba as sessões
+```
+
+---
+
 ### Retomada — a próxima sessão começa aqui
 
 **O site está no ar na VPS, e a migração está feita.** O que falta deixou de ser
 uma lista solta e virou o **§14**: seis fases numeradas, com ordem entre elas e
-critério de pronto em cada uma. Comece pela **fase 8**, o backup.
+critério de pronto em cada uma. **A fase 8, o backup, está feita** — o registro
+está logo acima. A próxima é a **fase 9**, as imagens, que é a única que se vê
+de fora.
 
 Duas decisões da fase 5 fecharam aqui e não voltam à mesa:
 
@@ -2153,32 +2268,28 @@ conferência somou um motivo que a data não cobre:
 [ ] e não apagar antes de a fase 9 ter resgatado os 12 arquivos
 ```
 
-### Fase 8 — o backup, que ainda é zero  ·  FAÇA ESTA PRIMEIRO
-
-Conferido hoje: o `crontab` do `ubuntu` tem 5 jobs, nenhum de `pg_dump`; o do
-root está vazio; `/var/backups` só tem coisa do apt. O único dump é
-`/home/ubuntu/mirsui-dump/` de 03/09 — tirado uma vez, da origem que já não
-existe, e no mesmo disco do banco. Hoje o Mirsui inteiro mora num container sem
-cópia.
-
-**A máquina já tem com o que fazer isso.** O `rclone` está instalado, com um
-remote `gdrive:` configurado e em uso por um cron de 5 em 5 minutos. Não há
-ferramenta nova para escolher.
-
-> **A armadilha do `rclone`.** O script que já existe na máquina usa
-> `rclone sync`. Para backup use **`rclone copy`**. O `sync` espelha remoções:
-> quando o `find -mtime +14` apagar o dump velho aqui, o `sync` apaga a cópia de
-> lá também — e "fora da máquina" vira decoração.
+### Fase 8 — o backup  ·  **FEITA em 4/09 às 19h17**
 
 ```
-[ ] cron noturno de pg_dump (o script do §8)
-[ ] rclone copy para o gdrive: — copy, NÃO sync
-[ ] um restore testado de propósito, num banco descartável do próprio container
-    (createdb → psql < dump → conferir as contagens → dropdb), sem tocar no
-    banco de produção
-[ ] a prova: as contagens do restore batendo com 15 usuários / 15 profiles /
-    4 playlists
+[x] cron noturno de pg_dump — 03:30 todo dia, banco + papéis do cluster
+[x] rclone copy para gdrive:mirsui-backup — copy, NÃO sync
+[x] um restore testado de propósito, num banco descartável do container
+[x] a prova: 15 usuários / 15 profiles / 4 playlists / 36 policies / 17 tabelas,
+    e o trigger on_auth_user_created junto
+[ ] decidir o /opt/mirsui-db/.env: o JWT_SECRET NÃO está no backup, e isso é
+    escolha, não esquecimento — as três saídas estão no §13
 ```
+
+O registro completo está no §13 (`fase 8 concluída`), e vale ler por dois
+motivos que não cabem numa caixa marcada:
+
+- **O dump tem que sair como `supabase_admin`, não como `postgres`.** No Supabase
+  self-hosted o `postgres` não é superusuário. Com o papel errado o restore
+  entrega os dados e não os donos — 295 linhas de `must be member of role` — e o
+  GoTrue não sobe em cima daquele banco. Foi o teste de restore que achou isso, e
+  é a razão de ele existir.
+- **`rclone copy`, nunca `sync`.** O `sync-gdrive.sh` vizinho usa `sync`, e `sync`
+  espelha remoções: a limpeza local dos 14 dias apagaria a cópia de fora junto.
 
 ### Fase 9 — as imagens, que estão quebradas em produção
 

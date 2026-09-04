@@ -5,8 +5,9 @@ e a **fase 3 configurada** em 4 de setembro — o Supabase self-hosted está de 
 na VPS com o banco restaurado, mandando e-mail e aceitando login com Google, e
 **nada em produção foi tocado.** Dois itens estão bloqueados por coisas fora da
 máquina: os 12 arquivos do Storage (HTTP 402 na origem) e os testes da fase 3,
-que esperam dois registros de DNS na Hostinger. O §13 é o registro do que foi
-feito e o ponto exato de retomada.
+que esperam **um** registro A na Hostinger. O §13 é o registro do que foi feito
+e o ponto exato de retomada — inclusive o trigger de `auth.users` que o dump não
+levou e que só apareceu porque a fase 3 testou um cadastro de verdade.
 **Escopo:** frontend Next.js, backend Fastify e banco Supabase, os três na
 mesma VPS Oracle Ampere A1 (4 vCPU / 24 GB / Ubuntu).
 **Verificado na máquina em 3 de setembro de 2026.** A primeira versão deste
@@ -623,13 +624,15 @@ Fase 3  [x] SMTP configurado (Resend, smtp.resend.com:465) e envio provado —
             (/auth/v1/settings responde "google":true)
         [x] phone signup+autoconfirm desligados (vinham true no .env.example)
         [x] vhost mirsui-db no nginx, respondendo por Host header
+        [x] mirsui.com verificado no Resend, remetente = noreply@mirsui.com
+        [x] trigger on_auth_user_created recriado — o dump não levou (§13)
+        [x] policy de select de storage.objects recriada, mesmo motivo
         [!] db.mirsui.com — BLOQUEADO: falta o registro A na Hostinger (§13)
-        [!] mirsui.com no Resend — BLOQUEADO: domínio não verificado, o
-            remetente de sandbox só entrega para o dono da conta (§13)
         [ ] certbot --nginx -d db.mirsui.com (depois do registro A)
-        [ ] SMTP_ADMIN_EMAIL=noreply@mirsui.com (depois da verificação)
-        [ ] os 4 caminhos de auth testados
+        [x] cadastro por e-mail: 200, e-mail enviado, profile criado (16=16)
+        [ ] os outros 3 caminhos (dependem do registro A)
         [ ] decidir os templates de e-mail: padrão em inglês ou reescrever
+        [ ] apagar o usuário de teste teste_fase3_tmp
 
 Fase 4  [ ] Next buildado e servindo na 3002
         [ ] mirsui-web.service criado e habilitado
@@ -1001,56 +1004,106 @@ envio), o que limita o estrago, mas não zera.
 
 ---
 
+### 4 de setembro, mais tarde — o Resend liberou, e apareceu o buraco do dump
+
+`mirsui.com` foi verificado no Resend. Confirmado do jeito que importa: um envio
+de `noreply@mirsui.com` para um endereço que **não** é o dono da conta passou —
+era exatamente essa a regra que derrubava o cadastro. `SMTP_ADMIN_EMAIL` trocado
+de `onboarding@resend.dev` para `noreply@mirsui.com`.
+
+O cadastro que respondia 500 passou a responder 200, com
+`confirmation_sent_at` gravado. E foi aí que a conta não fechou.
+
+#### `auth.users` = 16, `profiles` = 15
+
+O trigger `on_auth_user_created` **não existia no banco migrado.**
+
+**Um trigger pertence ao schema da tabela, não ao da função.** O dump da fase 2
+saiu com `--schema=public` mais os dados de `auth.users`, então
+`public.handle_new_user` veio inteira — e o gatilho que a chama, que morava em
+`auth`, não. A função ficou órfã, e órfã não dispara.
+
+A varredura fechou o escopo em vez de deixar dúvida: das seis funções de trigger
+em `public`, `handle_new_user` era a única com zero gatilhos ligados. As outras
+cinco (`update_updated_at_column`, `calculate_user_rating`,
+`log_track_popularity`, `profile_comments_set_updated_at`,
+`update_track_comment_updated_at`) estavam todas conectadas.
+
+**O que custaria se passasse:** toda conta criada depois da virada de DNS
+nasceria sem linha em `profiles`, e sem erro visível em lugar nenhum — o
+`signUp` responde 201, o e-mail de confirmação chega, o usuário confirma, e cai
+num site que não acha o perfil dele. O `019_painel_do_dono.sql` já tinha
+enxergado essa possibilidade de longe ("uma conta sem linha em profiles é...");
+aqui ela deixaria de ser hipótese.
+
+#### O mesmo buraco, no Storage
+
+Pela mesma razão, `storage.objects` estava com **RLS ligado e zero policies** —
+a policy de select do `016_storage_fechado.sql` mora no schema `storage` e não
+veio no dump. Isso falha *fechado*, não aberto: ninguém vaza nada. Mas é o outro
+lado do 016, e precisa existir para o dia em que um bucket privado for criado.
+
+Os buckets em si estavam certos (públicos, 5 MB, mesmos MIME) — a fase 2 os
+recriou por `INSERT`, e é por isso que só as policies faltavam.
+
+#### A causa raiz das duas é a mesma
+
+**Nem o trigger nem as policies do Storage estavam em migration.** As duas foram
+criadas pelo painel do Supabase, e painel não vai para o git. O conserto virou
+`032_o_que_o_dump_nao_levou.sql` no repo do backend, aplicado na VPS e conferido:
+novo cadastro fecha **16 = 16**, com `username`, `display_name` e `avatar_url`
+todos preenchidos pelo trigger.
+
+As três policies de escrita do `playlist-thumbnails` que o 016 preservou **não
+voltaram, de propósito.** O gerenciador de playlists saiu do frontend na limpeza
+do legado e hoje não existe uma única chamada de `.upload()` ou `storage.from()`
+no cliente — o avatar sobe por `POST /profiles/:id/avatar`, com service role,
+que ignora RLS. Recriar policy de escrita para um caminho que ninguém usa só
+aumenta a superfície.
+
+> **Fica um usuário de teste no banco:** `danielkondlatsch.p+fase3@gmail.com`,
+> não confirmado, `username = teste_fase3_tmp`. Ele foi deixado de propósito —
+> o e-mail de confirmação dele já está na caixa de entrada e serve para testar o
+> link assim que `db.mirsui.com` resolver. **Apagar depois:**
+> `delete from auth.users where email like '%+fase3%'` (o cascade leva o
+> profile junto).
+
+---
+
 ### Retomada — a próxima sessão começa aqui
 
-**A fase 3 está bloqueada em dois registros de DNS na Hostinger.** Vale dizer
-que o §4 deste documento desenha Cloudflare na frente de tudo e **isso ainda não
-é verdade**: os nameservers de `mirsui.com` são `ns1/ns2.dns-parking.com`, ou
-seja, a zona é da Hostinger. A Cloudflare é fase 5, e nada aqui depende dela.
+**Falta um registro de DNS, um só.** O Resend saiu do caminho.
 
-**1. `db.mirsui.com` precisa existir.** Sem ele o callback do Google não tem
-para onde voltar e os links dos e-mails apontam para o nada:
+**`db.mirsui.com` precisa existir.** Na Hostinger, na zona de `mirsui.com`:
 
 ```
-tipo A · nome: db · valor: 146.235.44.203 · TTL padrão · sem proxy
+tipo: A   ·   nome: db   ·   valor: 146.235.44.203   ·   TTL: padrão
 ```
 
-Não encosta em `www` nem no apex — os dois continuam na Vercel. Assim que
-resolver, o certificado é um comando:
+É **A**, não CNAME nem TXT: CNAME aponta nome para nome, e o destino aqui é um
+IP. O campo "nome" leva só `db` — a Hostinger completa o domínio sozinha; digitar
+`db.mirsui.com` cria `db.mirsui.com.mirsui.com`. Não encosta em `www` nem no
+apex, que seguem na Vercel.
+
+Depois que resolver (`dig +short db.mirsui.com` tem que devolver o IP):
 
 ```bash
 sudo certbot --nginx -d db.mirsui.com
 ```
 
-**2. `mirsui.com` precisa estar verificado no Resend.** Adicionar o domínio em
-`resend.com/domains` e copiar para a Hostinger os registros que ele mostrar
-(DKIM, SPF e o MX de retorno). Depois disso, trocar o remetente provisório:
+E então os quatro caminhos:
 
 ```
-SMTP_ADMIN_EMAIL=noreply@mirsui.com     # hoje: onboarding@resend.dev
+[x] cadastro por e-mail   — 200, e-mail enviado, profile criado (16=16)
+[ ] confirmação pelo link — o e-mail já está na caixa; falta o link resolver
+[ ] login com Google      — 302 correto; falta o callback resolver
+[ ] troca de senha        — envio já provado; falta o link resolver
 ```
-
-Com os dois no lugar, os quatro caminhos podem ser testados de verdade:
-
-```
-[ ] cadastro por e-mail  (hoje 500 — é o item 2 que destrava)
-[ ] confirmação pelo link do e-mail
-[ ] login com Google     (hoje 302 correto; falta o callback resolver)
-[ ] troca de senha       (SMTP já provado; falta o link resolver)
-```
-
-#### Uma decisão que ninguém tomou ainda
-
-Os **templates de e-mail** do GoTrue estão nos padrões em inglês
-("Confirm your signup", "Reset your password"). Os do projeto na nuvem eram
-configurados pelo painel e **não vêm no `pg_dump`** — se havia versão em
-português, ela se perdeu junto com o acesso ao painel. Não foram reescritos aqui
-porque ninguém sabe o que os originais diziam. Fica a decisão: aceitar o padrão
-em inglês ou escrever os quatro (`MAILER_TEMPLATES_*`) antes de virar o DNS.
 
 Fora do caminho crítico, mas pronto para quando der:
 
 ```
 [ ] Storage: rodar /tmp/migra-storage.sh quando a cota virar
 [ ] URLs: os dois UPDATE acima + o next.config.mjs
+[ ] apagar o usuário de teste teste_fase3_tmp
 ```

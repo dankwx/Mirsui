@@ -1,12 +1,12 @@
 # Migração para a VPS — Vercel e Supabase saem, a Oracle assume tudo
 
-**Status:** em execução. **Fases 0, 1 e 2 concluídas** em 3 de setembro de 2026
-e a **fase 3 configurada** em 4 de setembro — o Supabase self-hosted está de pé
-na VPS com o banco restaurado, mandando e-mail e aceitando login com Google, e
-**nada em produção foi tocado.** Dois itens estão bloqueados por coisas fora da
-máquina: os 12 arquivos do Storage (HTTP 402 na origem) e os testes da fase 3,
-que esperam **um** registro A na Hostinger. O §13 é o registro do que foi feito
-e o ponto exato de retomada — inclusive o trigger de `auth.users` que o dump não
+**Status:** em execução. **Fases 0 a 3 concluídas** — o Supabase self-hosted está
+de pé na VPS em `https://db.mirsui.com`, com o banco restaurado, mandando e-mail
+em português e com os quatro caminhos de auth testados. **Nada em produção foi
+tocado:** o site segue na Vercel apontando para a nuvem. **A próxima é a fase
+4** (o Next na máquina), que não depende de mais ninguém. Um item continua
+bloqueado por fora: os 12 arquivos do Storage, por HTTP 402 na origem. O §13 é o
+registro do que foi feito — inclusive o trigger de `auth.users` que o dump não
 levou e que só apareceu porque a fase 3 testou um cadastro de verdade.
 **Escopo:** frontend Next.js, backend Fastify e banco Supabase, os três na
 mesma VPS Oracle Ampere A1 (4 vCPU / 24 GB / Ubuntu).
@@ -627,12 +627,15 @@ Fase 3  [x] SMTP configurado (Resend, smtp.resend.com:465) e envio provado —
         [x] mirsui.com verificado no Resend, remetente = noreply@mirsui.com
         [x] trigger on_auth_user_created recriado — o dump não levou (§13)
         [x] policy de select de storage.objects recriada, mesmo motivo
-        [!] db.mirsui.com — BLOQUEADO: falta o registro A na Hostinger (§13)
-        [ ] certbot --nginx -d db.mirsui.com (depois do registro A)
+        [x] registro A de db.mirsui.com na Hostinger
+        [x] certbot --nginx -d db.mirsui.com — vale até 03/12/2026
         [x] cadastro por e-mail: 200, e-mail enviado, profile criado (16=16)
-        [ ] os outros 3 caminhos (dependem do registro A)
-        [ ] decidir os templates de e-mail: padrão em inglês ou reescrever
-        [ ] apagar o usuário de teste teste_fase3_tmp
+        [x] confirmação: link seguido, confirmed_at gravado, sessão emitida
+        [x] troca de senha: link seguido, sessão com type=recovery
+        [x] login Google: chega na tela real, sem redirect_uri_mismatch
+        [x] login por senha: token emitido (exercita os hashes migrados)
+        [x] templates em português, servidos pelo nginx
+        [x] usuário de teste apagado — de volta a 15/15/15
 
 Fase 4  [ ] Next buildado e servindo na 3002
         [ ] mirsui-web.service criado e habilitado
@@ -644,8 +647,11 @@ Fase 5  [x] sites-enabled mirsui-db (db→54321) — adiantado na fase 3, que
             não tinha como testar OAuth sem ele
         [ ] sites-enabled mirsui-web (www→3002)
         [x] nginx -t ANTES do reload — há 6 sites na máquina (agora 7)
-        [ ] certbot para www e db
-        [ ] decidido como o Certbot renova com a Cloudflare na frente
+        [x] certbot para db (o de www fica para quando o Next subir)
+        [ ] certbot para www
+        [ ] decidido como o Certbot renova com a Cloudflare na frente —
+            o de db já está emitido e renova sozinho ENQUANTO o DNS for
+            direto; pôr a Cloudflare na frente mexe nisso
         [ ] Cloudflare proxy + Bot Fight + rate limit
         [ ] canonical do §5.3 decidido
 
@@ -1070,40 +1076,113 @@ aumenta a superfície.
 
 ---
 
-### Retomada — a próxima sessão começa aqui
+### 4 de setembro, fim do dia — **fase 3 concluída**
 
-**Falta um registro de DNS, um só.** O Resend saiu do caminho.
+O registro A entrou na Hostinger e `db.mirsui.com` passou a resolver. O resto
+saiu em sequência.
 
-**`db.mirsui.com` precisa existir.** Na Hostinger, na zona de `mirsui.com`:
-
-```
-tipo: A   ·   nome: db   ·   valor: 146.235.44.203   ·   TTL: padrão
-```
-
-É **A**, não CNAME nem TXT: CNAME aponta nome para nome, e o destino aqui é um
-IP. O campo "nome" leva só `db` — a Hostinger completa o domínio sozinha; digitar
-`db.mirsui.com` cria `db.mirsui.com.mirsui.com`. Não encosta em `www` nem no
-apex, que seguem na Vercel.
-
-Depois que resolver (`dig +short db.mirsui.com` tem que devolver o IP):
+#### TLS
 
 ```bash
-sudo certbot --nginx -d db.mirsui.com
+sudo certbot --nginx -d db.mirsui.com --non-interactive --redirect --agree-tos
 ```
 
-E então os quatro caminhos:
+Certificado emitido, válido até 3 de dezembro de 2026, renovação automática já
+agendada pelo próprio Certbot. O `--redirect` pôs o 301 de HTTP para HTTPS.
+`nginx -t` limpo e `api.mirsui.com` conferido em 200 depois do reload — os
+outros seis sites da máquina não sentiram nada.
+
+#### Os quatro caminhos
+
+| caminho | como foi testado | resultado |
+|---|---|---|
+| cadastro por e-mail | `POST /signup` | 200, e-mail enviado, profile criado (16 = 16) |
+| confirmação | `admin/generate_link` type=signup, link seguido | 303, `confirmed_at` preenchido, sessão emitida |
+| troca de senha | `admin/generate_link` type=recovery, link seguido | 303 com `type=recovery`, sessão emitida |
+| login com Google | `authorize` seguido até o fim | chega na tela real de login do Google |
+
+O `generate_link` foi usado de propósito no lugar de abrir a caixa de entrada:
+ele devolve **o mesmo link que vai no e-mail**, então dá para segui-lo com
+`curl` e ver o 303 e a sessão saindo. Testa o servidor, não o cliente de e-mail.
+
+Duas conferências que valem mais que o 200:
+
+- O `redirect_to=https://www.mirsui.com/auth/confirm` — o que o `ModalLogin`
+  manda de verdade — **passa** na allowlist `ADDITIONAL_REDIRECT_URLS`. Se não
+  passasse, o GoTrue devolveria o usuário para a raiz e a página de trocar senha
+  nunca abriria.
+- No Google, a URL final traz `app_domain=https://db.mirsui.com` e **nenhum
+  `redirect_uri_mismatch`**. O único passo que sobra é alguém digitar a senha,
+  que é a parte que nenhum `curl` faz.
+
+Também foi testado o **login por senha** (`grant_type=password`): token emitido.
+Isso exercita o mesmo código que valida os hashes bcrypt dos 14 usuários
+migrados. E `auth.identities` segue com as 15 linhas, a do `google` inclusive,
+com `provider_id` preenchido — é por ele que o GoTrue reconhece quem volta.
+
+#### Os e-mails voltaram a falar português
+
+O GoTrue sai com os templates padrão em inglês, e os do painel da nuvem se
+perderam com o acesso. Foram escritos quatro novos —
+`docs/email-templates/` no repo do frontend.
+
+O detalhe que decide o desenho: **`MAILER_TEMPLATES_*` recebe URL, não HTML.**
+O nginx serve a pasta em `https://db.mirsui.com/email-templates/`, então
+**editar um arquivo troca o e-mail sem reiniciar container** — só o `rsync`.
+Não há segredo nos arquivos, é HTML com placeholder.
+
+Os assuntos são texto puro e ficam no `.env`. O compose oficial não expõe nem os
+assuntos nem os templates, então as oito variáveis vieram pelo
+`docker-compose.mirsui.yml`, junto com as do Google.
+
+> **A cópia é nova, não é restauração.** Ninguém sabe o que os originais diziam.
+> Está curta de propósito — um parágrafo, um botão, o link em texto embaixo — e
+> é para ser editada quando você tiver opinião.
+
+Um `POST /recover` real depois disso: 200, `template cache worker started` no
+log, zero erro, `recovery_sent_at` gravado.
+
+#### Estado ao fechar a fase
 
 ```
-[x] cadastro por e-mail   — 200, e-mail enviado, profile criado (16=16)
-[ ] confirmação pelo link — o e-mail já está na caixa; falta o link resolver
-[ ] login com Google      — 302 correto; falta o callback resolver
-[ ] troca de senha        — envio já provado; falta o link resolver
+11 containers          healthy
+nginx                  7 sites, config ok, api.mirsui.com 200
+db.mirsui.com          auth 200 · rest 200 · templates 200 · http→https 301
+studio                 sem resposta de fora (só 127.0.0.1:54323)
+dados                  15 usuários · 15 profiles · 15 identidades
+policies               36 em public · 1 em storage
+triggers em auth.users 1
 ```
 
-Fora do caminho crítico, mas pronto para quando der:
+O usuário de teste foi apagado. **Produção continua na Vercel apontando para a
+nuvem** — nada aqui virou DNS de site.
+
+---
+
+### Retomada — a próxima sessão começa aqui
+
+**A fase 3 acabou. O próximo passo é a fase 4**, e ela não depende de mais
+ninguém:
 
 ```
-[ ] Storage: rodar /tmp/migra-storage.sh quando a cota virar
-[ ] URLs: os dois UPDATE acima + o next.config.mjs
-[ ] apagar o usuário de teste teste_fase3_tmp
+[ ] clonar o frontend na VPS, npm ci, output:'standalone', build
+[ ] pm2 start npm --name mirsui-web -- start   (porta 3002)
+[ ] pm2 startup + pm2 save — o conserto do §4.1, que vale por si só:
+    hoje `systemctl is-enabled pm2-ubuntu` responde not-found, e um reboot
+    da Oracle derruba o backend sem avisar ninguém
+[ ] curl 127.0.0.1:3002 antes de tocar no nginx
 ```
+
+Antes de virar o DNS (fase 6), três coisas continuam pendentes e nenhuma delas
+é da fase 4:
+
+```
+[ ] Storage: rodar /tmp/migra-storage.sh quando a cota da nuvem virar
+[ ] URLs: os dois UPDATE do §13 + tirar tqprioqqitimssshcrcr do next.config.mjs
+[ ] BACKUP: o §8 inteiro. Hoje o banco novo não tem backup nenhum, e é o
+    item de maior risco do documento.
+```
+
+> **E o que já dava para fazer hoje:** rotacionar a senha do banco na nuvem, o
+> client secret do Google e a API key do Resend. Os três circularam em texto
+> claro durante o planejamento.

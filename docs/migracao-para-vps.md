@@ -382,14 +382,21 @@ pm2. O que falta é o front — e o gancho de boot do pm2 (§4.1).
    gerenciador de processos, e ter dois é como se perde o rastro de quem
    levanta o quê:
    ```bash
-   pm2 start npm --name mirsui-web -- start
+   PORT=3002 HOSTNAME=127.0.0.1 pm2 start .next/standalone/server.js --name mirsui-web
    ```
+   *(Este passo dizia `pm2 start npm -- start`, e contradizia o passo 2: o
+   próprio Next recusa `next start` com `output: 'standalone'`. O §13 tem o
+   aviso na íntegra, e as três cópias que o standalone não faz — sem elas o
+   site sobe sem CSS, sem JS e sem imagem.)*
 4. **Consertar o boot**, que é o achado do §4.1 e vale por si só:
    ```bash
    pm2 startup    # imprime um comando com sudo; rode o que ele mandar
    pm2 save       # congela mirsui-backend + mirsui-web no dump.pm2
    ```
-5. Testar por `curl` em `127.0.0.1:3002` antes de tocar no nginx.
+5. Testar por `curl` em `127.0.0.1:3002` antes de tocar no nginx. Não só a
+   `/`: uma página dinâmica, um `/_next/static/...`, um arquivo do `public/`
+   e um `/_next/image?url=...`. As três últimas são justamente o que quebra
+   quando falta uma das cópias do standalone.
 
 > **Confirme o passo 4 de verdade.** `systemctl is-enabled pm2-ubuntu` tem que
 > responder `enabled`. Enquanto responder `not-found`, um reboot da Oracle
@@ -637,11 +644,18 @@ Fase 3  [x] SMTP configurado (Resend, smtp.resend.com:465) e envio provado —
         [x] templates em português, servidos pelo nginx
         [x] usuário de teste apagado — de volta a 15/15/15
 
-Fase 4  [ ] Next buildado e servindo na 3002
-        [ ] mirsui-web.service criado e habilitado
-        [ ] mirsui-backend.service criado (hoje é processo solto — não
-            sobrevive a reboot) e o processo antigo morto ANTES
-        [ ] curl 127.0.0.1:3002 respondendo
+Fase 4  [x] frontend clonado em /home/ubuntu/mirsui-web · npm ci · build
+        [x] output:'standalone' ligado — 587 MB de node_modules viram 35 MB
+        [x] .env.production escrito, chmod 600, .env.production no .gitignore
+        [x] pm2 mirsui-web rodando .next/standalone/server.js, e NÃO
+            `npm start`: o Next recusa a combinação (§13)
+        [x] deploy.sh — as três cópias que o standalone não faz
+        [x] pm2 startup + pm2 save — `systemctl is-enabled pm2-ubuntu`
+            responde **enabled**. Era o buraco do §4.1.
+        [x] bind em 127.0.0.1:3002, não em 0.0.0.0
+        [x] curl 127.0.0.1:3002 respondendo — 5 rotas, static, public,
+            otimizador de imagem e uma página que lê o Supabase novo
+        [x] nginx NÃO tocado — continua com os mesmos 7 sites
 
 Fase 5  [x] sites-enabled mirsui-db (db→54321) — adiantado na fase 3, que
             não tinha como testar OAuth sem ele
@@ -1159,28 +1173,200 @@ nuvem** — nada aqui virou DNS de site.
 
 ---
 
+### 4 de setembro, noite — **fase 4 concluída**
+
+O front passou a rodar na máquina. Ele ainda não atende ninguém: escuta só em
+`127.0.0.1:3002`, o nginx não sabe que ele existe e o DNS não mudou. A produção
+continua na Vercel, apontando para a nuvem. O que mudou é que agora existe uma
+cópia funcionando do site inteiro em cima do Supabase novo — e dá para conferir
+cada página antes de virar qualquer coisa.
+
+#### Onde ficou
+
+```
+/home/ubuntu/mirsui-web                  clone de git@github.com:dankwx/Mirsui.git
+/home/ubuntu/mirsui-web/.env.production  13 variáveis, chmod 600
+/home/ubuntu/mirsui-web/deploy.sh        o que substitui o `git push`
+```
+
+O clone é por SSH e a chave da máquina já autentica como `dankwx` — não foi
+preciso configurar nada.
+
+#### A contradição entre os passos 2 e 3 desta fase
+
+O plano mandava ligar `output: 'standalone'` (passo 2) e subir com
+`pm2 start npm -- start` (passo 3). **Os dois não convivem**, e quem diz isso é
+o próprio Next, na primeira linha do log:
+
+```
+⚠ "next start" does not work with "output: standalone" configuration.
+  Use "node .next/standalone/server.js" instead.
+```
+
+Ele sobe assim mesmo hoje, mas contra um aviso explícito — e no Next 15 isso
+vira erro. Ficou o que o Next suporta: o pm2 roda o `server.js` do standalone.
+O ganho é o que o passo 2 prometia, e maior:
+
+| | |
+|---|---|
+| `node_modules` | 587 MB |
+| `.next` inteiro | 171 MB |
+| **`.next/standalone` — o que de fato roda** | **35 MB** |
+
+#### As três cópias que o standalone não faz, e por isso existe um script
+
+O build standalone **não** copia `public/`, **não** copia `.next/static` e
+**não** enxerga o `.env.production` da raiz — ele roda com `cwd` em
+`.next/standalone`, e é lá que o Next procura os arquivos de ambiente.
+
+Isso é a pior categoria de pegadinha: **o build passa limpo e o erro só aparece
+no navegador**, na forma de um site sem CSS, sem JS e sem imagem. Um deploy
+feito de comandos soltos esquece uma dessas três em algum momento, então o
+deploy virou `deploy.sh`:
+
+```bash
+git pull --rebase && npm ci && npm run build
+cp -r public/. .next/standalone/public/
+cp -r .next/static .next/standalone/.next/static
+cp .env.production .next/standalone/.env.production && chmod 600 ...
+pm2 restart mirsui-web --update-env && pm2 save --force
+```
+
+Ele foi rodado inteiro de ponta a ponta, não só escrito: 7m42s — dos quais
+4m35s são o `npm ci`, o build sozinho leva 57s — e o smoke test depois dele
+passou igual. O `--rebase` no `git pull` é de propósito; ver mais abaixo.
+
+O script mora dentro do clone mas fora do repo, listado em `.git/info/exclude`
+para não sujar o `git status`.
+
+#### Um buraco no `.gitignore` que já estava lá
+
+`.env*.local` e `.env` estavam ignorados; **`.env.production` não.** É o
+arquivo que carrega o client secret do Spotify e a chave do YouTube na VPS.
+Entrou no `.gitignore` no mesmo commit do `output: 'standalone'`.
+
+#### O conserto do boot — o achado do §4.1
+
+```bash
+sudo env PATH=$PATH:/usr/bin \
+  /usr/local/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
+pm2 save
+```
+
+```
+systemctl is-enabled pm2-ubuntu         →  enabled      (antes: not-found)
+/etc/systemd/system/pm2-ubuntu.service  →  ExecStart=... pm2 resurrect
+~/.pm2/dump.pm2                         →  mirsui-backend + mirsui-web
+```
+
+Três conferências que o `enabled` sozinho não dá:
+
+- o `dump.pm2` guardou os **args** de cada um — `mirsui-backend` com
+  `npm start` e o cwd certo, `mirsui-web` com `PORT=3002` no env. Um dump sem
+  args ressuscita um `npm` sem comando.
+- o `PATH` da unit resolve `node` e `npm` (os dois em `/usr/bin`). Se o Node
+  viesse de nvm, o boot falharia calado.
+- `is-active` responde `inactive`, e **isso é esperado**: o daemon do pm2 que
+  está no ar hoje foi levantado à mão, não pela unit. No boot é a unit que
+  levanta, e aí ela fica ativa.
+
+O único jeito de provar isso por inteiro é reiniciar a máquina — o que
+derrubaria o backend em produção por alguns segundos, e não foi feito sem
+combinar. Fica como a última conferência antes da fase 6.
+
+#### Uma porta que ficou mais fechada do que estava
+
+O primeiro teste, ainda com `next start`, abriu `*:3002` — todas as interfaces.
+O `server.js` do standalone respeita `HOSTNAME`, então ele subiu com
+`HOSTNAME=127.0.0.1` e agora escuta só no loopback, que é de onde o nginx vai
+falar com ele na fase 5. Mesmo assunto da porta aberta do §13 de ontem.
+
+#### O que respondeu
+
+Tudo por `curl` em `127.0.0.1:3002`, com o nginx ainda sem saber que a 3002
+existe:
+
+| | |
+|---|---|
+| `/` · `/feed` · `/pilha` · `/termos` · `/privacidade` | 200 |
+| `/reset-password` · `/robots.txt` · `/auth/check-email` | 200 |
+| `/user/coelho` — página dinâmica que lê o Supabase novo | 200, com o nome na página |
+| `/api/auth/me` | 200, JSON válido |
+| `/_next/static/chunks/webpack-*.js` | 200 — a cópia do `static` entrou |
+| `/assets/track-art2.webp` | 200 — a cópia do `public` entrou |
+| `/_next/image?url=https://i.scdn.co/...&w=640` | 200 `image/jpeg`, 68 KB |
+
+O otimizador de imagem era o risco real do standalone: ele traça o
+`node_modules` e podia deixar o `sharp` de fora. Não deixou.
+
+`db.mirsui.com` está embutido no bundle do cliente, a primeira resposta de `/`
+sai em ~280 ms e o processo fica em 139 MB — bem abaixo dos ~350 MB que o §4.2
+estimou.
+
+#### Uma confirmação que veio de graça
+
+`tqprioqqitimssshcrcr` ainda aparece no build, mas **só** em
+`.next/server/app/index.rsc` e `index.html`, que são a home pré-renderizada. Ou
+seja: não sobrou nenhuma referência em *código*; o que sobrou é **dado**,
+gravado nas linhas do banco. É exatamente o que os dois `UPDATE` pendentes do
+§13 fazem, e agora está provado que são eles e mais nada.
+
+#### O commit não foi para o origin, de propósito
+
+`output: 'standalone'` e o `.gitignore` viraram um commit local, replicado na
+VPS por `git format-patch | git am` — os dois lados têm o mesmo patch, byte a
+byte. Ele **não foi empurrado** porque hoje um push no `main` ainda dispara um
+deploy de produção na Vercel, e isso é fora do escopo da fase 4.
+
+Enquanto ele não sobe, o commit existe só nos dois clones, e é por isso que o
+`deploy.sh` usa `git pull --rebase`: o rebase replica o commit local por cima
+do que vier, e no dia em que o mesmo patch chegar pelo origin ele percebe que
+já está aplicado e o descarta sozinho. Com `--ff-only` o deploy travava.
+
+#### Estado ao fechar a fase
+
+```
+pm2          mirsui-backend (8d, cluster) · mirsui-web (fork, 3002)
+pm2-ubuntu   enabled no systemd
+3002         127.0.0.1 apenas
+nginx        7 sites, config ok, api.mirsui.com 200 — nada tocado
+disco        99 GB livres (o front custou ~800 MB)
+produção     ainda na Vercel, ainda na nuvem
+```
+
+---
+
 ### Retomada — a próxima sessão começa aqui
 
-**A fase 3 acabou. O próximo passo é a fase 4**, e ela não depende de mais
-ninguém:
+**A fase 4 acabou. O próximo passo é a fase 5**, que é a primeira a mexer em
+coisa que o mundo enxerga:
 
 ```
-[ ] clonar o frontend na VPS, npm ci, output:'standalone', build
-[ ] pm2 start npm --name mirsui-web -- start   (porta 3002)
-[ ] pm2 startup + pm2 save — o conserto do §4.1, que vale por si só:
-    hoje `systemctl is-enabled pm2-ubuntu` responde not-found, e um reboot
-    da Oracle derruba o backend sem avisar ninguém
-[ ] curl 127.0.0.1:3002 antes de tocar no nginx
+[ ] sites-enabled mirsui-web: www.mirsui.com → 127.0.0.1:3002, no mesmo
+    padrão do mirsui-api. nginx -t ANTES do reload — são 7 sites na máquina.
+[ ] registro A de www.mirsui.com apontando para a VPS
+[ ] certbot --nginx -d www.mirsui.com
+[ ] decidir o canônico do §5.3 (apex ou www) — o build atual já saiu com
+    NEXT_PUBLIC_SITE_URL=https://www.mirsui.com, que é a aposta do §7. Se a
+    decisão for o apex, é rebuildar, não só trocar o nginx.
+[ ] Cloudflare: proxy + Bot Fight + rate limit, e resolver como o Certbot
+    renova com a nuvem laranja na frente
 ```
 
-Antes de virar o DNS (fase 6), três coisas continuam pendentes e nenhuma delas
-é da fase 4:
+Antes de virar o DNS (fase 6), continua pendente, e nada disso é da fase 5:
 
 ```
+[ ] BACKUP: o §8 inteiro. O banco novo segue sem backup nenhum, e é o item
+    de maior risco do documento.
 [ ] Storage: rodar /tmp/migra-storage.sh quando a cota da nuvem virar
-[ ] URLs: os dois UPDATE do §13 + tirar tqprioqqitimssshcrcr do next.config.mjs
-[ ] BACKUP: o §8 inteiro. Hoje o banco novo não tem backup nenhum, e é o
-    item de maior risco do documento.
+[ ] URLs: os dois UPDATE do §13. A fase 4 provou que só falta o dado — não
+    há mais referência ao host velho em código.
+[ ] tirar tqprioqqitimssshcrcr.supabase.co do next.config.mjs — mas **só
+    depois** dos UPDATE, senão as imagens que ainda apontam para lá param de
+    passar pelo otimizador.
+[ ] um reboot combinado, para ver o pm2-ubuntu ressuscitar os dois de verdade
+[ ] empurrar o commit do output:'standalone' quando o deploy da Vercel deixar
+    de importar
 ```
 
 > **E o que já dava para fazer hoje:** rotacionar a senha do banco na nuvem, o

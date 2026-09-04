@@ -2364,6 +2364,19 @@ API key do Resend passaram em texto claro durante o planejamento.
 ---
 
 **Fora do escopo deste documento, mas anotado para não se perder:**
+
+**Cadastro por Google entra sem `username` e sem `display_name`.** O trigger
+`handle_new_user` lê `raw_user_meta_data ->> 'display_name'`, e o Google não
+manda esse campo — manda `name` e `full_name`. Resultado: a linha de `profiles`
+nasce com as duas colunas nulas. Foi assim que o único usuário de fora do
+projeto entrou, em 30/07/2026: no banco ele é um perfil sem nome, e o
+`_mouretsu` que aparece na tela sai de `auth.users.raw_user_meta_data`, não de
+`profiles`. Isso degrada mais do que parece — `/user/[username]` é a rota do
+perfil, e sem `username` o link cai no UUID. O conserto é o trigger aceitar
+`coalesce(display_name, name, full_name)` e derivar um `username` quando vier
+vazio; a parte chata é decidir o que fazer com colisão de `username`, que tem
+constraint de único.
+
 `/sitemap.xml` responde 404. Não é regressão da migração — o `app/` tem
 `robots.ts` e nunca teve rota de sitemap —, mas agora que o site é servido por
 nós e está atrás da Cloudflare, é uma linha que só a gente pode escrever.

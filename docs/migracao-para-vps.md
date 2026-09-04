@@ -680,17 +680,19 @@ Fase 5  [x] sites-enabled mirsui-db (db→54321) — adiantado na fase 3, que
         [x] real_ip acordou — access_log mostra visitante, não Cloudflare
         [x] /_next/static/ cacheando (MISS→HIT), mesmo sem regra
         [x] RESOLVIDO como o Certbot renova com a Cloudflare na frente:
-            HTTP-01 atravessa. --dry-run passa nos 5 certificados, 3 deles
-            já atrás da nuvem laranja. Sem DNS-01, sem plugin, sem token.
-            RESSALVA: testado com o Bot Fight AINDA DESLIGADO — refazer.
-        [ ] recriar o CNAME send → send.forge.rmta.net, CINZA (o Resend)
-        [ ] autoconfig e autodiscover para CINZA (vieram laranja, e isso
-            quebra a autoconfiguração de cliente de e-mail)
-        [ ] api e db para CINZA (o Bot Fight é botão de zona inteira)
-        [ ] Bot Fight Mode + regra de rate limit + cache rule
-        [ ] desligar o "Block training in robots.txt" da Cloudflare — ele
-            põe um segundo grupo User-agent:* ANTES do do app, sem nenhum
-            Disallow, e o app já bloqueia 23 scrapers contra os 9 dela
+            HTTP-01 atravessa, e atravessa COM O BOT FIGHT LIGADO — o
+            --dry-run foi refeito depois de ativá-lo. Sem DNS-01, sem
+            plugin, sem token. api e db saíram do proxy e renovam direto.
+        [x] CNAME send → send.forge.rmta.net recriado, cinza
+        [x] autoconfig e autodiscover para cinza, resolvendo na Hostinger
+        [x] api e db para cinza
+        [x] "Block training in robots.txt" desligado — o robots.txt voltou
+            a ter UM grupo User-agent:*, que é o do app
+        [x] Bot Fight Mode ligado — mas ver o §13: não deu para provar que
+            ele barra nada. Não conte com ele; a regra de rate limit é que
+            faz o trabalho.
+        [ ] regra de rate limit (a que importa)
+        [ ] cache rule de /_next/static/ (o HIT já acontece sem ela)
 
 BACKUP  [ ] cron noturno de pg_dump rodando
         [ ] destino FORA da máquina
@@ -1707,6 +1709,73 @@ o problema; a segunda fonte é a que não acrescenta nada.
 404 pelos dois caminhos, e é o certo: o Mirsui não tem anúncio. Nada a fazer —
 e é a mesma razão pela qual a política `Training: "Block on pages with ads"` da
 tela de configuração não bloqueia nada aqui.
+
+---
+
+#### Os consertos, conferidos um a um
+
+| | |
+|---|---|
+| `send.mirsui.com` | recriado, `CNAME send.forge.rmta.net`, cinza. O return path do Resend voltou. |
+| `autoconfig` · `autodiscover` | cinzas, e resolvendo para `autoconfig.mail.hostinger.com` / `autodiscover.mail.hostinger.com` — que é o que faz Thunderbird e Outlook se configurarem sozinhos |
+| `api` · `db` | cinzas. Respondem direto na VPS (200 e 401), fora do alcance do Bot Fight. |
+| `www` · apex | laranja, que é onde o proxy tem serventia |
+| MX · SPF · DKIM · DMARC | intactos |
+| `robots.txt` | voltou a ter **um** grupo `User-agent: *`, sem `Content-Signal`. É o arquivo versionado do app outra vez, e ele já é mais rigoroso que o da Cloudflare. |
+
+#### A ressalva do `--dry-run` caiu
+
+Com o **Bot Fight Mode ligado**, o teste foi refeito:
+
+```
+Congratulations, all simulated renewals succeeded:
+  /etc/letsencrypt/live/www.mirsui.com/fullchain.pem (success)
+```
+
+O HTTP-01 atravessa a nuvem laranja **com o Bot Fight ativo**. O item que o §5
+deixou em aberto fecha sem asterisco: não é preciso DNS-01, nem plugin, nem
+token de API. `api` e `db` saíram do proxy e renovam direto, como antes.
+
+#### O que o Bot Fight está fazendo, honestamente: não deu para provar que faz algo
+
+Ele está ligado no painel. Mas requisições que são o próprio retrato do que ele
+deveria barrar continuam passando:
+
+```
+User-Agent: python-requests/2.31.0   →  200
+User-Agent: Scrapy/2.11              →  200
+curl, sem User-Agent nenhum          →  200
+```
+
+E vindas de um IP de datacenter, que é o sinal mais forte que existe. Duas
+explicações possíveis, e não dá para escolher entre elas de fora: ou ainda
+estava propagando, ou a heurística dele é mais frouxa do que o nome sugere — o
+Bot Fight pontua a requisição pelo modelo da Cloudflare, não pela string do
+`User-Agent`, e não desafia tudo que não é navegador.
+
+**Não conte com ele como se fosse a proteção.** Quem vai fazer o trabalho de
+verdade é a regra de rate limit, que é escopada e determinística. Para saber se
+o Bot Fight faz alguma coisa aqui, o lugar de olhar é `Security → Events` depois
+de algumas horas de tráfego real; se não aparecer nada, ele é decoração e o
+custo de mantê-lo ligado é o risco de um dia barrar alguém de verdade.
+
+#### Estado
+
+```
+site       https://www.mirsui.com atrás da Cloudflare, 200 em todas as rotas
+apex       301 para o www, um salto
+api · db   cinzas, direto na VPS
+cache      /_next/static/ em HIT
+real_ip    access_log com IP de visitante
+cert       renova por HTTP-01 mesmo com o Bot Fight ligado
+```
+
+Faltam duas regras, as duas no painel: o **rate limit** (`http.host eq
+"www.mirsui.com" and not starts_with(http.request.uri.path, "/_next/")`, 50 req
+por 10s por IP, block por 1 min) e a **cache rule** de `/_next/static/`. A cache
+rule é a menos urgente das duas — o `HIT` já acontece sem ela, por regra de
+extensão da Cloudflare; a regra explícita serve para o comportamento não
+depender de um padrão que eles podem mudar sem avisar.
 
 ---
 

@@ -1,13 +1,13 @@
 # Migração para a VPS — Vercel e Supabase saem, a Oracle assume tudo
 
 **Status:** **o site saiu da Vercel em 4 de setembro de 2026.**
-`https://www.mirsui.com` é servido pela VPS, com certificado próprio, em cima do
-Supabase self-hosted de `https://db.mirsui.com`. **Fases 0 a 5 concluídas, menos
-a Cloudflare** — que é a única parte da fase 5 que não depende desta máquina:
-exige mover os nameservers, e com ela vai junto a decisão de como o Certbot
-renova por trás da nuvem laranja (§5). **A fase 6 perdeu o objeto:** o DNS já
-virou, e virou sem cerimônia porque a Vercel já respondia 402 — não havia
-produção para proteger. O que resta antes de encerrar a migração é o **§8, o
+`https://www.mirsui.com` é servido pela VPS, atrás da Cloudflare, em cima do
+Supabase self-hosted de `https://db.mirsui.com`. **Fases 0 a 5 concluídas.** A
+Cloudflare entrou com rate limit e cache rule testados por comportamento, e o
+Certbot renova por HTTP-01 atravessando a nuvem laranja com o Bot Fight ligado —
+que era o item que o §5 deixava em aberto, agora resolvido por medição e não por
+palpite. **A fase 6 perdeu o objeto:** o DNS já virou, e virou sem cerimônia
+porque a Vercel já respondia 402 — não havia produção para proteger. O que resta antes de encerrar a migração é o **§8, o
 backup**, que segue em zero e é o maior risco do documento. Dois itens continuam
 bloqueados por fora: os 12 arquivos do Storage (HTTP 402 na origem) e os dois
 `UPDATE` de URL do §13. O §13 é o registro do que foi feito — inclusive o
@@ -691,8 +691,10 @@ Fase 5  [x] sites-enabled mirsui-db (db→54321) — adiantado na fase 3, que
         [x] Bot Fight Mode ligado — mas ver o §13: não deu para provar que
             ele barra nada. Não conte com ele; a regra de rate limit é que
             faz o trabalho.
-        [ ] regra de rate limit (a que importa)
-        [ ] cache rule de /_next/static/ (o HIT já acontece sem ela)
+        [x] regra de rate limit — dispara na req #55, bloqueia com 429 e
+            deixa /_next/ passar (provado COM o IP bloqueado); expira só
+        [x] cache rule de /_next/static/ — HIT, e todo o HTML segue
+            DYNAMIC, que é o lado perigoso e foi o que se conferiu
 
 BACKUP  [ ] cron noturno de pg_dump rodando
         [ ] destino FORA da máquina
@@ -1776,6 +1778,92 @@ por 10s por IP, block por 1 min) e a **cache rule** de `/_next/static/`. A cache
 rule é a menos urgente das duas — o `HIT` já acontece sem ela, por regra de
 extensão da Cloudflare; a regra explícita serve para o comportamento não
 depender de um padrão que eles podem mudar sem avisar.
+
+---
+
+### 4 de setembro, início da tarde — **fase 5 concluída**
+
+As duas regras entraram, e as duas foram testadas contra o comportamento, não
+contra a tela de configuração.
+
+#### O rate limit dispara, e exclui o que tinha que excluir
+
+```
+(http.host eq "www.mirsui.com" and not starts_with(http.request.uri.path, "/_next/"))
+→ 50 requisições / 10s por IP → Block por 1 min
+```
+
+Rajada de 70 requisições **concorrentes**: todas 200. Não é a regra falhando —
+é que o contador do plano free é aproximado e 70 chamadas simultâneas chegam
+antes de ele fechar a conta. Vale registrar porque o teste errado dá a
+impressão de que a regra não existe.
+
+Sequencial, que é como um scraper de verdade se comporta:
+
+```
+req #1   → 200
+req #55  → 429     (o limite é 50; a aproximação do plano free explica a folga)
+```
+
+E com o IP já bloqueado, na mesma corrida — que é o teste que prova a exclusão:
+
+| | |
+|---|---|
+| `/pilha` · `/feed` | **429** |
+| `/_next/static/…` | **200** |
+| `/_next/image?…` | **200** |
+
+É exatamente o desenho: o visitante bloqueado não fica sem CSS, e — mais
+importante — a rajada de assets de um carregamento normal de página **nunca
+conta** para o limite. Sem essa exclusão, um único acesso de verdade queimaria
+metade da cota do próprio visitante.
+
+O bloqueio expira sozinho no minuto configurado, verificado esperando.
+
+#### A cache rule está escopada, e isso foi conferido pelo lado perigoso
+
+O risco de uma cache rule mal escopada não é cachear de menos: é cachear uma
+página com estado de usuário e servi-la para outra pessoa. Então a conferência
+foi essa:
+
+| | |
+|---|---|
+| `/` · `/feed` · `/pilha` · `/user/coelho` · `/api/auth/me` · `/auth/check-email` | **todas `DYNAMIC`** — nenhuma cacheada |
+| `/_next/static/…` | **`HIT`**, com `age` de 1.547s e o `max-age=31536000, immutable` da origem respeitado |
+
+#### Uma nota sobre o otimizador de imagem, que não é da fase 5
+
+`/_next/image` sai como `DYNAMIC` na borda, e o motivo está no cabeçalho que o
+próprio Next manda:
+
+```
+cache-control: public, max-age=60, must-revalidate
+```
+
+Com 60 segundos não há o que a Cloudflare cacheie de útil. **Isso não é um
+problema hoje:** o Next mantém cache próprio em disco
+(`.next/cache/images`, 2,4 MB e crescendo), então a máquina não está
+re-otimizando a mesma imagem a cada pedido.
+
+Fica como ideia para outro dia, não para agora: subir o `minimumCacheTTL` no
+`next.config.mjs` faria a borda cachear as imagens também, tirando da VPS o
+tráfego de imagem inteiro. É mudança de código com rebuild, e a fase 5 acabou.
+
+#### Fase 5 fechada
+
+```
+nginx      8 sites · mirsui-web · real_ip da Cloudflare ativo
+DNS        Cloudflare · www e apex laranja · api, db, send, autoconfig,
+           autodiscover cinzas · MX, SPF, DKIM, DMARC intactos
+TLS        www + apex, vence 03/12 · renova por HTTP-01 ATRAVÉS da nuvem
+           laranja, com o Bot Fight ligado — testado, não suposto
+borda      rate limit disparando e excluindo /_next/ · /_next/static/ em HIT
+robots     um grupo User-agent:* só, o do app
+site       https://www.mirsui.com, 200 em todas as rotas
+```
+
+O único item aberto que sobrou na migração inteira é o **§8: o backup.** O
+Mirsui está no ar, servindo de um banco que não tem cópia nenhuma.
 
 ---
 

@@ -8,12 +8,15 @@ Certbot renova por HTTP-01 atravessando a nuvem laranja com o Bot Fight ligado �
 que era o item que o §5 deixava em aberto, agora resolvido por medição e não por
 palpite. A fase 6 aconteceu dentro da fase 5, porque a Vercel já respondia 402 e
 não havia produção para proteger; a hora de acompanhamento foi feita e está no
-§13. **Resta a fase 7, que é não apagar nada até 18/09** — e o §8. O que resta antes de encerrar a migração é o **§8, o
-backup**, que segue em zero e é o maior risco do documento. Dois itens continuam
-bloqueados por fora: os 12 arquivos do Storage (HTTP 402 na origem) e os dois
-`UPDATE` de URL do §13. O §13 é o registro do que foi feito — inclusive o
-trigger de `auth.users` que o dump não levou e que só apareceu porque a fase 3
-testou um cadastro de verdade.
+§13. **A migração está feita. O que falta é o que a torna segura, e virou o
+§14** — as fases 7 a 12, com ordem entre elas. **Comece pela fase 8, o backup**,
+que segue em zero e é o maior risco do documento. A fase 9 é a única visível de
+fora: as imagens do site estão quebradas hoje, porque os 12 arquivos do Storage
+nunca vieram (HTTP 402 na origem, e o que está no disco da VPS são 12 cópias do
+corpo do erro) e as 17 URLs ainda apontam para o host morto. O §13 é o registro
+do que foi feito — inclusive o trigger de `auth.users` que o dump não levou e que
+só apareceu porque a fase 3 testou um cadastro de verdade, e a conferência da
+noite de 4/09, que encontrou o repositório partido em dois e o consertou.
 **Escopo:** frontend Next.js, backend Fastify e banco Supabase, os três na
 mesma VPS Oracle Ampere A1 (4 vCPU / 24 GB / Ubuntu).
 **Verificado na máquina em 3 de setembro de 2026.** A primeira versão deste
@@ -453,6 +456,11 @@ Baixar o TTL para 300s um dia antes. Virar. Acompanhar por uma hora.
 **Não apagar o projeto Supabase na nuvem por duas semanas.** Ele é o rollback
 do §10, e o custo de mantê-lo parado é zero.
 
+> **As fases não param na 7.** A execução mostrou que faltava o que a migração
+> não previa: backup, imagens, monitoramento, um reboot provado e a rotação dos
+> segredos. Isso virou as **fases 8 a 12, no §14**, com a fase 7 relida lá — ela
+> ganhou um segundo motivo para não apagar nada.
+
 ---
 
 ## 7. O mapa de variáveis de ambiente
@@ -703,8 +711,9 @@ Fase 5  [x] sites-enabled mirsui-db (db→54321) — adiantado na fase 3, que
 BACKUP  [ ] cron noturno de pg_dump rodando
         [ ] destino FORA da máquina
         [ ] um restore testado de verdade
-        >>> agora é o item de maior risco em aberto: o site está no ar
-            servindo de um banco que não tem backup nenhum
+        >>> segue sendo o item de maior risco em aberto: o site está no ar
+            servindo de um banco que não tem backup nenhum. Virou a
+            **fase 8** do §14, com o caminho já escolhido (rclone + gdrive:)
 
 Fase 6  [x] DNS virado — em 4/09, sem esperar, porque não havia o que
             proteger: a Vercel já respondia 402 nos dois nomes
@@ -718,7 +727,8 @@ Fase 6  [x] DNS virado — em 4/09, sem esperar, porque não havia o que
         [x] log próprio para o vhost — o access_log era um só para os 8
             sites, e sem isso não há como monitorar nada daqui pra frente
 
-Fase 7  [x] projeto na nuvem intacto — está ACTIVE_HEALTHY, nem parado nem
+Fase 7  >>> esta fase e as que sobraram ganharam texto e ordem no §14
+        [x] projeto na nuvem intacto — está ACTIVE_HEALTHY, nem parado nem
             apagado. No plano grátis parar não economiza nada, e de pé ele
             é um rollback melhor do que parado.
         [ ] apagar só depois de 2 semanas limpas — ou seja, não antes de
@@ -1977,55 +1987,264 @@ alguma coisa.
 
 ---
 
+### 4 de setembro, noite — a conferência na máquina, e o git que tinha se partido em dois
+
+Não é uma fase: é uma varredura por SSH com o site já no ar, para separar o que
+o documento *diz* do que a máquina *faz*. A maior parte bateu. O que não bateu
+está abaixo, e são quatro coisas — três delas o documento não sabia.
+
+#### O que bateu
+
+| conferido | resultado |
+|---|---|
+| Supabase | 11 containers `healthy`, 21 h de uptime, `restart: unless-stopped`, `docker` `enabled` no boot |
+| Banco | 28 MB · 15 usuários · 15 profiles · 4 playlists |
+| Processos | `mirsui-web` online há 8 h, `mirsui-backend` há 9 dias, nenhum reinício novo |
+| nginx | 8 sites, `nginx -t` ok |
+| TLS | `www`+apex e `db` até 03/12 · `api` até 09/10 · `certbot.timer` ativo, rodou às 13h06 |
+| Borda | `www` 200 · apex 301 → `www` em um salto · HSTS · HTML `DYNAMIC` · estático `immutable` |
+| Portas | 3002 só em loopback; a 3000 escuta em `0.0.0.0` mas **não responde de fora** — testado em `146.235.44.203:3000` |
+| Log próprio | 455 requisições, **zero 5xx**; os 404 são só varredura (`/wp-admin/install.php`, `/wp-login.php`, `/.env`) |
+| Máquina | disco 49% de 192 GB · RAM 5,1 de 23 GB · load 0,39 |
+| Nuvem | projeto `tqprioqqitimssshcrcr` está `ACTIVE_HEALTHY` — o rollback do §10 existe de verdade |
+
+#### Novidade 1 — os dois `UPDATE` não consertam as imagens, e o disco mente
+
+O §13 registrava as 17 URLs mortas como "falta só o dado". Falta mais do que
+isso:
+
+```
+storage.objects  = 0     ← os dois buckets existem e estão VAZIOS
+profiles         = 14 avatares apontando para o host morto
+playlists        =  3 capas apontando para o host morto
+```
+
+Os 12 arquivos nunca chegaram, e a origem continua respondendo 402 hoje. Rodar
+os dois `UPDATE` agora trocaria **402 por 404**: a URL passaria a apontar para um
+`db.mirsui.com` que não tem o arquivo. Primeiro os bytes, depois as linhas.
+
+E isso está visível em produção: o HTML que `www.mirsui.com` serve hoje sai com
+`src` de avatar apontando para `tqprioqqitimssshcrcr.supabase.co`, e o otimizador
+de imagem devolve 402 junto.
+
+**A armadilha.** Existe `/home/ubuntu/mirsui-storage/` com os 12 arquivos, nos
+nomes certos, na estrutura certa de bucket. Eles não são imagens:
+
+```
+12 arquivos · 189 bytes cada · TODOS com o mesmo md5 (a850e1cb…)
+{"message":"Service for this project is restricted due to the following
+ violations: exceed_egress_quota…"}
+```
+
+São 12 cópias do corpo do erro 402. O `/tmp/migra-storage.sh` está correto — ele
+testa `código != 200` e por isso **não** subiu nada, que é a razão de
+`storage.objects` ser 0. O risco é humano: quem abrir aquela pasta daqui a um mês
+vai ver "os arquivos estão aqui" e subir 12 JSONs com `Content-Type: image/jpeg`.
+Aí o site passa a responder **200 com lixo**, que é pior do que o 402 de hoje,
+porque para de doer.
+
+Três coisas que barateiam o conserto:
+
+- **9 dos 14 avatares são o mesmo `default.jpg`.** Ele não é dado de usuário, é a
+  imagem de fallback — dá para **recriar**, não precisa recuperar. Isso conserta
+  9 de 14 sem depender da cota da nuvem. Sobram 5 fotos de usuário e 3 capas, que
+  são dado de verdade e só voltam da origem.
+- **O `next.config.mjs` não tem `db.mirsui.com` em `images.domains`** — só o host
+  antigo. O plano mandava *remover* o antigo e ninguém reparou que falta
+  *adicionar* o novo. Sem isso o `<Image>` recusa a URL nova depois do `UPDATE`.
+- **O `/tmp/migra-storage.sh` mora em `/tmp`.** A fase 11 é um reboot combinado, e
+  o Ubuntu limpa `/tmp` no boot. Tirar de lá antes, ou a fase 11 come a fase 9.
+
+#### Novidade 2 — o repositório tinha se partido em dois
+
+O `git pull` do `deploy.sh` ia falhar no primeiro deploy de verdade:
+
+```
+origin/main   de2e8f9
+aqui          de2e8f9 + 11 commits   (entre eles 772c238, o do standalone)
+na VPS        de2e8f9 +  1 commit    (ba2433d, o do standalone TAMBÉM)
+```
+
+Dois commits diferentes fazendo a mesma mudança, nenhum dos dois no `origin`: a
+fase 4 commitou o `output: 'standalone'` na máquina, e a mesma mudança foi
+commitada aqui. Histórias divergentes, e o `deploy.sh` começa por `git pull`.
+
+Resolvido sem rebuild e sem reiniciar nada, porque os blobs eram idênticos:
+
+```
+next.config.mjs   aqui 1756964…   VPS 1756964…   ← o mesmo objeto git
+.gitignore        aqui 494ffa0…   VPS 494ffa0…   ← o mesmo objeto git
+```
+
+`ba2433d` não continha um byte que `772c238` não tivesse. Então:
+
+1. `git push origin main` daqui — 12 commits, nenhum tocando código de aplicação:
+   só `docs/`, mais o `next.config.mjs` e o `.gitignore` que a VPS já tinha
+   idênticos.
+2. Na VPS, `git branch pre-sync-2026-09-04 ba2433d` **antes** de qualquer coisa.
+   O commit da máquina continua alcançável; não virou lixo de reflog.
+3. `git reset --hard origin/main`. O `git diff --stat HEAD origin/main` de antes
+   listava 6 arquivos, todos em `docs/` — **nenhum arquivo de código**. Depois, o
+   `mtime` do `next.config.mjs` continua sendo o de 03/09 22h58: prova de que o
+   git nem chegou a tocá-lo.
+4. Conferido em seguida: `git pull --ff-only` responde *Already up to date*, o pm2
+   segue com os mesmos reinícios de antes, `127.0.0.1:3002` responde 200 e o `www`
+   responde 200.
+
+O build que está no ar continua sendo o mesmo build. Nada foi refeito porque nada
+precisava ser.
+
+#### Novidade 3 — ninguém está olhando
+
+O `uptime-kuma` roda nesta máquina desde antes da migração, e seus 4 monitores
+são `ping` de máquinas de pessoas (`daniel`, `allan`, `alysson`, `lucas`). **Nada
+monitora `mirsui.com`.** Sair da Vercel levou junto o alerta que ninguém tinha
+notado que existia.
+
+#### Novidade 4 — o boot continua sendo teoria
+
+`pm2-ubuntu` está `enabled`, mas `inactive (dead)`: o daemon que roda hoje subiu
+fora do systemd. O `dump.pm2` tem os dois processos e os containers voltam por
+conta própria (`unless-stopped` + `docker enabled`), então a teoria fecha. É
+teoria — ver a fase 11.
+
+---
+
 ### Retomada — a próxima sessão começa aqui
 
-**O site está no ar na VPS.** O que falta se divide em três, e a ordem entre
-elas importa:
+**O site está no ar na VPS, e a migração está feita.** O que falta deixou de ser
+uma lista solta e virou o **§14**: seis fases numeradas, com ordem entre elas e
+critério de pronto em cada uma. Comece pela **fase 8**, o backup.
 
-**1. O backup (§8) — o maior risco em aberto, e agora com o site dependendo
-dele.** Nenhum item feito: nem o `pg_dump` noturno, nem o destino fora da
-máquina, nem um restore testado. Enquanto isso não existir, o Mirsui inteiro
-mora num container sem cópia.
+Duas decisões da fase 5 fecharam aqui e não voltam à mesa:
+
+- **A renovação fica em HTTP-01 e não vira DNS-01.** Mediu-se que o HTTP-01
+  atravessa a nuvem laranja **com o Bot Fight ligado** — o `--dry-run` foi
+  refeito depois de ativá-lo —, e `api` e `db` estão cinza e renovam direto.
+  Instalar o `python3-certbot-dns-cloudflare` e emitir um token de
+  `Zone:DNS:Edit` seria somar uma peça e um segredo para resolver um problema
+  que a medição mostrou não existir.
+- **O `db` fica cinza na Cloudflare.** No plano gratuito o Bot Fight Mode é um
+  botão de zona inteira; ligá-lo com o `db` laranja põe um detector de robô na
+  frente de toda chamada do `supabase-js` feita pelo navegador, inclusive as de
+  auth. O SSR já está protegido disso pelo `/etc/hosts`, mas o navegador não.
+  Custa só proteção de DDoS num hostname que não é o alvo — o que estourou a
+  cota foi tráfego de site, não de API.
+
+---
+
+## 14. O que sobrou — fases 7 a 12
+
+A migração acabou. O que segue é o que faltou para ela ser **segura**, e a ordem
+não é a numérica: **a fase 8 vem antes de todas**, e a 11 vem depois dela.
+
+### Fase 7 — não apagar nada, e agora por dois motivos
+
+Segue como estava: o projeto da nuvem não se apaga antes de **18/09/2026**. Mas a
+conferência somou um motivo que a data não cobre:
+
+> **Os 12 arquivos do Storage só existem lá.** O que está no disco da VPS são
+> corpos de erro 402. Se o projeto for apagado antes de a cota virar, as 5 fotos
+> de usuário e as 3 capas de playlist somem para sempre. **A fase 7 não termina
+> em 18/09 — ela termina quando a fase 9 tiver os bytes.**
 
 ```
-[ ] cron noturno de pg_dump
-[ ] destino FORA da máquina
-[ ] um restore testado de verdade
+[ ] não apagar antes de 18/09/2026
+[ ] e não apagar antes de a fase 9 ter resgatado os 12 arquivos
 ```
 
-**2. A Cloudflare — FEITA, e esta lista ficou para trás.** Toda ela entrou em
-4 de setembro e está registrada em `§13 — a Cloudflare entrou` e em
-`§13 — fase 5 concluída`: nameservers trocados, zona conferida registro a
-registro, nuvem laranja no `www` e no apex, `api` e `db` cinza, Bot Fight Mode,
-regra de rate limit provada com o IP bloqueado, cache rule de `/_next/static/`
-em HIT.
+### Fase 8 — o backup, que ainda é zero  ·  FAÇA ESTA PRIMEIRO
 
-O último item da lista original — **trocar a renovação para DNS-01** — não é
-mais para fazer, e não por desistência: mediu-se que o **HTTP-01 atravessa a
-nuvem laranja com o Bot Fight ligado**, o `--dry-run` foi refeito depois de
-ativá-lo, e `api` e `db` estão cinza e renovam direto. Instalar o
-`python3-certbot-dns-cloudflare` e emitir um token de `Zone:DNS:Edit` seria
-adicionar uma peça e um segredo para resolver um problema que a medição mostrou
-não existir. **A ressalva sobre o `db` continua valendo** e virou decisão: ele
-fica cinza enquanto o Bot Fight for um botão de zona inteira, porque ligá-lo com
-o `db` laranja põe um detector de robô na frente de toda chamada do
-`supabase-js` feita pelo navegador, inclusive as de auth.
+Conferido hoje: o `crontab` do `ubuntu` tem 5 jobs, nenhum de `pg_dump`; o do
+root está vazio; `/var/backups` só tem coisa do apt. O único dump é
+`/home/ubuntu/mirsui-dump/` de 03/09 — tirado uma vez, da origem que já não
+existe, e no mesmo disco do banco. Hoje o Mirsui inteiro mora num container sem
+cópia.
 
-**3. O que já estava pendente e continua:**
+**A máquina já tem com o que fazer isso.** O `rclone` está instalado, com um
+remote `gdrive:` configurado e em uso por um cron de 5 em 5 minutos. Não há
+ferramenta nova para escolher.
+
+> **A armadilha do `rclone`.** O script que já existe na máquina usa
+> `rclone sync`. Para backup use **`rclone copy`**. O `sync` espelha remoções:
+> quando o `find -mtime +14` apagar o dump velho aqui, o `sync` apaga a cópia de
+> lá também — e "fora da máquina" vira decoração.
 
 ```
-[ ] Storage: rodar /tmp/migra-storage.sh quando a cota da nuvem virar
-[ ] URLs: os dois UPDATE do §13 (a fase 4 provou que só falta o dado)
-[ ] tirar tqprioqqitimssshcrcr.supabase.co do next.config.mjs — só DEPOIS
-    dos UPDATE, senão as imagens que ainda apontam para lá param de passar
-    pelo otimizador
-[ ] um reboot combinado, para ver o pm2-ubuntu ressuscitar os dois de verdade
-    — agora com o site no ar, isto deixou de ser de graça: combine a janela
-[ ] empurrar o commit do output:'standalone'. O deploy da Vercel deixou de
-    importar no minuto em que o DNS virou, então este item destravou sozinho
-[ ] fase 7: NÃO apagar o projeto da nuvem por duas semanas
+[ ] cron noturno de pg_dump (o script do §8)
+[ ] rclone copy para o gdrive: — copy, NÃO sync
+[ ] um restore testado de propósito, num banco descartável do próprio container
+    (createdb → psql < dump → conferir as contagens → dropdb), sem tocar no
+    banco de produção
+[ ] a prova: as contagens do restore batendo com 15 usuários / 15 profiles /
+    4 playlists
 ```
 
-> **E o que já dava para fazer desde a fase 3:** rotacionar a senha do banco na
-> nuvem, o client secret do Google e a API key do Resend. Os três circularam em
-> texto claro durante o planejamento.
+### Fase 9 — as imagens, que estão quebradas em produção
+
+A ordem importa, e metade não depende da nuvem:
+
+```
+[ ] 1. db.mirsui.com entra em images.domains do next.config.mjs (o host antigo
+       FICA, por enquanto) — sem isso o <Image> recusa a URL nova
+[ ] 2. tirar /tmp/migra-storage.sh de /tmp, antes que a fase 11 o apague
+[ ] 3. apagar /home/ubuntu/mirsui-storage/ — são 12 corpos de erro 402, e é a
+       armadilha descrita acima
+[ ] 4. recriar um default.jpg e subir no bucket user-profile-images
+[ ] 5. UPDATE só das linhas que terminam em default.jpg → 9 dos 14 avatares
+       consertados sem depender de ninguém
+--- daqui para baixo depende de a cota da nuvem virar ---
+[ ] 6. rodar o migra-storage.sh e conferir que os arquivos têm tamanho de
+       imagem, não 189 bytes
+[ ] 7. os dois UPDATE completos do §13
+[ ] 8. só então tirar tqprioqqitimssshcrcr.supabase.co do next.config.mjs
+[ ] 9. npm run build + deploy.sh — os passos 1 e 8 são config do Next, e config
+       do Next só vale depois do build
+```
+
+### Fase 10 — alguém olhando
+
+```
+[ ] monitor HTTP de https://www.mirsui.com com notificação que chegue no celular
+```
+
+> **A ressalva que decide onde o monitor mora.** O `uptime-kuma` roda **na
+> própria VPS**. Ele cobre bem o caso comum — o Next morreu e a máquina não — e
+> não cobre o caso que importa: se a máquina cair, o monitor cai junto, e o
+> silêncio fica indistinguível de "está tudo bem". O mínimo honesto é um checador
+> de fora (UptimeRobot, Better Stack, ou um health check da Cloudflare), com o
+> kuma como segunda camada, não como a única.
+
+### Fase 11 — o reboot combinado  ·  DEPOIS da fase 8
+
+A máquina está com 67 dias de uptime e nunca reiniciou com esta stack. O que
+precisa ser provado, sem intervenção manual nenhuma:
+
+```
+[ ] os 11 containers do Supabase voltam sozinhos
+[ ] o pm2-ubuntu ressuscita mirsui-web e mirsui-backend
+[ ] www.mirsui.com responde 200 sem ninguém abrir um SSH
+```
+
+Combine a janela: com o site no ar, isto deixou de ser de graça. E faça depois da
+fase 8 — reiniciar sem backup é apostar duas coisas de uma vez.
+
+### Fase 12 — os três segredos que circularam
+
+Pendente desde a fase 3: a senha do banco da nuvem, o client secret do Google e a
+API key do Resend passaram em texto claro durante o planejamento.
+
+```
+[ ] senha do banco na nuvem — antes de 18/09, depois disso deixa de existir
+[ ] client secret do Google — derruba o login por Google até o .env do GoTrue
+    ser atualizado e o container reiniciado. Janela curta, mas existe: troque e
+    teste na sequência, não deixe para conferir depois
+[ ] API key do Resend — trocar e provar com um envio de verdade
+```
+
+---
+
+**Fora do escopo deste documento, mas anotado para não se perder:**
+`/sitemap.xml` responde 404. Não é regressão da migração — o `app/` tem
+`robots.ts` e nunca teve rota de sitemap —, mas agora que o site é servido por
+nós e está atrás da Cloudflare, é uma linha que só a gente pode escrever.

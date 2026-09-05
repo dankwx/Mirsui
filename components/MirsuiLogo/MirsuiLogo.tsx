@@ -1,25 +1,37 @@
+import {
+    MARCA_DISCOS,
+    MARCA_MIOLO,
+    MARCA_RAZAO,
+    MARCA_VIEWBOX,
+} from './marca'
+
 interface MirsuiLogoProps {
+    /** altura do símbolo em px; a largura sai da razão da marca */
     size?: number
+    /** cor dos discos — o padrão é a tinta do produto */
+    ink?: string
+    /** cor do miolo */
+    acc?: string
     className?: string
 }
 
-export default function MirsuiLogo({ size = 38, className }: MirsuiLogoProps) {
+export default function MirsuiLogo({
+    size = 30,
+    ink = '#ece3d2',
+    acc = '#cdef36',
+    className,
+}: MirsuiLogoProps) {
     return (
         <svg
             className={className}
             xmlns="http://www.w3.org/2000/svg"
-            width={size}
+            width={Math.round(size * MARCA_RAZAO)}
             height={size}
-            viewBox="0 0 100 100"
+            viewBox={MARCA_VIEWBOX}
             aria-hidden="true"
         >
-            <circle cx="50" cy="50" r="49" fill="#16120c" />
-            <path
-                d="M50 1 a49 49 0 0 1 0 98 a24.5 24.5 0 0 1 0-49 a24.5 24.5 0 0 0 0-49z"
-                fill="#cdef36"
-            />
-            <circle cx="50" cy="25.5" r="7.2" fill="#16120c" />
-            <circle cx="50" cy="74.5" r="7.2" fill="#cdef36" />
+            <path fillRule="evenodd" d={MARCA_DISCOS} fill={ink} />
+            <path d={MARCA_MIOLO} fill={acc} />
         </svg>
     )
 }

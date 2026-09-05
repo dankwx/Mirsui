@@ -8,11 +8,16 @@
 import { ImageResponse } from 'next/og'
 import { NextRequest } from 'next/server'
 
+import {
+    MARCA_DISCOS,
+    MARCA_MIOLO,
+    MARCA_VIEWBOX,
+} from '@/components/MirsuiLogo/marca'
+
 export const runtime = 'edge'
 
 const BG = '#14110b'
 const ACC = '#cdef36'
-const ON_ACC = '#16120c'
 const TEXT = '#f3ecdb'
 const MUTED = '#9a9180'
 
@@ -67,18 +72,17 @@ export async function GET(req: NextRequest) {
                     }}
                 >
                     <svg
-                        width="46"
+                        width="64"
                         height="46"
-                        viewBox="0 0 100 100"
+                        viewBox={MARCA_VIEWBOX}
                         xmlns="http://www.w3.org/2000/svg"
                     >
-                        <circle cx="50" cy="50" r="49" fill={ON_ACC} />
                         <path
-                            d="M50 1 a49 49 0 0 1 0 98 a24.5 24.5 0 0 1 0-49 a24.5 24.5 0 0 0 0-49z"
-                            fill={ACC}
+                            fillRule="evenodd"
+                            d={MARCA_DISCOS}
+                            fill={TEXT}
                         />
-                        <circle cx="50" cy="25.5" r="7.2" fill={ON_ACC} />
-                        <circle cx="50" cy="74.5" r="7.2" fill={ACC} />
+                        <path d={MARCA_MIOLO} fill={ACC} />
                     </svg>
                     <div
                         style={{

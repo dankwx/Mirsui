@@ -2434,6 +2434,17 @@ motivos que não cabem numa caixa marcada:
 > Armadilha para o futuro: "as fotos estão aparecendo" **não** significava que
 > a fase 9 tinha sido feita — significava o contrário.
 
+> **O primeiro deploy saiu com as URLs velhas, e o culpado era o
+> `.next/cache/fetch-cache`.** Ele persiste entre builds, e a home é
+> prerenderizada no build com os `fetch` de `homeService.ts` (1 h de
+> `revalidate`). O build pegou a resposta do backend de *antes* do `UPDATE` e
+> gravou 26 `src` da nuvem no `index.html`. O backend já respondia
+> `db.mirsui.com`; era só o cache do build. Conserto: `rm -rf
+> .next/cache/fetch-cache && ./deploy.sh`. **Regra:** depois de qualquer
+> mudança direta no banco que a home mostra, o deploy precisa desse `rm` antes
+> — o `deploy.sh` não faz isso sozinho de propósito, porque o cache é o que
+> deixa o build barato no dia a dia.
+
 **Os passos 4 e 5 morreram porque o problema era outro.** O plano supunha que
 os avatares estavam feios por falta de dado. Não estavam: estavam feios por
 falta de tratamento de erro. O fallback de avatar já existia em todas as telas,

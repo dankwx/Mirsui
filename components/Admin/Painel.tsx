@@ -648,8 +648,16 @@ export default function PainelDoDono({ dados }: { dados: DadosDoPainel }) {
                         <h1 className="text-[clamp(28px,2.8vw,36px)] font-extrabold leading-none tracking-[-0.04em] text-mir-text">
                             Painel
                         </h1>
-                        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-mir-text3">
-                            medido {quando(dados.gerado_em, dataHora)}
+                        <span className="flex flex-wrap items-baseline gap-x-4 font-mono text-[11px] uppercase tracking-[0.12em] text-mir-text3">
+                            {/* Discreto de propósito: é ferramenta de bastidor,
+                                não um número do painel. */}
+                            <Link
+                                href="/admin/perfis"
+                                className="transition-colors hover:text-mir-text"
+                            >
+                                perfis semeados →
+                            </Link>
+                            <span>medido {quando(dados.gerado_em, dataHora)}</span>
                         </span>
                     </div>
 

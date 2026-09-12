@@ -140,3 +140,31 @@ export interface Painel {
     maisSalvas: FaixaSalva[]
     registros: Registro[]
 }
+
+/* ------------------------------------------------------------------ *
+ * Perfis semeados (docs/plano-semeadura-de-perfis.md, §7–8)
+ *
+ * Espelha `GET /admin/seed/profiles` em `src/routes/admin.ts` do backend.
+ * ------------------------------------------------------------------ */
+
+export interface PerfilSemeado {
+    id: string
+    username: string | null
+    display_name: string | null
+    avatar_url: string | null
+    /** nome do JPEG em imagens/usadas/ */
+    image_file: string
+    batch: string
+    /** data de entrada da conta (backdatada), ou da semeadura se não deu para ler */
+    created_at: string
+    fichas: number
+}
+
+export interface Semeados {
+    profiles: PerfilSemeado[]
+    total: number
+    page: number
+    limit: number
+    /** fotos ainda não usadas em imagens/ */
+    pool: number
+}

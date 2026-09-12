@@ -1,81 +1,123 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { capaDoAcervo, type GeneroDoAcervo } from '@/utils/homeService'
-import { enderecoDaFaixa } from '@/utils/trackHref'
+import PilhaDaHome from './PilhaDaHome'
+import { capaDoAcervo, type FaixaDoAcervo, type GeneroDoAcervo } from '@/utils/homeService'
+import type { PileHeat, PileTrack } from '@/utils/pileTypes'
 
 /**
- * O acervo por gênero.
+ * O acervo: a pilha e os gêneros.
  *
- * É daqui que vem a densidade da página. O Letterboxd enche a home com uma
- * centena de pôsteres porque tem milhões de pessoas alimentando o catálogo; o
- * Mirsui tem 2.994 faixas medidas todo dia, todas com capa, e é o único dado
- * grande que existe aqui hoje. Então a home mostra o catálogo, não uma lista de
- * argumentos sobre ele.
+ * A pilha é a densidade da página, do jeito que a parede de pôsteres é a do
+ * Letterboxd: o Mirsui mede quase três mil faixas todo dia, todas com capa, e
+ * isso é o único dado grande que existe aqui. Os gêneros embaixo dão um jeito
+ * de entrar nela, com a contagem real de cada um no acervo inteiro.
  *
- * Os números de cada gênero são a contagem real no acervo inteiro, não a
- * quantidade de capas na fileira.
+ * As capas de cada gênero ficam empilhadas de lado, como os discos da marca,
+ * e se abrem no hover (.pile-band / .pile-teaser, em globals.css).
  */
 
 /**
- * Sem ISRC não existe ficha para abrir — mas isso hoje é raro e some sozinho:
- * o Deezer devolveu ISRC para 3.425 de 3.425 faixas consultadas, e a fila do
- * job cobre o resto. Este ramo era a regra quando o endereço era o id do
- * Spotify (só 21,4% do catálogo tinha um); agora é a exceção.
+ * O calor de cada peça vem da ordem por rank dentro da amostra: as quatro
+ * mais ouvidas viram peça grande, as doze seguintes média, o resto pequeno.
+ * Uma amostra de sessenta com um terço de peças grandes daria uma pilha de
+ * 1.300px; assim fica em ~800px no desktop.
  */
-function Faixa({
-    md5,
-    titulo,
-    artista,
-    isrc,
-}: {
-    md5: string | null
-    titulo: string
-    artista: string
-    isrc: string | null
-}) {
-    const capa = (
-        <>
-            <div className="aspect-square w-full overflow-hidden rounded-[6px] bg-mir-card ring-1 ring-mir-line transition duration-300 group-hover:-translate-y-1 group-hover:ring-mir-text3 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
-                {md5 && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                        src={capaDoAcervo(md5, 250)!}
-                        alt={`${titulo}, de ${artista}`}
-                        loading="lazy"
-                        decoding="async"
-                        className="h-full w-full object-cover"
-                    />
-                )}
-            </div>
-            <div className="mt-2 truncate text-[13px] font-semibold tracking-[-0.01em] text-mir-text">
-                {titulo}
-            </div>
-            <div className="mt-0.5 truncate text-[12px] text-mir-text3">{artista}</div>
-        </>
-    )
+function calor(indice: number): PileHeat {
+    if (indice < 4) return 'topo'
+    if (indice < 16) return 'meio'
+    return 'subsolo'
+}
 
-    const classe = 'group w-[clamp(7.5rem,20vw,9.5rem)] flex-none snap-start'
+function pecasDaPilha(faixas: FaixaDoAcervo[]): PileTrack[] {
+    return [...faixas]
+        .sort((a, b) => (b.rank ?? 0) - (a.rank ?? 0))
+        .map((f, i) => ({
+            id: f.id,
+            isrc: f.isrc,
+            title: f.titulo,
+            artist: f.artista,
+            cover: capaDoAcervo(f.md5, 500),
+            coverSmall: capaDoAcervo(f.md5, 250),
+            genre: f.genero ?? 'outros',
+            heat: calor(i),
+            audiencia: 0,
+        }))
+}
 
-    if (!isrc) {
-        return <div className={classe}>{capa}</div>
-    }
+function Genero({ g }: { g: GeneroDoAcervo }) {
+    const rotacoes = [-6, -2, 2, 5, -3]
     return (
-        <Link href={enderecoDaFaixa(isrc, artista, titulo)} className={classe}>
-            {capa}
+        <Link href="/pilha" className="pile-band group block min-w-0">
+            <div className="flex h-[92px] items-end pl-2">
+                {g.faixas.slice(0, 5).map((f, i) => (
+                    <div
+                        key={f.id}
+                        className="pile-teaser -ml-5 h-[76px] w-[76px] flex-none overflow-hidden rounded-[6px] bg-mir-card ring-1 ring-mir-line first:ml-0"
+                        style={
+                            {
+                                '--tr': `${rotacoes[i % rotacoes.length]}deg`,
+                                zIndex: 5 - i,
+                            } as React.CSSProperties
+                        }
+                    >
+                        {f.md5 && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                                src={capaDoAcervo(f.md5, 250)!}
+                                alt=""
+                                loading="lazy"
+                                decoding="async"
+                                className="h-full w-full object-cover"
+                            />
+                        )}
+                    </div>
+                ))}
+            </div>
+            <div className="mt-3 flex items-baseline gap-2.5">
+                <h3 className="m-0 truncate text-[16px] font-bold tracking-[-0.015em] text-mir-text transition-colors group-hover:underline group-hover:decoration-mir-line2 group-hover:underline-offset-4">
+                    {g.nome}
+                </h3>
+                <span className="flex-none font-mono text-[11.5px] tabular-nums text-mir-text3">
+                    {g.total.toLocaleString('pt-BR')} faixas
+                </span>
+            </div>
         </Link>
     )
 }
 
-export default function Acervo({ generos }: { generos: GeneroDoAcervo[] }) {
-    if (generos.length === 0) return null
+export default function Acervo({
+    parede,
+    generos,
+    medidas,
+}: {
+    parede: FaixaDoAcervo[]
+    generos: GeneroDoAcervo[]
+    medidas: number
+}) {
+    if (parede.length === 0 && generos.length === 0) return null
 
     return (
-        <section className="border-b border-mir-line bg-mir-bg">
-            <div className="mx-auto w-full max-w-[1320px] px-5 pb-10 pt-16 sm:px-10 lg:pt-20">
-                <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
-                    <h2 className="m-0 max-w-[20ch] font-display text-[clamp(26px,3.4vw,40px)] font-black leading-[1] tracking-[-0.045em] text-mir-text">
-                        O acervo que a gente mede.
-                    </h2>
+        // overflow-x clip: peça rotacionada na borda da pilha vazava para
+        // fora do container e abria rolagem lateral no celular
+        <section className="border-b border-mir-line [overflow-x:clip]">
+            <div className="mx-auto w-full max-w-[1320px] px-5 pt-16 sm:px-10 lg:pt-24">
+                <h2 className="m-0 max-w-[16ch] font-display text-[clamp(30px,4.2vw,52px)] font-black leading-[0.98] tracking-[-0.05em] text-mir-text">
+                    {medidas > 0 ? (
+                        <>
+                            <span className="tabular-nums">
+                                {medidas.toLocaleString('pt-BR')}
+                            </span>{' '}
+                            faixas medidas todo dia.
+                        </>
+                    ) : (
+                        'O acervo que a gente mede.'
+                    )}
+                </h2>
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-x-8 gap-y-3">
+                    <p className="m-0 max-w-[48ch] text-[15.5px] leading-[1.5] text-mir-text2">
+                        Capa maior, mais audiência. A Pilha é o catálogo que o
+                        Observatório mede, despejado num lugar só.
+                    </p>
                     <Link
                         href="/pilha"
                         className="group inline-flex items-center gap-2 whitespace-nowrap text-[14px] font-semibold text-mir-text2 transition-colors hover:text-mir-text"
@@ -86,45 +128,19 @@ export default function Acervo({ generos }: { generos: GeneroDoAcervo[] }) {
                 </div>
             </div>
 
-            {/* Uma fileira por gênero, no mesmo container do resto da página.
-                A primeira versão sangrava até a borda da tela, e isso quebrava
-                em monitor largo: num 2315px os títulos começavam em 530px (o
-                container de 1320 centralizado) e as capas em 40px, 490px de
-                desalinhamento. A rolagem lateral continua sendo a affordance de
-                "tem mais do que cabe" — o overflow corta a última capa na borda
-                direita do container, que é o mesmo recado. */}
-            <div className="flex flex-col gap-9 pb-20 lg:pb-24">
-                {generos.map((g) => (
-                    <div key={g.nome}>
-                        <div className="mx-auto flex w-full max-w-[1320px] items-baseline gap-3 px-5 sm:px-10">
-                            <h3 className="m-0 text-[15px] font-bold tracking-[-0.01em] text-mir-text">
-                                {g.nome}
-                            </h3>
-                            <span className="font-mono text-[11.5px] tabular-nums text-mir-text3">
-                                {g.total.toLocaleString('pt-BR')} faixas
-                            </span>
-                            <span className="h-px flex-1 bg-mir-line" />
-                        </div>
+            {parede.length > 0 && (
+                <div className="mx-auto mt-8 w-full max-w-[1320px] px-5 sm:px-10">
+                    <PilhaDaHome pecas={pecasDaPilha(parede)} />
+                </div>
+            )}
 
-                        {/* scroll-pl acompanha o px: sem ele o scroll-snap
-                            encosta o primeiro item na borda do scrollport e
-                            ignora o padding, então a fileira nascia com
-                            scrollLeft de 40px e as capas ficavam justamente
-                            esse tanto à esquerda do título. */}
-                        <div className="mx-auto mt-3.5 flex w-full max-w-[1320px] snap-x scroll-pl-5 gap-3.5 overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:scroll-pl-10 sm:px-10 [&::-webkit-scrollbar]:hidden">
-                            {g.faixas.map((f) => (
-                                <Faixa
-                                    key={f.id}
-                                    md5={f.md5}
-                                    titulo={f.titulo}
-                                    artista={f.artista}
-                                    isrc={f.isrc}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                ))}
-            </div>
+            {generos.length > 0 && (
+                <div className="mx-auto grid w-full max-w-[1320px] grid-cols-1 gap-x-8 gap-y-10 px-5 pb-20 pt-16 sm:grid-cols-2 sm:px-10 lg:grid-cols-4 lg:pb-24">
+                    {generos.map((g) => (
+                        <Genero key={g.nome} g={g} />
+                    ))}
+                </div>
+            )}
         </section>
     )
 }

@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
+import { origemPublica } from '@/lib/site'
 import { createClientForActions } from '@/utils/supabase/server'
 
 /**
@@ -13,7 +14,10 @@ import { createClientForActions } from '@/utils/supabase/server'
  * `code` é recuperação de senha e redireciona para /reset-password.
  */
 export async function GET(request: NextRequest) {
-    const { searchParams, origin } = new URL(request.url)
+    const { searchParams } = new URL(request.url)
+    // Não é o `origin` de `request.url`: atrás do nginx ele é o bind interno
+    // do servidor, e o redirect sairia para localhost — ver origemPublica.
+    const origin = origemPublica(request.headers)
     const code = searchParams.get('code')
     const next = searchParams.get('next') ?? '/'
 

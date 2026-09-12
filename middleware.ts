@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
+import { origemPublica } from '@/lib/site'
+
 // O conteúdo do Mirsui é aberto. Login serve para AGIR (salvar, botar ficha,
 // seguir, comentar), não para OLHAR — mesmo modelo de Letterboxd e Last.fm.
 //
@@ -148,7 +150,11 @@ export async function middleware(request: NextRequest) {
     if (!temCookieDeSessao(request)) return NextResponse.next()
 
     const { user, response } = await validarSessao(request)
-    if (user) return NextResponse.redirect(new URL('/feed', request.url))
+    if (user) {
+      return NextResponse.redirect(
+        new URL('/feed', origemPublica(request.headers))
+      )
+    }
 
     // Cookie vencido ou inválido: segue para a landing mesmo. A `response`
     // leva junto a limpeza que o @supabase/ssr fez dos cookies mortos, senão
@@ -165,7 +171,7 @@ export async function middleware(request: NextRequest) {
   if (!user) {
     // Não há mais página de login: usuários não autenticados voltam para a
     // home (landing), onde o login/registro acontece via modal.
-    const redirectUrl = new URL('/', request.url)
+    const redirectUrl = new URL('/', origemPublica(request.headers))
     redirectUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(redirectUrl)
   }

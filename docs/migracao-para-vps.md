@@ -677,6 +677,8 @@ Fase 4  [x] frontend clonado em /home/ubuntu/mirsui-web · npm ci · build
         [x] curl 127.0.0.1:3002 respondendo — 5 rotas, static, public,
             otimizador de imagem e uma página que lê o Supabase novo
         [x] nginx NÃO tocado — continua com os mesmos 7 sites
+        [x] .env do BACKEND apontado para 127.0.0.1:54321 + chaves novas —
+            FALTAVA, e derrubou o login por senha por 8 dias (§13, 11/09)
 
 Fase 5  [x] sites-enabled mirsui-db (db→54321) — adiantado na fase 3, que
             não tinha como testar OAuth sem ele
@@ -2248,6 +2250,67 @@ Três saídas, nenhuma urgente hoje:
 [ ] aceitar: no dia do restore, reemitir JWT_SECRET, anon key e service role,
     e refazer o build do front. Funciona, custa uma tarde e derruba as sessões
 ```
+
+---
+
+### 11 de setembro, noite — o login por senha estava quebrado desde a virada, e o culpado era o `.env` que a fase 4 não tocou
+
+**O sintoma:** entrar com e-mail e senha em `www.mirsui.com` devolvia "Erro ao
+iniciar sessão". No log do `mirsui-web`:
+
+```
+Erro ao persistir sessão: invalid JWT: unable to parse or verify signature,
+token signature is invalid   (403, code: bad_jwt)
+```
+
+**A causa:** o §7 manda trocar `SUPABASE_URL` e as duas chaves no
+`/home/ubuntu/mirsui-backend/.env`. O checklist da fase 4 marcou o frontend e
+esqueceu o backend — o `.env` era de **16/08**, e ainda apontava para
+`tqprioqqitimssshcrcr.supabase.co`. Como o projeto da nuvem continua no ar (fase
+7), o `signInWithPassword` do backend funcionava lá, emitia um token assinado com
+o `JWT_SECRET` **antigo**, e o `setSession` do frontend o levava ao GoTrue
+**novo**, que recusava a assinatura. Três consequências, não uma:
+
+1. login por senha quebrado — o caso relatado;
+2. login por Google entrava (vai direto ao GoTrue novo), mas toda rota do
+   backend com `requireAuth` devolvia 401, porque o `getUser` validava o token
+   novo contra o GoTrue da nuvem;
+3. **os crons gravaram na nuvem por oito dias** (03→11/09).
+
+**O conserto:** `.env` do backend com `SUPABASE_URL=http://127.0.0.1:54321`,
+`ANON_KEY` e `SERVICE_ROLE_KEY` do `/opt/mirsui-db/.env`,
+`FRONTEND_URL=https://www.mirsui.com`; cópia do anterior em `.env.pre-vps`
+(ignorado pelo git, junto com o `.env`); `pm2 restart mirsui-backend
+--update-env`. Testado com um usuário descartável no GoTrue local: login pelo
+backend → token com `iss: https://db.mirsui.com/auth/v1` → aceito por
+`db.mirsui.com/auth/v1/user` (200) → `GET /stakes` com o token responde 200 e sem
+ele 401. Usuário apagado; 15/15 de novo.
+
+**O que divergiu, medido antes de mexer.** Só o que os crons produzem — nenhuma
+tabela de usuário (stakes, favorites, playlists, comments, followers, users)
+tinha diferença de contagem, e a VPS era **prefixo exato** da nuvem nas cinco
+tabelas que divergiram (ids locais ⊂ ids da nuvem, nada local que a nuvem não
+tivesse):
+
+| tabela | nuvem | VPS antes | trazido |
+|---|---|---|---|
+| `track_popularity_history` | 59.020 | 42.894 | +16.126 (ids > 66226) |
+| `observed_tracks` | 21.245 | 18.164 | +3.081, e as 18.164 atualizadas |
+| `stake_snapshots` | 198 | 180 | +18 (ids > 207) |
+| `discovery_artists` | 97 | 91 | +6, e as 91 atualizadas |
+| `stakes` | 3 | 3 | as 5 colunas que o job escreve, nos 3 |
+
+Trazido por PostgREST (só leitura na nuvem, ~22 MB), numa transação única com
+conferência de totais dentro dela, ensaiada antes com `rollback`. Sequências
+avançadas (`82358`, `225`). Backup das cinco tabelas antes de aplicar em
+`/var/backups/mirsui/mirsui-pre-sync-nuvem-2026-09-11.sql.gz`. Os crons voltam a
+gravar aqui a partir da próxima rodada (08:00/08:30 e 12:00 UTC).
+
+> **A lição para o checklist:** "fase concluída" era o front no ar lendo o banco
+> novo. O backend estava no ar também — só que lendo o outro. Ninguém percebeu
+> por oito dias porque o login por Google funcionava e a home não precisa de
+> sessão. Enquanto a fase 7 mantiver a nuvem viva, um `.env` esquecido não
+> falha: ele **funciona no lugar errado**, que é pior.
 
 ---
 

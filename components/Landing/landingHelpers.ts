@@ -48,26 +48,3 @@ export function tom(semente: string): string {
     }
     return TONS[h % TONS.length]
 }
-
-/** "14 nov 2024" — para quando as datas de uma lista cruzam o ano. */
-export function diaMesAno(iso: string | null): string {
-    if (!iso) return ''
-    const d = new Date(iso)
-    if (isNaN(d.getTime())) return ''
-    return `${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`
-}
-
-/** "10 ago" a partir de YYYY-MM-DD, sem fuso: a data é o dia da medição. */
-export function diaMesDeData(ymd: string | null): string {
-    if (!ymd) return ''
-    const [, m, d] = ymd.split('-').map(Number)
-    if (!m || !d) return ''
-    return `${d} ${MESES[m - 1]}`
-}
-
-/** "+10,7%", "Estável", "-2,1%": a variação como o produto fala. */
-export function variacaoTexto(v: number | null): string | null {
-    if (v === null) return null
-    if (Math.abs(v) < 0.5) return 'Estável'
-    return `${v > 0 ? '+' : ''}${v.toFixed(1).replace('.', ',')}%`
-}

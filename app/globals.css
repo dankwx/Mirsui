@@ -493,37 +493,3 @@
     transform: rotate(var(--tr, 0deg));
   }
 }
-
-/* ---------- Home: a esteira de achados ----------
-   Duas cópias do mesmo trilho, e o conjunto anda meia largura: o loop fecha
-   sem emenda. Pausa no hover para dar tempo de clicar; sem movimento vira
-   uma fileira que rola com o dedo. */
-.mir-esteira {
-  display: flex;
-  overflow: hidden;
-  padding: 8px 0;
-}
-.mir-esteira-trilho {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: 12px;
-  padding-right: 12px;
-  animation: mir-ticker 80s linear infinite;
-  will-change: transform;
-}
-.mir-esteira:hover .mir-esteira-trilho {
-  animation-play-state: paused;
-}
-@media (prefers-reduced-motion: reduce) {
-  .mir-esteira {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .mir-esteira-trilho {
-    animation: none;
-  }
-  .mir-esteira-trilho[aria-hidden='true'] {
-    display: none;
-  }
-}

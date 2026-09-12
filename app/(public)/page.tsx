@@ -1,15 +1,13 @@
 import { getRecentActivity } from '@/utils/homepageService'
 import { getLandingObservatory } from '@/utils/observatoryService'
-import { getFichaDaHome } from '@/utils/fichaDaHome'
 import {
     getParedeDoAcervo,
     getGenerosDoAcervo,
     getPessoasDaCena,
 } from '@/utils/homeService'
 import Hero from '@/components/Landing/Hero'
-import Esteira from '@/components/Landing/Esteira'
-import Acervo from '@/components/Landing/Acervo'
 import Cena from '@/components/Landing/Cena'
+import Acervo from '@/components/Landing/Acervo'
 import Fechamento from '@/components/Landing/Fechamento'
 import type { Metadata } from 'next'
 
@@ -32,14 +30,6 @@ import type { Metadata } from 'next'
  * capa. Então o acervo é quem enche a página, e a camada de gente aparece do
  * tamanho real que tem — sem inventar usuário, que é a mentira que qualquer
  * clique desmentiria.
- *
- * A quarta versão (set/2026) trocou a atmosfera pelo mecanismo. O hero deixou
- * de ser manchete sobre mosaico e virou a ficha de uma faixa real: capa, a
- * curva medida e quem chegou antes, com o carimbo de posição. Esse carimbo
- * ("1ª", "2ª") é o desenho que só o Mirsui tem, e repete na esteira de
- * achados e na cena para a página inteira ler como a mesma coisa. O acervo
- * virou a pilha por gravidade de /pilha, e os gêneros viraram discos
- * empilhados, que é a marca virando layout.
  *
  * Metadata, rotas e o redirect de quem já está logado seguem como estavam:
  * mexer neles é mexer em SEO.
@@ -100,29 +90,21 @@ export const metadata: Metadata = {
 export const revalidate = 600
 
 export default async function HomePage() {
-    const [parede, generos, achados, pessoas, observatorio] = await Promise.all([
+    const [mosaico, generos, achados, pessoas, observatorio] = await Promise.all([
         getParedeDoAcervo(60),
-        getGenerosDoAcervo(8, 5),
-        // 24: a esteira precisa de comprimento, e a ficha do hero e os recados
-        // escolhem dentro desta mesma lista, sem consulta extra.
-        getRecentActivity(24),
+        getGenerosDoAcervo(8, 8),
+        getRecentActivity(6),
         getPessoasDaCena(6),
         getLandingObservatory(1),
     ])
-    const ficha = await getFichaDaHome(achados)
 
     return (
         <div className="min-h-screen bg-mir-bg text-mir-text">
             <span aria-hidden="true" className="mir-grain" />
 
-            <Hero ficha={ficha} />
-            <Esteira achados={achados} />
-            <Acervo
-                parede={parede}
-                generos={generos}
-                medidas={observatorio?.medidas ?? 0}
-            />
+            <Hero mosaico={mosaico} medidas={observatorio?.medidas ?? 0} />
             <Cena achados={achados} pessoas={pessoas} />
+            <Acervo generos={generos} />
             <Fechamento />
             {/* Sem <LandingFooter /> aqui: quem monta o rodapé é o
                 app/(public)/layout.tsx, para todas as páginas deslogadas. */}

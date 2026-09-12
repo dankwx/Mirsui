@@ -12,10 +12,11 @@ não havia produção para proteger; a hora de acompanhamento foi feita e está 
 §14** — as fases 7 a 12, com ordem entre elas. **A fase 8, o backup, está
 feita**: cron às 03:30, dois arquivos por dia no `gdrive:mirsui-backup` e um
 restore testado de propósito, que foi quem descobriu que o dump precisa sair como
-`supabase_admin`. **A fase 9, as imagens, também está feita na parte que se via de fora**: o
+`supabase_admin`. **A fase 9, as imagens, está feita — inteira, em 11/09**: o
 avatar quebrado caía no ícone de imagem partida porque o fallback só tratava
-URL ausente, não URL morta — corrigido em `d40ddc7`. Falta só o resgate dos
-bytes, que depende de a cota da nuvem virar, provavelmente dia 27. O §13 é o registro
+URL ausente, não URL morta (corrigido em `d40ddc7`), e a cota da nuvem virou
+antes do dia 27 — os 12 arquivos foram resgatados, as 17 URLs reescritas e o
+host antigo saiu do `next.config.mjs`. Nada mais aponta para a nuvem. O §13 é o registro
 do que foi feito — inclusive o trigger de `auth.users` que o dump não levou e que
 só apareceu porque a fase 3 testou um cadastro de verdade, e a conferência da
 noite de 4/09, que encontrou o repositório partido em dois e o consertou.
@@ -2321,11 +2322,14 @@ uma lista solta e virou o **§14**: seis fases numeradas, com ordem entre elas e
 critério de pronto em cada uma. **As fases 8 e 9 estão feitas** — o backup e as
 imagens.
 
-**A fase 9 fechou a parte que se via de fora** (`d40ddc7`): o avatar quebrado
-caía no ícone de imagem partida em vez do fallback, e agora cai no fallback.
-Falta só o resgate dos bytes, que **depende da cota da nuvem virar — dia 27,
-provavelmente**. Marque isso: é a única pendência deste documento com data de
-terceiro, e ela conflita com o 18/09 da fase 7.
+**A fase 9 fechou inteira em 11/09.** A parte que se via de fora já tinha
+fechado em `d40ddc7` (o avatar morto caía no ícone de imagem partida em vez do
+fallback). A cota da nuvem virou antes do dia 27 previsto — foi notada porque
+as fotos *voltaram* em produção sem ninguém ter feito nada, o que só podia ser
+o site puxando da nuvem outra vez — e nessa janela o resgate rodou: 12 arquivos
+(5,3 MB, tamanhos de imagem, nenhum de 189 bytes), 14 + 3 `UPDATE`, host antigo
+fora do `next.config.mjs`, build e deploy. Com isso a trava da fase 7 caiu: o
+projeto na nuvem pode ser apagado a partir de 18/09.
 
 **A próxima é a fase 10**, o monitor de fora, que não depende de ninguém. Depois
 a 11 (o reboot combinado, que precisa de janela) e a 12 (os três segredos).
@@ -2357,10 +2361,10 @@ não é a numérica: **a fase 8 vem antes de todas**, e a 11 vem depois dela.
 Segue como estava: o projeto da nuvem não se apaga antes de **18/09/2026**. Mas a
 conferência somou um motivo que a data não cobre:
 
-> **Os 12 arquivos do Storage só existem lá.** O que está no disco da VPS são
-> corpos de erro 402. Se o projeto for apagado antes de a cota virar, as 5 fotos
-> de usuário e as 3 capas de playlist somem para sempre. **A fase 7 não termina
-> em 18/09 — ela termina quando a fase 9 tiver os bytes.**
+> ~~**Os 12 arquivos do Storage só existem lá.**~~ **Resolvido em 11/09** — a
+> fase 9 resgatou os 12 (ver abaixo). O que segue é o registro do porquê a
+> trava existia. Se o projeto tivesse sido apagado antes de a cota virar, as 5
+> fotos de usuário e as 3 capas de playlist sumiriam para sempre.
 
 **Atualização de 4/09 — a trava encolheu, mas não sumiu.** O inventário da fase
 9 mostrou que 3 dos 12 são capas de playlist, e playlist saiu do produto; o
@@ -2373,8 +2377,7 @@ omissão**, que é exatamente o que acontece se alguém apagar o projeto na data
 
 ```
 [ ] não apagar antes de 18/09/2026
-[ ] e não apagar antes de a fase 9 resgatar as 5 fotos — ou de a perda delas
-    ser uma decisão tomada, não um esquecimento
+[x] e não apagar antes de a fase 9 resgatar as 5 fotos — **resgatadas em 11/09**
 ```
 
 ### Fase 8 — o backup  ·  **FEITA em 4/09 às 19h17**
@@ -2400,7 +2403,7 @@ motivos que não cabem numa caixa marcada:
 - **`rclone copy`, nunca `sync`.** O `sync-gdrive.sh` vizinho usa `sync`, e `sync`
   espelha remoções: a limpeza local dos 14 dias apagaria a cópia de fora junto.
 
-### Fase 9 — as imagens  ·  **o feio saiu do ar em 4/09; falta o resgate**
+### Fase 9 — as imagens  ·  **FEITA em 11/09 — a cota virou antes do dia 27**
 
 ```
 [x] 1. db.mirsui.com entra em images.domains do next.config.mjs (o host antigo
@@ -2413,14 +2416,23 @@ motivos que não cabem numa caixa marcada:
          a850e1cb…, e só então removido
 [x] 4. ~~recriar um default.jpg~~ — **cancelado, e o motivo está abaixo**
 [x] 5. ~~UPDATE das linhas de default.jpg~~ — **não é mais preciso**
---- daqui para baixo depende de a cota da nuvem virar (dia 27, provavelmente) --
-[ ] 6. rodar o mirsui-migra-storage.sh e conferir que os arquivos têm tamanho
+--- a cota virou antes do dia 27; o resto rodou em 11/09 ------------------------
+[x] 6. rodar o mirsui-migra-storage.sh e conferir que os arquivos têm tamanho
        de imagem, não 189 bytes
-[ ] 7. os dois UPDATE completos do §13
-[ ] 8. só então tirar tqprioqqitimssshcrcr.supabase.co do next.config.mjs
-[ ] 9. npm run build + deploy.sh — os passos 1 e 8 são config do Next, e config
+       → enviados=12 falhas=0, 5,3 MB, de 6,6 KB a 4,1 MB, 10 md5 distintos;
+         storage.objects = 8 + 4. Cada URL nova respondeu 200 em db.mirsui.com
+[x] 7. os dois UPDATE completos do §13 → UPDATE 14, UPDATE 3, zero sobrando
+[x] 8. só então tirar tqprioqqitimssshcrcr.supabase.co do next.config.mjs
+[x] 9. npm run build + deploy.sh — os passos 1 e 8 são config do Next, e config
        do Next só vale depois do build
 ```
+
+> **Como se soube que a cota tinha virado.** Ninguém olhou o painel: as fotos
+> reapareceram em `www.mirsui.com` sem nenhuma ação, e a única explicação era
+> o HTML ainda apontar para a nuvem e a nuvem ter voltado a responder 200. Ou
+> seja, o site estava de novo gastando egress lá. O resgate rodou nessa janela.
+> Armadilha para o futuro: "as fotos estão aparecendo" **não** significava que
+> a fase 9 tinha sido feita — significava o contrário.
 
 **Os passos 4 e 5 morreram porque o problema era outro.** O plano supunha que
 os avatares estavam feios por falta de dado. Não estavam: estavam feios por

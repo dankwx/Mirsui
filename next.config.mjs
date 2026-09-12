@@ -11,12 +11,10 @@ const nextConfig = {
         domains: [
             'i.scdn.co',
             'cdn-images.dzcdn.net',
-            // db.mirsui.com: o Storage self-hosted, para onde as imagens de
-            // usuário apontam agora. O host antigo continua aqui de propósito
-            // enquanto os 12 arquivos não vierem da nuvem — ver fase 9 do
-            // docs/migracao-para-vps.md. Só sai depois do resgate.
+            // db.mirsui.com: o Storage self-hosted, onde moram as imagens de
+            // usuário desde o resgate da fase 9 (docs/migracao-para-vps.md).
+            // O host da nuvem saiu de propósito: nada mais aponta para lá.
             'db.mirsui.com',
-            'tqprioqqitimssshcrcr.supabase.co',
         ],
     },
     // Reverse proxy do PostHog: o client envia eventos para /ingest (mesmo domínio),

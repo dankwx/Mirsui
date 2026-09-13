@@ -16,7 +16,8 @@
 
 import 'server-only'
 
-const BASE = 'https://api.deezer.com'
+// Somente server-side. Sem fallback direto: todos os processos compartilham
+// o limite e a pausa do gateway local, inclusive os renders do Next.
 
 /**
  * A faixa é revalidada em 15 min, e não em 24 h como o resto, por causa da
@@ -90,13 +91,25 @@ interface DeezerLista<T> {
 
 async function dz<T>(path: string, revalidate: number): Promise<T | null> {
     try {
-        const res = await fetch(`${BASE}${path}`, { next: { revalidate } })
+        const token = process.env.DEEZER_GATEWAY_TOKEN
+        if (!token) return null
+        const res = await fetch(`${process.env.DEEZER_GATEWAY_URL || 'http://127.0.0.1:3012'}/request`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+            body: JSON.stringify({ path, priority: 'interactive', maxAgeMs: Math.min(revalidate * 1000, 86400000), waitMs: 8000 }),
+            // O gateway aplica a janela de frescor deste endpoint e só guarda
+            // sucessos. O Next não deve guardar um erro do broker.
+            cache: 'no-store',
+            signal: AbortSignal.timeout(10000),
+        })
         if (!res.ok) return null
-        const data = (await res.json()) as T & { error?: DeezerErro }
+        const result = await res.json() as { ok: boolean; data?: T & { error?: DeezerErro } }
+        if (!result.ok) return null
+        const data = result.data
         // O Deezer responde 200 com `error` no corpo para faixa inexistente
         // (code 800) e para quota estourada (code 4). Os dois viram null aqui;
         // quem chama trata os dois do mesmo jeito, que é não mostrar o bloco.
-        if (data && data.error) return null
+        if (!data || data.error) return null
         return data
     } catch {
         return null

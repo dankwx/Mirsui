@@ -71,6 +71,20 @@ export interface Mes {
     fichas: number
 }
 
+/**
+ * Um dia do catálogo do Observatório. Vem de `admin_catalogo_por_dia()`
+ * (migration 034), colada ao JSON pela rota. O dia é o de São Paulo, e a
+ * série é contínua: dia sem descoberta chega com `novas: 0`.
+ */
+export interface DiaDoCatalogo {
+    /** 'YYYY-MM-DD' */
+    dia: string
+    /** faixas que entraram nesse dia */
+    novas: number
+    /** faixas no banco ao fim desse dia */
+    total: number
+}
+
 export interface Pessoa {
     id: string
     username: string | null
@@ -135,6 +149,8 @@ export interface Painel {
     observatorio: Observatorio
     social: Social
     meses: Mes[]
+    /** da primeira faixa até hoje, um item por dia */
+    catalogo: DiaDoCatalogo[]
     pessoas: Pessoa[]
     mesa: FichaNaMesa[]
     maisSalvas: FaixaSalva[]

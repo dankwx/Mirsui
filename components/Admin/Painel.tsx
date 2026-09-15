@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import type {
+    DiaDoCatalogo,
     FaixaSalva,
     FichaNaMesa,
     Mes,
@@ -248,6 +249,239 @@ function Meses({ meses }: { meses: Mes[] }) {
                     pico de {teto} num mês só
                 </span>
             </div>
+        </div>
+    )
+}
+
+/* ------------------------------------------------------------------ *
+ * O catálogo
+ *
+ * Uma linha só: quantas faixas o Observatório tinha ao fim de cada dia, desde
+ * a primeira. A descoberta entra em lote de madrugada, então a curva sobe em
+ * degraus — e o degrau de hoje é a pergunta que a seção responde ("as 5 mil
+ * de hoje entraram?"). Dia sem degrau é a rotina parada, por isso a série
+ * vem contínua do banco em vez de pular os dias vazios.
+ *
+ * O SVG só desenha a área e a linha, esticado na largura que houver (mesmo
+ * truque da Sparkline em TrackCurve). Régua, rótulos e o ponto final são HTML
+ * posicionado em porcentagem: dentro do SVG esticado o texto escalaria junto
+ * e ficaria ilegível no telefone.
+ * ------------------------------------------------------------------ */
+
+/** "15 set", ou "15 set 26" com o ano, a partir de 'YYYY-MM-DD' — sem Date, sem fuso. */
+function dataDia(dia: string, comAno = false): string {
+    const [a, m, d] = dia.split('-')
+    const base = `${Number(d)} ${MESES[Number(m) - 1]}`
+    return comAno ? `${base} ${a.slice(2)}` : base
+}
+
+/** "40 mil" em vez de "40.000": a régua é lida de canto de olho. */
+const curto = (v: number) => (v >= 1000 ? `${nf.format(v / 1000)} mil` : nf.format(v))
+
+/**
+ * O passo da régua: 1, 2 ou 5 × 10^k, o menor que deixa no máximo cinco
+ * linhas até o teto. 36 mil → 10 mil; 120 mil → 50 mil.
+ */
+function passoDaRegua(max: number): number {
+    const base = Math.pow(10, Math.floor(Math.log10(Math.max(max, 1))))
+    for (const m of [0.2, 0.5, 1, 2, 5]) {
+        const passo = base * m
+        if (max / passo <= 5) return Math.max(1, passo)
+    }
+    return base * 10
+}
+
+function Catalogo({ dias }: { dias: DiaDoCatalogo[] }) {
+    const n = dias.length
+    if (n === 0) {
+        return <Vazio>O Observatório ainda não tem faixa nenhuma.</Vazio>
+    }
+
+    const hoje = dias[n - 1]
+    const ontem = n > 1 ? dias[n - 2] : null
+    const semana = dias.slice(-7)
+    const mediaSemana = Math.round(
+        semana.reduce((soma, d) => soma + d.novas, 0) / semana.length
+    )
+
+    const passo = passoDaRegua(hoje.total)
+    const teto = Math.max(passo, Math.ceil(hoje.total / passo) * passo)
+    const regua: number[] = []
+    for (let v = passo; v <= teto; v += passo) regua.push(v)
+
+    // Em porcentagem da caixa: x pelo índice, y pelo total contra o teto.
+    const x = (i: number) => (n > 1 ? (i / (n - 1)) * 100 : 50)
+    const y = (total: number) => 100 - (total / teto) * 100
+
+    // viewBox 1000×100 esticado com preserveAspectRatio="none".
+    const pontos = dias.map(
+        (d, i) => `${(x(i) * 10).toFixed(2)} ${y(d.total).toFixed(2)}`
+    )
+    const linha = `M ${pontos.join(' L ')}`
+    const area = `${linha} L ${(x(n - 1) * 10).toFixed(2)} 100 L ${(x(0) * 10).toFixed(2)} 100 Z`
+
+    // Marcas do eixo: o primeiro dia, cada dia 1 e o último. Com mais de oito
+    // meses, só alguns dias 1, senão os rótulos se atropelam no telefone.
+    // Um dia 1 encostado numa ponta (menos de 8% da largura) também sai.
+    const primeirosDoMes = dias
+        .map((_, i) => i)
+        .filter((i) => i > 0 && i < n - 1 && dias[i].dia.endsWith('-01'))
+    const saltoMes = Math.ceil(primeirosDoMes.length / 8)
+    const marcas = [
+        0,
+        ...primeirosDoMes.filter(
+            (i, k) => k % saltoMes === 0 && x(i) >= 8 && x(i) <= 92
+        ),
+        ...(n > 1 ? [n - 1] : []),
+    ]
+
+    const resumo =
+        `${nf.format(hoje.total)} faixas no banco em ${dataDia(hoje.dia, true)}; ` +
+        `${nf.format(hoje.novas)} entraram hoje`
+
+    return (
+        <div>
+            <p className="max-w-[64ch] text-[15px] leading-[1.45] text-mir-text2">
+                <b className="font-bold text-mir-text">
+                    {nf.format(hoje.total)} faixas
+                </b>{' '}
+                no banco.{' '}
+                {hoje.novas > 0 ? (
+                    <>
+                        Hoje entraram{' '}
+                        <b className="font-bold text-mir-text">
+                            {nf.format(hoje.novas)}
+                        </b>
+                    </>
+                ) : (
+                    <>Hoje ainda não entrou nenhuma</>
+                )}
+                {ontem && <>; ontem, {nf.format(ontem.novas)}</>}. Na última
+                semana, {nf.format(mediaSemana)} por dia.
+            </p>
+
+            <figure
+                role="img"
+                aria-label={resumo}
+                className="mr-[76px] mt-6 pt-4"
+            >
+                <div className="relative h-[180px] border-b border-mir-line">
+                    {/* régua: uma linha por passo, rótulo em cima à esquerda.
+                        O zero é a base da caixa e não precisa de nome. */}
+                    {regua.map((v) => (
+                        <div
+                            key={v}
+                            className="absolute inset-x-0 border-t border-mir-line"
+                            style={{ top: `${y(v)}%` }}
+                        >
+                            <span className="absolute left-0 top-[-15px] font-mono text-[9.5px] tabular-nums text-mir-text3">
+                                {curto(v)}
+                            </span>
+                        </div>
+                    ))}
+
+                    <svg
+                        viewBox="0 0 1000 100"
+                        preserveAspectRatio="none"
+                        className="absolute inset-0 h-full w-full"
+                        aria-hidden="true"
+                    >
+                        {/* Esmaecendo até zero, como na TrackCurve: bloco chapado
+                            de creme sobre o fundo quente vira uma mancha. */}
+                        <defs>
+                            <linearGradient id="catalogo-area" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#ece3d2" stopOpacity="0.14" />
+                                <stop offset="100%" stopColor="#ece3d2" stopOpacity="0" />
+                            </linearGradient>
+                        </defs>
+                        <path d={area} fill="url(#catalogo-area)" />
+                        <path
+                            d={linha}
+                            fill="none"
+                            stroke="#ece3d2"
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            vectorEffect="non-scaling-stroke"
+                        />
+                    </svg>
+
+                    {/* o ponto de hoje e o total, na ponta da linha */}
+                    <span
+                        className="absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-mir-text ring-2 ring-mir-bg"
+                        style={{ left: `${x(n - 1)}%`, top: `${y(hoje.total)}%` }}
+                    />
+                    <span
+                        className="absolute left-full ml-3 -translate-y-1/2 text-[13.5px] font-extrabold tabular-nums leading-none tracking-[-0.03em] text-mir-text"
+                        style={{ top: `${y(hoje.total)}%` }}
+                    >
+                        {nf.format(hoje.total)}
+                    </span>
+
+                    {/* hover: uma coluna invisível por dia, com o fio, o ponto e
+                        a leitura daquele dia. Só CSS — a página é server
+                        component e o gráfico não precisa de estado. O balão
+                        vira de lado na metade direita e desce quando o ponto
+                        está em cima, para não cobrir o que está mostrando. */}
+                    <div className="absolute inset-0" aria-hidden="true">
+                        {dias.map((d, i) => {
+                            const cx = x(i)
+                            const cy = y(d.total)
+                            const largura = n > 1 ? 100 / (n - 1) : 100
+                            return (
+                                <div
+                                    key={d.dia}
+                                    className="group absolute bottom-0 top-0 -translate-x-1/2"
+                                    style={{ left: `${cx}%`, width: `${largura}%` }}
+                                >
+                                    <span className="absolute bottom-0 left-1/2 top-0 w-px bg-mir-line2 opacity-0 group-hover:opacity-100" />
+                                    <span
+                                        className="absolute left-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-mir-text opacity-0 ring-2 ring-mir-bg group-hover:opacity-100"
+                                        style={{ top: `${cy}%` }}
+                                    />
+                                    <div
+                                        className={`pointer-events-none absolute z-10 whitespace-nowrap rounded-md bg-mir-raised px-2.5 py-1.5 opacity-0 shadow-lg group-hover:opacity-100 ${
+                                            cx > 60 ? 'right-1/2 mr-2.5' : 'left-1/2 ml-2.5'
+                                        } ${cy > 45 ? 'top-0' : 'bottom-5'}`}
+                                    >
+                                        <p className="text-[13.5px] font-bold tabular-nums leading-tight text-mir-text">
+                                            {nf.format(d.total)}{' '}
+                                            <span className="font-normal text-mir-text3">
+                                                no banco
+                                            </span>
+                                        </p>
+                                        <p className="mt-0.5 font-mono text-[11px] tabular-nums text-mir-text2">
+                                            {dataDia(d.dia, true)} ·{' '}
+                                            {d.novas > 0
+                                                ? `+${nf.format(d.novas)}`
+                                                : 'nenhuma nova'}
+                                        </p>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>
+
+                {/* eixo: as pontas ancoram para dentro, o meio centraliza */}
+                <div className="relative mt-1.5 h-4">
+                    {marcas.map((i) => (
+                        <span
+                            key={i}
+                            className={`absolute whitespace-nowrap font-mono text-[9.5px] tabular-nums text-mir-text3 ${
+                                i === 0
+                                    ? ''
+                                    : i === n - 1
+                                      ? '-translate-x-full'
+                                      : '-translate-x-1/2'
+                            }`}
+                            style={{ left: `${x(i)}%` }}
+                        >
+                            {dataDia(dias[i].dia)}
+                        </span>
+                    ))}
+                </div>
+            </figure>
         </div>
     )
 }
@@ -728,6 +962,14 @@ export default function PainelDoDono({ dados }: { dados: DadosDoPainel }) {
                         nota={`${nf.format(obs.historico_24h)} nas últimas 24 h`}
                     />
                 </section>
+
+                {/* ---- o catálogo ---- */}
+                <Secao
+                    titulo="O catálogo"
+                    nota="faixas no Observatório ao fim de cada dia, desde a primeira que entrou"
+                >
+                    <Catalogo dias={dados.catalogo} />
+                </Secao>
 
                 {/* ---- os meses ---- */}
                 <Secao

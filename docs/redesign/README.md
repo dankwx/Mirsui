@@ -1,5 +1,7 @@
 # Mirsui: clube de descobertas
 
+**Para continuar o design, leia [DESIGN.md](../../DESIGN.md).** Este arquivo é o registro histórico da implementação e da geração de assets. O design foi aprovado, integrado à `main` e publicado; a referência está preservada na tag `design-club-v1`, commit `f4b122b`.
+
 Branch: `redesign/landing-record-club`.
 
 ## Direção

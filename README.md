@@ -61,6 +61,9 @@ Duas ferramentas, com papéis diferentes:
 
 ## Documentos
 
+- [DESIGN.md](DESIGN.md) — guia da identidade aprovada: princípios, tokens,
+  componentes e como aplicá-la em outras telas. Referência preservada na tag
+  `design-club-v1`; capturas em `docs/redesign/`.
 - `REVISITAR.md` — **leia antes de divulgar o Mirsui em qualquer lugar com
   audiência.** O que quebra quando o site der certo, com os números medidos.
 - `docs/plano-de-urls-e-seo.md` — a forma das URLs e por que a indexação está

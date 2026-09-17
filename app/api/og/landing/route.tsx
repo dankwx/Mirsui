@@ -14,10 +14,10 @@ import {
 
 export const runtime = 'edge'
 
-const BG = '#16120c'
-const ACC = '#cdef36'
-const TEXT = '#ece3d2'
-const MUTED = '#9b958b'
+const BG = '#f7f7f2'
+const ACC = '#db4b27'
+const TEXT = '#242522'
+const MUTED = '#64665e'
 
 export async function GET() {
     return new ImageResponse(
@@ -36,28 +36,18 @@ export async function GET() {
             >
                 <div
                     style={{
-                        position: 'absolute',
-                        bottom: '-260px',
-                        left: '-160px',
-                        width: '820px',
-                        height: '820px',
-                        background: `radial-gradient(closest-side, ${ACC}26, transparent 70%)`,
                         display: 'flex',
+                        alignItems: 'center',
+                        gap: '16px',
                     }}
-                />
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                >
                     <svg
                         width="61"
                         height="44"
                         viewBox={MARCA_VIEWBOX}
                         xmlns="http://www.w3.org/2000/svg"
                     >
-                        <path
-                            fillRule="evenodd"
-                            d={MARCA_DISCOS}
-                            fill={TEXT}
-                        />
+                        <path fillRule="evenodd" d={MARCA_DISCOS} fill={TEXT} />
                         <path d={MARCA_MIOLO} fill={ACC} />
                     </svg>
                     <div
@@ -85,7 +75,7 @@ export async function GET() {
                             maxWidth: '900px',
                         }}
                     >
-                        Salve a música antes dela estourar.
+                        Você ouviu primeiro. O mundo vem depois.
                     </div>
                     <div
                         style={{
@@ -96,11 +86,17 @@ export async function GET() {
                             color: MUTED,
                         }}
                     >
-                        Fica registrado que a descoberta foi sua.
+                        Descubra música. Registre seus achados.
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '14px',
+                    }}
+                >
                     <div
                         style={{
                             display: 'flex',
@@ -119,7 +115,7 @@ export async function GET() {
                             color: TEXT,
                         }}
                     >
-                        A CENA, AO VIVO
+                        SEU OUVIDO CHEGA ANTES.
                     </div>
                 </div>
             </div>

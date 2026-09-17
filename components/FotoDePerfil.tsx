@@ -23,10 +23,12 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 export default function FotoDePerfil({
     src,
     className,
+    loading,
     children,
 }: {
     src?: string | null
     className?: string
+    loading?: 'lazy' | 'eager'
     children?: ReactNode
 }) {
     const [quebrou, setQuebrou] = useState(false)
@@ -77,6 +79,7 @@ export default function FotoDePerfil({
         <img
             ref={ref}
             src={src}
+            loading={loading}
             alt=""
             className={className}
             onError={() => setQuebrou(true)}

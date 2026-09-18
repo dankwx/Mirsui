@@ -99,18 +99,18 @@ Respeite `prefers-reduced-motion`. Não acrescente rolagem forçada, paralaxe, c
 
 ## Como expandir para outras partes do site
 
-**Estado atual:** esta linguagem ainda não é um tema global. [PublicShell](components/Landing/PublicShell.tsx) só a ativa em `/`. Páginas legais e telas logadas continuam com a identidade anterior. `tailwind.config.ts` ainda contém `mir-*` marrom/lima, e `globals.css` contém tokens antigos: não os confunda com o sistema `club`.
+**Estado atual:** a home e o perfil público em `/user/[username]` usam a identidade `club`. [PublicShell](components/Landing/PublicShell.tsx) mantém a home no shell público, enquanto o layout do grupo `(club)` usa [ClubShell](components/Club/ClubShell.tsx), [ClubHeader](components/Club/ClubHeader.tsx) e [ClubFooter](components/Landing/ClubFooter.tsx). Os tokens compartilhados estão em [app/club.css](app/club.css). Páginas legais e outras telas logadas continuam com a identidade anterior. `tailwind.config.ts` ainda contém `mir-*` marrom/lima, e `globals.css` contém tokens antigos: não os confunda com o sistema `club`.
 
 1. Leia a captura e o componente da home mais próximo da tarefa. Defina qual conteúdo e qual ação devem dominar a nova tela.
 2. Mantenha rotas, sessão, regras do produto, analytics e dados existentes. Mudar apresentação não autoriza inventar funcionalidades.
 3. Para migrar várias telas, extraia os tokens, estilos básicos e controle de tema para uma camada compartilhada. Faça essa extração preservando o resultado visual da home; evite copiar dez hexadecimais para cada módulo.
-4. Planeje o shell da nova área. Importar `Club.module.css` sozinho não define as variáveis: elas dependem de `.shell`. Copiar `PublicShell` também não resolve, pois ele verifica a rota `/`.
+4. Planeje o shell da nova área. Use `ClubShell` e os tokens de `app/club.css`; importar `Club.module.css` sozinho não define as variáveis. Copiar `PublicShell` também não resolve, pois ele é o shell da home.
 5. Reuse a hierarquia de botões, capas, textos e estados. Crie layouts adequados à tarefa, em vez de repetir as seções da landing.
 6. Compare a home antes/depois da extração e teste a nova tela nos dois temas.
 
-**Tema e portais:** [ThemeToggle](components/Landing/ThemeToggle.tsx) usa `data-club-theme="auto|light|dark"`, preferência do sistema e a chave `mirsui-landing-theme` no `localStorage`. Hoje encontra um único shell via `querySelector`. Se houver mais shells ou um tema para todo o app, centralize esse controle e preserve a preferência anterior na migração.
+**Tema e portais:** [ThemeToggle](components/Club/ThemeToggle.tsx) usa `data-club-theme="auto|light|dark"`, preferência do sistema e a chave `mirsui-landing-theme` no `localStorage`. Hoje encontra um único shell via `querySelector`. Se houver mais shells ou um tema para todo o app, centralize esse controle e preserve a preferência anterior na migração.
 
-O modal de autenticação é montado em um portal no `body`. Por isso há seletores `body:has(.shell)` que disponibilizam os tokens e adaptam as classes `.au-*`. Um novo diálogo portado para fora do shell precisa receber o tema também. Não resolva isso com um override global que recolore telas ainda não migradas.
+O modal de autenticação é montado em um portal no `body`. Por isso há seletores `body:has([data-club-theme])` que disponibilizam os tokens e adaptam as classes `.au-*`. Um novo diálogo portado para fora do shell precisa receber o tema também. Não resolva isso com um override global que recolore telas ainda não migradas.
 
 | Tela | Como traduzir a identidade |
 |---|---|
@@ -144,12 +144,13 @@ Esse tamanho é uma sugestão para páginas internas, não um valor extraído da
 
 | Arquivo | Responsabilidade |
 |---|---|
-| [Club.module.css](components/Landing/Club.module.css) | Tokens, layouts, componentes visuais, temas, responsividade e adaptação do modal |
+| [app/club.css](app/club.css) | Tokens, base compartilhada, temas, acessibilidade e adaptação do modal em portal |
+| [Club.module.css](components/Landing/Club.module.css) | Layouts e componentes visuais específicos da home |
 | [Hero.tsx](components/Landing/Hero.tsx) | Navegação, promessa principal, CTA e capas inclinadas |
 | [Acervo.tsx](components/Landing/Acervo.tsx) | Seleção editorial e filtros de gêneros reais |
 | [ComoFunciona.tsx](components/Landing/ComoFunciona.tsx) | Demonstração local do registro; não grava no banco |
 | [Cena.tsx](components/Landing/Cena.tsx) | Pessoas e atividade reais |
-| [RecordCover.tsx](components/Landing/RecordCover.tsx) | Capa com dimensões reservadas e fallback |
+| [RecordCover.tsx](components/Club/RecordCover.tsx) | Capa com dimensões reservadas e fallback |
 | [Fechamento.tsx](components/Landing/Fechamento.tsx) / [ClubFooter.tsx](components/Landing/ClubFooter.tsx) | Ilustração, convite e assinatura da marca |
 | [AuthModalTrigger.tsx](components/AuthModalTrigger/AuthModalTrigger.tsx) | Entrada nos fluxos reais de login/cadastro |
 | [page.tsx](app/(public)/page.tsx) | Composição, dados e metadata da home |

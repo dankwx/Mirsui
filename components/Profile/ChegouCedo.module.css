@@ -1,0 +1,185 @@
+.section {
+    border-top: 1px solid var(--club-line);
+}
+
+.container {
+    padding-block: 56px;
+}
+
+.heading h2 {
+    color: var(--club-text);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: clamp(26px, 2.8vw, 36px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.045em;
+}
+
+.heading p {
+    margin-top: 8px;
+    color: var(--club-muted);
+    font-size: 15px;
+    line-height: 1.55;
+}
+
+.content {
+    display: grid;
+    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+    align-items: end;
+    gap: 48px;
+    margin-top: 24px;
+}
+
+.featuredLink,
+.secondaryLink {
+    display: block;
+    min-width: 0;
+    color: var(--club-text);
+}
+
+.featuredCover {
+    box-shadow: 0 18px 28px -16px #20201e70;
+}
+
+.featuredLink h3 {
+    display: -webkit-box;
+    margin-top: 16px;
+    overflow: hidden;
+    color: var(--club-text);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.artist {
+    margin-top: 2px;
+    overflow: hidden;
+    color: var(--club-muted);
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.receiptResult {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--club-line);
+}
+
+.featuredOrdinal {
+    color: var(--club-accent-text);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.05em;
+}
+
+.receiptResult strong {
+    display: block;
+    color: var(--club-text);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.receiptResult p {
+    margin-top: 4px;
+    color: var(--club-muted);
+    font-size: 12px;
+}
+
+.secondaryGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-self: end;
+    gap: 22px;
+}
+
+.secondaryLink h3 {
+    margin-top: 12px;
+    overflow: hidden;
+    color: var(--club-text);
+    font-size: 14px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.secondaryLink .artist {
+    font-size: 13px;
+}
+
+.callout,
+.calloutLarge {
+    margin-top: 6px;
+    overflow: hidden;
+    color: var(--club-muted);
+    font-size: 12px;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.calloutLarge {
+    font-size: 13px;
+}
+
+.ordinal {
+    margin-right: 3px;
+    color: var(--club-muted);
+    font-weight: 500;
+}
+
+.ordinalAccent {
+    color: var(--club-accent-text);
+    font-weight: 600;
+}
+
+.featuredLink:hover h3,
+.secondaryLink:hover h3 {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.secondaryLink:hover [data-record-cover] img {
+    transform: scale(1.035);
+}
+
+@media (max-width: 1100px) {
+    .content {
+        grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+        gap: 32px;
+    }
+
+    .secondaryGrid {
+        gap: 16px;
+    }
+}
+
+@media (max-width: 767px) {
+    .container {
+        padding-block: 40px;
+    }
+
+    .content {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        margin-top: 18px;
+    }
+
+    .featuredLink {
+        max-width: 320px;
+    }
+
+    .secondaryGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px 20px;
+    }
+}

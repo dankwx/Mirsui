@@ -1,21 +1,11 @@
-// ===================================
-// components/Profile/FollowButton.tsx
-// ===================================
-
 'use client'
 
+import { Loader2, UserMinus, UserPlus } from 'lucide-react'
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { toggleFollow } from './actions'
-import { UserPlus, UserMinus, Loader2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { capture } from '@/lib/posthog'
-
-/**
- * Seguir é laranja, não lima: o lima do app significa "você chegou cedo", e
- * seguir alguém não tem nada a ver com precedência. O laranja é a cor da camada
- * humana — seguir, recados, favoritar.
- */
+import recipes from '@/components/Club/club-recipes.module.css'
+import { toggleFollow } from './actions'
+import styles from './FollowButton.module.css'
 
 type ButtonType = 'icon' | 'text'
 
@@ -23,12 +13,14 @@ interface FollowButtonProps {
     followingId: string
     initialIsFollowing: boolean
     type?: ButtonType
+    compact?: boolean
 }
 
 export default function FollowButton({
     followingId,
     initialIsFollowing,
     type = 'icon',
+    compact = false,
 }: FollowButtonProps) {
     const [isFollowing, setIsFollowing] = useState(initialIsFollowing)
     const [isLoading, setIsLoading] = useState(false)
@@ -51,62 +43,40 @@ export default function FollowButton({
         }
     }
 
-    const buttonProps = {
-        onClick: handleToggleFollow,
-        disabled: isLoading,
-        title: isFollowing ? 'Deixar de seguir' : 'Seguir',
-    }
-
-    if (type === 'icon') {
-        const iconClass = cn(
-            'h-10 w-10 rounded-full border transition',
-            isFollowing
-                ? 'border-mir-line2 bg-mir-fill1 text-mir-text2 hover:bg-mir-fill2 hover:text-mir-text'
-                : 'border-transparent bg-mir-warm text-mir-on-warm hover:bg-mir-warm hover:brightness-105'
-        )
-
-        return (
-            <Button
-                {...buttonProps}
-                size="icon"
-                variant="ghost"
-                className={iconClass}
-            >
-                {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                ) : isFollowing ? (
-                    <UserMinus className="h-4 w-4" />
-                ) : (
-                    <UserPlus className="h-4 w-4" />
-                )}
-            </Button>
-        )
-    }
-
-    const textClass = cn(
-        'rounded-[9px] border px-[18px] py-[9px] text-[13.5px] font-semibold transition active:translate-y-px',
-        isFollowing
-            ? 'border-mir-line2 bg-transparent text-mir-text2 hover:border-mir-text3 hover:bg-mir-fill1 hover:text-mir-text'
-            : 'border-transparent bg-mir-warm text-mir-on-warm hover:bg-mir-warm hover:brightness-105'
+    const label = isFollowing ? 'Deixar de seguir' : 'Seguir'
+    const icon = isLoading ? (
+        <Loader2 className={styles.spinner} aria-hidden="true" />
+    ) : isFollowing ? (
+        <UserMinus aria-hidden="true" />
+    ) : (
+        <UserPlus aria-hidden="true" />
     )
 
+    if (type === 'icon') {
+        return (
+            <button
+                type="button"
+                onClick={handleToggleFollow}
+                disabled={isLoading}
+                aria-label={label}
+                title={label}
+                className={`${styles.iconButton} ${isFollowing ? styles.following : styles.primary}`}
+            >
+                {icon}
+            </button>
+        )
+    }
+
     return (
-        <Button
-            {...buttonProps}
-            size="sm"
-            variant="ghost"
-            className={textClass}
+        <button
+            type="button"
+            onClick={handleToggleFollow}
+            disabled={isLoading}
+            title={label}
+            className={`${recipes.button} ${compact ? recipes.buttonSmall : ''} ${styles.textButton} ${isFollowing ? styles.following : styles.primary}`}
         >
-            {isLoading ? (
-                <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Carregando...
-                </>
-            ) : isFollowing ? (
-                'Deixar de seguir'
-            ) : (
-                'Seguir'
-            )}
-        </Button>
+            {icon}
+            {isLoading ? 'Carregando...' : label}
+        </button>
     )
 }

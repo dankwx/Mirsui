@@ -1,0 +1,24 @@
+.cover {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--club-surface);
+    border-radius: 3px;
+}
+
+.cover img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s;
+}
+
+.coverFallback {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    color: var(--club-muted);
+}

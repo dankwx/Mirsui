@@ -53,7 +53,7 @@ type SearchFilter = 'all' | 'tracks' | 'artists'
 const SEARCH_CACHE_TTL = 5 * 60 * 1000
 const searchCache = new Map<string, { data: SearchResults; timestamp: number }>()
 
-export default function SearchWithResults() {
+export default function SearchWithResults({ className = '' }: { className?: string }) {
     const [query, setQuery] = useState('')
     const [results, setResults] = useState<SearchResults | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -215,31 +215,31 @@ export default function SearchWithResults() {
     return (
         <div
             ref={searchRef}
-            className="group relative w-full"
+            className={`group relative w-full [--search-bg:#221b12] [--search-fg:#ece3d2] [--search-muted:rgba(236,227,210,0.55)] [--search-line:rgba(236,227,210,0.12)] [--search-line-strong:rgba(236,227,210,0.20)] [--search-fill:rgba(236,227,210,0.04)] [--search-hover:rgba(236,227,210,0.08)] [--search-surface:#221b12] [--search-panel:#382d1d] [--search-accent:#cdef36] ${className}`}
         >
-            <div className="relative flex h-11 items-stretch overflow-hidden rounded-full border border-mir-line bg-mir-fill1 transition-colors focus-within:border-mir-line2 focus-within:bg-mir-fill2">
+            <div className="relative flex h-11 items-stretch overflow-hidden rounded-full border border-[var(--search-line)] bg-[var(--search-fill)] transition-colors focus-within:border-[var(--search-line-strong)] focus-within:bg-[var(--search-hover)]">
                 {/* Botão de filtro */}
                 <div ref={filterRef} className="relative">
                     <button
                         type="button"
                         onClick={() => setShowFilterMenu(!showFilterMenu)}
-                        className="flex h-full items-center gap-1.5 border-r border-mir-line px-3 text-sm font-semibold text-mir-text2 transition-colors hover:bg-mir-fill2 hover:text-mir-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mir-acc/60"
+                        className="flex h-full items-center gap-1.5 border-r border-[var(--search-line)] px-3 text-sm font-semibold text-[var(--search-fg)] transition-colors hover:bg-[var(--search-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--search-accent)]/60"
                     >
                         {searchFilter === 'all' && <Filter className="h-4 w-4" />}
                         {searchFilter === 'tracks' && <Music className="h-4 w-4" />}
                         {searchFilter === 'artists' && <User className="h-4 w-4" />}
-                        <ChevronDown className="h-3.5 w-3.5 text-mir-text3" />
+                        <ChevronDown className="h-3.5 w-3.5 text-[var(--search-muted)]" />
                     </button>
 
                     {/* Menu de filtros */}
                     {showFilterMenu && (
-                        <div className="absolute left-0 top-[calc(100%+10px)] z-50 w-44 overflow-hidden rounded-xl border border-mir-line bg-mir-surface p-1 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
+                        <div className="absolute left-0 top-[calc(100%+10px)] z-50 w-44 overflow-hidden rounded-xl border border-[var(--search-line)] bg-[var(--search-surface)] p-1 shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
                             <button
                                 onClick={() => {
                                     setSearchFilter('all')
                                     setShowFilterMenu(false)
                                 }}
-                                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-mir-text2 transition-colors duration-200 hover:bg-mir-fill2 hover:text-mir-text ${searchFilter === 'all' ? 'bg-mir-fill2 text-mir-text' : ''}`}
+                                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--search-fg)] transition-colors duration-200 hover:bg-[var(--search-hover)] ${searchFilter === 'all' ? 'bg-[var(--search-hover)]' : ''}`}
                             >
                                 <Filter className="h-4 w-4" />
                                 Tudo
@@ -249,7 +249,7 @@ export default function SearchWithResults() {
                                     setSearchFilter('tracks')
                                     setShowFilterMenu(false)
                                 }}
-                                className={`mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-mir-text2 transition-colors duration-200 hover:bg-mir-fill2 hover:text-mir-text ${searchFilter === 'tracks' ? 'bg-mir-fill2 text-mir-text' : ''}`}
+                                className={`mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--search-fg)] transition-colors duration-200 hover:bg-[var(--search-hover)] ${searchFilter === 'tracks' ? 'bg-[var(--search-hover)]' : ''}`}
                             >
                                 <Music className="h-4 w-4" />
                                 Músicas
@@ -259,7 +259,7 @@ export default function SearchWithResults() {
                                     setSearchFilter('artists')
                                     setShowFilterMenu(false)
                                 }}
-                                className={`mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-mir-text2 transition-colors duration-200 hover:bg-mir-fill2 hover:text-mir-text ${searchFilter === 'artists' ? 'bg-mir-fill2 text-mir-text' : ''}`}
+                                className={`mt-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--search-fg)] transition-colors duration-200 hover:bg-[var(--search-hover)] ${searchFilter === 'artists' ? 'bg-[var(--search-hover)]' : ''}`}
                             >
                                 <User className="h-4 w-4" />
                                 Artistas
@@ -270,31 +270,31 @@ export default function SearchWithResults() {
 
                 {/* Campo de busca */}
                 <div className="relative flex-1">
-                    <SearchIcon className="absolute left-3.5 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-mir-text3" />
+                    <SearchIcon className="absolute left-3.5 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[var(--search-muted)]" />
                     <Input
                         type="search"
                         placeholder={getPlaceholderText(searchFilter)}
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onFocus={() => results && setShowResults(true)}
-                        className="h-full rounded-none border-none bg-transparent pl-9 pr-10 text-sm text-mir-text placeholder:text-mir-text3 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        className="h-full rounded-none border-none bg-transparent pl-9 pr-10 text-sm text-[var(--search-fg)] placeholder:text-[var(--search-muted)] focus-visible:ring-0 focus-visible:ring-offset-0"
                     />
                     {isLoading && (
-                        <Loader2 className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-mir-text3" />
+                        <Loader2 className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-[var(--search-muted)]" />
                     )}
                 </div>
             </div>
 
             {/* Dropdown de resultados */}
             {showResults && results && query.trim().length >= 2 && (
-                <div className="absolute left-0 right-0 top-[calc(100%+12px)] z-40 max-h-96 overflow-y-auto rounded-xl border border-mir-line bg-mir-surface shadow-[0_30px_80px_rgba(0,0,0,0.55)]">
+                <div className="absolute left-0 right-0 top-[calc(100%+12px)] z-40 max-h-96 overflow-y-auto rounded-xl border border-[var(--search-line)] bg-[var(--search-surface)] shadow-[0_30px_80px_rgba(0,0,0,0.55)]">
                     {/* Tracks - só mostra se o filtro permitir */}
                     {(searchFilter === 'all' || searchFilter === 'tracks') &&
                         results.tracks?.items &&
                         results.tracks.items.length > 0 && (
                             <div className="p-3">
                                 {searchFilter === 'all' && (
-                                    <div className="flex items-center gap-2 px-2 pb-2 font-mono text-[10px] font-medium uppercase tracking-[0.13em] text-mir-text3">
+                                    <div className="flex items-center gap-2 px-2 pb-2 font-mono text-[10px] font-medium uppercase tracking-[0.13em] text-[var(--search-muted)]">
                                         <Music className="h-3 w-3" />
                                         Músicas
                                     </div>
@@ -308,7 +308,7 @@ export default function SearchWithResults() {
                                             onClick={() =>
                                                 handleTrackClick(track)
                                             }
-                                            className="group flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors duration-200 hover:bg-mir-fill2"
+                                            className="group flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors duration-200 hover:bg-[var(--search-hover)]"
                                         >
                                             <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg">
                                                 {track.album.images[0] ? (
@@ -323,16 +323,16 @@ export default function SearchWithResults() {
                                                         className="object-cover"
                                                     />
                                                 ) : (
-                                                    <div className="flex h-full w-full items-center justify-center bg-mir-fill2">
-                                                        <Music className="h-4 w-4 text-mir-text3" />
+                                                    <div className="flex h-full w-full items-center justify-center bg-[var(--search-hover)]">
+                                                        <Music className="h-4 w-4 text-[var(--search-muted)]" />
                                                     </div>
                                                 )}
                                             </div>
                                             <div className="min-w-0 flex-1">
-                                                <span className="block truncate text-sm font-medium text-mir-text">
+                                                <span className="block truncate text-sm font-medium text-[var(--search-fg)]">
                                                     {track.name}
                                                 </span>
-                                                <span className="block truncate text-xs text-mir-text2">
+                                                <span className="block truncate text-xs text-[var(--search-muted)]">
                                                     {track.artists
                                                         .map(
                                                             (artist) =>
@@ -342,7 +342,7 @@ export default function SearchWithResults() {
                                                     • {track.album.name}
                                                 </span>
                                             </div>
-                                            <span className="flex-shrink-0 font-mono text-[11px] text-mir-text3">
+                                            <span className="flex-shrink-0 font-mono text-[11px] text-[var(--search-muted)]">
                                                 {formatDuration(
                                                     track.duration_ms
                                                 )}
@@ -356,9 +356,9 @@ export default function SearchWithResults() {
                     {(searchFilter === 'all' || searchFilter === 'artists') &&
                         results.artists?.items &&
                         results.artists.items.length > 0 && (
-                            <div className={`p-3 ${searchFilter === 'all' && results.tracks?.items?.length ? 'border-t border-mir-line' : ''}`}>
+                            <div className={`p-3 ${searchFilter === 'all' && results.tracks?.items?.length ? 'border-t border-[var(--search-line)]' : ''}`}>
                                 {searchFilter === 'all' && (
-                                    <div className="flex items-center gap-2 px-2 pb-2 font-mono text-[10px] font-medium uppercase tracking-[0.13em] text-mir-text3">
+                                    <div className="flex items-center gap-2 px-2 pb-2 font-mono text-[10px] font-medium uppercase tracking-[0.13em] text-[var(--search-muted)]">
                                         <User className="h-3 w-3" />
                                         Artistas
                                     </div>
@@ -372,7 +372,7 @@ export default function SearchWithResults() {
                                             onClick={() =>
                                                 handleArtistClick(artist)
                                             }
-                                            className="group flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors duration-200 hover:bg-mir-fill2"
+                                            className="group flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors duration-200 hover:bg-[var(--search-hover)]"
                                         >
                                             <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full">
                                                 {artist.images?.[0]?.url ? (
@@ -386,17 +386,17 @@ export default function SearchWithResults() {
                                                         className="object-cover"
                                                     />
                                                 ) : (
-                                                    <div className="flex h-full w-full items-center justify-center bg-mir-fill2">
-                                                        <User className="h-4 w-4 text-mir-text3" />
+                                                    <div className="flex h-full w-full items-center justify-center bg-[var(--search-hover)]">
+                                                        <User className="h-4 w-4 text-[var(--search-muted)]" />
                                                     </div>
                                                 )}
                                             </div>
                                             <div className="min-w-0 flex-1">
-                                                <span className="block truncate text-sm font-medium text-mir-text">
+                                                <span className="block truncate text-sm font-medium text-[var(--search-fg)]">
                                                     {artist.name}
                                                 </span>
                                                 {artist.followers?.total != null && (
-                                                    <span className="block text-xs text-mir-text2">
+                                                    <span className="block text-xs text-[var(--search-muted)]">
                                                         {artist.followers.total.toLocaleString('pt-BR')} fãs
                                                     </span>
                                                 )}
@@ -410,7 +410,7 @@ export default function SearchWithResults() {
                     {((searchFilter === 'all' && !results.tracks?.items?.length && !results.artists?.items?.length) ||
                       (searchFilter === 'tracks' && !results.tracks?.items?.length) ||
                       (searchFilter === 'artists' && !results.artists?.items?.length)) && (
-                            <div className="p-4 text-center text-sm text-mir-text2">
+                            <div className="p-4 text-center text-sm text-[var(--search-muted)]">
                                 Nenhum resultado encontrado para &quot;{query}&quot;
                             </div>
                         )}

@@ -1,13 +1,30 @@
 'use client'
 
 import React, { useState, useTransition } from 'react'
-import { Pin, PinOff, Trash2 } from 'lucide-react'
-import { createClient } from '@/utils/supabase/client'
-import { addRecado, deleteRecado, togglePinRecado } from './actions'
-import { RECADO_SELECT, RECADOS_PAGE_SIZE, type Recado } from '@/utils/profileComments'
+import { ArrowDown, Pin, PinOff, Trash2 } from 'lucide-react'
+import AuthModalTrigger from '@/components/AuthModalTrigger/AuthModalTrigger'
 import FotoDePerfil from '@/components/FotoDePerfil'
+import shellStyles from '@/components/Club/ClubShell.module.css'
+import recipes from '@/components/Club/club-recipes.module.css'
+import { createClient } from '@/utils/supabase/client'
+import { RECADO_SELECT, RECADOS_PAGE_SIZE, type Recado } from '@/utils/profileComments'
+import { addRecado, deleteRecado, togglePinRecado } from './actions'
+import styles from './Recados.module.css'
 
-const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+const MESES = [
+    'jan',
+    'fev',
+    'mar',
+    'abr',
+    'mai',
+    'jun',
+    'jul',
+    'ago',
+    'set',
+    'out',
+    'nov',
+    'dez',
+]
 
 interface RecadosProps {
     profileId: string
@@ -23,22 +40,13 @@ function formatDate(iso: string) {
 }
 
 function displayNameOf(author: Recado['author']) {
-    return author?.display_name || author?.username || 'usuário'
+    return author?.display_name || author?.username || 'Usuário'
 }
 
 function initialsOf(author: Recado['author']) {
     return displayNameOf(author).slice(0, 2).toUpperCase()
 }
 
-// tom estável a partir do nome (fallback de avatar)
-const TONES = ['#241f1a', '#1c2320', '#27201f', '#1b2026', '#231d27', '#202420', '#2a201b', '#1a2326', '#25211c', '#1d2126', '#26211f', '#1f231d']
-function tone(seed: string) {
-    let h = 0
-    for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0
-    return TONES[h % TONES.length]
-}
-
-// Fixados primeiro, depois mais recentes — espelha a ordenação do servidor.
 function sortRecados(list: Recado[]) {
     return [...list].sort((a, b) => {
         if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1
@@ -63,8 +71,8 @@ const Recados: React.FC<RecadosProps> = ({
     const isOwner = currentUserId === profileId
     const hasMore = recados.length < total
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
+    const handleSubmit = (event: React.FormEvent) => {
+        event.preventDefault()
         const trimmed = content.trim()
         if (!trimmed || isPosting) return
         setError(null)
@@ -83,7 +91,7 @@ const Recados: React.FC<RecadosProps> = ({
 
     const handleDelete = async (recado: Recado) => {
         const snapshot = recados
-        setRecados((prev) => prev.filter((r) => r.id !== recado.id))
+        setRecados((prev) => prev.filter((item) => item.id !== recado.id))
         setTotal((prev) => Math.max(0, prev - 1))
 
         const result = await deleteRecado(recado.id)
@@ -97,13 +105,21 @@ const Recados: React.FC<RecadosProps> = ({
     const handleTogglePin = async (recado: Recado) => {
         const next = !recado.is_pinned
         setRecados((prev) =>
-            sortRecados(prev.map((r) => (r.id === recado.id ? { ...r, is_pinned: next } : r)))
+            sortRecados(
+                prev.map((item) =>
+                    item.id === recado.id ? { ...item, is_pinned: next } : item
+                )
+            )
         )
 
         const result = await togglePinRecado(recado.id, next)
         if (!result.success) {
             setRecados((prev) =>
-                sortRecados(prev.map((r) => (r.id === recado.id ? { ...r, is_pinned: !next } : r)))
+                sortRecados(
+                    prev.map((item) =>
+                        item.id === recado.id ? { ...item, is_pinned: !next } : item
+                    )
+                )
             )
             setError(result.message)
         }
@@ -126,11 +142,14 @@ const Recados: React.FC<RecadosProps> = ({
 
             const next = (data ?? []) as unknown as Recado[]
             setRecados((prev) => {
-                const existing = new Set(prev.map((r) => r.id))
-                return sortRecados([...prev, ...next.filter((r) => !existing.has(r.id))])
+                const existing = new Set(prev.map((item) => item.id))
+                return sortRecados([
+                    ...prev,
+                    ...next.filter((item) => !existing.has(item.id)),
+                ])
             })
-        } catch (err) {
-            console.error('Error loading more recados:', err)
+        } catch (loadError) {
+            console.error('Error loading more recados:', loadError)
             setError('Não foi possível carregar mais recados.')
         } finally {
             setLoadingMore(false)
@@ -138,156 +157,139 @@ const Recados: React.FC<RecadosProps> = ({
     }
 
     return (
-        <section className="pb-16 pt-14">
-            {/* Mesma régua de título das outras seções do perfil: antes era um
-                rótulo de 13px em caixa alta e a seção sumia no fim da página. */}
-            <div className="mb-6">
-                <h2 className="m-0 text-[clamp(26px,3.6vw,34px)] font-extrabold tracking-[-0.04em] text-mir-text">
-                    Recados
-                </h2>
-                <p className="m-0 mt-1.5 font-mono text-[11.5px] text-mir-text3">
-                    {total} {total === 1 ? 'recado' : 'recados'}
-                </p>
-            </div>
+        <section className={styles.section}>
+            <div className={`${shellStyles.container} ${styles.container}`}>
+                <div className={styles.heading}>
+                    <h2>Recados</h2>
+                    <p>
+                        {total} {total === 1 ? 'recado' : 'recados'}
+                    </p>
+                </div>
 
-            {/* Caixa de novo recado */}
-            {isLoggedIn ? (
-                <form
-                    onSubmit={handleSubmit}
-                    className="flex items-center gap-3 rounded-[12px] border border-mir-line bg-mir-fill1 p-2.5 transition focus-within:border-mir-line2"
-                >
-                    <div className="grid h-[38px] w-[38px] flex-none place-items-center rounded-[9px] border border-mir-line bg-mir-fill2 font-mono text-[11px] font-semibold uppercase text-mir-text3">
-                        vc
+                {isLoggedIn ? (
+                    <form onSubmit={handleSubmit} className={styles.form}>
+                        <div className={styles.composerAvatar}>vc</div>
+                        <input
+                            type="text"
+                            value={content}
+                            maxLength={500}
+                            onChange={(event) => setContent(event.target.value)}
+                            placeholder="Deixe um recado…"
+                        />
+                        <button
+                            type="submit"
+                            disabled={!content.trim() || isPosting}
+                            className={`${recipes.button} ${recipes.buttonSmall}`}
+                        >
+                            {isPosting ? 'Enviando...' : 'Enviar'}
+                        </button>
+                    </form>
+                ) : (
+                    <div className={styles.loginNotice}>
+                        Entre para deixar um recado.{' '}
+                        <AuthModalTrigger mode="login" className={recipes.textLink}>
+                            Entrar ↗
+                        </AuthModalTrigger>
                     </div>
-                    <input
-                        type="text"
-                        value={content}
-                        maxLength={500}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder="deixe um recado..."
-                        className="min-w-0 flex-1 bg-transparent px-1 text-[14px] text-mir-text placeholder:text-mir-text3 focus:outline-none"
-                    />
-                    <button
-                        type="submit"
-                        disabled={!content.trim() || isPosting}
-                        className="flex-none rounded-[9px] bg-mir-warm px-[18px] py-[9px] text-[13px] font-semibold text-mir-on-warm transition hover:brightness-105 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        {isPosting ? 'Enviando...' : 'Enviar'}
-                    </button>
-                </form>
-            ) : (
-                <div className="rounded-[12px] border border-mir-line bg-mir-fill1 px-4 py-3.5 font-mono text-[12.5px] text-mir-text3">
-                    faça login para deixar um recado
-                </div>
-            )}
+                )}
 
-            {error && (
-                <p className="mt-2 font-mono text-[11.5px] text-red-400">{error}</p>
-            )}
+                {error && (
+                    <p className={styles.error} role="alert">
+                        {error}
+                    </p>
+                )}
 
-            {/* Lista */}
-            {recados.length === 0 ? (
-                <div className="mt-5 rounded-[12px] border border-dashed border-mir-line2 px-8 py-12 text-center font-mono text-[13px] text-mir-text3">
-                    nenhum recado por aqui ainda
-                </div>
-            ) : (
-                <ul className="mt-2">
-                    {recados.map((recado) => {
-                        const canDelete = currentUserId === recado.author?.id || isOwner
-                        const name = displayNameOf(recado.author)
-                        return (
-                            <li
-                                key={recado.id}
-                                className={`group relative flex gap-[14px] border-b border-mir-line py-[18px] ${
-                                    recado.is_pinned
-                                        ? 'border-l-2 border-l-mir-warm bg-mir-warm-soft pl-[14px] pr-3'
-                                        : ''
-                                }`}
-                            >
-                                {/* Avatar */}
-                                <FotoDePerfil
-                                    src={recado.author?.avatar_url}
-                                    className="h-[38px] w-[38px] flex-none rounded-[9px] border border-mir-line object-cover"
+                {recados.length === 0 ? (
+                    <p className={styles.empty}>Nenhum recado por aqui ainda.</p>
+                ) : (
+                    <ul className={styles.list}>
+                        {recados.map((recado) => {
+                            const canDelete =
+                                currentUserId === recado.author?.id || isOwner
+                            const name = displayNameOf(recado.author)
+                            return (
+                                <li
+                                    key={recado.id}
+                                    className={`${styles.item} ${recado.is_pinned ? styles.pinned : ''}`}
                                 >
-                                    <div
-                                        className="grid h-[38px] w-[38px] flex-none place-items-center rounded-[9px] border border-mir-line font-mono text-[11px] font-bold uppercase text-mir-text2"
-                                        style={{ backgroundColor: tone(name) }}
-                                    >
-                                        {initialsOf(recado.author)}
+                                    <div className={styles.messageAvatar}>
+                                        <FotoDePerfil
+                                            src={recado.author?.avatar_url}
+                                            className={styles.avatarImage}
+                                        >
+                                            <span>{initialsOf(recado.author)}</span>
+                                        </FotoDePerfil>
                                     </div>
-                                </FotoDePerfil>
-
-                                <div className="min-w-0 flex-1">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[14px] font-bold tracking-tight text-mir-text">
-                                            {name}
-                                        </span>
-                                        {recado.author?.username && (
-                                            <span className="font-mono text-[12px] text-mir-text3">
-                                                @{recado.author.username}
+                                    <div className={styles.messageBody}>
+                                        <div className={styles.meta}>
+                                            <span className={styles.name}>{name}</span>
+                                            {recado.author?.username && (
+                                                <span className={styles.handle}>
+                                                    @{recado.author.username}
+                                                </span>
+                                            )}
+                                            {recado.is_pinned && (
+                                                <span className={styles.pinLabel}>
+                                                    <Pin size={11} aria-hidden="true" />
+                                                    Fixado
+                                                </span>
+                                            )}
+                                            <span className={styles.date}>
+                                                {formatDate(recado.created_at)}
                                             </span>
-                                        )}
-                                        {recado.is_pinned && (
-                                            <span className="inline-flex items-center gap-1 rounded-[5px] bg-mir-warm px-[6px] py-[2px] font-mono text-[9px] font-semibold uppercase tracking-[0.08em] text-mir-on-warm">
-                                                Fixado
-                                            </span>
-                                        )}
-                                        <span className="ml-auto whitespace-nowrap pl-3 font-mono text-[11px] text-mir-text3">
-                                            {formatDate(recado.created_at)}
-                                        </span>
+                                        </div>
+                                        <p className={styles.content}>{recado.content}</p>
                                     </div>
-                                    <p className="mt-[7px] break-words text-[14px] leading-normal text-mir-text2">
-                                        {recado.content}
-                                    </p>
-                                </div>
 
-                                {/* Ações (aparecem no hover) */}
-                                {(isOwner || canDelete) && (
-                                    <div className="absolute right-2 top-[14px] flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
-                                        {isOwner && (
-                                            <button
-                                                type="button"
-                                                onClick={() => handleTogglePin(recado)}
-                                                title={recado.is_pinned ? 'Desafixar' : 'Fixar'}
-                                                className="grid h-[26px] w-[26px] place-items-center rounded-[7px] border border-mir-line bg-mir-surface text-mir-text3 transition hover:border-mir-line2 hover:text-mir-text"
-                                            >
-                                                {recado.is_pinned ? (
-                                                    <PinOff className="h-[13px] w-[13px]" />
-                                                ) : (
-                                                    <Pin className="h-[13px] w-[13px]" />
-                                                )}
-                                            </button>
-                                        )}
-                                        {canDelete && (
-                                            <button
-                                                type="button"
-                                                onClick={() => handleDelete(recado)}
-                                                title="Remover recado"
-                                                className="grid h-[26px] w-[26px] place-items-center rounded-[7px] border border-mir-line bg-mir-surface text-mir-text3 transition hover:border-red-400/40 hover:text-red-400"
-                                            >
-                                                <Trash2 className="h-[13px] w-[13px]" />
-                                            </button>
-                                        )}
-                                    </div>
-                                )}
-                            </li>
-                        )
-                    })}
-                </ul>
-            )}
+                                    {(isOwner || canDelete) && (
+                                        <div className={styles.itemActions}>
+                                            {isOwner && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleTogglePin(recado)}
+                                                    title={recado.is_pinned ? 'Desafixar' : 'Fixar'}
+                                                    aria-label={recado.is_pinned ? 'Desafixar' : 'Fixar'}
+                                                >
+                                                    {recado.is_pinned ? (
+                                                        <PinOff size={13} aria-hidden="true" />
+                                                    ) : (
+                                                        <Pin size={13} aria-hidden="true" />
+                                                    )}
+                                                </button>
+                                            )}
+                                            {canDelete && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDelete(recado)}
+                                                    title="Remover recado"
+                                                    aria-label="Remover recado"
+                                                >
+                                                    <Trash2 size={13} aria-hidden="true" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+                                </li>
+                            )
+                        })}
+                    </ul>
+                )}
 
-            {hasMore && (
-                <div className="mt-6 flex justify-center">
-                    <button
-                        type="button"
-                        onClick={loadMore}
-                        disabled={loadingMore}
-                        className="rounded-full border border-mir-line bg-mir-fill1 px-5 py-2 text-[12.5px] font-semibold text-mir-text2 transition hover:border-mir-line2 hover:text-mir-text disabled:opacity-50"
-                    >
-                        {loadingMore ? 'Carregando...' : 'Ver mais recados'}
-                    </button>
-                </div>
-            )}
+                {hasMore && (
+                    <div className={styles.more}>
+                        <button
+                            type="button"
+                            onClick={loadMore}
+                            disabled={loadingMore}
+                            className={recipes.textLink}
+                            aria-busy={loadingMore}
+                        >
+                            {loadingMore ? 'Carregando…' : 'Ver mais recados'}
+                            {!loadingMore && <ArrowDown size={15} aria-hidden="true" />}
+                        </button>
+                    </div>
+                )}
+            </div>
         </section>
     )
 }

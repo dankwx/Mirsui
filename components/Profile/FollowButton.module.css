@@ -1,0 +1,50 @@
+.iconButton {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 1px solid var(--club-line);
+    border-radius: 50%;
+    color: var(--club-text);
+    background: transparent;
+}
+
+.iconButton svg {
+    width: 16px;
+    height: 16px;
+}
+
+.textButton svg {
+    width: 15px;
+    height: 15px;
+}
+
+.primary {
+    color: var(--club-on-button);
+    background: var(--club-text);
+}
+
+.primary:hover {
+    color: var(--club-on-button);
+}
+
+.following {
+    color: var(--club-text);
+    background: transparent;
+    border-color: var(--club-line);
+}
+
+.following:hover {
+    border-color: var(--club-text);
+    background: transparent;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

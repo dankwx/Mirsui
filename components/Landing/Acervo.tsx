@@ -6,7 +6,7 @@ import { ArrowUpRight } from 'lucide-react'
 import type { GeneroDoAcervo } from '@/utils/homeService'
 import { enderecoDaFaixa } from '@/utils/trackHref'
 import { editorialRecords } from './editorialRecords'
-import RecordCover from './RecordCover'
+import RecordCover from '@/components/Club/RecordCover'
 import styles from './Club.module.css'
 
 export default function Acervo({ generos }: { generos: GeneroDoAcervo[] }) {

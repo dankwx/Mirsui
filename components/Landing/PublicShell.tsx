@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import LandingFooter from '@/components/Footer/LandingFooter'
 import ClubFooter from './ClubFooter'
+import ClubShell from '@/components/Club/ClubShell'
 import styles from './Club.module.css'
 
 /** Keep the redesign on the home; legal pages retain their existing chrome. */
@@ -23,9 +24,9 @@ export default function PublicShell({
         )
     }
     return (
-        <div className={styles.shell} data-club-theme="auto">
+        <ClubShell>
             <main>{children}</main>
             <ClubFooter />
-        </div>
+        </ClubShell>
     )
 }

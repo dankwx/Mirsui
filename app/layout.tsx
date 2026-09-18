@@ -2,6 +2,7 @@
 import type { Metadata } from 'next'
 import { Archivo, Hanken_Grotesk, Space_Grotesk } from 'next/font/google'
 import './globals.css'
+import './club.css'
 import { Toaster } from '@/components/ui/toaster'
 import Footer from '@/components/Footer/Footer'
 import GoogleAnalytics from '@/components/GoogleAnalytics/GoogleAnalytics'

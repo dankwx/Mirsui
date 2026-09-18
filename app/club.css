@@ -1,0 +1,149 @@
+/* Tokens e base compartilhados pelas telas que já usam a identidade club. */
+[data-club-theme],
+body:has([data-club-theme]) {
+    --club-bg: #f7f7f2;
+    --club-surface: #eeeee7;
+    --club-paper: #fdfdf9;
+    --club-text: #242522;
+    --club-muted: #64665e;
+    --club-line: #d9dbd2;
+    --club-accent: #db4b27;
+    --club-accent-text: #b63a1b;
+    --club-accent-soft: #f5e1d7;
+    --club-on-button: #f7f7f2;
+    --club-danger: #b3261e;
+    --club-danger-soft: #f6e0dd;
+    color-scheme: light;
+    background: var(--club-bg);
+    color: var(--club-text);
+    font-family: var(--font-hanken), sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+[data-club-theme='dark'],
+body:has([data-club-theme='dark']) {
+    --club-bg: #1e201d;
+    --club-surface: #282b26;
+    --club-paper: #30332e;
+    --club-text: #f0f0e7;
+    --club-muted: #b2b7aa;
+    --club-line: #42473d;
+    --club-accent: #f57a53;
+    --club-accent-text: #f9906f;
+    --club-accent-soft: #47332b;
+    --club-on-button: #20221d;
+    --club-danger: #f28b82;
+    --club-danger-soft: #4a2b28;
+    color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+    [data-club-theme='auto'],
+    body:has([data-club-theme='auto']) {
+        --club-bg: #1e201d;
+        --club-surface: #282b26;
+        --club-paper: #30332e;
+        --club-text: #f0f0e7;
+        --club-muted: #b2b7aa;
+        --club-line: #42473d;
+        --club-accent: #f57a53;
+        --club-accent-text: #f9906f;
+        --club-accent-soft: #47332b;
+        --club-on-button: #20221d;
+        --club-danger: #f28b82;
+        --club-danger-soft: #4a2b28;
+        color-scheme: dark;
+    }
+}
+
+[data-club-theme] *,
+[data-club-theme] *::before,
+[data-club-theme] *::after {
+    box-sizing: border-box;
+}
+
+[data-club-theme] :where(h1, h2, h3, p) {
+    margin: 0;
+}
+
+[data-club-theme] :where(a, button) {
+    -webkit-tap-highlight-color: transparent;
+}
+
+[data-club-theme] :where(a, button):focus-visible {
+    outline: 3px solid var(--club-accent);
+    outline-offset: 5px;
+}
+
+[data-club-theme] :where(input, select, textarea):focus-visible {
+    outline: 2px solid var(--club-accent);
+    outline-offset: 2px;
+}
+
+[data-club-theme] :where(section) {
+    scroll-margin-top: 28px;
+}
+
+[data-club-theme] ::selection {
+    background: var(--club-accent);
+    color: #fdfdf9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-club-theme] *,
+    [data-club-theme] *::before,
+    [data-club-theme] *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* O modal de autenticação é montado em um portal direto no body. */
+body:has([data-club-theme]) .au-scrim {
+    --line: var(--club-line);
+    --line2: var(--club-line);
+    --fill1: var(--club-surface);
+    --fill2: var(--club-bg);
+    --text: var(--club-text);
+    --text2: var(--club-muted);
+    --text3: var(--club-muted);
+    --acc: var(--club-accent-text);
+    --acc-soft: var(--club-accent-soft);
+    --on-acc: var(--club-paper);
+    background: rgba(30, 32, 29, 0);
+    backdrop-filter: blur(0);
+}
+
+body:has([data-club-theme]) .au-scrim.show {
+    background: rgba(30, 32, 29, 0.55);
+    backdrop-filter: blur(4px);
+}
+
+body:has([data-club-theme]) .au-card {
+    width: min(100% - 32px, 440px);
+    background: var(--club-paper);
+    border: 1px solid var(--club-line);
+    border-radius: 9px;
+    box-shadow: 0 30px 60px -30px rgba(20, 20, 18, 0.45);
+}
+
+body:has([data-club-theme]) .au-submit {
+    background: var(--club-text);
+    color: var(--club-on-button);
+    border-radius: 6px;
+}
+
+body:has([data-club-theme]) .au-input {
+    border-radius: 6px;
+}
+
+body:has([data-club-theme]) .au-glow {
+    display: none;
+}
+
+body:has([data-club-theme]) .au-close:focus-visible {
+    outline: 2px solid var(--club-accent);
+    outline-offset: 2px;
+    box-shadow: none;
+}

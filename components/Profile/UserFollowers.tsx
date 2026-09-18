@@ -1,8 +1,7 @@
-// ===================================
-// components/Profile/UserFollowers.tsx
-// ===================================
+'use client'
 
-import React from 'react'
+import Link from 'next/link'
+import { Star } from 'lucide-react'
 import {
     Dialog,
     DialogContent,
@@ -10,12 +9,12 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Star } from 'lucide-react'
+import FotoDePerfil from '@/components/FotoDePerfil'
+import recipes from '@/components/Club/club-recipes.module.css'
 import FollowButton from './FollowButton'
-import type { User, Rating } from '@/types/profile'
+import type { Rating, User } from '@/types/profile'
+import styles from './UserFollowers.module.css'
 
-// score retirado da UI do perfil por enquanto — manter o código
 const SHOW_SCORE = false
 
 interface FollowersFollowingSectionProps {
@@ -25,6 +24,10 @@ interface FollowersFollowingSectionProps {
     isOwnProfile: boolean
     isLoggedIn: boolean
     currentUserId: string
+}
+
+function initialsOf(user: User) {
+    return (user.display_name || user.username || 'U').slice(0, 2).toUpperCase()
 }
 
 export default function FollowersFollowingSection({
@@ -44,45 +47,42 @@ export default function FollowersFollowingSection({
         user: User
         showFollowButton?: boolean
     }) => (
-        <div className="flex items-center justify-between rounded-xl border border-mir-line bg-mir-fill1 px-3.5 py-3">
-            <div className="flex items-center">
-                <Avatar className="mr-3 h-10 w-10 rounded-full border border-mir-line bg-mir-card">
-                    <AvatarImage
-                        src={user.avatar_url || undefined}
-                        alt={`${user.username}'s avatar`}
-                    />
-                    <AvatarFallback className="rounded-full bg-mir-card text-sm font-bold text-mir-text">
-                        {user.first_name?.[0] || user.username?.[0] || 'U'}
-                    </AvatarFallback>
-                </Avatar>
-                <a
-                    href={`/user/${user.username}`}
-                    className="font-mono text-[13px] text-mir-text2 transition hover:text-mir-warm"
-                >
-                    @{user.username}
-                </a>
+        <div className={styles.userItem}>
+            <div className={styles.userIdentity}>
+                <div className={styles.avatar}>
+                    <FotoDePerfil
+                        src={user.avatar_url}
+                        className={styles.avatarImage}
+                    >
+                        <span>{initialsOf(user)}</span>
+                    </FotoDePerfil>
+                </div>
+                <div className={styles.userCopy}>
+                    <Link href={`/user/${user.username || user.id}`}>
+                        {user.display_name || user.username || 'Usuário'}
+                    </Link>
+                    {user.username && <span>@{user.username}</span>}
+                </div>
             </div>
-
             {showFollowButton && isLoggedIn && user.id !== currentUserId && (
                 <FollowButton
                     followingId={user.id}
                     initialIsFollowing={user.isFollowing || false}
                     type="text"
+                    compact
                 />
             )}
         </div>
     )
 
-    // Mesma métrica visual do <Numero> em ProfileHeader: 30px, rótulo em
-    // minúscula. São a mesma fileira de números, então não podem divergir.
     const statTrigger = (count: number, label: string) => (
-        <button className="group flex flex-col text-left">
-            <span className="text-[30px] font-extrabold leading-none tracking-[-0.03em] tabular-nums text-mir-text transition group-hover:text-mir-warm">
-                {count}
-            </span>
-            <span className="mt-1.5 font-mono text-[10.5px] lowercase tracking-[0.06em] text-mir-text3">
-                {label}
-            </span>
+        <button
+            type="button"
+            className={recipes.statTrigger}
+            aria-label={`Ver ${label}`}
+        >
+            <span className={recipes.statValue}>{count}</span>
+            <span className={recipes.statLabel}>{label}</span>
         </button>
     )
 
@@ -95,13 +95,17 @@ export default function FollowersFollowingSection({
                         followers.length === 1 ? 'seguidor' : 'seguidores'
                     )}
                 </DialogTrigger>
-                <DialogContent className="max-w-md border border-mir-line bg-mir-surface text-mir-text shadow-[0_30px_80px_rgba(0,0,0,0.55)] sm:rounded-2xl">
-                    <DialogHeader>
-                        <DialogTitle className="text-lg font-bold tracking-tight text-mir-text">
+                <DialogContent
+                    className={styles.dialogContent}
+                    overlayClassName={styles.dialogOverlay}
+                    closeClassName={styles.dialogClose}
+                >
+                    <DialogHeader className={styles.dialogHeader}>
+                        <DialogTitle className={styles.dialogTitle}>
                             Seguidores
                         </DialogTitle>
                     </DialogHeader>
-                    <div className="max-h-[420px] space-y-2.5 overflow-y-auto pr-1">
+                    <div className={styles.userList}>
                         {followers.length > 0 ? (
                             followers.map((user) => (
                                 <UserListItem
@@ -111,9 +115,7 @@ export default function FollowersFollowingSection({
                                 />
                             ))
                         ) : (
-                            <p className="rounded-xl border border-dashed border-mir-line2 px-6 py-10 text-center font-mono text-[13px] text-mir-text3">
-                                nenhum seguidor ainda
-                            </p>
+                            <p className={styles.empty}>Nenhum seguidor ainda.</p>
                         )}
                     </div>
                 </DialogContent>
@@ -123,13 +125,17 @@ export default function FollowersFollowingSection({
                 <DialogTrigger asChild>
                     {statTrigger(following.length, 'seguindo')}
                 </DialogTrigger>
-                <DialogContent className="max-w-md border border-mir-line bg-mir-surface text-mir-text shadow-[0_30px_80px_rgba(0,0,0,0.55)] sm:rounded-2xl">
-                    <DialogHeader>
-                        <DialogTitle className="text-lg font-bold tracking-tight text-mir-text">
+                <DialogContent
+                    className={styles.dialogContent}
+                    overlayClassName={styles.dialogOverlay}
+                    closeClassName={styles.dialogClose}
+                >
+                    <DialogHeader className={styles.dialogHeader}>
+                        <DialogTitle className={styles.dialogTitle}>
                             Seguindo
                         </DialogTitle>
                     </DialogHeader>
-                    <div className="max-h-[420px] space-y-2.5 overflow-y-auto pr-1">
+                    <div className={styles.userList}>
                         {following.length > 0 ? (
                             following.map((user) => (
                                 <UserListItem
@@ -139,23 +145,19 @@ export default function FollowersFollowingSection({
                                 />
                             ))
                         ) : (
-                            <p className="rounded-xl border border-dashed border-mir-line2 px-6 py-10 text-center font-mono text-[13px] text-mir-text3">
-                                não segue ninguém ainda
-                            </p>
+                            <p className={styles.empty}>Não segue ninguém ainda.</p>
                         )}
                     </div>
                 </DialogContent>
             </Dialog>
 
             {SHOW_SCORE && (
-                <div className="flex flex-col gap-1">
-                    <span className="flex items-center gap-1 text-[22px] font-extrabold leading-none tracking-tight tabular-nums text-mir-text">
-                        <Star className="h-4 w-4 text-mir-acc" />
+                <div className={styles.score}>
+                    <span>
+                        <Star size={16} aria-hidden="true" />
                         {currentRating}
                     </span>
-                    <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-mir-text3">
-                        score
-                    </span>
+                    <small>score</small>
                 </div>
             )}
         </>

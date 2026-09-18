@@ -103,7 +103,7 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
     const vitrine = rankVitrine(candidatas, savers, VITRINE)
 
     return (
-        <div className="w-full bg-mir-bg">
+        <div>
             <ProfileHeader
                 userData={profileData}
                 stats={stats}
@@ -127,16 +127,12 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
                 }}
             />
 
-            <section className="w-full bg-mir-bg">
-                <div className="mx-auto w-full max-w-[1200px] px-5 pb-8 sm:px-8">
-                    <Recados
-                        profileId={userData.id}
-                        currentUserId={currentUserId}
-                        initialComments={recados.comments}
-                        total={recados.total}
-                    />
-                </div>
-            </section>
+            <Recados
+                profileId={userData.id}
+                currentUserId={currentUserId}
+                initialComments={recados.comments}
+                total={recados.total}
+            />
         </div>
     )
 }

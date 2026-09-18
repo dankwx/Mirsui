@@ -1,0 +1,151 @@
+.userItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-block: 12px;
+    border-bottom: 1px solid var(--club-line);
+}
+
+.userIdentity {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    flex: none;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 50%;
+    background: var(--club-accent-soft);
+    box-shadow: 0 0 0 1px var(--club-line);
+    color: var(--club-accent-text);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.avatarImage,
+.avatar span {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    object-fit: cover;
+}
+
+.userCopy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.userCopy a {
+    overflow: hidden;
+    color: var(--club-text);
+    font-size: 14px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.userCopy a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.userCopy span {
+    margin-top: 2px;
+    color: var(--club-muted);
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 12px;
+}
+
+.userItem > button {
+    flex: none;
+    margin-left: auto;
+}
+
+.dialogOverlay {
+    background: rgba(30, 32, 29, 0.55);
+    backdrop-filter: blur(4px);
+}
+
+.dialogContent {
+    display: block;
+    width: min(calc(100% - 32px), 440px);
+    max-width: none;
+    padding: 28px;
+    border: 1px solid var(--club-line);
+    border-radius: 9px;
+    color: var(--club-text);
+    background: var(--club-paper);
+    box-shadow: 0 30px 60px -30px rgba(20, 20, 18, 0.45);
+}
+
+.dialogClose {
+    top: 14px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
+    padding: 7px;
+    color: var(--club-muted);
+    background: transparent;
+    box-shadow: none !important;
+}
+
+.dialogClose:hover {
+    color: var(--club-text);
+    background: var(--club-surface);
+}
+
+.dialogHeader {
+    margin-bottom: 14px;
+    text-align: left;
+}
+
+.dialogTitle {
+    color: var(--club-text);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+}
+
+.userList {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.empty {
+    padding-block: 32px;
+    color: var(--club-muted);
+    font-size: 14px;
+    text-align: center;
+}
+
+.score {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.score span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--club-text);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.score small {
+    color: var(--club-muted);
+    font-size: 11px;
+}

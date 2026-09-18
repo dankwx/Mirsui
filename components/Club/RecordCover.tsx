@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Disc3 } from 'lucide-react'
-import styles from './Club.module.css'
+import styles from './RecordCover.module.css'
 
 export default function RecordCover({
     src,
@@ -14,8 +14,12 @@ export default function RecordCover({
     className?: string
 }) {
     const [failedSrc, setFailedSrc] = useState<string | null>(null)
+
     return (
-        <span className={`${styles.cover} ${className}`}>
+        <span
+            className={`${styles.cover} ${className}`}
+            data-record-cover="true"
+        >
             {src && failedSrc !== src ? (
                 // Catalogue images already have CDN-sized variants.
                 // eslint-disable-next-line @next/next/no-img-element

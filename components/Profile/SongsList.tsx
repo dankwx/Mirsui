@@ -4,42 +4,27 @@ import React, { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-    MoreVerticalIcon,
-    HeartIcon,
-    TrashIcon,
+    ChevronDown,
+    Heart,
     ImageIcon,
-    ChevronDownIcon,
+    MoreHorizontal,
+    Trash2,
 } from 'lucide-react'
-import { Button } from '../ui/button'
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuTrigger,
     DropdownMenuSeparator,
-} from '../ui/dropdown-menu'
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import RecordCover from '@/components/Club/RecordCover'
+import shellStyles from '@/components/Club/ClubShell.module.css'
+import recipes from '@/components/Club/club-recipes.module.css'
+import { useCertificateGeneratorSimple } from '@/hooks/use-certificate-generator-simple'
 import { removeTrack, toggleFavorite } from './actions'
 import { trackHref } from './trackHref'
-import { useCertificateGeneratorSimple } from '@/hooks/use-certificate-generator-simple'
 import type { Song } from '@/types/profile'
-
-/**
- * O acervo.
- *
- * Duas mudanças de fundo em relação à versão anterior:
- *
- * 1. O mês entra como marcador dentro da própria grade, e não como faixa
- *    horizontal. O acervo já vinha ordenado por data, mas nada na tela mostrava
- *    o tempo passando: era um saco de capas. A primeira tentativa foi agrupar
- *    por mês em blocos, e ficou pior: com 20 faixas em 8 meses, cada bloco
- *    tinha 1 ou 2 capas e o resto da linha era vazio. Como marcador em linha,
- *    as capas continuam correndo sem buraco e o tempo aparece do mesmo jeito.
- *
- * 2. Saiu o selo EARLY de cima das capas. Neste acervo ele aparecia em 17 das
- *    20 faixas: um selo que quase todo mundo tem não distingue ninguém, e era
- *    o elemento mais claro de cada capa. No lugar entra a posição real, que
- *    varia de verdade de faixa para faixa.
- */
+import styles from './SongsList.module.css'
 
 type SongsListProps = {
     songs: Song[]
@@ -51,7 +36,20 @@ type SongsListProps = {
     }
 }
 
-const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+const MESES = [
+    'jan',
+    'fev',
+    'mar',
+    'abr',
+    'mai',
+    'jun',
+    'jul',
+    'ago',
+    'set',
+    'out',
+    'nov',
+    'dez',
+]
 
 const mesAno = (iso: string | null) => {
     if (!iso) return null
@@ -71,29 +69,6 @@ const SORTS: { id: Sort; label: string }[] = [
     { id: 'artist', label: 'Artista A-Z' },
 ]
 
-/** Capa sem thumbnail: tipografia sobre o card, sem cor sorteada. */
-const Capa = ({ song }: { song: Song }) => {
-    if (song.track_thumbnail) {
-        return (
-            <img
-                src={song.track_thumbnail}
-                alt={song.track_title}
-                className="aspect-square w-full object-cover transition duration-300 group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-            />
-        )
-    }
-    return (
-        <div className="flex aspect-square w-full flex-col justify-end bg-mir-card p-2.5">
-            <div className="truncate font-mono text-[9.5px] lowercase text-mir-text3">
-                {song.artist_name}
-            </div>
-            <div className="mt-1 line-clamp-3 text-[13px] font-extrabold leading-[1.08] tracking-[-0.02em] text-mir-text2">
-                {song.track_title}
-            </div>
-        </div>
-    )
-}
-
 const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userData }) => {
     const [filter, setFilter] = useState<Filter>('all')
     const [sort, setSort] = useState<Sort>('recent')
@@ -102,49 +77,51 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
     const router = useRouter()
     const { generateCertificate, isGenerating } = useCertificateGeneratorSimple()
 
-    const firstCount = songs.filter((s) => s.position === 1).length
-    const favCount = songs.filter((s) => s.is_favorited).length
+    const firstCount = songs.filter((song) => song.position === 1).length
+    const favCount = songs.filter((song) => song.is_favorited).length
 
-    // Só oferece o filtro quando ele tem o que filtrar. Chip que leva a uma
-    // grade vazia é armadilha.
     const filters = useMemo(() => {
-        const list: { id: Filter; label: string }[] = [{ id: 'all', label: 'Tudo' }]
-        if (firstCount > 0) list.push({ id: 'first', label: 'Cheguei em 1º' })
-        if (favCount > 0) list.push({ id: 'fav', label: 'Favoritas' })
+        const list: { id: Filter; label: string; count: number }[] = [
+            { id: 'all', label: 'Tudo', count: songs.length },
+        ]
+        if (firstCount > 0) {
+            list.push({ id: 'first', label: 'Cheguei em 1º', count: firstCount })
+        }
+        if (favCount > 0) {
+            list.push({ id: 'fav', label: 'Favoritas', count: favCount })
+        }
         return list
-    }, [firstCount, favCount])
+    }, [songs.length, firstCount, favCount])
 
     const list = useMemo(() => {
-        let l = songs.slice()
-        if (filter === 'first') l = l.filter((s) => s.position === 1)
-        if (filter === 'fav') l = l.filter((s) => s.is_favorited)
+        let result = songs.slice()
+        if (filter === 'first') result = result.filter((song) => song.position === 1)
+        if (filter === 'fav') result = result.filter((song) => song.is_favorited)
 
-        const time = (s: Song) => (s.claimedat ? new Date(s.claimedat).getTime() : 0)
-        if (sort === 'recent') l.sort((a, b) => time(b) - time(a))
-        else if (sort === 'old') l.sort((a, b) => time(a) - time(b))
-        else if (sort === 'position')
-            l.sort((a, b) => (a.position ?? 1e9) - (b.position ?? 1e9))
-        else if (sort === 'az') l.sort((a, b) => a.track_title.localeCompare(b.track_title))
-        else if (sort === 'artist') l.sort((a, b) => a.artist_name.localeCompare(b.artist_name))
-        return l
+        const time = (song: Song) =>
+            song.claimedat ? new Date(song.claimedat).getTime() : 0
+        if (sort === 'recent') result.sort((a, b) => time(b) - time(a))
+        else if (sort === 'old') result.sort((a, b) => time(a) - time(b))
+        else if (sort === 'position') {
+            result.sort((a, b) => (a.position ?? 1e9) - (b.position ?? 1e9))
+        } else if (sort === 'az') {
+            result.sort((a, b) => a.track_title.localeCompare(b.track_title))
+        } else {
+            result.sort((a, b) => a.artist_name.localeCompare(b.artist_name))
+        }
+        return result
     }, [songs, filter, sort])
 
-    // Marcar o mês só faz sentido quando a ordem é cronológica.
     const grouped = sort === 'recent' || sort === 'old'
 
-    /**
-     * O mês vai numa faixa de altura fixa acima de cada capa, preenchida só na
-     * primeira faixa do mês. Todas as células reservam a mesma altura, então a
-     * grade não desalinha e nenhuma célula é gasta só com texto.
-     */
     const items = useMemo(() => {
-        let atual: string | null = null
+        let currentMonth: string | null = null
         return list.map((song) => {
-            if (!grouped) return { song, mes: null as string | null }
+            if (!grouped) return { song, month: null as string | null }
             const label = mesAno(song.claimedat)
-            const novo = label && label !== atual
-            if (novo) atual = label
-            return { song, mes: novo ? label : null }
+            const isNew = label && label !== currentMonth
+            if (isNew) currentMonth = label
+            return { song, month: isNew ? label : null }
         })
     }, [list, grouped])
 
@@ -189,151 +166,116 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
     }
 
     const OwnerMenu = ({ song }: { song: Song }) => (
-        <div className="absolute right-1.5 top-1.5 z-10" onClick={(e) => e.preventDefault()}>
+        <div className={styles.ownerMenu} onClick={(event) => event.preventDefault()}>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        size="icon"
+                    <button
+                        type="button"
                         aria-label="Opções da faixa"
-                        className="h-7 w-7 rounded-full bg-black/55 text-mir-text opacity-0 backdrop-blur-sm transition hover:bg-black/75 hover:text-mir-text focus-visible:opacity-100 group-hover:opacity-100"
+                        className={styles.ownerTrigger}
                     >
-                        <MoreVerticalIcon className="h-3.5 w-3.5" />
-                    </Button>
+                        <MoreHorizontal size={15} aria-hidden="true" />
+                    </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                    align="end"
-                    className="w-56 border border-mir-line bg-mir-raised text-mir-text2 shadow-[0_24px_60px_rgba(0,0,0,0.5)]"
-                >
+                <DropdownMenuContent align="end" className={styles.menu}>
                     <DropdownMenuItem
                         onClick={() => handleToggleFavorite(song.id, song.is_favorited)}
                         disabled={favoriteStates[song.id]}
-                        className="cursor-pointer focus:bg-mir-fill2 focus:text-mir-text"
+                        className={styles.menuItem}
                     >
-                        <HeartIcon
-                            className={`mr-2 h-4 w-4 ${song.is_favorited ? 'fill-current text-mir-warm' : ''}`}
+                        <Heart
+                            className={song.is_favorited ? styles.favoriteMenuIcon : ''}
+                            aria-hidden="true"
                         />
                         {favoriteStates[song.id] ? (
-                            <span className="flex items-center">
-                                <div className="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-mir-text3 border-t-transparent" />
-                                Processando...
-                            </span>
+                            <span className={styles.processing}>Processando...</span>
                         ) : song.is_favorited ? (
                             'Tirar das favoritas'
                         ) : (
                             'Botar nas favoritas'
                         )}
                     </DropdownMenuItem>
-
-                    <DropdownMenuSeparator className="bg-mir-line" />
-
+                    <DropdownMenuSeparator className={styles.menuSeparator} />
                     <DropdownMenuItem
                         onClick={() => handleGenerateCertificate(song)}
                         disabled={isGenerating}
-                        className="cursor-pointer focus:bg-mir-fill2 focus:text-mir-text"
+                        className={styles.menuItem}
                     >
-                        <ImageIcon className="mr-2 h-4 w-4" />
-                        {isGenerating ? (
-                            <span className="flex items-center">
-                                <div className="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-mir-text3 border-t-transparent" />
-                                Gerando discovery card...
-                            </span>
-                        ) : (
-                            'Gerar discovery card'
-                        )}
+                        <ImageIcon aria-hidden="true" />
+                        {isGenerating ? 'Gerando discovery card...' : 'Gerar discovery card'}
                     </DropdownMenuItem>
-
-                    <DropdownMenuSeparator className="bg-mir-line" />
-
+                    <DropdownMenuSeparator className={styles.menuSeparator} />
                     <DropdownMenuItem
                         onClick={() => handleRemoveTrack(song.id, song.track_title)}
                         disabled={loadingStates[song.id]}
-                        className="cursor-pointer text-red-400 focus:bg-red-400/10 focus:text-red-300"
+                        className={`${styles.menuItem} ${styles.removeItem}`}
                     >
-                        <TrashIcon className="mr-2 h-4 w-4" />
-                        {loadingStates[song.id] ? (
-                            <span className="flex items-center">
-                                <div className="mr-2 h-3 w-3 animate-spin rounded-full border-2 border-red-400 border-t-transparent" />
-                                Removendo...
-                            </span>
-                        ) : (
-                            'Remover do acervo'
-                        )}
+                        <Trash2 aria-hidden="true" />
+                        {loadingStates[song.id] ? 'Removendo...' : 'Remover do acervo'}
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>
     )
 
-    const Tile = ({ song, mes }: { song: Song; mes: string | null }) => (
-        <Link href={trackHref(song)} className="group block min-w-0">
-            {/* O mês é cronologia, não precedência: em lima ele ficava mais
-                aceso que o ordinal logo abaixo, que é o dado que distingue a
-                pessoa. Ambos os assuntos são "tempo", mas só um é conquista. */}
+    const Tile = ({ song, month }: { song: Song; month: string | null }) => (
+        <div className={styles.tile}>
             {grouped && (
-                <div className="mb-2 flex h-[15px] items-center gap-2 font-mono text-[11px] text-mir-text3">
-                    {mes && (
+                <div className={styles.monthMarker}>
+                    {month && (
                         <>
-                            <span className="truncate">{mes}</span>
-                            <span className="h-px flex-1 bg-mir-line" />
+                            <span>{month}</span>
+                            <span aria-hidden="true" />
                         </>
                     )}
                 </div>
             )}
-            <div className="relative overflow-hidden rounded-[4px] bg-mir-card ring-1 ring-mir-line transition group-hover:ring-mir-text3">
-                <Capa song={song} />
+            <div className={styles.coverWrap}>
+                <Link href={trackHref(song)} aria-label={`${song.track_title}, ${song.artist_name}`}>
+                    <RecordCover
+                        src={song.track_thumbnail}
+                        alt={`Capa de ${song.track_title}`}
+                    />
+                </Link>
                 {canRemove && <OwnerMenu song={song} />}
             </div>
-            <div className="mt-2 truncate text-[13.5px] font-bold tracking-[-0.01em] text-mir-text">
-                {song.track_title}
-            </div>
-            <div className="mt-0.5 truncate text-[12px] text-mir-text2">
-                {song.artist_name}
-            </div>
-            <div className="mt-1.5 flex items-center gap-2 font-mono text-[11px]">
-                {song.position !== null && (
-                    // sem rótulo: "a salvar" repetido em 200 capas vira ruído.
-                    // O title cobre quem não conhece a convenção.
-                    <span
-                        title={`${song.position}ª a salvar`}
-                        className={`tabular-nums ${
-                            song.position === 1
-                                ? 'font-bold text-mir-acc'
-                                : 'text-mir-text3'
-                        }`}
-                    >
-                        {song.position}ª
-                    </span>
-                )}
-                {!grouped && (
-                    <span className="truncate text-mir-text3">{mesAno(song.claimedat)}</span>
-                )}
-                {song.is_favorited && (
-                    <HeartIcon className="ml-auto h-3 w-3 flex-none fill-current text-mir-warm" />
-                )}
-            </div>
-        </Link>
+            <Link href={trackHref(song)} className={styles.tileInfo}>
+                <div className={styles.title} title={song.track_title}>
+                    {song.track_title}
+                </div>
+                <div className={styles.artist} title={song.artist_name}>
+                    {song.artist_name}
+                </div>
+                <div className={styles.dataLine}>
+                    {song.position !== null && (
+                        <span
+                            title={`${song.position}ª a salvar`}
+                            className={song.position === 1 ? styles.positionAccent : styles.position}
+                        >
+                            {song.position}ª
+                        </span>
+                    )}
+                    {!grouped && <span>{mesAno(song.claimedat)}</span>}
+                    {song.is_favorited && (
+                        <Heart size={12} fill="currentColor" aria-label="Favorita" />
+                    )}
+                </div>
+            </Link>
+        </div>
     )
 
     if (!songs.length) {
         return (
-            <section className="w-full border-b border-mir-line bg-mir-bg">
-                <div className="mx-auto w-full max-w-[1200px] px-5 py-16 sm:px-8">
-                    <h2 className="m-0 mb-7 text-[clamp(26px,3.6vw,34px)] font-extrabold tracking-[-0.04em] text-mir-text">
-                        Acervo
-                    </h2>
-                    <div className="rounded-[12px] border border-dashed border-mir-line2 px-8 py-16 text-center">
-                        <p className="m-0 text-[15px] text-mir-text2">
-                            Nenhuma faixa salva ainda.
-                        </p>
-                        {/* Ia para /claimtrack, que era a "página de salvar" e
-                            não existe mais. Salvar se faz na ficha da faixa, e
-                            a pilha é o lugar onde se acha uma para abrir. */}
-                        <Link
-                            href="/pilha"
-                            className="mt-5 inline-flex rounded-full bg-mir-text px-5 py-2.5 text-[13.5px] font-bold text-mir-bg transition hover:brightness-105 active:translate-y-px"
-                        >
-                            Revirar a pilha
+            <section className={styles.section}>
+                <div className={`${shellStyles.container} ${styles.container}`}>
+                    <div className={styles.heading}>
+                        <h2>Acervo</h2>
+                        <p>0 faixas</p>
+                    </div>
+                    <div className={styles.empty}>
+                        <p>Nenhuma faixa salva ainda.</p>
+                        <Link href="/pilha" className={recipes.button}>
+                            Revirar a pilha ↗
                         </Link>
                     </div>
                 </div>
@@ -342,67 +284,54 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
     }
 
     return (
-        <section className="w-full border-b border-mir-line bg-mir-bg">
-            <div className="mx-auto w-full max-w-[1200px] px-5 py-14 sm:px-8">
-                <div className="mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
-                    <div>
-                        <h2 className="m-0 text-[clamp(26px,3.6vw,34px)] font-extrabold tracking-[-0.04em] text-mir-text">
-                            Acervo
-                        </h2>
-                        <p className="m-0 mt-1.5 font-mono text-[11.5px] tabular-nums text-mir-text3">
+        <section className={styles.section}>
+            <div className={`${shellStyles.container} ${styles.container}`}>
+                <div className={styles.headingRow}>
+                    <div className={styles.heading}>
+                        <h2>Acervo</h2>
+                        <p>
                             {list.length} {list.length === 1 ? 'faixa' : 'faixas'}
                         </p>
                     </div>
-
-                    <div className="flex flex-wrap items-center gap-3">
-                        {filters.length > 1 && (
-                            <div className="flex gap-1 rounded-full bg-mir-fill1 p-1">
-                                {filters.map((f) => (
-                                    <button
-                                        key={f.id}
-                                        onClick={() => setFilter(f.id)}
-                                        aria-pressed={filter === f.id}
-                                        className={`rounded-full px-3.5 py-1.5 font-mono text-[11.5px] transition ${
-                                            filter === f.id
-                                                ? 'bg-mir-text text-mir-bg'
-                                                : 'text-mir-text3 hover:text-mir-text'
-                                        }`}
-                                    >
-                                        {f.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                        <div className="relative flex items-center">
-                            <select
-                                value={sort}
-                                onChange={(e) => setSort(e.target.value as Sort)}
-                                aria-label="Ordenar acervo"
-                                className="cursor-pointer appearance-none rounded-full border border-mir-line2 bg-transparent py-2 pl-4 pr-9 font-mono text-[11.5px] text-mir-text2 outline-none transition hover:border-mir-text3 hover:text-mir-text focus-visible:ring-1 focus-visible:ring-mir-acc"
-                            >
-                                {SORTS.map((s) => (
-                                    <option
-                                        key={s.id}
-                                        value={s.id}
-                                        className="bg-mir-surface text-mir-text"
-                                    >
-                                        {s.label}
-                                    </option>
-                                ))}
-                            </select>
-                            <ChevronDownIcon className="pointer-events-none absolute right-3.5 h-3.5 w-3.5 text-mir-text3" />
-                        </div>
+                    <div className={styles.sortControl}>
+                        <select
+                            value={sort}
+                            onChange={(event) => setSort(event.target.value as Sort)}
+                            aria-label="Ordenar acervo"
+                        >
+                            {SORTS.map((item) => (
+                                <option key={item.id} value={item.id}>
+                                    {item.label}
+                                </option>
+                            ))}
+                        </select>
+                        <ChevronDown size={14} aria-hidden="true" />
                     </div>
                 </div>
 
-                {list.length === 0 ? (
-                    <div className="rounded-[12px] border border-dashed border-mir-line2 px-8 py-14 text-center font-mono text-[13px] text-mir-text3">
-                        nenhuma faixa neste filtro
+                {filters.length > 1 && (
+                    <div className={`${recipes.filters} ${styles.filters}`} role="group" aria-label="Filtrar acervo">
+                        {filters.map((item) => (
+                            <button
+                                type="button"
+                                key={item.id}
+                                onClick={() => setFilter(item.id)}
+                                aria-pressed={filter === item.id}
+                                className={filter === item.id ? recipes.filterActive : recipes.filter}
+                            >
+                                {item.label}{' '}
+                                <span className={styles.filterCount}>{item.count}</span>
+                            </button>
+                        ))}
                     </div>
+                )}
+
+                {list.length === 0 ? (
+                    <div className={styles.emptyFilter}>Nenhuma faixa neste filtro.</div>
                 ) : (
-                    <div className="grid grid-cols-3 gap-x-4 gap-y-7 sm:grid-cols-[repeat(auto-fill,minmax(132px,1fr))] sm:gap-x-5">
-                        {items.map(({ song, mes }) => (
-                            <Tile key={song.id} song={song} mes={mes} />
+                    <div className={styles.grid}>
+                        {items.map(({ song, month }) => (
+                            <Tile key={song.id} song={song} month={month} />
                         ))}
                     </div>
                 )}

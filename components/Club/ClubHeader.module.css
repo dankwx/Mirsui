@@ -1,0 +1,284 @@
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    border-bottom: 1px solid var(--club-line);
+    background: color-mix(in srgb, var(--club-bg) 90%, transparent);
+    backdrop-filter: blur(12px);
+}
+
+.nav {
+    width: min(1280px, calc(100% - 112px));
+    height: 72px;
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.wordmark {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 7px;
+    color: var(--club-text);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+}
+
+.navLinks {
+    display: flex;
+    align-items: center;
+    gap: 27px;
+}
+
+.navLink {
+    position: relative;
+    padding-block: 10px;
+    color: var(--club-muted);
+    font-size: 14px;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.navLink:hover,
+.navLinkActive {
+    color: var(--club-text);
+}
+
+.navLinkActive::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 3px;
+    left: 0;
+    height: 2px;
+    background: var(--club-text);
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-left: auto;
+}
+
+.search {
+    width: 290px;
+}
+
+.search :global(.club-search) {
+    --search-bg: var(--club-paper) !important;
+    --search-fg: var(--club-text) !important;
+    --search-muted: var(--club-muted) !important;
+    --search-line: var(--club-line) !important;
+    --search-line-strong: var(--club-text) !important;
+    --search-fill: var(--club-surface) !important;
+    --search-hover: var(--club-surface) !important;
+    --search-surface: var(--club-paper) !important;
+    --search-panel: var(--club-paper) !important;
+    --search-accent: var(--club-accent-text) !important;
+}
+
+.themeToggle {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    color: var(--club-text);
+    background: transparent;
+    transition: background 0.2s;
+}
+
+.themeToggle:hover {
+    background: var(--club-surface);
+}
+
+.login {
+    padding-block: 10px;
+    color: var(--club-muted);
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: color 0.2s;
+}
+
+.login:hover {
+    color: var(--club-text);
+}
+
+.signup {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 16px;
+    border: 1px solid var(--club-text);
+    border-radius: 7px;
+    color: var(--club-on-button);
+    background: var(--club-text);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.signup:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 var(--club-accent);
+}
+
+.profile {
+    position: relative;
+}
+
+.avatarButton {
+    display: block;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--club-line);
+    border-radius: 50%;
+    background: var(--club-accent-soft);
+    color: var(--club-accent-text);
+}
+
+.avatarImage,
+.avatarFallback {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    object-fit: cover;
+}
+
+.avatarFallback {
+    font-family: var(--font-archivo), sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 220px;
+    overflow: hidden;
+    border: 1px solid var(--club-line);
+    border-radius: 9px;
+    background: var(--club-paper);
+    box-shadow: 0 20px 40px -20px rgba(20, 20, 18, 0.35);
+}
+
+.menuHeader {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--club-line);
+}
+
+.menuHeader p {
+    overflow: hidden;
+    color: var(--club-text);
+    font-size: 14px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.menuHeader span {
+    display: block;
+    margin-top: 2px;
+    overflow: hidden;
+    color: var(--club-muted);
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.menuItems {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px;
+}
+
+.menuItems a,
+.menuItems button {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border: 0;
+    border-radius: 5px;
+    color: var(--club-muted);
+    background: transparent;
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    transition: color 0.2s, background 0.2s;
+}
+
+.menuItems a:hover,
+.menuItems button:hover {
+    color: var(--club-text);
+    background: var(--club-surface);
+}
+
+.menuItems svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    color: var(--club-muted);
+}
+
+@media (max-width: 1100px) {
+    .nav {
+        width: calc(100% - 64px);
+    }
+
+    .navLinks {
+        gap: 18px;
+    }
+
+    .search {
+        display: none;
+    }
+}
+
+@media (max-width: 767px) {
+    .nav {
+        width: calc(100% - 40px);
+        height: 64px;
+        gap: 16px;
+    }
+
+    .wordmark {
+        gap: 6px;
+        font-size: 22px;
+    }
+
+    .wordmark svg {
+        width: 24px;
+    }
+
+    .navLinks {
+        display: none;
+    }
+
+    .actions {
+        gap: 12px;
+    }
+}
+
+@media (max-width: 380px) {
+    .signup {
+        display: none;
+    }
+}

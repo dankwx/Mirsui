@@ -1,0 +1,300 @@
+.section {
+    border-bottom: 1px solid var(--club-line);
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 296px;
+    align-items: start;
+    gap: 64px;
+    padding-block: 40px;
+}
+
+.noFavorites {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.identityColumn {
+    min-width: 0;
+}
+
+.identity {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.avatar,
+.avatarButton {
+    display: grid;
+    width: 96px;
+    height: 96px;
+    flex: none;
+    place-items: center;
+    overflow: hidden;
+    border: 0;
+    border-radius: 50%;
+    background: var(--club-accent-soft);
+    box-shadow: 0 0 0 1px var(--club-line);
+    color: var(--club-accent-text);
+}
+
+.avatarButton {
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+
+.avatarButton:hover,
+.avatarButton:focus-visible {
+    box-shadow: 0 0 0 2px var(--club-accent);
+}
+
+.avatarImage,
+.avatarFallback {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    object-fit: cover;
+}
+
+.avatarFallback {
+    font-family: var(--font-archivo), sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+}
+
+.identityCopy {
+    min-width: 0;
+    padding-top: 1px;
+}
+
+.identityCopy h1 {
+    color: var(--club-text);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: clamp(34px, 4.4vw, 56px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.05em;
+    overflow-wrap: anywhere;
+}
+
+.username {
+    margin-top: 6px;
+    color: var(--club-muted);
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.bio {
+    max-width: 56ch;
+    margin-top: 12px;
+    color: var(--club-muted);
+    font-size: 16px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 20px 40px;
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid var(--club-line);
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.since {
+    margin-left: auto;
+    color: var(--club-muted);
+    font-size: 12px;
+}
+
+.favorites {
+    min-width: 0;
+}
+
+.favoritesLabel {
+    margin-bottom: 12px;
+    color: var(--club-muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.favoritesGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.favoriteLink {
+    display: block;
+    min-width: 0;
+}
+
+.favoriteLink:hover [data-record-cover] img,
+.favoriteLink:focus-visible [data-record-cover] img {
+    transform: scale(1.035);
+}
+
+.dialogOverlay {
+    background: rgba(30, 32, 29, 0.55);
+    backdrop-filter: blur(4px);
+}
+
+.dialogContent {
+    display: block;
+    width: min(calc(100% - 32px), 440px);
+    max-width: none;
+    padding: 28px;
+    border: 1px solid var(--club-line);
+    border-radius: 9px;
+    color: var(--club-text);
+    background: var(--club-paper);
+    box-shadow: 0 30px 60px -30px rgba(20, 20, 18, 0.45);
+}
+
+.dialogClose {
+    top: 14px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
+    padding: 7px;
+    color: var(--club-muted);
+    background: transparent;
+    box-shadow: none !important;
+}
+
+.dialogClose:hover {
+    color: var(--club-text);
+    background: var(--club-surface);
+}
+
+.dialogClose:focus-visible {
+    outline: 2px solid var(--club-accent);
+    outline-offset: 2px;
+}
+
+.dialogHeader {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.dialogTitle {
+    color: var(--club-text);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+}
+
+.editForm {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field label {
+    color: var(--club-text);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.field input,
+.field textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--club-line);
+    border-radius: 6px;
+    outline: none;
+    color: var(--club-text);
+    background: var(--club-bg);
+    font: inherit;
+    font-size: 15px;
+    line-height: 1.45;
+}
+
+.field textarea {
+    resize: vertical;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+    color: var(--club-muted);
+}
+
+.field input:hover,
+.field textarea:hover {
+    border-color: var(--club-muted);
+}
+
+.editActions {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    padding-top: 2px;
+}
+
+.saveButton {
+    flex: 1;
+}
+
+@media (max-width: 767px) {
+    .layout {
+        display: block;
+        padding-block: 28px;
+    }
+
+    .identity {
+        gap: 18px;
+    }
+
+    .avatar,
+    .avatarButton {
+        width: 72px;
+        height: 72px;
+    }
+
+    .avatarFallback {
+        font-size: 24px;
+    }
+
+    .stats {
+        gap: 18px 28px;
+    }
+
+    .actions {
+        gap: 12px;
+    }
+
+    .since {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .favorites {
+        margin-top: 28px;
+    }
+
+    .favoritesGrid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+    }
+}

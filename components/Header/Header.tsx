@@ -8,6 +8,7 @@ import { useEffect, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut } from '@/app/auth/actions'
+import { navLinks, navLinksVisitante } from './navLinks'
 import FotoDePerfil from '@/components/FotoDePerfil'
 
 // Tipo para o perfil do usuário
@@ -31,99 +32,6 @@ interface HeaderProps {
      */
     isDono?: boolean
 }
-
-type NavLink = {
-    title: string
-    url: string
-    match: (pathname: string) => boolean
-}
-
-/* Vocabulário do produto (vale pra toda copy visível):
- *
- *   salvar / salva      a ação grátis e ilimitada de marcar que ouviu cedo.
- *                       Verbo de botão, deliberadamente sem sabor: é o texto
- *                       mais lido do app e palavra "criativa" cansa em alta
- *                       frequência.
- *   achado              o substantivo da mesma coisa ("meus achados").
- *   acervo              onde os achados ficam. "412 no acervo" é a contagem.
- *   ficha / botar ficha a aposta com vaga limitada, trava e multiplicador.
- *                       Vem de "botar as fichas em", que em português falado já
- *                       significa apoiar com convicção. Rota segue /stakes; só
- *                       o rótulo é português.
- *   Faro                a pontuação. Ainda sem página própria, então fora
- *                       da nav por enquanto.
- *
- * Aposentados: carimbar/carimbo, claim/Claim, reivindicar, despacho, cravar/
- * cravada, stake como verbo ("dê stake"). Identificadores, rotas e campos de
- * banco seguem em claim/stake de propósito: renomear aquilo exige o backend.
- *
- * Nota: referencia/Mirsui Cravadas.dc.html é o mock antigo e ainda fala
- * "cravada" inteiro. Ele ficou desalinhado de propósito, não é fonte.
- */
-
-const navLinks: NavLink[] = [
-    {
-        title: 'Início',
-        // url base; é sobrescrita em runtime por homeUrl (ver componente).
-        url: '/',
-        match: (p) => p === '/' || p.startsWith('/feed'),
-    },
-    {
-        title: 'A pilha',
-        url: '/pilha',
-        match: (p) => p.startsWith('/pilha'),
-    },
-    {
-        // a rota segue /stakes (link público, não muda); o rótulo é o nome
-        // em português da feature
-        title: 'Fichas',
-        url: '/stakes',
-        match: (p) => p.startsWith('/stakes'),
-    },
-]
-
-/* Saíram daqui:
- *
- *   "Acervo" → /library    a página era um gerenciador de playlists de outra
- *                          fase. O acervo de verdade — os achados de alguém —
- *                          mora em /user/<username>, que já está no menu do
- *                          avatar como "Perfil".
- *   "Salvar faixa" → /claimtrack
- *                          página de outra fase, com número inventado no corpo
- *                          e uma seção que chamava uma RPC inexistente. Salvar
- *                          se faz na ficha da faixa; a busca do header é o
- *                          caminho para chegar nela.
- */
-
-/**
- * Nav de quem chega sem sessão.
- *
- * O conteúdo do site abriu (faixa, artista, perfil, feed e acervo dos outros),
- * mas /pilha e /stakes seguem exigindo login. Mostrar a nav completa para um
- * visitante seria oferecer becos sem saída: os itens levam a um redirect de
- * volta para a landing.
- *
- * Aqui "Início" é a landing — e não o feed, como no caso logado —, então o feed
- * ganha item próprio. Para quem tem sessão isso sairia repetido, que é o motivo
- * de as duas listas serem separadas em vez de uma filtrada.
- */
-const navLinksVisitante: NavLink[] = [
-    {
-        title: 'Início',
-        url: '/',
-        match: (p) => p === '/',
-    },
-    {
-        title: 'Achados',
-        url: '/feed',
-        match: (p) => p.startsWith('/feed'),
-    },
-    {
-        title: 'A pilha',
-        url: '/pilha',
-        match: (p) => p.startsWith('/pilha'),
-    },
-]
 
 export default function Header({ userProfile, isDono = false }: HeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false)

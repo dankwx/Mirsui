@@ -4,7 +4,7 @@ import FotoDePerfil from '@/components/FotoDePerfil'
 import { diaMes, trackHref } from './landingHelpers'
 import type { RecentActivityItem } from '@/utils/homepageService'
 import type { PessoaDaCena } from '@/utils/homeService'
-import RecordCover from './RecordCover'
+import RecordCover from '@/components/Club/RecordCover'
 import styles from './Club.module.css'
 
 export default function Cena({

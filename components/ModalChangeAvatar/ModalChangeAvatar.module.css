@@ -1,0 +1,185 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 24px 16px;
+    background: rgba(30, 32, 29, 0.55);
+    backdrop-filter: blur(4px);
+}
+
+.overlay * {
+    box-sizing: border-box;
+}
+
+.card {
+    width: min(100%, 440px);
+    overflow: hidden;
+    border: 1px solid var(--club-line);
+    border-radius: 9px;
+    color: var(--club-text);
+    background: var(--club-paper);
+    box-shadow: 0 30px 60px -30px rgba(20, 20, 18, 0.45);
+}
+
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--club-line);
+}
+
+.header h3 {
+    color: var(--club-text);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+}
+
+.header p {
+    margin-top: 6px;
+    color: var(--club-muted);
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 12px;
+}
+
+.close {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    color: var(--club-muted);
+    background: transparent;
+}
+
+.close:hover {
+    color: var(--club-text);
+    background: var(--club-surface);
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 24px 28px 28px;
+}
+
+.preview {
+    display: grid;
+    width: 140px;
+    height: 140px;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid var(--club-line);
+    border-radius: 50%;
+    color: var(--club-muted);
+    background: var(--club-surface);
+}
+
+.previewImage {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.filePicker {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 18px;
+    border: 1px dashed var(--club-line);
+    border-radius: 7px;
+    color: var(--club-muted);
+    background: var(--club-surface);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.filePicker:hover {
+    border-color: var(--club-text);
+}
+
+.filePicker span {
+    overflow: hidden;
+    color: var(--club-text);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fileInput {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.help,
+.error {
+    color: var(--club-muted);
+    font-size: 12px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.error {
+    color: var(--club-danger);
+    font-size: 13px;
+}
+
+.footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 18px 28px;
+    border-top: 1px solid var(--club-line);
+}
+
+.save {
+    min-width: 140px;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 480px) {
+    .header,
+    .body,
+    .footer {
+        padding-inline: 20px;
+    }
+
+    .footer {
+        align-items: stretch;
+    }
+
+    .footer > button {
+        flex: 1;
+    }
+}

@@ -30,6 +30,7 @@
     "posthog-js": "^1.392.0",
     "react": "^18",
     "react-dom": "^18",
+    "sharp": "^0.35.4",
     "sonner": "^2.0.7",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7"

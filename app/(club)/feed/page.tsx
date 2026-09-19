@@ -1,9 +1,19 @@
-import React from 'react'
+// app/(club)/feed/page.tsx
+//
+// A home de quem está logado: o que a cena andou salvando.
+//
+// Vive no grupo `(club)`, com o shell, o header e o rodapé compactos de
+// DESIGN.md. A composição segue a linha "Feed" do guia: pessoas e achados com
+// bom ritmo de leitura, espaçamento compacto. Os dados, a paginação, o salvar
+// direto do feed e a porta da pilha não mudaram.
+
 import { getFeedPostsWithInteractions, getRecentClaims } from '@/utils/feedService.backend'
-import FeedContent from '@/components/FeedContent/FeedContent'
-import LandingFooter from '@/components/Footer/LandingFooter'
+import Feed from '@/components/Feed/Feed'
+import PileInvite from '@/components/Feed/PileInvite'
+import shellStyles from '@/components/Club/ClubShell.module.css'
 import { createClient } from '@/utils/supabase/server'
 import type { Metadata } from 'next'
+import styles from './page.module.css'
 
 export const metadata: Metadata = {
     title: 'Feed - Mirsui',
@@ -23,7 +33,7 @@ export default async function FeedPage() {
     const [{ data: { user } }, feed, recent] = await Promise.all([
         supabase.auth.getUser(),
         getFeedPostsWithInteractions(5, 0),
-        getRecentClaims(4) // Buscar apenas 4 músicas únicas
+        getRecentClaims(4), // Buscar apenas 4 músicas únicas
     ])
 
     const currentUserId = user?.id ?? null
@@ -32,20 +42,22 @@ export default async function FeedPage() {
     // usando o token que authHeaders() manda. Não há segunda ida ao banco.
 
     return (
-        // min-h + flex column: com a aba "seguindo" vazia a página fica curta e o
-        // rodapé flutuava no meio da tela. Escopado aqui para não mexer no
-        // fluxo das outras páginas do dashboard.
-        <div className="flex min-h-[calc(100dvh-72px)] flex-col">
-            <div className="flex-1">
-                <FeedContent
+        <div className={`${shellStyles.container} ${styles.page}`}>
+            <header className={styles.heading}>
+                <h1>Achados</h1>
+                <p>Quem ouviu primeiro o quê, na ordem em que aconteceu.</p>
+            </header>
+
+            <div className={styles.body}>
+                <Feed
                     initialPosts={feed.posts}
-                    recentClaims={recent.claims}
                     currentUserId={currentUserId}
                     loadFailed={feed.failed}
-                    recentClaimsFailed={recent.failed}
                 />
+                <aside className={styles.rail}>
+                    <PileInvite claims={recent.claims} loadFailed={recent.failed} />
+                </aside>
             </div>
-            <LandingFooter compact />
         </div>
     )
 }

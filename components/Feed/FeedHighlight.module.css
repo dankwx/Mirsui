@@ -1,0 +1,132 @@
+.highlight {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    grid-template-areas:
+        'cover head'
+        'cover body';
+    grid-template-rows: auto 1fr;
+    align-items: start;
+    gap: 0 28px;
+    padding-block: 28px 30px;
+}
+
+.coverLink {
+    display: block;
+    grid-area: cover;
+    min-width: 0;
+}
+
+.cover {
+    box-shadow:
+        0 20px 32px -20px #20201e80,
+        1px 1px 2px #20201e25;
+}
+
+.coverLink:hover .cover img {
+    transform: scale(1.03);
+}
+
+.head {
+    grid-area: head;
+    min-width: 0;
+    padding-top: 2px;
+}
+
+.body {
+    grid-area: body;
+    min-width: 0;
+}
+
+.eyebrow {
+    margin-bottom: 10px;
+    color: var(--club-accent-text);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.title {
+    margin-top: 10px;
+    color: var(--club-text);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: clamp(24px, 2.6vw, 34px);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.045em;
+    overflow-wrap: anywhere;
+}
+
+.title a {
+    color: inherit;
+}
+
+.title a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.artist {
+    margin-top: 6px;
+    color: var(--club-text);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.album {
+    color: var(--club-muted);
+    font-weight: 400;
+}
+
+.footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 18px;
+    margin-top: 18px;
+}
+
+@media (max-width: 1100px) {
+    .highlight {
+        grid-template-columns: 160px minmax(0, 1fr);
+        gap: 0 22px;
+    }
+}
+
+@media (max-width: 767px) {
+    /* No celular a capa fica ao lado só do "quem salvou"; o título ganha a
+       largura inteira, em vez de quebrar em cinco linhas numa coluna estreita. */
+    .highlight {
+        grid-template-columns: 104px minmax(0, 1fr);
+        grid-template-areas:
+            'cover head'
+            'body body';
+        grid-template-rows: auto auto;
+        align-items: center;
+        gap: 14px 16px;
+        padding-block: 20px 24px;
+    }
+
+    .head {
+        padding-top: 0;
+    }
+
+    .eyebrow {
+        margin-bottom: 8px;
+    }
+
+    .title {
+        margin-top: 0;
+        font-size: 24px;
+    }
+
+    .artist {
+        font-size: 14px;
+    }
+
+    .footer {
+        margin-top: 14px;
+    }
+}

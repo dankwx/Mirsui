@@ -1,0 +1,90 @@
+.byline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
+    min-width: 0;
+    color: var(--club-muted);
+    font-size: 13px;
+    line-height: 1.3;
+}
+
+.bylineLarge {
+    font-size: 14px;
+}
+
+.person {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+    color: var(--club-text);
+}
+
+.person strong {
+    overflow: hidden;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.person:hover strong {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.avatar {
+    display: grid;
+    width: 24px;
+    height: 24px;
+    flex: none;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 50%;
+    color: var(--club-accent-text);
+    background: var(--club-accent-soft);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.bylineLarge .avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 11px;
+}
+
+.avatarImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.when {
+    white-space: nowrap;
+}
+
+.note {
+    margin-top: 8px;
+    color: var(--club-muted);
+    font-size: 14px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.precedence {
+    color: var(--club-muted);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.first {
+    color: var(--club-accent-text);
+    font-weight: 700;
+}

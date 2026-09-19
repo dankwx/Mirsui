@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Disc3 } from 'lucide-react'
 import styles from './RecordCover.module.css'
 
@@ -17,6 +17,18 @@ export default function RecordCover({
     priority?: boolean
 }) {
     const [failedSrc, setFailedSrc] = useState<string | null>(null)
+    const ref = useRef<HTMLImageElement>(null)
+
+    useEffect(() => {
+        // Em página renderizada no servidor o <img> já vem no HTML, e uma capa
+        // morta (404 do CDN) falha antes da hidratação pendurar o `onError`.
+        // Evento perdido não redispara, então o ícone de imagem quebrada
+        // ficava na tela. `complete` com `naturalWidth` zero é como perguntar
+        // ao DOM o que aconteceu antes do React chegar — mesma técnica de
+        // FotoDePerfil.
+        const img = ref.current
+        if (src && img?.complete && img.naturalWidth === 0) setFailedSrc(src)
+    }, [src])
 
     return (
         <span
@@ -27,6 +39,7 @@ export default function RecordCover({
                 // Catalogue images already have CDN-sized variants.
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
+                    ref={ref}
                     src={src}
                     alt={alt}
                     width={250}

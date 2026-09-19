@@ -99,7 +99,7 @@ Respeite `prefers-reduced-motion`. Não acrescente rolagem forçada, paralaxe, c
 
 ## Como expandir para outras partes do site
 
-**Estado atual:** a home, o perfil público em `/user/[username]` e a página de faixa em `/track/[id]` usam a identidade `club`. [PublicShell](components/Landing/PublicShell.tsx) mantém a home no shell público, enquanto o layout do grupo `(club)` usa [ClubShell](components/Club/ClubShell.tsx), [ClubHeader](components/Club/ClubHeader.tsx) e [ClubFooter](components/Landing/ClubFooter.tsx). Os tokens compartilhados estão em [app/club.css](app/club.css). Páginas legais e outras telas logadas continuam com a identidade anterior. `tailwind.config.ts` ainda contém `mir-*` marrom/lima, e `globals.css` contém tokens antigos: não os confunda com o sistema `club`.
+**Estado atual:** a home, o perfil público em `/user/[username]`, a página de faixa em `/track/[id]` e o feed em `/feed` (a home de quem está logado) usam a identidade `club`. [PublicShell](components/Landing/PublicShell.tsx) mantém a home no shell público, enquanto o layout do grupo `(club)` usa [ClubShell](components/Club/ClubShell.tsx), [ClubHeader](components/Club/ClubHeader.tsx) e [ClubFooter](components/Landing/ClubFooter.tsx). Os tokens compartilhados estão em [app/club.css](app/club.css). Páginas legais e outras telas logadas continuam com a identidade anterior. `tailwind.config.ts` ainda contém `mir-*` marrom/lima, e `globals.css` contém tokens antigos: não os confunda com o sistema `club`.
 
 1. Leia a captura e o componente da home mais próximo da tarefa. Defina qual conteúdo e qual ação devem dominar a nova tela.
 2. Mantenha rotas, sessão, regras do produto, analytics e dados existentes. Mudar apresentação não autoriza inventar funcionalidades.
@@ -116,7 +116,7 @@ O modal de autenticação é montado em um portal no `body`. Por isso há seleto
 |---|---|
 | Perfil | Identidade da pessoa, capas e seus registros em primeiro plano. Título menor, números com função, ações de seguir/compartilhar claras. |
 | Faixa / artista | Capa ou foto principal, nome, contexto e ação dominante. Dê destaque à precedência sem transformar toda informação em badge. A faixa já está migrada: use-a como referência para o artista. |
-| Feed | Pessoas e achados com bom ritmo de leitura. Espaçamento mais compacto; preserve legibilidade e navegação. |
+| Feed | Pessoas e achados com bom ritmo de leitura. Espaçamento mais compacto; preserve legibilidade e navegação. Já migrado: título pequeno, filtros sublinhados, último achado com capa maior, linhas de 64 px e a pilha na lateral. |
 | Busca / pilha | A busca e os resultados dominam. Grid de capas, filtros acessíveis e estados vazios úteis. |
 | Formulários / admin | Mesmas fontes, cores e formas, com densidade funcional. Sem discos inclinados, manchetes enormes ou linguagem promocional. |
 
@@ -156,6 +156,7 @@ Esse tamanho é uma sugestão para páginas internas, não um valor extraído da
 | [page.tsx](app/(public)/page.tsx) | Composição, dados e metadata da home |
 | [trackHref.ts](utils/trackHref.ts) | Endereços canônicos de faixas; não monte slugs manualmente |
 | [components/Track](components/Track) | Página de faixa: player com forma de onda real da prévia, ações de salvar, registro de descoberta, quem chegou antes e curva do Observatório |
+| [components/Feed](components/Feed) | Feed: abas, último achado em destaque, linhas com salvar direto, "carregar mais" paginado, estados vazio/erro e o convite para a pilha com as últimas capas |
 
 ## Checklist de entrega
 

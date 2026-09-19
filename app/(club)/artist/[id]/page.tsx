@@ -1,4 +1,4 @@
-// app/(dashboard)/artist/[id]/page.tsx
+// app/(club)/artist/[id]/page.tsx
 //
 // A página de artista, endereçada pelo id do Deezer.
 //
@@ -9,22 +9,29 @@
 // é a métrica que o Observatório e os Stakes já usam.
 //
 // Ver docs/plano-independencia-do-spotify.md, fase 3.
+//
+// A PÁGINA NA IDENTIDADE CLUB (19/09/2026)
+// Vive no grupo `(club)`, com o shell, o header e o rodapé compactos de
+// DESIGN.md, na linha "Faixa / artista" do guia: foto, nome, contexto e ação
+// dominam a abertura; os números têm função; as mais ouvidas são uma lista
+// densa; a discografia é um grid de capas; a precedência é dado real do
+// acervo. Saíram as listas de seguidores e fãs com nomes fictícios, o
+// "Artista Verificado" e o contador de seguidores no Mirsui que era sempre 0.
+// A resolução da URL, os metadados e o carregamento não mudaram.
 
 import { permanentRedirect, notFound } from 'next/navigation'
 import { carregarArtista } from '@/utils/artistPageService'
+import { precedenciaDoArtista } from '@/utils/artistClaims'
 import { searchDeezerArtists } from '@/utils/deezerService'
 import { enderecoDoArtista, idDoArtistaNoEndereco } from '@/utils/artistHref'
 import type { Metadata } from 'next'
-
-import ArtistHeroSection from '@/components/Artist/ArtistHeroSection'
-import ArtistStatsGrid from '@/components/Artist/ArtistStatsGrid'
-import ArtistTopTracks from '@/components/Artist/ArtistTopTracks'
-import ArtistDiscographyTabs from '@/components/Artist/ArtistDiscographyTabs'
-import ArtistRecentFollowers from '@/components/Artist/ArtistRecentFollowers'
-import ArtistTopFans from '@/components/Artist/ArtistTopFans'
-import ArtistDetailsCard from '@/components/Artist/ArtistDetailsCard'
-import ArtistAllTracksSimple from '@/components/Artist/ArtistAllTracksSimple'
-import ArtistTrackStats from '@/components/Artist/ArtistTrackStats'
+import shellStyles from '@/components/Club/ClubShell.module.css'
+import ArtistHero from '@/components/Artist/ArtistHero'
+import MaisOuvidas, { type FaixaListada } from '@/components/Artist/MaisOuvidas'
+import Discografia from '@/components/Artist/Discografia'
+import QuemGarimpou from '@/components/Artist/QuemGarimpou'
+import { ano } from '@/components/Artist/format'
+import styles from '@/components/Artist/ArtistPage.module.css'
 
 const SPOTIFY_ID_RE = /^[A-Za-z0-9]{22}$/
 
@@ -137,70 +144,50 @@ export default async function ArtistDetailsPage({
 
     const { artista, topTracks, albuns } = dados
 
-    const albums = albuns.filter((a) => a.album_type === 'album')
-    const singles = albuns.filter((a) => a.album_type === 'single')
-    const compilations = albuns.filter((a) => a.album_type === 'compilation')
+    /**
+     * `/artist/{id}/top` do Deezer não traz data de lançamento, mas traz o id
+     * do álbum — e a lista de álbuns, já carregada, traz a data. Casar os dois
+     * aqui dá o ano de cada faixa sem requisição nova, e conserta a ordenação
+     * por lançamento, que comparava datas vazias.
+     */
+    const anoPorAlbum = new Map(
+        albuns.map((a) => [a.id, ano(a.release_date)] as const)
+    )
 
-    const artistImageUrl = artista.images[0]?.url || '/placeholder-artist.svg'
-    const artistUrl = artista.external_urls.spotify
+    // O que é nosso: quem já guardou estas faixas. Uma consulta, dado real;
+    // se falhar, a seção simplesmente não aparece.
+    const precedencia = await precedenciaDoArtista(topTracks)
 
-    // Seguidores do artista DENTRO do Mirsui. O número era 142 chumbado no
-    // código; virou 0 porque essa feature não existe, e zero honesto vale mais
-    // que cento e quarenta e dois inventados.
-    const totalFollows = 0
-    const hasUserFollowed = false
-
-    const formatFollowers = (count: number) => {
-        if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`
-        if (count >= 1000) return `${(count / 1000).toFixed(1)}K`
-        return count.toString()
-    }
-
-    const fas = artista.followers.total
-        ? formatFollowers(artista.followers.total)
-        : 'N/A'
+    const faixas: FaixaListada[] = topTracks.map((t) => ({
+        ...t,
+        ano: ano(t.album.release_date) ?? anoPorAlbum.get(t.album.id) ?? null,
+        salvos: precedencia?.porFaixa[t.uri] ?? 0,
+    }))
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="grid gap-8 lg:grid-cols-3">
-                {/* Left Column - Artist Info */}
-                <div className="space-y-6 lg:col-span-2">
-                    <ArtistHeroSection
-                        artistInfo={artista}
-                        artistImageUrl={artistImageUrl}
-                        artistUrl={artistUrl}
-                        hasUserFollowed={hasUserFollowed}
-                    />
-                    <ArtistStatsGrid
-                        totalFollows={totalFollows}
-                        fas={fas}
-                        popularity={artista.popularity}
-                        totalAlbums={albuns.length}
-                    />
-                    <ArtistTopTracks topTracks={topTracks} />
+        <div>
+            <ArtistHero
+                artista={artista}
+                lancamentos={albuns.length}
+                faixasMedidas={topTracks.length}
+            />
 
-                    <ArtistTrackStats topTracks={topTracks} albums={albuns} />
+            <div className={`${shellStyles.container} ${styles.body}`}>
+                <MaisOuvidas faixas={faixas} artistaId={artista.id} />
 
-                    <ArtistAllTracksSimple topTracks={topTracks} albums={albuns} />
+                {precedencia && (
+                    <aside className={styles.rail}>
+                        <QuemGarimpou
+                            precedencia={precedencia}
+                            nomeDoArtista={artista.name}
+                        />
+                    </aside>
+                )}
+            </div>
 
-                    <ArtistDiscographyTabs
-                        albums={albums}
-                        singles={singles}
-                        compilations={compilations}
-                    />
-                </div>
-
-                {/* Right Column - Activity */}
-                <div className="space-y-6">
-                    <ArtistRecentFollowers />
-                    <ArtistTopFans />
-                    <ArtistDetailsCard
-                        genres={artista.genres}
-                        popularity={artista.popularity}
-                        fas={fas}
-                        totalAlbums={albuns.length}
-                        formatFollowers={formatFollowers}
-                    />
+            <div className={styles.discography}>
+                <div className={shellStyles.container}>
+                    <Discografia albuns={albuns} />
                 </div>
             </div>
         </div>

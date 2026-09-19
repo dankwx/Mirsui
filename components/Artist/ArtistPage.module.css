@@ -1,0 +1,63 @@
+/* Corpo da página de artista: lista à esquerda, precedência na lateral,
+   discografia em largura total abaixo. */
+
+.body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
+    gap: 64px;
+    padding-block: 48px 56px;
+}
+
+/* Sem a lateral (consulta falhou), a lista ocupa a largura toda. */
+.body:has(> :only-child) {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.rail {
+    position: sticky;
+    top: 92px;
+    min-width: 0;
+}
+
+.discography {
+    border-top: 1px solid var(--club-line);
+}
+
+.discography > div {
+    padding-block: 48px 64px;
+}
+
+@media (max-width: 1100px) {
+    .body {
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: 40px;
+    }
+}
+
+/* A lista de faixas precisa de largura: com 768 px a lateral a espremia em
+   ~380 px e cortava título, álbum e ano de uma vez. Abaixo de 900 px a
+   precedência desce para baixo da lista. */
+@media (max-width: 900px) {
+    .body {
+        display: flex;
+        flex-direction: column;
+        gap: 44px;
+    }
+
+    .rail {
+        position: static;
+        width: 100%;
+    }
+}
+
+@media (max-width: 767px) {
+    .body {
+        gap: 40px;
+        padding-block: 32px 40px;
+    }
+
+    .discography > div {
+        padding-block: 36px 48px;
+    }
+}

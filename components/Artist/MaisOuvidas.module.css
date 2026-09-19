@@ -1,0 +1,343 @@
+.section {
+    min-width: 0;
+}
+
+.heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px 32px;
+}
+
+.heading h2 {
+    color: var(--club-text);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: clamp(26px, 2.8vw, 36px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.045em;
+}
+
+.heading p {
+    margin-top: 8px;
+    color: var(--club-muted);
+    font-size: 15px;
+    line-height: 1.55;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.control {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.control > span {
+    color: var(--club-muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.input,
+.select {
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--club-line);
+    border-radius: 6px;
+    color: var(--club-text);
+    background: var(--club-bg);
+    font: inherit;
+    font-size: 14px;
+}
+
+.input {
+    width: 220px;
+}
+
+.input::placeholder {
+    color: var(--club-muted);
+}
+
+.input:hover,
+.select:hover {
+    border-color: var(--club-muted);
+}
+
+.select {
+    appearance: none;
+    padding-right: 32px;
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+        linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position:
+        calc(100% - 17px) 50%,
+        calc(100% - 12px) 50%;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+}
+
+.list {
+    margin: 22px 0 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--club-line);
+}
+
+.header,
+.row {
+    display: grid;
+    grid-template-columns: 28px 52px minmax(0, 1fr) 52px 72px;
+    align-items: center;
+    gap: 14px;
+    border-top: 1px solid var(--club-line);
+}
+
+.header {
+    padding-block: 10px;
+    color: var(--club-muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.header > span:nth-child(4),
+.header > span:nth-child(5),
+.duration,
+.audience {
+    text-align: right;
+}
+
+.row {
+    padding-block: 10px;
+}
+
+.position {
+    color: var(--club-muted);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: right;
+}
+
+.coverLink {
+    display: block;
+    min-width: 0;
+}
+
+.cover {
+    box-shadow:
+        0 8px 14px -10px #20201e60,
+        1px 1px 2px #20201e20;
+}
+
+.coverLink:hover .cover img {
+    transform: scale(1.04);
+}
+
+.who {
+    min-width: 0;
+}
+
+.title {
+    color: var(--club-text);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+}
+
+.title a {
+    display: block;
+    overflow: hidden;
+    color: inherit;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.title a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.context {
+    display: flex;
+    flex-wrap: nowrap;
+    min-width: 0;
+    margin-top: 2px;
+    overflow: hidden;
+    color: var(--club-muted);
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Só o primeiro trecho (o álbum) encolhe; ano, participações e acervo ficam
+   inteiros. Sem isto o ano virava "2…" atrás de um título comprido. */
+.context > span {
+    flex-shrink: 0;
+}
+
+.context > span:first-child {
+    min-width: 0;
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.context > span:nth-child(n + 2) {
+    max-width: 50%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.context > span + span::before {
+    content: '·';
+    padding-inline: 6px;
+}
+
+.context a {
+    color: inherit;
+    text-underline-offset: 3px;
+}
+
+.context a:hover {
+    text-decoration: underline;
+}
+
+.saved {
+    flex-shrink: 0;
+    color: var(--club-accent-text);
+    font-weight: 600;
+}
+
+/* No desktop o agrupador some e os dois números entram nas colunas do grid. */
+.meta {
+    display: contents;
+}
+
+.duration,
+.audience {
+    color: var(--club-muted);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.audience {
+    color: var(--club-text);
+    font-weight: 600;
+}
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.empty {
+    margin-top: 20px;
+    padding: 18px 20px;
+    border-radius: 7px;
+    color: var(--club-muted);
+    background: var(--club-surface);
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.more {
+    margin-top: 12px;
+}
+
+@media (max-width: 767px) {
+    .heading {
+        align-items: stretch;
+    }
+
+    .controls {
+        width: 100%;
+    }
+
+    .control {
+        flex: 1 1 140px;
+    }
+
+    .input {
+        width: 100%;
+    }
+
+    .header {
+        display: none;
+    }
+
+    .row {
+        grid-template-columns: 22px 48px minmax(0, 1fr);
+        align-items: start;
+        gap: 6px 12px;
+    }
+
+    .position {
+        padding-top: 14px;
+    }
+
+    .position {
+        font-size: 13px;
+    }
+
+    .title {
+        font-size: 14px;
+    }
+
+    /* Na tela estreita a linha de contexto quebra em vez de cortar: cortar
+       deixava "Ran… · 2013 · com Phar… · 1 pe" e não dizia nada. */
+    .context {
+        display: block;
+        white-space: normal;
+        line-height: 1.45;
+    }
+
+    .context > span,
+    .context > span:first-child,
+    .context > span:nth-child(n + 2) {
+        display: inline;
+        max-width: none;
+        overflow: visible;
+    }
+
+    /* Duração e audiência descem para uma linha própria, sob o título. */
+    .meta {
+        display: flex;
+        grid-column: 3;
+        gap: 0 10px;
+        margin-top: -2px;
+    }
+
+    .duration,
+    .audience {
+        font-size: 12px;
+        text-align: left;
+    }
+
+    .audience::before {
+        content: '·';
+        margin-right: 10px;
+        color: var(--club-muted);
+        font-weight: 400;
+    }
+
+    /* Sem o cabeçalho de colunas, o número precisa dizer o que é. */
+    .audience::after {
+        content: ' de audiência';
+        color: var(--club-muted);
+        font-weight: 400;
+    }
+}

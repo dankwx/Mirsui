@@ -1,0 +1,226 @@
+/* O mosaico de capas empilhadas por gravidade.
+   A posição de cada peça vem do JS (pileLayout.ts); aqui fica só a queda,
+   o repouso e o realce no hover/foco. */
+
+.stage {
+    position: relative;
+    width: 100%;
+    margin-top: 24px;
+    /* contexto de empilhamento próprio: o z-index do hover precisa valer só
+       entre as peças, não sobre o header fixo nem sobre a ficha. */
+    z-index: 0;
+}
+
+.measuring {
+    display: grid;
+    height: 100%;
+    place-items: center;
+    color: var(--club-muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.slot {
+    position: absolute;
+    display: block;
+    padding: 0;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    cursor: pointer;
+    /* na primeira montagem não transiciona (já nasce na posição); isto é para
+       quando a janela muda de largura e a pilha reassenta */
+    transition:
+        left 0.5s cubic-bezier(0.22, 1, 0.3, 1),
+        top 0.5s cubic-bezier(0.22, 1, 0.3, 1),
+        width 0.5s,
+        height 0.5s,
+        opacity 0.3s;
+}
+
+.slot:focus-visible {
+    outline-offset: 3px;
+}
+
+/* Ao chegar por Tab, a peça para abaixo da barra de filtros grudada, com
+   espaço para o balão que abre acima dela. */
+.slot {
+    scroll-margin-top: 170px;
+}
+
+/* `.slot .piece` em vez de `.piece`: a receita `.sleeve` também declara
+   position, e a ordem entre módulos no bundle não é garantida. */
+.slot .piece {
+    position: absolute;
+    inset: 0;
+    display: block;
+    transform: rotate(var(--r, 0deg));
+    transition:
+        transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+        box-shadow 0.3s;
+    animation: drop 0.5s cubic-bezier(0.2, 0.86, 0.3, 1.06) var(--d, 0ms)
+        backwards;
+    will-change: transform;
+}
+
+/* A capa é a peça inteira; o fallback do RecordCover fica na superfície e o
+   disco cresce com a peça em vez de ficar num tamanho fixo. */
+.piece [data-record-cover] {
+    height: 100%;
+    background: var(--club-surface);
+}
+
+.piece [data-record-cover] svg {
+    width: 42%;
+    height: 42%;
+}
+
+@keyframes drop {
+    0% {
+        transform: translateY(-70px) rotate(calc(var(--r, 0deg) * 2.4))
+            scale(1.04);
+        opacity: 0;
+    }
+    55% {
+        opacity: 1;
+    }
+    /* o achatamento no pouso é o que dá peso: sem ele a peça só desliza */
+    78% {
+        transform: translateY(0) rotate(var(--r, 0deg)) scale(1.03, 0.96);
+    }
+    100% {
+        transform: translateY(0) rotate(var(--r, 0deg)) scale(1);
+        opacity: 1;
+    }
+}
+
+/* z-index vem inline (ordem de chegada), daí o !important */
+.slot:hover,
+.slot:focus-visible {
+    z-index: 900 !important;
+}
+
+/* A capa se endireita e sobe um pouco, como as da abertura da home. */
+.slot:hover .piece,
+.slot:focus-visible .piece {
+    transform: rotate(0deg) translateY(-6px) scale(1.06);
+    box-shadow:
+        0 22px 34px -16px #20201e80,
+        1px 1px 2px #20201e30;
+}
+
+/* Filtro ativo: as outras peças esmaecem, mas continuam no lugar — a pilha
+   não muda de forma, só de foco. */
+.dim {
+    pointer-events: none;
+    opacity: 0.16;
+}
+
+.dim .piece {
+    box-shadow: none;
+}
+
+/* ---- tooltip ---- */
+.tip {
+    position: absolute;
+    z-index: 2;
+    bottom: calc(100% + 10px);
+    display: flex;
+    width: max-content;
+    max-width: 240px;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    border: 1px solid var(--club-line);
+    border-radius: 7px;
+    color: var(--club-text);
+    background: var(--club-paper);
+    box-shadow: 0 18px 30px -18px #20201e70;
+    text-align: left;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+        opacity 0.16s ease,
+        transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.tip strong {
+    overflow: hidden;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tipArtist {
+    overflow: hidden;
+    color: var(--club-muted);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tipMeta {
+    margin-top: 3px;
+    color: var(--club-muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.tipMeta span {
+    color: var(--club-text);
+    font-weight: 600;
+}
+
+.tip_center {
+    left: 50%;
+    transform: translate(-50%, 6px);
+}
+
+.tip_left {
+    left: 0;
+    transform: translateY(6px);
+}
+
+.tip_right {
+    right: 0;
+    transform: translateY(6px);
+}
+
+.slot:hover .tip_center,
+.slot:focus-visible .tip_center {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.slot:hover .tip_left,
+.slot:hover .tip_right,
+.slot:focus-visible .tip_left,
+.slot:focus-visible .tip_right {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Sem hover (toque) o tooltip nunca aparece e só atrapalharia o layout. Na
+   tela estreita também some: as peças têm 40–120 px e o balão cobriria a
+   pilha — e, mesmo invisível, alargava a página. */
+@media (hover: none), (max-width: 767px) {
+    .tip {
+        display: none;
+    }
+}
+
+/* club.css já zera animações e transições sob movimento reduzido; aqui a
+   regra fica explícita porque a queda é o que mais importa parar. */
+@media (prefers-reduced-motion: reduce) {
+    .piece {
+        animation: none;
+    }
+
+    .slot:hover .piece,
+    .slot:focus-visible .piece {
+        transform: rotate(0deg);
+    }
+}

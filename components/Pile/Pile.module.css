@@ -1,0 +1,14 @@
+.pile {
+    margin-top: 20px;
+}
+
+.view[hidden] {
+    display: none;
+}
+
+.empty {
+    margin-top: 20px;
+    color: var(--club-muted);
+    font-size: 14px;
+    line-height: 1.55;
+}

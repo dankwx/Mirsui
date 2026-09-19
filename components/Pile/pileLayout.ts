@@ -160,9 +160,12 @@ export function packPile(
 
     // quem está mais em cima pousa primeiro — sem isso a queda parece aleatória
     // em vez de gravidade
+    // 10 ms entre peças (era 17): com ~170 peças a cascata inteira leva 1,7 s
+    // em vez de 2,9 s — curta o bastante para não segurar a página, longa o
+    // bastante para ainda ler como queda.
     const byY = [...placed].sort((a, b) => a.y - b.y)
     const delays = new Map<string, number>()
-    byY.forEach((p, i) => delays.set(p.track.id, i * 17))
+    byY.forEach((p, i) => delays.set(p.track.id, i * 10))
 
     const pieces: PilePiece[] = placed.map((p) => ({
         ...p,

@@ -1,0 +1,67 @@
+.toolbar {
+    display: flex;
+    align-items: stretch;
+    gap: 24px;
+    border-bottom: 1px solid var(--club-line);
+}
+
+/* A linha sublinhada vem da receita; a borda de baixo passa para a barra
+   inteira, para ações e filtros dividirem a mesma linha. */
+.filters {
+    min-width: 0;
+    flex: 1 1 auto;
+    border-bottom: 0;
+    /* a borda de 2 px do filtro ativo precisa encostar na linha da barra */
+    margin-bottom: -1px;
+}
+
+/* A faixa de filtros rola na horizontal e corta o que sai dela — inclusive o
+   anel de foco de 5 px de afastamento da base. Aqui o anel fica por dentro. */
+.filters > button:focus-visible {
+    outline-offset: -3px;
+}
+
+.count {
+    margin-left: 6px;
+    color: var(--club-muted);
+    font-weight: 500;
+}
+
+.actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 20px;
+}
+
+/* A receita move o ícone como uma seta diagonal; estes não são setas. */
+.action:hover svg {
+    transform: none;
+}
+
+@media (min-width: 768px) {
+    .toolbar {
+        position: sticky;
+        top: 72px;
+        z-index: 30;
+        background: color-mix(in srgb, var(--club-bg) 92%, transparent);
+        backdrop-filter: blur(12px);
+    }
+}
+
+@media (max-width: 767px) {
+    .toolbar {
+        flex-direction: column-reverse;
+        gap: 0;
+    }
+
+    .actions {
+        justify-content: flex-end;
+        gap: 16px;
+    }
+
+    .action {
+        font-size: 13px;
+        padding-block: 6px;
+    }
+}

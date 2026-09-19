@@ -99,7 +99,7 @@ Respeite `prefers-reduced-motion`. Não acrescente rolagem forçada, paralaxe, c
 
 ## Como expandir para outras partes do site
 
-**Estado atual:** a home, o perfil público em `/user/[username]`, a página de faixa em `/track/[id]`, a página de artista em `/artist/[id]` e o feed em `/feed` (a home de quem está logado) usam a identidade `club`. [PublicShell](components/Landing/PublicShell.tsx) mantém a home no shell público, enquanto o layout do grupo `(club)` usa [ClubShell](components/Club/ClubShell.tsx), [ClubHeader](components/Club/ClubHeader.tsx) e [ClubFooter](components/Landing/ClubFooter.tsx). Os tokens compartilhados estão em [app/club.css](app/club.css). Páginas legais e outras telas logadas continuam com a identidade anterior. `tailwind.config.ts` ainda contém `mir-*` marrom/lima, e `globals.css` contém tokens antigos: não os confunda com o sistema `club`.
+**Estado atual:** a home, o perfil público em `/user/[username]`, a página de faixa em `/track/[id]`, a página de artista em `/artist/[id]`, o feed em `/feed` (a home de quem está logado) e a pilha em `/pilha` usam a identidade `club`. [PublicShell](components/Landing/PublicShell.tsx) mantém a home no shell público, enquanto o layout do grupo `(club)` usa [ClubShell](components/Club/ClubShell.tsx), [ClubHeader](components/Club/ClubHeader.tsx) e [ClubFooter](components/Landing/ClubFooter.tsx). Os tokens compartilhados estão em [app/club.css](app/club.css). Páginas legais e outras telas logadas continuam com a identidade anterior. `tailwind.config.ts` ainda contém `mir-*` marrom/lima, e `globals.css` contém tokens antigos: não os confunda com o sistema `club`. O bloco `.pile-*` (palco, peças, queda `pile-drop`, tooltip, `pile-chip`, `pile-teaser`/`pile-band`) saiu de `globals.css` na migração da pilha e vive em `components/Pile/*.module.css`; os keyframes `mir-fade`/`mir-pop` ficaram porque `.anim-fade`/`.anim-pop` dos Stakes ainda os usam.
 
 1. Leia a captura e o componente da home mais próximo da tarefa. Defina qual conteúdo e qual ação devem dominar a nova tela.
 2. Mantenha rotas, sessão, regras do produto, analytics e dados existentes. Mudar apresentação não autoriza inventar funcionalidades.
@@ -117,7 +117,7 @@ O modal de autenticação é montado em um portal no `body`. Por isso há seleto
 | Perfil | Identidade da pessoa, capas e seus registros em primeiro plano. Título menor, números com função, ações de seguir/compartilhar claras. |
 | Faixa / artista | Capa ou foto principal, nome, contexto e ação dominante. Dê destaque à precedência sem transformar toda informação em badge. Ambas já migradas: a faixa abre com a capa (objeto) e o artista com a foto redonda (pessoa); os dois têm números com função, lista densa e precedência com dado real. |
 | Feed | Pessoas e achados com bom ritmo de leitura. Espaçamento mais compacto; preserve legibilidade e navegação. Já migrado: título pequeno, filtros sublinhados, último achado com capa maior, linhas de 64 px e a pilha na lateral. |
-| Busca / pilha | A busca e os resultados dominam. Grid de capas, filtros acessíveis e estados vazios úteis. |
+| Busca / pilha | A busca e os resultados dominam. Grid de capas, filtros acessíveis e estados vazios úteis. A pilha já migrou: cabeçalho compacto com contagem, filtros sublinhados com contagem no ativo, mosaico por gravidade com capas `.sleeve` que se endireitam no foco, lista densa sempre no DOM e ficha em diálogo de papel. |
 | Formulários / admin | Mesmas fontes, cores e formas, com densidade funcional. Sem discos inclinados, manchetes enormes ou linguagem promocional. |
 
 Exemplo de CSS para um **componente novo dentro de um shell já integrado**:
@@ -157,6 +157,7 @@ Esse tamanho é uma sugestão para páginas internas, não um valor extraído da
 | [trackHref.ts](utils/trackHref.ts) | Endereços canônicos de faixas; não monte slugs manualmente |
 | [components/Track](components/Track) | Página de faixa: player com forma de onda real da prévia, ações de salvar, registro de descoberta, quem chegou antes e curva do Observatório |
 | [components/Feed](components/Feed) | Feed: abas, último achado em destaque, linhas com salvar direto, "carregar mais" paginado, estados vazio/erro e o convite para a pilha com as últimas capas |
+| [components/Pile](components/Pile) | A pilha: `Pile` orquestra filtro, semente e ficha; `PileToolbar` (filtros `.filters` + "Embaralhar"/"Ver em lista"), `PileMosaic`/`PilePiece` (palco medido por ResizeObserver, peças-botão com tooltip por `align`, esmaecidas fora do filtro), `PileList` (a vista que o servidor entrega) e `PieceSheet` (Radix Dialog em papel; "Abrir a faixa" só com ISRC, via `enderecoDaFaixa`). A geometria continua em [pileLayout.ts](components/Pile/pileLayout.ts) |
 | [components/Artist](components/Artist) | Página de artista: abertura com foto redonda e "Ouvir no Deezer", números com função, "Mais ouvidas" com busca e ordenação locais, discografia em filtros e grid de capas, e "Quem já garimpou" a partir de [artistClaims.ts](utils/artistClaims.ts) — uma consulta real ao acervo; sem dado, a seção não aparece |
 
 ## Checklist de entrega

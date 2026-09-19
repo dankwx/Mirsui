@@ -1,0 +1,226 @@
+/* ------------------------------------------------------------ abertura */
+
+.hero {
+    padding-block: 44px 40px;
+}
+
+.heroGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+    align-items: start;
+    gap: 56px;
+}
+
+.coverColumn {
+    min-width: 0;
+}
+
+.cover {
+    box-shadow:
+        0 24px 40px -22px #20201e80,
+        1px 1px 2px #20201e25;
+}
+
+.info {
+    min-width: 0;
+    padding-top: 4px;
+}
+
+.eyebrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 0;
+    color: var(--club-muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.eyebrow > span + span::before {
+    content: '·';
+    padding-inline: 8px;
+}
+
+.eyebrow > span:first-child {
+    color: var(--club-accent-text);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+.title {
+    margin-top: 12px;
+    color: var(--club-text);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: clamp(34px, 4.6vw, 60px);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -0.05em;
+    overflow-wrap: anywhere;
+}
+
+.artists {
+    margin-top: 12px;
+    color: var(--club-text);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.artists a {
+    color: inherit;
+    text-underline-offset: 4px;
+}
+
+.artists a:hover {
+    text-decoration: underline;
+}
+
+.album {
+    color: var(--club-muted);
+    font-weight: 400;
+}
+
+.player {
+    max-width: 640px;
+    margin-top: 30px;
+}
+
+/* --------------------------------------------------------------- ficha */
+
+.specs {
+    border-top: 1px solid var(--club-line);
+    border-bottom: 1px solid var(--club-line);
+}
+
+.specsList {
+    display: flex;
+    flex-wrap: wrap;
+    margin-block: 0;
+}
+
+.specsList > div {
+    min-width: 0;
+    flex: 1 1 140px;
+    padding: 18px 28px 18px 0;
+}
+
+.specsList > div + div {
+    padding-left: 28px;
+    border-left: 1px solid var(--club-line);
+}
+
+.specsList dt {
+    color: var(--club-muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.specsList dd {
+    margin: 6px 0 0;
+    overflow: hidden;
+    color: var(--club-text);
+    font-size: 15px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* --------------------------------------------------------------- corpo */
+
+.body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    align-items: start;
+    gap: 64px;
+    padding-block: 52px 60px;
+}
+
+.rail {
+    position: sticky;
+    top: 92px;
+    min-width: 0;
+}
+
+@media (max-width: 1100px) {
+    .heroGrid {
+        grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+        gap: 40px;
+    }
+
+    .body {
+        grid-template-columns: minmax(0, 1fr) 300px;
+        gap: 40px;
+    }
+
+    /* Abaixo de 1100 px a ficha não cabe numa linha: vira faixa rolável em vez
+       de quebrar e deixar um item órfão com divisor pela metade. */
+    .specsList {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+
+    .specsList > div {
+        flex: 0 0 auto;
+        min-width: 120px;
+        max-width: 240px;
+    }
+}
+
+@media (max-width: 767px) {
+    .hero {
+        padding-block: 28px 32px;
+    }
+
+    .heroGrid {
+        display: block;
+    }
+
+    .coverColumn {
+        width: min(100%, 260px);
+    }
+
+    .info {
+        margin-top: 22px;
+        padding-top: 0;
+    }
+
+    .title {
+        margin-top: 10px;
+    }
+
+    .artists {
+        font-size: 16px;
+    }
+
+    .player {
+        margin-top: 24px;
+    }
+
+    .specsList > div {
+        padding: 14px 20px 14px 0;
+    }
+
+    .specsList > div + div {
+        padding-left: 20px;
+    }
+
+    .specsList dd {
+        font-size: 14px;
+    }
+
+    .body {
+        display: flex;
+        flex-direction: column;
+        gap: 36px;
+        padding-block: 36px 44px;
+    }
+
+    .rail {
+        position: static;
+        order: -1;
+        width: 100%;
+    }
+}

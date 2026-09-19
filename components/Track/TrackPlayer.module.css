@@ -1,0 +1,145 @@
+.wrap {
+    min-width: 0;
+}
+
+.player {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.playButton {
+    display: grid;
+    width: 56px;
+    height: 56px;
+    flex: none;
+    place-items: center;
+    padding: 0;
+    border: 1px solid var(--club-text);
+    border-radius: 50%;
+    color: var(--club-on-button);
+    background: var(--club-text);
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
+}
+
+.playButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 var(--club-accent);
+}
+
+.playButton:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.playIcon {
+    margin-left: 3px;
+}
+
+.track {
+    position: relative;
+    min-width: 0;
+    flex: 1;
+    height: 44px;
+}
+
+.wave {
+    display: block;
+    width: 100%;
+    height: 44px;
+}
+
+.waveBase rect {
+    fill: var(--club-line);
+}
+
+.wavePlayed rect {
+    fill: var(--club-accent);
+}
+
+.seek {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* O foco aparece na onda, não no range nativo escondido. */
+.seek:focus-visible {
+    outline: none;
+}
+
+.track:has(.seek:focus-visible) {
+    border-radius: 2px;
+    outline: 2px solid var(--club-accent);
+    outline-offset: 6px;
+}
+
+.time {
+    flex: none;
+    min-width: 82px;
+    color: var(--club-muted);
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.time > span:first-child {
+    color: var(--club-text);
+}
+
+.note,
+.unavailable {
+    margin-top: 10px;
+    color: var(--club-muted);
+    font-size: 12px;
+}
+
+.unavailable {
+    margin-top: 0;
+    padding: 14px 16px;
+    border-radius: 7px;
+    background: var(--club-surface);
+    font-size: 14px;
+}
+
+.video {
+    aspect-ratio: 16 / 9;
+    max-width: 520px;
+    overflow: hidden;
+    border-radius: 3px;
+    background: var(--club-surface);
+}
+
+.video iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+@media (max-width: 767px) {
+    .player {
+        gap: 12px;
+    }
+
+    .playButton {
+        width: 48px;
+        height: 48px;
+    }
+
+    .time {
+        min-width: 0;
+    }
+
+    .time > span:not(:first-child) {
+        display: none;
+    }
+}

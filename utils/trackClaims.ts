@@ -99,19 +99,20 @@ export async function salvamentoDoUsuario(
     userId: string,
     trackUri: string | null,
     isrc: string | null
-): Promise<{ position: number | null } | null> {
+): Promise<{ position: number | null; claimedat: string | null } | null> {
     const filtro = filtroDaGravacao(trackUri, isrc)
     if (!filtro) return null
 
     const supabase = await createClient()
     const { data, error } = await supabase
         .from('tracks')
-        .select('position')
+        .select('position, claimedat')
         .eq('user_id', userId)
         .or(filtro)
         .limit(1)
         .maybeSingle()
 
     if (error || !data) return null
-    return { position: (data as { position: number | null }).position }
+    const linha = data as { position: number | null; claimedat: string | null }
+    return { position: linha.position, claimedat: linha.claimedat ?? null }
 }

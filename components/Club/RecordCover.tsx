@@ -8,10 +8,13 @@ export default function RecordCover({
     src,
     alt,
     className = '',
+    priority = false,
 }: {
     src: string | null
     alt: string
     className?: string
+    /** capa principal da página: carrega antes, sem esperar rolagem */
+    priority?: boolean
 }) {
     const [failedSrc, setFailedSrc] = useState<string | null>(null)
 
@@ -28,7 +31,8 @@ export default function RecordCover({
                     alt={alt}
                     width={250}
                     height={250}
-                    loading="lazy"
+                    loading={priority ? 'eager' : 'lazy'}
+                    fetchPriority={priority ? 'high' : undefined}
                     decoding="async"
                     onError={() => setFailedSrc(src)}
                 />

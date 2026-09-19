@@ -263,7 +263,7 @@ function Meses({ meses }: { meses: Mes[] }) {
  * vem contínua do banco em vez de pular os dias vazios.
  *
  * O SVG só desenha a área e a linha, esticado na largura que houver (mesmo
- * truque da Sparkline em TrackCurve). Régua, rótulos e o ponto final são HTML
+ * truque da Linha em components/Track/TrackCurve). Régua, rótulos e o ponto final são HTML
  * posicionado em porcentagem: dentro do SVG esticado o texto escalaria junto
  * e ficaria ilegível no telefone.
  * ------------------------------------------------------------------ */
@@ -386,7 +386,7 @@ function Catalogo({ dias }: { dias: DiaDoCatalogo[] }) {
                         className="absolute inset-0 h-full w-full"
                         aria-hidden="true"
                     >
-                        {/* Esmaecendo até zero, como na TrackCurve: bloco chapado
+                        {/* Esmaecendo até zero, como em components/Track/TrackCurve: bloco chapado
                             de creme sobre o fundo quente vira uma mancha. */}
                         <defs>
                             <linearGradient id="catalogo-area" x1="0" y1="0" x2="0" y2="1">

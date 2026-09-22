@@ -49,6 +49,9 @@ const PUBLIC_API_ROUTES = [
   // crawler de WhatsApp/Twitter/Facebook nunca chega autenticado, então com o
   // gate de sessão elas respondiam 307 para "/" e o preview saía vazio.
   '/api/og/',
+  // A prévia de 30 s da página de faixa, pedida no play. A página é pública,
+  // então o play também tem que ser.
+  '/api/previa/',
 ]
 
 function isPublicPath(pathname: string): boolean {

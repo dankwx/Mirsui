@@ -8,14 +8,29 @@
 // plano B: sumia a capa, o artista, a ficha técnica e até a curva do
 // Observatório, que é medida por nós e não depende de API nenhuma para existir.
 //
-// Aqui as duas fontes são consultadas em paralelo e se completam:
+// DESDE 22/09/2026 A FAIXA DO CATÁLOGO NÃO PERGUNTA AO DEEZER
+// Até aqui as duas fontes eram consultadas em paralelo a cada visita:
+// `/track/isrc:X` (cache de 15 min) e `/artist/{id}` (24 h). O site e a
+// medição dividem a mesma cota do gateway, ~3 req/s, e um robô que percorre
+// 100 mil páginas diferentes passa todas fora do cache — o cache protege o que
+// é popular, e o robô percorre justamente o que não é. Ver a proposta 1 de
+// mirsui-backend/docs/propostas-22-09-2026.md.
 //
-//   Deezer          uma requisição sem chave devolve título, artista, álbum,
-//                   capa, duração, explícito, data, rank e a prévia de 30 s
-//   observed_tracks título, artista, capa, gênero e rank que o Observatório já
-//                   mediu — em casa, sem requisição nenhuma
+// Agora, quando o Observatório conhece a gravação, a página sai inteira do
+// banco: título, artista, álbum, capa, gênero e popularidade já estavam lá, e
+// a migration 037 passou a guardar duração, explícito, data, participações e
+// SE existe prévia. A URL da prévia é assinada e vence em horas, então não é
+// guardada: o player pede quando alguém aperta play (app/api/previa/[id]).
+// Robô não aperta play.
 //
-// Se o Deezer estiver em quota, sobra o que é nosso e a página fica de pé.
+// Um efeito que vale por si: a popularidade da ficha passa a ser o MESMO
+// número da curva logo abaixo (a medição do dia), e não o rank ao vivo do
+// Deezer, que podia não bater com ela na mesma tela.
+//
+// O Deezer continua sendo a fonte só para a gravação que o Observatório ainda
+// não viu — alguém chegou nela pela busca. É um caminho raro: todo link
+// interno do site é montado a partir do acervo, e o que alguém salva entra no
+// catálogo na rodada seguinte.
 
 import 'server-only'
 import { cache } from 'react'
@@ -23,8 +38,8 @@ import { supabasePublic } from '@/utils/supabase/public'
 import {
     fetchDeezerTrackByISRC,
     fetchDeezerAlbumGenres,
-    fetchDeezerArtist,
     coverFromMd5,
+    type FaixaDeezer,
 } from '@/utils/deezerService'
 import {
     montarFaixaObservada,
@@ -55,12 +70,15 @@ export interface DadosDaFaixa {
     duration: number
     explicit: boolean
     genres: string[] | null
-    /** `nb_fan` do Deezer — quem favoritou o artista */
-    followers: number | null
     /** 0-100 por popScore(rank): a MESMA escala da curva logo abaixo na página */
     popularity: number | null
-    /** MP3 de 30 s, assinado e de vida curta. Nunca gravar no banco. */
-    previewUrl: string | null
+    /**
+     * Se há prévia de 30 s no Deezer. null = ainda não sabemos (a faixa não foi
+     * medida desde a migration 037): o player aparece e descobre no play.
+     * A URL em si nunca passa por aqui — é assinada e vence em horas; quem a
+     * busca é app/api/previa/[id], no clique.
+     */
+    temPrevia: boolean | null
     /** camada 1 do "ouvir no Spotify": id que o job já pagou. Pode ser null. */
     spotifyTrackId: string | null
     /** de onde veio o grosso do que está na tela */
@@ -159,8 +177,8 @@ export const carregarDadosDaFaixa = cache(async function carregarDadosDaFaixa(
 })
 
 /**
- * A ficha completa de uma gravação. Devolve null só quando nem o Deezer nem o
- * Observatório conhecem o ISRC — e aí a rota responde 404 de verdade, em vez de
+ * A ficha completa de uma gravação. Devolve null só quando nem o Observatório
+ * nem o Deezer conhecem o ISRC — e aí a rota responde 404 de verdade, em vez de
  * renderizar "Faixa Desconhecida" com 200.
  *
  * `cache()` do React: `generateMetadata` e o componente da página pedem a mesma
@@ -169,70 +187,83 @@ export const carregarDadosDaFaixa = cache(async function carregarDadosDaFaixa(
 export const carregarFaixaPorIsrc = cache(async function carregarFaixaPorIsrc(
     isrc: string
 ): Promise<DadosDaFaixa | null> {
-    const [doDeezer, dados] = await Promise.all([
-        fetchDeezerTrackByISRC(isrc),
-        carregarDadosDaFaixa(isrc),
-    ])
-    const local = dados.observada
+    const { observada } = await carregarDadosDaFaixa(isrc)
+    if (observada) return faixaDoCatalogo(isrc, observada)
 
-    if (!doDeezer && !local) return null
+    // Fora do catálogo: o único caminho que ainda chama o Deezer na visita.
+    const doDeezer = await fetchDeezerTrackByISRC(isrc)
+    if (!doDeezer) return null
+    return faixaDoDeezer(isrc, doDeezer)
+})
 
-    // O gênero do Observatório JÁ é o do Deezer: vem do chart de onde a faixa
-    // entrou. Quando ele existe, a requisição a /album/{id} não acontece — o
-    // caminho comum da página fica em uma única chamada ao Deezer.
-    const generoLocal = local?.genre?.trim() || null
-    const artistaPrincipal = doDeezer?.artists[0]?.id ?? null
-
-    const [generosDoAlbum, artista] = await Promise.all([
-        !generoLocal && doDeezer?.albumId
-            ? fetchDeezerAlbumGenres(doDeezer.albumId)
-            : Promise.resolve(null),
-        artistaPrincipal
-            ? fetchDeezerArtist(artistaPrincipal)
-            : Promise.resolve(null),
-    ])
-
-    const artists: ArtistaDaPagina[] = doDeezer?.artists.length
-        ? doDeezer.artists
-        : local
-          ? [{ id: local.deezerArtistId, name: local.artistName }]
-          : []
-
-    const coverUrl =
-        doDeezer?.coverUrl ??
-        (local?.coverMd5 ? coverFromMd5(local.coverMd5, 1000) : null)
-
-    const popularity = doDeezer
-        ? popScore(doDeezer.rank)
-        : (local?.lastPopularity ?? null)
+/** A gravação que o Observatório mede: tudo do banco, nenhuma requisição. */
+function faixaDoCatalogo(isrc: string, local: FaixaObservada): DadosDaFaixa {
+    // As participações só existem quando a rodada mediu por /track/{id}; sem
+    // elas, fica o artista principal — o crédito que o catálogo sempre teve.
+    const artists: ArtistaDaPagina[] = local.contributors ?? [
+        { id: local.deezerArtistId, name: local.artistName },
+    ]
+    const genero = local.genre?.trim() || null
 
     return {
         isrc,
-        deezerTrackId: doDeezer?.deezerId ?? local?.deezerTrackId ?? null,
-        title: doDeezer?.title ?? local?.title ?? 'Faixa',
+        deezerTrackId: local.deezerTrackId,
+        title: local.title,
         artists,
         artistNames:
-            artists.map((a) => a.name).join(', ') || 'Artista Desconhecido',
-        albumName: doDeezer?.albumName ?? local?.albumName ?? null,
-        coverUrl,
-        releaseDate: doDeezer?.releaseDate ?? null,
-        duration: doDeezer?.duration ?? 0,
-        explicit: doDeezer?.explicit ?? false,
-        genres: generoLocal ? [generoLocal] : generosDoAlbum,
-        followers: artista?.nbFan ?? null,
-        popularity,
-        previewUrl: doDeezer?.previewUrl ?? null,
-        spotifyTrackId: local?.spotifyTrackId ?? null,
-        fonte: doDeezer ? 'deezer' : 'observatorio',
-        // O acervo primeiro, o Deezer só como último recurso — o contrário do
-        // resto do objeto, e de propósito. Ver o comentário do campo.
+            artists.map((a) => a.name).join(', ') || local.artistName,
+        albumName: local.albumName,
+        coverUrl: local.coverMd5 ? coverFromMd5(local.coverMd5, 1000) : null,
+        releaseDate: local.releaseDate,
+        duration: local.durationSeconds ?? 0,
+        explicit: local.explicitLyrics ?? false,
+        genres: genero ? [genero] : null,
+        popularity: local.lastPopularity,
+        temPrevia: local.hasPreview,
+        spotifyTrackId: local.spotifyTrackId,
+        fonte: 'observatorio',
+        enderecoCanonico: enderecoDaFaixa(isrc, local.artistName, local.title),
+    }
+}
+
+/**
+ * A gravação que o Observatório ainda não viu. Uma requisição para a faixa e,
+ * quando o álbum existe, uma para o gênero — que mora no álbum no Deezer.
+ * Sem `/artist/{id}`: o número de fãs saiu da ficha junto com esta chamada.
+ */
+async function faixaDoDeezer(
+    isrc: string,
+    doDeezer: FaixaDeezer
+): Promise<DadosDaFaixa> {
+    const generos = doDeezer.albumId
+        ? await fetchDeezerAlbumGenres(doDeezer.albumId)
+        : null
+
+    return {
+        isrc,
+        deezerTrackId: doDeezer.deezerId,
+        title: doDeezer.title,
+        artists: doDeezer.artists,
+        artistNames:
+            doDeezer.artists.map((a) => a.name).join(', ') ||
+            'Artista Desconhecido',
+        albumName: doDeezer.albumName,
+        coverUrl: doDeezer.coverUrl,
+        releaseDate: doDeezer.releaseDate,
+        duration: doDeezer.duration,
+        explicit: doDeezer.explicit,
+        genres: generos,
+        popularity: popScore(doDeezer.rank),
+        temPrevia: !!doDeezer.previewUrl,
+        spotifyTrackId: null,
+        fonte: 'deezer',
         enderecoCanonico: enderecoDaFaixa(
             isrc,
-            local?.artistName ?? artists[0]?.name,
-            local?.title ?? doDeezer?.title
+            doDeezer.artists[0]?.name,
+            doDeezer.title
         ),
     }
-})
+}
 
 /**
  * O caminho legado: um id do Spotify que não deu para converter em ISRC nem
@@ -277,9 +308,8 @@ export async function carregarFaixaLegada(
         duration: 0,
         explicit: false,
         genres: null,
-        followers: null,
         popularity: null,
-        previewUrl: null,
+        temPrevia: false,
         spotifyTrackId: spotifyId,
         fonte: 'observatorio',
         // Sem ISRC não há endereço canônico a apontar: esta gravação só existe

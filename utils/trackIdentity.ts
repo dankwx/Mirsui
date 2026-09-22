@@ -92,6 +92,19 @@ export interface FaixaObservada {
     spotifyTrackId: string | null
     lastRank: number | null
     lastPopularity: number | null
+    /**
+     * Os campos fixos da gravação (migration 037 do backend). A rodada da
+     * noite os grava a partir das respostas que já pede; null enquanto
+     * nenhuma resposta disse. Data e participações só vêm de `/track/{id}`,
+     * então faltam com mais frequência que o resto.
+     */
+    durationSeconds: number | null
+    explicitLyrics: boolean | null
+    /** se o Deezer tem prévia de 30 s; a URL, assinada, nunca é guardada */
+    hasPreview: boolean | null
+    releaseDate: string | null
+    /** principal + participações, na ordem do Deezer */
+    contributors: { id: string; name: string }[] | null
 }
 
 interface LinhaObservada {
@@ -106,6 +119,23 @@ interface LinhaObservada {
     spotify_track_id: string | null
     last_rank: number | null
     last_popularity: number | null
+    // Opcionais: a RPC anterior à 037 não os devolve.
+    duration_seconds?: number | null
+    explicit_lyrics?: boolean | null
+    has_preview?: boolean | null
+    release_date?: string | null
+    contributors?: unknown
+}
+
+/** A lista de creditados como veio do jsonb, só com o que tem id e nome. */
+function creditados(v: unknown): { id: string; name: string }[] | null {
+    if (!Array.isArray(v)) return null
+    const lista = v.flatMap((a) =>
+        a && typeof a === 'object' && 'id' in a && 'name' in a && a.id && a.name
+            ? [{ id: String(a.id), name: String(a.name) }]
+            : []
+    )
+    return lista.length > 0 ? lista : null
 }
 
 /**
@@ -133,6 +163,15 @@ export function montarFaixaObservada(
         spotifyTrackId: r.spotify_track_id,
         lastRank: r.last_rank,
         lastPopularity: r.last_popularity,
+        durationSeconds:
+            typeof r.duration_seconds === 'number' && r.duration_seconds > 0
+                ? r.duration_seconds
+                : null,
+        explicitLyrics:
+            typeof r.explicit_lyrics === 'boolean' ? r.explicit_lyrics : null,
+        hasPreview: typeof r.has_preview === 'boolean' ? r.has_preview : null,
+        releaseDate: r.release_date || null,
+        contributors: creditados(r.contributors),
     }
 }
 

@@ -71,7 +71,6 @@ import {
     generos,
     nomeDe,
     perfilDe,
-    pessoas,
 } from '@/components/Track/format'
 import styles from '@/components/Track/TrackPage.module.css'
 
@@ -256,10 +255,6 @@ export default async function TrackDetailsPage({
         },
         faixa.albumName && { k: 'Álbum', v: faixa.albumName },
         faixa.duration > 0 && { k: 'Duração', v: duracao(faixa.duration) },
-        faixa.followers != null && {
-            k: 'Artista',
-            v: `${pessoas(faixa.followers)} fãs no Deezer`,
-        },
     ].filter(Boolean) as { k: string; v: string }[]
 
     // O registro mostra o comprovante de quem olha, quando ela já salvou;
@@ -282,14 +277,20 @@ export default async function TrackDetailsPage({
           : null
 
     /**
-     * Prévia do YouTube: agora é a SEGUNDA opção, atrás do MP3 que o Deezer
-     * entrega no mesmo objeto da faixa. Só roda quando não veio prévia do
-     * Deezer e quando existe id do Spotify — que é a chave de `youtube_cache`
-     * (migrations 002 e 017). Na prática isso reduz o consumo da cota do
-     * YouTube (100 buscas/dia para o site inteiro) a quase zero.
+     * Prévia do YouTube: é a SEGUNDA opção, atrás do MP3 do Deezer. Só roda
+     * quando se SABE que o Deezer não tem prévia (`temPrevia === false`; null
+     * é "ainda não medido", e aí o player do Deezer tenta no play) e quando
+     * existe id do Spotify — que é a chave de `youtube_cache` (migrations 002
+     * e 017). Na prática isso reduz o consumo da cota do YouTube (100
+     * buscas/dia para o site inteiro) a quase zero.
      */
+    const previaDoDeezer =
+        faixa.temPrevia !== false && faixa.deezerTrackId
+            ? `/api/previa/${faixa.deezerTrackId}`
+            : null
+
     let youtubeVideoId: string | null = null
-    if (!faixa.previewUrl && faixa.spotifyTrackId) {
+    if (!previaDoDeezer && faixa.spotifyTrackId) {
         const supabase = await createClient()
         const { data: cached } = await supabase
             .from('youtube_cache')
@@ -393,7 +394,7 @@ export default async function TrackDetailsPage({
 
                         <div className={styles.player}>
                             <TrackPlayer
-                                previewUrl={faixa.previewUrl}
+                                previewUrl={previaDoDeezer}
                                 videoId={youtubeVideoId}
                                 trackTitle={faixa.title}
                                 artistName={faixa.artistNames}

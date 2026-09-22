@@ -2,22 +2,24 @@
 
 // A prévia da faixa, no cabeçalho da página.
 //
-// O Deezer entrega um MP3 de 30 s no MESMO objeto da faixa que a página já
-// busca — sem requisição extra, sem chave, sem cota. A URL vem assinada com
-// `hdnea=exp=` e vale poucas horas, então é resolvida no request e nunca
-// gravada no banco (utils/deezerService.ts revalida em 15 min).
+// O Deezer tem um MP3 de 30 s para quase toda gravação. A URL vem assinada com
+// `hdnea=exp=` e vale poucas horas, então não é guardada nem vem com a página:
+// desde 22/09/2026 o player recebe o endereço de uma rota nossa
+// (app/api/previa/[id]) e só a chama quando alguém aperta play. Antes, a
+// página pedia a faixa ao Deezer a cada visita só para ter essa URL — e robô,
+// que é quem percorre as páginas que o cache não protege, não aperta play.
 //
 // A FORMA DE ONDA É REAL. O CDN de prévias responde com
 // `access-control-allow-origin: *` (medido em 18/09/2026), então o mesmo
 // arquivo que o <audio> toca pode ser lido e decodificado com a Web Audio API
 // e virar 64 barras de amplitude. Nada é desenhado a partir de um número
-// aleatório: se a decodificação falhar (navegador antigo, CORS que mude de
-// ideia, rede), as barras ficam chapadas e o player continua funcionando —
-// o arquivo entra no cache do navegador e o <audio> o reaproveita.
+// aleatório: até o primeiro play, e se a decodificação falhar (navegador
+// antigo, CORS que mude de ideia, rede), as barras ficam chapadas e o player
+// continua funcionando.
 //
 // O YouTube continua como segunda opção: a busca custa 100 unidades da cota
 // de 10.000/dia e exigiu uma tabela de cache (migrations 002 e 017). Só é
-// consultado quando não há prévia do Deezer.
+// consultado quando se sabe que não há prévia do Deezer.
 
 import { useEffect, useRef, useState } from 'react'
 import { Pause, Play } from 'lucide-react'
@@ -25,7 +27,10 @@ import { duracao as mmss } from './format'
 import styles from './TrackPlayer.module.css'
 
 interface TrackPlayerProps {
-    /** MP3 de 30 s do Deezer. Primeira opção. */
+    /**
+     * A rota que resolve o MP3 de 30 s do Deezer no play (app/api/previa/[id]).
+     * Primeira opção. Não é a URL do MP3: essa é assinada e vence em horas.
+     */
     previewUrl: string | null
     /** id do vídeo no cache do YouTube. Segunda opção. */
     videoId: string | null
@@ -135,16 +140,32 @@ function PlayerDoDeezer({
     const [posicao, setPosicao] = useState(0)
     const [duracao, setDuracao] = useState(30)
     const [picos, setPicos] = useState<number[] | null>(null)
+    /** o <audio> já recebeu a URL — só acontece no primeiro play */
+    const [pedida, setPedida] = useState(false)
+    const [falhou, setFalhou] = useState(false)
 
-    // Fonte nova (o usuário navegou para outra faixa): volta ao início parado
-    // e mede a onda de novo.
+    // Fonte nova (o usuário navegou para outra faixa): volta ao início parado,
+    // sem pedir nada até o próximo play.
     useEffect(() => {
         setTocando(false)
         setPosicao(0)
         setPicos(null)
+        setPedida(false)
+        setFalhou(false)
+        const a = audioRef.current
+        if (a?.getAttribute('src')) {
+            a.pause()
+            a.removeAttribute('src')
+            a.load()
+        }
+    }, [src])
 
-        // Quem pediu economia de dados não baixa 480 KB só para ver a onda:
-        // fica com as barras chapadas até apertar play.
+    // A onda é medida depois do primeiro play, da mesma URL que o <audio>
+    // toca: o 302 da rota fica 5 min no cache do navegador e o MP3 vem do CDN.
+    useEffect(() => {
+        if (!pedida) return
+        // Quem pediu economia de dados não baixa o arquivo de novo só para
+        // ver a onda.
         const conexao = (
             navigator as Navigator & { connection?: { saveData?: boolean } }
         ).connection
@@ -157,12 +178,21 @@ function PlayerDoDeezer({
                 /* barras chapadas; o player continua de pé */
             })
         return () => cancelar.abort()
-    }, [src])
+    }, [pedida, src])
 
     const alternar = () => {
         const a = audioRef.current
         if (!a) return
         if (a.paused) {
+            // A URL entra no <audio> dentro do próprio clique: o Safari só
+            // deixa tocar dentro do gesto, e a rota responde com 302.
+            if (!pedida || falhou) {
+                a.src = src
+                // Quem arrastou antes do primeiro play começa dali.
+                if (posicao > 0) a.currentTime = posicao
+                setPedida(true)
+                setFalhou(false)
+            }
             void a.play().then(
                 () => setTocando(true),
                 () => setTocando(false)
@@ -177,73 +207,98 @@ function PlayerDoDeezer({
         const a = audioRef.current
         const t = Number(e.target.value)
         setPosicao(t)
-        if (a) a.currentTime = t
+        if (a && pedida) a.currentTime = t
     }
 
     const progresso = duracao > 0 ? posicao / duracao : 0
 
     return (
-        <div className={styles.player}>
-            <audio
-                ref={audioRef}
-                src={src}
-                preload="metadata"
-                onLoadedMetadata={(e) => {
-                    const d = e.currentTarget.duration
-                    if (Number.isFinite(d) && d > 0) setDuracao(d)
-                }}
-                onTimeUpdate={(e) => setPosicao(e.currentTarget.currentTime)}
-                onEnded={() => {
-                    setTocando(false)
-                    setPosicao(0)
-                }}
-            />
-
-            <button
-                type="button"
-                onClick={alternar}
-                aria-label={
-                    tocando ? 'Pausar prévia' : `Tocar prévia de ${trackTitle}`
-                }
-                aria-pressed={tocando}
-                className={styles.playButton}
-            >
-                {tocando ? (
-                    <Pause size={20} fill="currentColor" aria-hidden="true" />
-                ) : (
-                    <Play
-                        size={20}
-                        fill="currentColor"
-                        aria-hidden="true"
-                        className={styles.playIcon}
-                    />
-                )}
-            </button>
-
-            <div className={styles.track}>
-                <Ondas picos={picos} progresso={progresso} id="preview-clip" />
-                {/* O range fica por cima da onda, invisível: dá clique para
-                    buscar, arraste, setas do teclado e leitor de tela, sem
-                    reinventar um slider. */}
-                <input
-                    type="range"
-                    min={0}
-                    max={duracao}
-                    step={0.1}
-                    value={posicao}
-                    onChange={irPara}
-                    aria-label="Posição da prévia"
-                    aria-valuetext={`${mmss(posicao)} de ${mmss(duracao)}`}
-                    className={styles.seek}
+        <>
+            <div className={styles.player}>
+                <audio
+                    ref={audioRef}
+                    preload="none"
+                    onLoadedMetadata={(e) => {
+                        const d = e.currentTarget.duration
+                        if (Number.isFinite(d) && d > 0) setDuracao(d)
+                    }}
+                    onTimeUpdate={(e) =>
+                        setPosicao(e.currentTarget.currentTime)
+                    }
+                    onEnded={() => {
+                        setTocando(false)
+                        setPosicao(0)
+                    }}
+                    onError={() => {
+                        // Sem prévia no Deezer, Deezer fora, ou a assinatura
+                        // venceu. O próximo play pede de novo.
+                        if (!audioRef.current?.getAttribute('src')) return
+                        setTocando(false)
+                        setFalhou(true)
+                    }}
                 />
-            </div>
 
-            <span className={styles.time}>
-                <span>{mmss(posicao)}</span>
-                <span aria-hidden="true"> / </span>
-                <span>{mmss(duracao)}</span>
-            </span>
-        </div>
+                <button
+                    type="button"
+                    onClick={alternar}
+                    aria-label={
+                        tocando
+                            ? 'Pausar prévia'
+                            : `Tocar prévia de ${trackTitle}`
+                    }
+                    aria-pressed={tocando}
+                    className={styles.playButton}
+                >
+                    {tocando ? (
+                        <Pause
+                            size={20}
+                            fill="currentColor"
+                            aria-hidden="true"
+                        />
+                    ) : (
+                        <Play
+                            size={20}
+                            fill="currentColor"
+                            aria-hidden="true"
+                            className={styles.playIcon}
+                        />
+                    )}
+                </button>
+
+                <div className={styles.track}>
+                    <Ondas
+                        picos={picos}
+                        progresso={progresso}
+                        id="preview-clip"
+                    />
+                    {/* O range fica por cima da onda, invisível: dá clique para
+                        buscar, arraste, setas do teclado e leitor de tela, sem
+                        reinventar um slider. */}
+                    <input
+                        type="range"
+                        min={0}
+                        max={duracao}
+                        step={0.1}
+                        value={posicao}
+                        onChange={irPara}
+                        aria-label="Posição da prévia"
+                        aria-valuetext={`${mmss(posicao)} de ${mmss(duracao)}`}
+                        className={styles.seek}
+                    />
+                </div>
+
+                <span className={styles.time}>
+                    <span>{mmss(posicao)}</span>
+                    <span aria-hidden="true"> / </span>
+                    <span>{mmss(duracao)}</span>
+                </span>
+            </div>
+            <p className={styles.note} role={falhou ? 'status' : undefined}>
+                {falhou
+                    ? 'A prévia não respondeu agora. Tente de novo ou ouça na plataforma ao lado.'
+                    : 'Prévia de 30 segundos'}
+            </p>
+        </>
     )
 }
 
@@ -257,7 +312,6 @@ export default function TrackPlayer({
         return (
             <div className={styles.wrap}>
                 <PlayerDoDeezer src={previewUrl} trackTitle={trackTitle} />
-                <p className={styles.note}>Prévia de 30 segundos</p>
             </div>
         )
     }

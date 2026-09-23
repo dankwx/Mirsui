@@ -1,6 +1,7 @@
 // utils/artistPageService.ts
 //
-// A página de artista, montada a partir do Deezer.
+// A página de artista do catálogo sai do Observatório. Só artistas que ainda
+// não estão nele usam o Deezer na visita, como na página de faixa.
 //
 // POR QUE ELA PRECISAVA MUDAR
 // Ela era 100% Spotify, e a seção principal — "Músicas Mais Populares" — usava
@@ -26,6 +27,7 @@ import {
     fetchDeezerArtist,
     fetchDeezerArtistTopTracks,
     fetchDeezerArtistAlbums,
+    coverFromMd5,
     type FaixaDeezer,
     type AlbumDeezer,
 } from '@/utils/deezerService'
@@ -57,7 +59,7 @@ export interface FaixaDaVitrine {
 export interface AlbumDaVitrine {
     id: string
     name: string
-    album_type: 'album' | 'single' | 'compilation'
+    album_type: 'album' | 'single' | 'compilation' | 'unknown'
     images: { url: string }[]
     release_date: string
     total_tracks: number
@@ -70,7 +72,7 @@ export interface ArtistaDaVitrine {
     name: string
     images: { url: string }[]
     /** `nb_fan` do Deezer, no campo que a tela já lê */
-    followers: { total: number }
+    followers: { total: number | null }
     genres: string[]
     /** 0-100 derivado do rank das faixas mais tocadas */
     popularity: number
@@ -81,6 +83,117 @@ export interface PaginaDoArtista {
     artista: ArtistaDaVitrine
     topTracks: FaixaDaVitrine[]
     albuns: AlbumDaVitrine[]
+    fonte: 'observatorio' | 'deezer'
+}
+
+interface FaixaLocal {
+    deezer_track_id: string
+    isrc: string | null
+    title: string
+    artist_name: string
+    deezer_artist_id: string | null
+    deezer_album_id: string | null
+    album_name: string | null
+    cover_md5: string | null
+    release_date: string | null
+    duration_seconds: number | null
+    last_popularity: number | null
+    contributors: { id: string | null; name: string }[] | null
+}
+
+interface AlbumLocal {
+    deezer_album_id: string
+    album_name: string
+    cover_md5: string | null
+    release_date: string | null
+}
+
+interface PaginaLocal {
+    name: string
+    nb_fan: number | null
+    top: FaixaLocal[]
+    albums: AlbumLocal[]
+}
+
+/** Uma RPC limita a saída antes de agregá-la: 99 faixas e 100 lançamentos. */
+async function carregarDoCatalogo(id: string): Promise<PaginaDoArtista | null> {
+    const { data, error } = await supabasePublic.rpc('get_artist_page', {
+        p_deezer_artist_id: id,
+    })
+    if (error) {
+        console.error('[artista] falha ao carregar o catálogo:', error.message)
+        return null
+    }
+    if (!data) return null
+
+    const local = data as PaginaLocal
+    if (
+        !local.name ||
+        !Array.isArray(local.top) ||
+        !Array.isArray(local.albums)
+    )
+        return null
+
+    const topTracks: FaixaDaVitrine[] = local.top.map((t) => {
+        const isrc = t.isrc || null
+        const capa = t.cover_md5 ? coverFromMd5(t.cover_md5, 500) : null
+        const contributors = Array.isArray(t.contributors)
+            ? t.contributors.filter((a) => a && a.name)
+            : []
+        return {
+            id: t.deezer_track_id,
+            name: t.title,
+            uri: isrc ? `isrc:${isrc}` : `deezer:track:${t.deezer_track_id}`,
+            href: `/track/${isrc || t.deezer_track_id}`,
+            externalUrl: `https://www.deezer.com/track/${t.deezer_track_id}`,
+            duration_ms: (t.duration_seconds || 0) * 1000,
+            popularity: t.last_popularity ?? 0,
+            artists:
+                contributors.length > 0
+                    ? contributors
+                    : [{ id: t.deezer_artist_id, name: t.artist_name }],
+            album: {
+                id: t.deezer_album_id || '',
+                name: t.album_name || '',
+                images: capa ? [{ url: capa }] : [],
+                release_date: t.release_date || '',
+                album_type: 'unknown',
+            },
+        }
+    })
+    const albuns: AlbumDaVitrine[] = local.albums.map((a) => ({
+        id: a.deezer_album_id,
+        name: a.album_name,
+        album_type: 'unknown',
+        images: a.cover_md5 ? [{ url: coverFromMd5(a.cover_md5, 500) }] : [],
+        release_date: a.release_date || '',
+        // O catálogo mede gravações, não a lista completa de faixas do álbum.
+        total_tracks: 0,
+        artists: [{ id, name: local.name }],
+        external_urls: {
+            spotify: `https://www.deezer.com/album/${a.deezer_album_id}`,
+        },
+    }))
+    const popularidade = topTracks.length
+        ? Math.round(
+              topTracks.reduce((s, t) => s + t.popularity, 0) / topTracks.length
+          )
+        : 0
+
+    return {
+        artista: {
+            id,
+            name: local.name,
+            images: [],
+            followers: { total: local.nb_fan },
+            genres: [],
+            popularity: popularidade,
+            external_urls: { spotify: `https://www.deezer.com/artist/${id}` },
+        },
+        topTracks,
+        albuns,
+        fonte: 'observatorio',
+    }
 }
 
 /**
@@ -89,7 +202,8 @@ export interface PaginaDoArtista {
  * uma quarta aba com um ou dois itens não ajudaria ninguém.
  */
 function tipoDoAlbum(recordType: string): 'album' | 'single' | 'compilation' {
-    if (recordType === 'compile' || recordType === 'compilation') return 'compilation'
+    if (recordType === 'compile' || recordType === 'compilation')
+        return 'compilation'
     if (recordType === 'single' || recordType === 'ep') return 'single'
     return 'album'
 }
@@ -164,7 +278,10 @@ async function buscarIsrcsLocais(
         return mapa
     }
 
-    for (const l of (data ?? []) as { deezer_track_id: string; isrc: string }[]) {
+    for (const l of (data ?? []) as {
+        deezer_track_id: string
+        isrc: string
+    }[]) {
         mapa.set(l.deezer_track_id, l.isrc)
     }
     return mapa
@@ -180,6 +297,10 @@ async function buscarIsrcsLocais(
 export const carregarArtista = cache(async function carregarArtista(
     deezerArtistId: string
 ): Promise<PaginaDoArtista | null> {
+    const local = await carregarDoCatalogo(deezerArtistId)
+    if (local) return local
+
+    // Fora do catálogo (ou antes de a migration 038 estar instalada).
     const [artista, top, albuns] = await Promise.all([
         fetchDeezerArtist(deezerArtistId),
         fetchDeezerArtistTopTracks(deezerArtistId, 99),
@@ -230,5 +351,6 @@ export const carregarArtista = cache(async function carregarArtista(
         albuns: albuns.map((a) =>
             albumParaVitrine(a, { id: artista.id, name: artista.name })
         ),
+        fonte: 'deezer',
     }
 })

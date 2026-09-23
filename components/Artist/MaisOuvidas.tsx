@@ -57,10 +57,12 @@ function ordenar(faixas: FaixaListada[], ordem: Ordem): FaixaListada[] {
 export default function MaisOuvidas({
     faixas,
     artistaId,
+    fonte,
 }: {
     faixas: FaixaListada[]
     /** para não linkar o próprio artista da página nas participações */
     artistaId: string
+    fonte: 'observatorio' | 'deezer'
 }) {
     const [busca, setBusca] = useState('')
     const [ordem, setOrdem] = useState<Ordem>('audiencia')
@@ -84,14 +86,19 @@ export default function MaisOuvidas({
     const escondidas = filtradas.length - visiveis.length
 
     return (
-        <section className={styles.section} aria-labelledby="mais-ouvidas-title">
+        <section
+            className={styles.section}
+            aria-labelledby="mais-ouvidas-title"
+        >
             <div className={styles.heading}>
                 <div>
                     <h2 id="mais-ouvidas-title">Mais ouvidas</h2>
                     <p>
-                        {faixas.length === 0
-                            ? 'O Deezer ainda não lista as faixas mais tocadas deste artista.'
-                            : `As ${faixas.length} faixas com mais audiência no Deezer.`}
+                        {fonte === 'observatorio'
+                            ? `As ${faixas.length} faixas com mais audiência entre as medidas pelo Observatório.`
+                            : faixas.length === 0
+                              ? 'O Deezer ainda não lista as faixas mais tocadas deste artista.'
+                              : `As ${faixas.length} faixas com mais audiência no Deezer.`}
                     </p>
                 </div>
 
@@ -113,7 +120,9 @@ export default function MaisOuvidas({
                             <select
                                 aria-labelledby={ordemId}
                                 value={ordem}
-                                onChange={(e) => setOrdem(e.target.value as Ordem)}
+                                onChange={(e) =>
+                                    setOrdem(e.target.value as Ordem)
+                                }
                                 className={styles.select}
                             >
                                 {ORDENS.map((o) => (
@@ -184,9 +193,13 @@ export default function MaisOuvidas({
                                         )}
                                     </h3>
                                     <p className={styles.context}>
-                                        {f.album.name && <span>{f.album.name}</span>}
+                                        {f.album.name && (
+                                            <span>{f.album.name}</span>
+                                        )}
                                         {f.ano && (
-                                            <span className={recipes.smallNumber}>
+                                            <span
+                                                className={recipes.smallNumber}
+                                            >
                                                 {f.ano}
                                             </span>
                                         )}
@@ -194,7 +207,9 @@ export default function MaisOuvidas({
                                             <span>
                                                 com{' '}
                                                 {convidados.map((a, i) => (
-                                                    <span key={`${a.id ?? a.name}-${i}`}>
+                                                    <span
+                                                        key={`${a.id ?? a.name}-${i}`}
+                                                    >
                                                         {a.id ? (
                                                             <Link
                                                                 href={enderecoDoArtista(
@@ -207,8 +222,9 @@ export default function MaisOuvidas({
                                                         ) : (
                                                             a.name
                                                         )}
-                                                        {i < convidados.length - 1 &&
-                                                            ', '}
+                                                        {i <
+                                                            convidados.length -
+                                                                1 && ', '}
                                                     </span>
                                                 ))}
                                             </span>

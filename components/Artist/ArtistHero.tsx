@@ -20,15 +20,17 @@ interface ArtistHeroProps {
     artista: ArtistaDaVitrine
     lancamentos: number
     faixasMedidas: number
+    fonte: 'observatorio' | 'deezer'
 }
 
 export default function ArtistHero({
     artista,
     lancamentos,
     faixasMedidas,
+    fonte,
 }: ArtistHeroProps) {
     const total = artista.followers.total
-    const fas = total > 0 ? pessoas(total) : null
+    const fas = total != null && total > 0 ? pessoas(total) : null
     const fa = total === 1 ? 'fã' : 'fãs'
     const foto = fotoMenor(artista.images[0]?.url ?? null)
     const inicial = artista.name.trim().slice(0, 1).toUpperCase() || '·'
@@ -55,9 +57,20 @@ export default function ArtistHero({
                 <div className={styles.copy}>
                     <p className={styles.eyebrow}>
                         <span>Artista</span>
-                        {fas && <span>{fas} {fa} no Deezer</span>}
+                        {fas && (
+                            <span>
+                                {fas} {fa} no Deezer
+                            </span>
+                        )}
                         {lancamentos > 0 && (
-                            <span>{plural(lancamentos, 'lançamento', 'lançamentos')}</span>
+                            <span>
+                                {plural(
+                                    lancamentos,
+                                    'lançamento',
+                                    'lançamentos'
+                                )}
+                                {fonte === 'observatorio' ? ' no acervo' : ''}
+                            </span>
                         )}
                     </p>
 
@@ -79,12 +92,16 @@ export default function ArtistHero({
                 <dl className={styles.stats}>
                     {fas && (
                         <div className={recipes.stat}>
-                            <dt className={recipes.statLabel}>{fa} no Deezer</dt>
+                            <dt className={recipes.statLabel}>
+                                {fa} no Deezer
+                            </dt>
                             <dd className={recipes.statValue}>{fas}</dd>
                         </div>
                     )}
                     {faixasMedidas > 0 && (
-                        <div className={`${recipes.stat} ${recipes.statAccent}`}>
+                        <div
+                            className={`${recipes.stat} ${recipes.statAccent}`}
+                        >
                             <dt className={recipes.statLabel}>
                                 audiência média das mais ouvidas,
                                 <br />
@@ -97,7 +114,11 @@ export default function ArtistHero({
                     )}
                     <div className={recipes.stat}>
                         <dt className={recipes.statLabel}>
-                            {lancamentos === 1 ? 'lançamento' : 'lançamentos'}
+                            {fonte === 'observatorio'
+                                ? 'lançamentos no acervo'
+                                : lancamentos === 1
+                                  ? 'lançamento'
+                                  : 'lançamentos'}
                         </dt>
                         <dd className={recipes.statValue}>
                             {lancamentos.toLocaleString('pt-BR')}

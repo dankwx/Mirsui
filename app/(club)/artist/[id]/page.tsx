@@ -17,7 +17,8 @@
 // densa; a discografia é um grid de capas; a precedência é dado real do
 // acervo. Saíram as listas de seguidores e fãs com nomes fictícios, o
 // "Artista Verificado" e o contador de seguidores no Mirsui que era sempre 0.
-// A resolução da URL, os metadados e o carregamento não mudaram.
+// Desde a migration 038, artistas medidos saem do catálogo; o Deezer atende
+// apenas artistas que ainda não estão nele.
 
 import { permanentRedirect, notFound } from 'next/navigation'
 import { carregarArtista } from '@/utils/artistPageService'
@@ -52,12 +53,20 @@ async function idDoDeezerPorIdDoSpotify(
     spotifyArtistId: string
 ): Promise<string | null> {
     const temCredencial =
-        !!(process.env.SPOTIFY_CLIENT_ID || process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID) &&
-        !!(process.env.SPOTIFY_CLIENT_SECRET || process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET)
+        !!(
+            process.env.SPOTIFY_CLIENT_ID ||
+            process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID
+        ) &&
+        !!(
+            process.env.SPOTIFY_CLIENT_SECRET ||
+            process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET
+        )
     if (!temCredencial) return null
 
     try {
-        const { fetchSpotifyArtistInfo } = await import('@/utils/spotifyService')
+        const { fetchSpotifyArtistInfo } = await import(
+            '@/utils/spotifyService'
+        )
         const doSpotify = await fetchSpotifyArtistInfo(spotifyArtistId)
         if (!doSpotify?.name) return null
 
@@ -125,7 +134,7 @@ export async function generateMetadata({
         title: `${dados.artista.name} | Mirsui`,
         description: `Descubra ${dados.artista.name} no Mirsui${
             fas ? ` — ${fas} fãs` : ''
-        }. Veja quem descobriu suas músicas primeiro e explore a discografia completa.`,
+        }. Veja quem descobriu suas músicas primeiro e explore seus lançamentos.`,
         // Um artista, um endereço — mesma razão da ficha da faixa.
         alternates: { canonical: enderecoDoArtista(id, dados.artista.name) },
     }
@@ -142,7 +151,7 @@ export default async function ArtistDetailsPage({
     const dados = await carregarArtista(id)
     if (!dados) notFound()
 
-    const { artista, topTracks, albuns } = dados
+    const { artista, topTracks, albuns, fonte } = dados
 
     /**
      * `/artist/{id}/top` do Deezer não traz data de lançamento, mas traz o id
@@ -170,10 +179,15 @@ export default async function ArtistDetailsPage({
                 artista={artista}
                 lancamentos={albuns.length}
                 faixasMedidas={topTracks.length}
+                fonte={fonte}
             />
 
             <div className={`${shellStyles.container} ${styles.body}`}>
-                <MaisOuvidas faixas={faixas} artistaId={artista.id} />
+                <MaisOuvidas
+                    faixas={faixas}
+                    artistaId={artista.id}
+                    fonte={fonte}
+                />
 
                 {precedencia && (
                     <aside className={styles.rail}>
@@ -187,7 +201,7 @@ export default async function ArtistDetailsPage({
 
             <div className={styles.discography}>
                 <div className={shellStyles.container}>
-                    <Discografia albuns={albuns} />
+                    <Discografia albuns={albuns} fonte={fonte} />
                 </div>
             </div>
         </div>

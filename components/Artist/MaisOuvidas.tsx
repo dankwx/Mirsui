@@ -15,7 +15,7 @@ import Link from 'next/link'
 import RecordCover from '@/components/Club/RecordCover'
 import recipes from '@/components/Club/club-recipes.module.css'
 import { enderecoDoArtista } from '@/utils/artistHref'
-import type { FaixaDaVitrine } from '@/utils/artistPageService'
+import type { Cobertura, FaixaDaVitrine } from '@/utils/artistPageService'
 import { duracaoMs } from './format'
 import styles from './MaisOuvidas.module.css'
 
@@ -57,12 +57,12 @@ function ordenar(faixas: FaixaListada[], ordem: Ordem): FaixaListada[] {
 export default function MaisOuvidas({
     faixas,
     artistaId,
-    fonte,
+    cobertura,
 }: {
     faixas: FaixaListada[]
     /** para não linkar o próprio artista da página nas participações */
     artistaId: string
-    fonte: 'observatorio' | 'deezer'
+    cobertura: Cobertura
 }) {
     const [busca, setBusca] = useState('')
     const [ordem, setOrdem] = useState<Ordem>('audiencia')
@@ -94,7 +94,7 @@ export default function MaisOuvidas({
                 <div>
                     <h2 id="mais-ouvidas-title">Mais ouvidas</h2>
                     <p>
-                        {fonte === 'observatorio'
+                        {cobertura === 'acervo'
                             ? `As ${faixas.length} faixas com mais audiência entre as medidas pelo Observatório.`
                             : faixas.length === 0
                               ? 'O Deezer ainda não lista as faixas mais tocadas deste artista.'

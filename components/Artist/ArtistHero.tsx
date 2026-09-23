@@ -12,7 +12,7 @@ import { ArrowUpRight } from 'lucide-react'
 import FotoDePerfil from '@/components/FotoDePerfil'
 import shellStyles from '@/components/Club/ClubShell.module.css'
 import recipes from '@/components/Club/club-recipes.module.css'
-import type { ArtistaDaVitrine } from '@/utils/artistPageService'
+import type { ArtistaDaVitrine, Cobertura } from '@/utils/artistPageService'
 import { fotoMenor, pessoas, plural } from './format'
 import styles from './ArtistHero.module.css'
 
@@ -20,14 +20,14 @@ interface ArtistHeroProps {
     artista: ArtistaDaVitrine
     lancamentos: number
     faixasMedidas: number
-    fonte: 'observatorio' | 'deezer'
+    cobertura: Cobertura
 }
 
 export default function ArtistHero({
     artista,
     lancamentos,
     faixasMedidas,
-    fonte,
+    cobertura,
 }: ArtistHeroProps) {
     const total = artista.followers.total
     const fas = total != null && total > 0 ? pessoas(total) : null
@@ -69,7 +69,7 @@ export default function ArtistHero({
                                     'lançamento',
                                     'lançamentos'
                                 )}
-                                {fonte === 'observatorio' ? ' no acervo' : ''}
+                                {cobertura === 'acervo' ? ' no acervo' : ''}
                             </span>
                         )}
                     </p>
@@ -114,7 +114,7 @@ export default function ArtistHero({
                     )}
                     <div className={recipes.stat}>
                         <dt className={recipes.statLabel}>
-                            {fonte === 'observatorio'
+                            {cobertura === 'acervo'
                                 ? 'lançamentos no acervo'
                                 : lancamentos === 1
                                   ? 'lançamento'

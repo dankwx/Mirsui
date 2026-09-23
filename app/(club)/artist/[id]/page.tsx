@@ -17,8 +17,9 @@
 // densa; a discografia é um grid de capas; a precedência é dado real do
 // acervo. Saíram as listas de seguidores e fãs com nomes fictícios, o
 // "Artista Verificado" e o contador de seguidores no Mirsui que era sempre 0.
-// Desde a migration 038, artistas medidos saem do catálogo; o Deezer atende
-// apenas artistas que ainda não estão nele.
+// Desde a migration 038, artistas medidos saem do banco; desde a 040, com a
+// ficha que a rodada guarda (foto, fãs, mais ouvidas, discografia). O Deezer
+// atende na visita apenas artistas que o banco ainda não conhece.
 
 import { permanentRedirect, notFound } from 'next/navigation'
 import { carregarArtista } from '@/utils/artistPageService'
@@ -151,7 +152,7 @@ export default async function ArtistDetailsPage({
     const dados = await carregarArtista(id)
     if (!dados) notFound()
 
-    const { artista, topTracks, albuns, fonte } = dados
+    const { artista, topTracks, albuns, cobertura } = dados
 
     /**
      * `/artist/{id}/top` do Deezer não traz data de lançamento, mas traz o id
@@ -179,14 +180,14 @@ export default async function ArtistDetailsPage({
                 artista={artista}
                 lancamentos={albuns.length}
                 faixasMedidas={topTracks.length}
-                fonte={fonte}
+                cobertura={cobertura}
             />
 
             <div className={`${shellStyles.container} ${styles.body}`}>
                 <MaisOuvidas
                     faixas={faixas}
                     artistaId={artista.id}
-                    fonte={fonte}
+                    cobertura={cobertura}
                 />
 
                 {precedencia && (
@@ -201,7 +202,7 @@ export default async function ArtistDetailsPage({
 
             <div className={styles.discography}>
                 <div className={shellStyles.container}>
-                    <Discografia albuns={albuns} fonte={fonte} />
+                    <Discografia albuns={albuns} cobertura={cobertura} />
                 </div>
             </div>
         </div>

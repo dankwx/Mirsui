@@ -1,7 +1,15 @@
 // utils/artistPageService.ts
 //
-// A página de artista do catálogo sai do Observatório. Só artistas que ainda
-// não estão nele usam o Deezer na visita, como na página de faixa.
+// A página de artista do catálogo sai do banco. Só artistas que o banco ainda
+// não conhece usam o Deezer na visita, como na página de faixa.
+//
+// DESDE A MIGRATION 040 A PÁGINA TEM FICHA
+// A 038 montava a página só com as faixas medidas pelo Observatório: Drake
+// com 4 faixas e 3 lançamentos, e ninguém com foto. Agora a rodada da noite
+// guarda o que esta página pedia ao Deezer (/artist, /top e /albums) em
+// `artist_details`, até 2.000 artistas por noite, e `get_artist_page` devolve
+// foto, fãs, as mais ouvidas e a discografia com tipo. Quem ainda não tem
+// ficha mostra o recorte do catálogo, com a foto pedida pelo navegador.
 //
 // POR QUE ELA PRECISAVA MUDAR
 // Ela era 100% Spotify, e a seção principal — "Músicas Mais Populares" — usava
@@ -28,6 +36,7 @@ import {
     fetchDeezerArtistTopTracks,
     fetchDeezerArtistAlbums,
     coverFromMd5,
+    artistPicFromMd5,
     type FaixaDeezer,
     type AlbumDeezer,
 } from '@/utils/deezerService'
@@ -79,11 +88,20 @@ export interface ArtistaDaVitrine {
     external_urls: { spotify: string }
 }
 
+/**
+ * O que as listas da página representam.
+ *
+ * 'discografia': as mais ouvidas e os lançamentos do Deezer, pedidos na visita
+ * ou guardados pela rodada (a ficha da migration 040).
+ * 'acervo': só o que o Observatório mede — o artista ainda não tem ficha.
+ */
+export type Cobertura = 'discografia' | 'acervo'
+
 export interface PaginaDoArtista {
     artista: ArtistaDaVitrine
     topTracks: FaixaDaVitrine[]
     albuns: AlbumDaVitrine[]
-    fonte: 'observatorio' | 'deezer'
+    cobertura: Cobertura
 }
 
 interface FaixaLocal {
@@ -106,13 +124,29 @@ interface AlbumLocal {
     album_name: string
     cover_md5: string | null
     release_date: string | null
+    /** do Deezer, quando há ficha; null no recorte do catálogo */
+    record_type?: string | null
 }
 
 interface PaginaLocal {
     name: string
     nb_fan: number | null
+    /** a rodada já guardou a ficha deste artista (migration 040) */
+    ficha?: boolean
+    /** null com ficha = o artista não tem foto no Deezer */
+    picture_md5?: string | null
     top: FaixaLocal[]
     albums: AlbumLocal[]
+}
+
+/**
+ * A foto sem ficha: o endereço fixo do Deezer, que redireciona para o CDN.
+ * Quem segue o redirecionamento é o navegador de quem visita, então não sai
+ * requisição daqui nem da cota do gateway. Se falhar, `FotoDePerfil` mostra a
+ * inicial.
+ */
+function fotoSemFicha(id: string): string {
+    return `https://api.deezer.com/artist/${encodeURIComponent(id)}/image?size=big`
 }
 
 /** Uma RPC limita a saída antes de agregá-la: 99 faixas e 100 lançamentos. */
@@ -124,6 +158,14 @@ async function carregarDoCatalogo(id: string): Promise<PaginaDoArtista | null> {
         console.error('[artista] falha ao carregar o catálogo:', error.message)
         return null
     }
+    return paginaDoCatalogo(id, data)
+}
+
+/** A resposta de `get_artist_page` na forma que a tela desenha. */
+function paginaDoCatalogo(
+    id: string,
+    data: unknown
+): PaginaDoArtista | null {
     if (!data) return null
 
     const local = data as PaginaLocal
@@ -161,13 +203,14 @@ async function carregarDoCatalogo(id: string): Promise<PaginaDoArtista | null> {
             },
         }
     })
+    const ficha = local.ficha === true
     const albuns: AlbumDaVitrine[] = local.albums.map((a) => ({
         id: a.deezer_album_id,
         name: a.album_name,
-        album_type: 'unknown',
+        album_type: ficha ? tipoDoAlbum(a.record_type || 'album') : 'unknown',
         images: a.cover_md5 ? [{ url: coverFromMd5(a.cover_md5, 500) }] : [],
         release_date: a.release_date || '',
-        // O catálogo mede gravações, não a lista completa de faixas do álbum.
+        // Nem o catálogo nem /artist/{id}/albums dizem quantas faixas há.
         total_tracks: 0,
         artists: [{ id, name: local.name }],
         external_urls: {
@@ -180,19 +223,25 @@ async function carregarDoCatalogo(id: string): Promise<PaginaDoArtista | null> {
           )
         : 0
 
+    const foto = ficha
+        ? local.picture_md5
+            ? artistPicFromMd5(local.picture_md5, 500)
+            : null
+        : fotoSemFicha(id)
+
     return {
         artista: {
             id,
             name: local.name,
-            images: [],
-            followers: { total: local.nb_fan },
+            images: foto ? [{ url: foto }] : [],
+            followers: { total: local.nb_fan ?? null },
             genres: [],
             popularity: popularidade,
             external_urls: { spotify: `https://www.deezer.com/artist/${id}` },
         },
         topTracks,
         albuns,
-        fonte: 'observatorio',
+        cobertura: ficha ? 'discografia' : 'acervo',
     }
 }
 
@@ -300,7 +349,8 @@ export const carregarArtista = cache(async function carregarArtista(
     const local = await carregarDoCatalogo(deezerArtistId)
     if (local) return local
 
-    // Fora do catálogo (ou antes de a migration 038 estar instalada).
+    // Sem ficha e fora do catálogo (ou antes de a migration 038 estar
+    // instalada).
     const [artista, top, albuns] = await Promise.all([
         fetchDeezerArtist(deezerArtistId),
         fetchDeezerArtistTopTracks(deezerArtistId, 99),
@@ -351,6 +401,6 @@ export const carregarArtista = cache(async function carregarArtista(
         albuns: albuns.map((a) =>
             albumParaVitrine(a, { id: artista.id, name: artista.name })
         ),
-        fonte: 'deezer',
+        cobertura: 'discografia',
     }
 })

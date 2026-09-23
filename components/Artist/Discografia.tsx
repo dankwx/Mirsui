@@ -10,7 +10,7 @@ import { useState } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import RecordCover from '@/components/Club/RecordCover'
 import recipes from '@/components/Club/club-recipes.module.css'
-import type { AlbumDaVitrine } from '@/utils/artistPageService'
+import type { AlbumDaVitrine, Cobertura } from '@/utils/artistPageService'
 import { ano } from './format'
 import styles from './Discografia.module.css'
 
@@ -37,13 +37,13 @@ const GAVETAS: { id: Gaveta; label: string; vazio: string }[] = [
 
 export default function Discografia({
     albuns,
-    fonte,
+    cobertura,
 }: {
     albuns: AlbumDaVitrine[]
-    fonte: 'observatorio' | 'deezer'
+    cobertura: Cobertura
 }) {
     const gavetas =
-        fonte === 'observatorio' ? GAVETAS.slice(0, 1) : GAVETAS.slice(1)
+        cobertura === 'acervo' ? GAVETAS.slice(0, 1) : GAVETAS.slice(1)
     const contagem = (g: Gaveta) =>
         albuns.filter((a) => a.album_type === g).length
 
@@ -63,12 +63,12 @@ export default function Discografia({
         <section className={styles.section} aria-labelledby="discografia-title">
             <div className={styles.heading}>
                 <h2 id="discografia-title">
-                    {fonte === 'observatorio'
+                    {cobertura === 'acervo'
                         ? 'Lançamentos no acervo'
                         : 'Discografia'}
                 </h2>
                 <p>
-                    {fonte === 'observatorio'
+                    {cobertura === 'acervo'
                         ? `${albuns.length} ${albuns.length === 1 ? 'lançamento medido' : 'lançamentos medidos'} pelo Observatório.`
                         : albuns.length === 0
                           ? 'O Deezer ainda não lista lançamentos deste artista.'
@@ -78,7 +78,7 @@ export default function Discografia({
 
             {albuns.length > 0 && (
                 <>
-                    {fonte === 'deezer' && (
+                    {cobertura === 'discografia' && (
                         <div
                             className={recipes.filters}
                             role="group"

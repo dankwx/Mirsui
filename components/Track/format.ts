@@ -69,6 +69,11 @@ export function duracao(segundos: number): string {
     return `${m}:${s.toString().padStart(2, '0')}`
 }
 
+/** "+4,3%". pt-BR usa vírgula: "+46.2%" num produto brasileiro é erro, não estilo. */
+export function percentual(v: number): string {
+    return `${v > 0 ? '+' : ''}${v.toFixed(1).replace('.', ',')}%`
+}
+
 export function diasEntre(inicio: string, fim: string): number {
     const a = new Date(inicio).getTime()
     const b = new Date(fim).getTime()

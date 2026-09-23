@@ -20,87 +20,10 @@ import type { CurvaDaFaixa } from '@/utils/observatoryService'
 import { variacaoDaCurva } from '@/utils/observatoryService'
 import shellStyles from '@/components/Club/ClubShell.module.css'
 import recipes from '@/components/Club/club-recipes.module.css'
-import { dataCurta, diasEntre } from './format'
+import { popScore } from '@/utils/popScore'
+import LinhaDaCurva from './LinhaDaCurva'
+import { dataCurta, diasEntre, percentual } from './format'
 import styles from './TrackCurve.module.css'
-
-/** A linha em SVG. Estica na largura; o traço não engorda junto. */
-function Linha({ valores, gradId }: { valores: number[]; gradId: string }) {
-    const L = 100
-    const A = 40
-    const PAD = 4
-
-    const min = Math.min(...valores)
-    const max = Math.max(...valores)
-    const amplitude = max - min
-
-    // Normalizar por min/max sozinho MENTE. Uma faixa que oscilou 0,05% em duas
-    // semanas viraria uma cordilheira de ponta a ponta, ao lado de um texto
-    // dizendo "Estável" — o desenho contradizendo o número.
-    //
-    // Então a altura ocupada é proporcional ao movimento REAL: 5% de variação
-    // relativa já enche a caixa, e o que for menos desenha proporcionalmente
-    // mais achatado, sempre centralizado. Movimento grande continua legível,
-    // ruído continua parecendo ruído.
-    const ESCALA_CHEIA = 0.05
-    const relativo = min > 0 ? amplitude / min : 0
-    const ocupacao = Math.min(1, relativo / ESCALA_CHEIA)
-
-    const alturaUtil = (A - PAD * 2) * ocupacao
-    const topo = (A - alturaUtil) / 2
-
-    const pontos = valores.map((v, i) => {
-        const x = valores.length === 1 ? L / 2 : (i / (valores.length - 1)) * L
-        // Série sem variação nenhuma vira uma reta no meio, não uma divisão por zero.
-        const y =
-            amplitude === 0
-                ? A / 2
-                : topo + (1 - (v - min) / amplitude) * alturaUtil
-        return [x, y] as const
-    })
-
-    const linha = pontos
-        .map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`)
-        .join(' ')
-    const area = `0,${A} ${linha} ${L},${A}`
-    const [fimX, fimY] = pontos[pontos.length - 1]
-
-    // O SVG estica sem manter proporção, então o ponto final é HTML por cima:
-    // um círculo dentro do SVG viraria uma elipse.
-    return (
-        <div className={styles.chart} aria-hidden="true">
-            <svg viewBox={`0 0 ${L} ${A}`} preserveAspectRatio="none">
-                <defs>
-                    <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-                        <stop
-                            offset="0%"
-                            stopColor="var(--club-accent)"
-                            stopOpacity="0.18"
-                        />
-                        <stop
-                            offset="100%"
-                            stopColor="var(--club-accent)"
-                            stopOpacity="0"
-                        />
-                    </linearGradient>
-                </defs>
-                <polygon points={area} fill={`url(#${gradId})`} />
-                <polyline
-                    points={linha}
-                    fill="none"
-                    stroke="var(--club-accent)"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    vectorEffect="non-scaling-stroke"
-                />
-            </svg>
-            <span
-                className={styles.endpoint}
-                style={{ left: `${fimX}%`, top: `${(fimY / A) * 100}%` }}
-            />
-        </div>
-    )
-}
 
 export default function TrackCurve({ curva }: { curva: CurvaDaFaixa }) {
     const { series } = curva
@@ -122,9 +45,9 @@ export default function TrackCurve({ curva }: { curva: CurvaDaFaixa }) {
                     <div className={styles.copy}>
                         <h2 id="observatorio-title">Observatório</h2>
                         <p>
-                            Audiência desta gravação no Deezer, medida pelo
-                            Mirsui uma vez por dia. Nenhuma plataforma publica
-                            esse histórico.
+                            Audiência desta gravação no Deezer, de
+                            0&nbsp;a&nbsp;100, medida pelo Mirsui uma vez por
+                            dia. Nenhuma plataforma publica esse histórico.
                         </p>
                     </div>
                     <div className={styles.reading}>
@@ -146,12 +69,19 @@ export default function TrackCurve({ curva }: { curva: CurvaDaFaixa }) {
     const estavel = Math.abs(variacao) < 0.5
     const subiu = variacao > 0
 
-    // pt-BR usa vírgula. "+46.2%" num produto brasileiro é erro, não estilo.
-    const percentual = `${subiu ? '+' : ''}${variacao.toFixed(1)}`.replace(
-        '.',
-        ','
-    )
-    const numero = estavel ? 'Estável' : `${percentual}%`
+    const numero = estavel ? 'Estável' : percentual(variacao)
+
+    // O percentual sozinho não dizia O QUE subiu. A frase diz, na escala 0-100
+    // da "Audiência hoje" do recibo — e sem depender de hover, que o celular
+    // não tem. O percentual continua vindo do rank bruto, mais fino que o
+    // número arredondado: 83 e 83 podem ser um +0,9% de verdade.
+    const inicio = popScore(series[0].r)
+    const hoje = popScore(series[series.length - 1].r)
+    const leitura = estavel
+        ? `sem movimento desde ${desde} · audiência ${hoje}/100`
+        : inicio === hoje
+          ? `audiência ${subiu ? 'subiu' : 'caiu'} desde ${desde} · ${hoje}/100`
+          : `audiência ${subiu ? 'subiu' : 'caiu'} de ${inicio} para ${hoje}/100 desde ${desde}`
 
     return (
         <section
@@ -162,9 +92,9 @@ export default function TrackCurve({ curva }: { curva: CurvaDaFaixa }) {
                 <div className={styles.copy}>
                     <h2 id="observatorio-title">Observatório</h2>
                     <p>
-                        Audiência desta gravação no Deezer, medida pelo Mirsui
-                        uma vez por dia. Nenhuma plataforma publica esse
-                        histórico.
+                        Audiência desta gravação no Deezer, de
+                        0&nbsp;a&nbsp;100, medida pelo Mirsui uma vez por dia.
+                        Nenhuma plataforma publica esse histórico.
                     </p>
                 </div>
 
@@ -178,16 +108,14 @@ export default function TrackCurve({ curva }: { curva: CurvaDaFaixa }) {
                             {numero}
                         </span>
                         <span className={styles.meaning}>
-                            {estavel
-                                ? `sem movimento desde ${desde}`
-                                : `${subiu ? 'subiu' : 'caiu'} desde ${desde}`}
+                            {leitura}
                             {dias > 0 &&
-                                ` · ${dias} ${dias === 1 ? 'dia' : 'dias'}`}
+                                ` · ${dias}\u00a0${dias === 1 ? 'dia' : 'dias'}`}
                         </span>
                     </div>
 
-                    <Linha
-                        valores={series.map((p) => p.r)}
+                    <LinhaDaCurva
+                        serie={series}
                         gradId={`curva-${curva.deezerTrackId}`}
                     />
 

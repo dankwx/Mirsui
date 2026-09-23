@@ -2,9 +2,9 @@
 //
 // O que é do Mirsui na página de artista: quem já salvou faixas dele.
 //
-// Uma consulta só, à tabela `tracks`, filtrando pelas gravações que a página
-// já tem em mãos (as mais ouvidas do Deezer). Não há chamada externa: o dado
-// é nosso. Se a consulta falhar, a seção some — nunca aparece gente inventada.
+// Uma consulta só, filtrando pelas gravações que a página já tem em mãos.
+// As chaves seguem no corpo da RPC: até 99 ISRCs na URL do PostgREST faziam
+// o proxy responder 502. Se a consulta falhar, a seção some.
 
 import 'server-only'
 import { supabasePublic } from '@/utils/supabase/public'
@@ -49,7 +49,7 @@ function isrcDaUri(uri: string): string | null {
  *
  * A mesma gravação pode estar guardada de duas formas (`tracks.isrc` para o
  * que foi salvo pela ficha nova; `track_uri` para o resto — ver
- * `filtroDaGravacao` em utils/trackClaims.ts). As duas entram no `.or()`.
+ * `filtroDaGravacao` em utils/trackClaims.ts). A RPC cobre as duas chaves.
  * Salvamentos antigos pelo id do Spotify sem ISRC preenchido ficam de fora:
  * a contagem pode ser menor que a real, nunca maior.
  */
@@ -64,21 +64,13 @@ export async function precedenciaDoArtista(
     ) as string[]
     const uris = Array.from(new Set(faixas.map((f) => f.uri)))
 
-    // ISRC é [A-Z0-9]{12} e as uris não têm vírgula nem parêntese: nada aqui
-    // precisa de escape para a sintaxe do PostgREST.
-    const partes: string[] = []
-    if (isrcs.length > 0) partes.push(`isrc.in.(${isrcs.join(',')})`)
-    if (uris.length > 0) partes.push(`track_uri.in.(${uris.join(',')})`)
-    if (partes.length === 0) return null
+    if (isrcs.length === 0 && uris.length === 0) return null
 
-    const { data, error } = await supabasePublic
-        .from('tracks')
-        .select(
-            'user_id, position, claimedat, isrc, track_uri, profiles:user_id ( username, avatar_url, display_name )'
-        )
-        .or(partes.join(','))
-        .order('claimedat', { ascending: true, nullsFirst: false })
-        .limit(500)
+    const { data, error } = await supabasePublic.rpc('get_artist_claims', {
+        p_isrcs: isrcs,
+        p_uris: uris,
+        p_limite: 500,
+    })
 
     if (error) {
         console.error('[artista] falha ao ler quem salvou:', error.message)

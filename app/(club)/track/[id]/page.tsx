@@ -28,7 +28,8 @@
 // Vive no grupo `(club)`, com o shell, o header e o rodapé compactos de
 // DESIGN.md. A composição segue a linha "Faixa / artista" do guia: capa e
 // ação dominam a abertura; a precedência aparece no registro e na lista de
-// quem chegou antes; o Observatório fecha. Os dados e as rotas não mudaram.
+// quem chegou antes; o Observatório vem depois, e as "Parecidas" fecham a
+// página com uma faixa de cada artista vizinho (migration 041, na mesma RPC).
 
 import { permanentRedirect, notFound } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
@@ -65,6 +66,7 @@ import TrackReceipt, {
 } from '@/components/Track/TrackReceipt'
 import QuemSalvou from '@/components/Track/QuemSalvou'
 import TrackCurve from '@/components/Track/TrackCurve'
+import Parecidas from '@/components/Track/Parecidas'
 import {
     dataDeLancamento,
     duracao,
@@ -464,6 +466,12 @@ export default async function TrackDetailsPage({
 
             {/* ============ OBSERVATÓRIO ============ */}
             {curva && <TrackCurve curva={curva} />}
+
+            {/* ============ PARECIDAS ============ */}
+            <Parecidas
+                faixas={dados?.relacionadas ?? []}
+                artista={faixa.artists[0]?.name ?? null}
+            />
         </div>
     )
 }

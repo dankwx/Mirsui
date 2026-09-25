@@ -102,6 +102,25 @@ export interface DadosDaFaixa {
 
 /* ------------------------------------------- tudo que é nosso, numa consulta */
 
+/**
+ * Uma faixa de um artista vizinho, pronta para a grade de "Parecidas".
+ *
+ * A vizinhança é montada pela rodada (migration 041) a partir do que a
+ * descoberta já perguntou ao Deezer — rádio e artistas relacionados — e das
+ * participações. Aqui só chega o que a página desenha.
+ */
+export interface FaixaRelacionada {
+    isrc: string
+    title: string
+    artistId: string | null
+    artistName: string
+    albumName: string | null
+    /** 500 px, como a discografia do artista: a capa passa de 200 px no
+     * tablet e a tela de alta densidade dobra isso */
+    coverUrl: string | null
+    href: string
+}
+
 export interface DadosDaPagina {
     /** a linha do Observatório, ou null se ele ainda não viu esta gravação */
     observada: FaixaObservada | null
@@ -111,6 +130,8 @@ export interface DadosDaPagina {
     salvamentos: number
     /** os oito primeiros a salvar, em ordem de chegada */
     quemSalvou: QuemSalvou[]
+    /** até seis, uma por artista vizinho; vazio antes da 041 ou sem vizinhos */
+    relacionadas: FaixaRelacionada[]
 }
 
 const NADA: DadosDaPagina = {
@@ -118,10 +139,42 @@ const NADA: DadosDaPagina = {
     curva: null,
     salvamentos: 0,
     quemSalvou: [],
+    relacionadas: [],
 }
 
 /**
- * Tudo que esta página lê do NOSSO banco, numa requisição só.
+ * Do jsonb da RPC para a grade. Linha sem ISRC, título ou artista fica de
+ * fora em vez de virar um link quebrado.
+ */
+function montarRelacionadas(bruto: unknown): FaixaRelacionada[] {
+    if (!Array.isArray(bruto)) return []
+    return bruto.flatMap((linha) => {
+        const r = linha as {
+            isrc?: string | null
+            title?: string | null
+            deezer_artist_id?: string | null
+            artist_name?: string | null
+            album_name?: string | null
+            cover_md5?: string | null
+        }
+        if (!r?.isrc || !r.title || !r.artist_name) return []
+        return [
+            {
+                isrc: r.isrc,
+                title: r.title,
+                artistId: r.deezer_artist_id ?? null,
+                artistName: r.artist_name,
+                albumName: r.album_name ?? null,
+                coverUrl: r.cover_md5 ? coverFromMd5(r.cover_md5, 500) : null,
+                href: enderecoDaFaixa(r.isrc, r.artist_name, r.title),
+            },
+        ]
+    })
+}
+
+/**
+ * Tudo que esta página lê do NOSSO banco, numa requisição só. Desde a 041 vêm
+ * junto as "Parecidas", sem requisição a mais.
  *
  * Eram quatro: a linha do Observatório, a curva, a contagem de salvamentos e a
  * lista de quem salvou. Todas chaveadas pelo mesmo ISRC, e três delas partindo
@@ -162,6 +215,7 @@ export const carregarDadosDaFaixa = cache(async function carregarDadosDaFaixa(
         curva?: unknown
         salvamentos?: number | string
         quem_salvou?: unknown
+        relacionadas?: unknown
     }
 
     return {
@@ -173,6 +227,7 @@ export const carregarDadosDaFaixa = cache(async function carregarDadosDaFaixa(
         quemSalvou: Array.isArray(b.quem_salvou)
             ? (b.quem_salvou as QuemSalvou[])
             : [],
+        relacionadas: montarRelacionadas(b.relacionadas),
     }
 })
 

@@ -44,6 +44,29 @@ const ALTURA = 44
 const PISO = 0.12
 
 /**
+ * Para onde a rota redireciona (ver app/api/previa/[id]). Abrir a conexão no
+ * pointerdown deixa DNS e TLS correndo junto com a ida ao Deezer (~300 ms), em
+ * vez de depois dela. É só um aperto de mão, sem pedido HTTP; sem
+ * `crossorigin`, porque é o <audio> que usa, e ele vai com credenciais.
+ */
+const CDN_DAS_PREVIAS = 'https://cdnt-preview.dzcdn.net'
+let preconectadoEm = 0
+
+function preconectarAoCdn() {
+    // O Chrome larga a conexão aberta e não usada em ~10 s, e um <link> que já
+    // está no <head> não abre outra: passado esse tempo, entra um novo.
+    const agora = Date.now()
+    if (agora - preconectadoEm < 10_000) return
+    preconectadoEm = agora
+    document.head.querySelector('link[data-previa]')?.remove()
+    const link = document.createElement('link')
+    link.rel = 'preconnect'
+    link.href = CDN_DAS_PREVIAS
+    link.dataset.previa = ''
+    document.head.appendChild(link)
+}
+
+/**
  * Lê o MP3 e devolve a amplitude (RMS) de cada trecho, normalizada em 0..1.
  * Roda uma vez por faixa e fora do caminho de pintura.
  */
@@ -142,7 +165,14 @@ function PlayerDoDeezer({
     const [picos, setPicos] = useState<number[] | null>(null)
     /** o <audio> já recebeu a URL — só acontece no primeiro play */
     const [pedida, setPedida] = useState(false)
+    /** o som já começou uma vez: só então a onda é medida */
+    const [soou, setSoou] = useState(false)
     const [falhou, setFalhou] = useState(false)
+    /**
+     * O mesmo que `pedida && !falhou`, mas lido na hora: o pointerdown e o
+     * click chegam colados, e o click não pode depender do render do outro.
+     */
+    const carregada = useRef(false)
 
     // Fonte nova (o usuário navegou para outra faixa): volta ao início parado,
     // sem pedir nada até o próximo play.
@@ -151,19 +181,26 @@ function PlayerDoDeezer({
         setPosicao(0)
         setPicos(null)
         setPedida(false)
+        setSoou(false)
         setFalhou(false)
+        carregada.current = false
         const a = audioRef.current
         if (a?.getAttribute('src')) {
             a.pause()
+            a.preload = 'none'
             a.removeAttribute('src')
             a.load()
         }
     }, [src])
 
-    // A onda é medida depois do primeiro play, da mesma URL que o <audio>
-    // toca: o 302 da rota fica 5 min no cache do navegador e o MP3 vem do CDN.
+    // A onda é medida depois que o som começa, da mesma URL que o <audio>
+    // toca. A rota é chamada de novo (o Chrome não guarda o 302 de um pedido
+    // com Range), mas o gateway responde do cache de 15 min, sem ir ao
+    // Deezer. Medir no clique, como era até 25/09/2026, punha os 480 KB da
+    // onda disputando a banda com o começo do áudio: no 4G emulado o play
+    // levava 1,2 a 2,4 s, e passou a ~0,5 s.
     useEffect(() => {
-        if (!pedida) return
+        if (!soou) return
         // Quem pediu economia de dados não baixa o arquivo de novo só para
         // ver a onda.
         const conexao = (
@@ -178,21 +215,36 @@ function PlayerDoDeezer({
                 /* barras chapadas; o player continua de pé */
             })
         return () => cancelar.abort()
-    }, [pedida, src])
+    }, [soou, src])
+
+    /**
+     * Põe a URL no <audio> e já começa a baixar. Com mouse, é chamado no
+     * pointerdown, que vem ~100 ms antes do click, e de novo no click (a
+     * segunda chamada não faz nada). No toque, só no click: um dedo que
+     * começa a rolar a página em cima do botão também dá pointerdown, e isso
+     * seria uma ida ao Deezer sem play.
+     */
+    const pedir = () => {
+        const a = audioRef.current
+        if (!a || carregada.current) return
+        carregada.current = true
+        preconectarAoCdn()
+        // `preload="none"` seguraria o download até o play().
+        a.preload = 'auto'
+        a.src = src
+        // Quem arrastou antes do primeiro play começa dali.
+        if (posicao > 0) a.currentTime = posicao
+        setPedida(true)
+        setFalhou(false)
+    }
 
     const alternar = () => {
         const a = audioRef.current
         if (!a) return
         if (a.paused) {
-            // A URL entra no <audio> dentro do próprio clique: o Safari só
-            // deixa tocar dentro do gesto, e a rota responde com 302.
-            if (!pedida || falhou) {
-                a.src = src
-                // Quem arrastou antes do primeiro play começa dali.
-                if (posicao > 0) a.currentTime = posicao
-                setPedida(true)
-                setFalhou(false)
-            }
+            // A URL entra no <audio> no máximo dentro do próprio clique: o
+            // Safari só deixa tocar dentro do gesto, e a rota responde com 302.
+            pedir()
             void a.play().then(
                 () => setTocando(true),
                 () => setTocando(false)
@@ -225,6 +277,7 @@ function PlayerDoDeezer({
                     onTimeUpdate={(e) =>
                         setPosicao(e.currentTarget.currentTime)
                     }
+                    onPlaying={() => setSoou(true)}
                     onEnded={() => {
                         setTocando(false)
                         setPosicao(0)
@@ -233,6 +286,7 @@ function PlayerDoDeezer({
                         // Sem prévia no Deezer, Deezer fora, ou a assinatura
                         // venceu. O próximo play pede de novo.
                         if (!audioRef.current?.getAttribute('src')) return
+                        carregada.current = false
                         setTocando(false)
                         setFalhou(true)
                     }}
@@ -240,6 +294,11 @@ function PlayerDoDeezer({
 
                 <button
                     type="button"
+                    onPointerDown={(e) => {
+                        if (e.button !== 0) return
+                        if (e.pointerType === 'mouse') pedir()
+                        else preconectarAoCdn()
+                    }}
                     onClick={alternar}
                     aria-label={
                         tocando

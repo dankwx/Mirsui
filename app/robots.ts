@@ -44,6 +44,9 @@ const SCRAPERS_DE_IA = [
     'ClaudeBot',
     'Claude-Web',
     'anthropic-ai',
+    // Robô de busca, como o OAI-SearchBot: em 18/10/2026 eram ~10,8 mil
+    // páginas de faixa numa manhã, quase todas fora do catálogo.
+    'Claude-SearchBot',
     'CCBot',
     'Google-Extended',
     'Applebot-Extended',

@@ -15,6 +15,7 @@
 // passou a ser endereçada por ele.
 
 import 'server-only'
+import { headers } from 'next/headers'
 
 // Somente server-side. Sem fallback direto: todos os processos compartilham
 // o limite e a pausa do gateway local, inclusive os renders do Next.
@@ -89,18 +90,63 @@ interface DeezerLista<T> {
     error?: DeezerErro
 }
 
+/* ------------------------------------------------------------ robôs */
+
+/**
+ * Robô de busca: Applebot, Claude-SearchBot, Amzn-SearchBot, meta-webindexer.
+ * Em 16/10/2026 eles abriam páginas de faixa fora do catálogo, cada uma
+ * chamando o Deezer na hora, e tiravam metade do gateway da rodada noturna.
+ *
+ * A chamada deles vai como `crawler`, que o gateway só atende quando a fila
+ * está vazia, e espera pouco. Com o gateway livre o robô recebe a página
+ * normal; ocupado, a espera estoura e a faixa fora do catálogo dá 404 para ele.
+ * As páginas do catálogo não mudam: saem do banco, sem Deezer.
+ *
+ * Os robôs de prévia de link (WhatsApp, iMessage, Telegram) ficam de fora de
+ * propósito: buscam a página na hora em que alguém manda o link, e prévia
+ * quebrada mata o único canal de crescimento (ver app/robots.ts). Também ficam
+ * de fora `Claude-User` e `ChatGPT-User`, que é uma pessoa perguntando.
+ *
+ * O `/` depois do nome é o que separa `Applebot/0.1` de um celular CUBOT.
+ */
+const ROBO_DE_BUSCA = /(?:bot|crawler|spider|slurp|webindexer)\//i
+const PREVIA_DE_LINK =
+    /facebookexternalhit|facebot|whatsapp|twitterbot|telegrambot|discordbot|slackbot|linkedinbot|pinterest|redditbot|skypeuripreview|embedly|iframely|mastodon|bluesky|vkshare|snapchat|viber/i
+
+/**
+ * Dentro de `unstable_cache` o Next não deixa ler o cabeçalho, e aí a resposta
+ * é "não": quem precisa separar o robô ali tem de perguntar antes de entrar
+ * (ver `isrcDeIdDeezer`).
+ */
+export function visitaDeRobo(): boolean {
+    let ua = ''
+    try {
+        ua = headers().get('user-agent') ?? ''
+    } catch {
+        // Fora de um request, ou dentro de `unstable_cache`.
+    }
+    return ROBO_DE_BUSCA.test(ua) && !PREVIA_DE_LINK.test(ua)
+}
+
+function vezDaVisita(): { priority: 'interactive' | 'crawler'; waitMs: number } {
+    return visitaDeRobo()
+        ? { priority: 'crawler', waitMs: 3000 }
+        : { priority: 'interactive', waitMs: 8000 }
+}
+
 async function dz<T>(path: string, revalidate: number): Promise<T | null> {
     try {
         const token = process.env.DEEZER_GATEWAY_TOKEN
         if (!token) return null
+        const { priority, waitMs } = vezDaVisita()
         const res = await fetch(`${process.env.DEEZER_GATEWAY_URL || 'http://127.0.0.1:3012'}/request`, {
             method: 'POST',
             headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
-            body: JSON.stringify({ path, priority: 'interactive', maxAgeMs: Math.min(revalidate * 1000, 86400000), waitMs: 8000 }),
+            body: JSON.stringify({ path, priority, maxAgeMs: Math.min(revalidate * 1000, 86400000), waitMs }),
             // O gateway aplica a janela de frescor deste endpoint e só guarda
             // sucessos. O Next não deve guardar um erro do broker.
             cache: 'no-store',
-            signal: AbortSignal.timeout(10000),
+            signal: AbortSignal.timeout(waitMs + 2000),
         })
         if (!res.ok) return null
         const result = await res.json() as { ok: boolean; data?: T & { error?: DeezerErro } }

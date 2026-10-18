@@ -19,7 +19,11 @@
 import 'server-only'
 import { unstable_cache } from 'next/cache'
 import { supabasePublic } from '@/utils/supabase/public'
-import { searchDeezerTracks, fetchDeezerTrackById } from '@/utils/deezerService'
+import {
+    searchDeezerTracks,
+    fetchDeezerTrackById,
+    visitaDeRobo,
+} from '@/utils/deezerService'
 import { ISRC_RE } from '@/utils/trackHref'
 
 // O formato do ISRC vem de utils/trackHref.ts, que não é `server-only` e por
@@ -260,22 +264,38 @@ export const isrcDeIdSpotify = unstable_cache(
     { revalidate: 86400, tags: ['observatorio'] }
 )
 
-/** ISRC a partir de um id do Deezer: local primeiro, Deezer depois. */
-export const isrcDeIdDeezer = unstable_cache(
-    async (deezerId: string): Promise<string | null> => {
-        const { data } = await supabasePublic
-            .from('observed_tracks')
-            .select('isrc')
-            .eq('deezer_track_id', deezerId)
-            .not('isrc', 'is', null)
-            .limit(1)
-            .maybeSingle()
+async function buscarIsrcDeIdDeezer(deezerId: string): Promise<string | null> {
+    const { data } = await supabasePublic
+        .from('observed_tracks')
+        .select('isrc')
+        .eq('deezer_track_id', deezerId)
+        .not('isrc', 'is', null)
+        .limit(1)
+        .maybeSingle()
 
-        if (data?.isrc) return data.isrc as string
+    if (data?.isrc) return data.isrc as string
 
-        const faixa = await fetchDeezerTrackById(deezerId)
-        return faixa?.isrc ?? null
-    },
+    const faixa = await fetchDeezerTrackById(deezerId)
+    return faixa?.isrc ?? null
+}
+
+const isrcGuardadoDeIdDeezer = unstable_cache(
+    buscarIsrcDeIdDeezer,
     ['isrc-de-deezer'],
     { revalidate: 86400, tags: ['observatorio'] }
 )
+
+/**
+ * ISRC a partir de um id do Deezer: local primeiro, Deezer depois.
+ *
+ * O robô de busca passa por fora do `unstable_cache`. Lá dentro o Next não
+ * deixa ler o user-agent, e a chamada ao Deezer iria como de gente; e o null de
+ * um gateway ocupado ficaria guardado 24 h. Eram 12.511 visitas de robô a
+ * `/track/{id do Deezer}` só na manhã de 18/10/2026, quase todas fora do
+ * catálogo: um terço das chamadas que os robôs faziam.
+ */
+export async function isrcDeIdDeezer(deezerId: string): Promise<string | null> {
+    return visitaDeRobo()
+        ? buscarIsrcDeIdDeezer(deezerId)
+        : isrcGuardadoDeIdDeezer(deezerId)
+}

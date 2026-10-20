@@ -129,9 +129,8 @@ export function getParedeDoAcervo(quantas = 60): Promise<FaixaDoAcervo[]> {
 /**
  * Gêneros com contagem real e algumas capas de amostra.
  *
- * A contagem vem de uma varredura da coluna `genre` inteira (uma coluna de
- * texto em 2.994 linhas, cacheada por uma hora) porque o número precisa ser o
- * do catálogo todo, não o da amostra que vai para a tela.
+ * A contagem é a do catálogo todo, não a da amostra que vai para a tela: um
+ * count exato por gênero, feito pelo Postgres, que devolve só o número.
  */
 /**
  * Os gêneros que vão para a home, na ordem em que vão.
@@ -159,69 +158,53 @@ const GENEROS_DA_CASA = [
 const generosCacheados = unstable_cache(
     async (quantosGeneros: number, capasPorGenero: number): Promise<GeneroDoAcervo[]> => {
         /**
-         * O PostgREST devolve no máximo mil linhas por requisição, e o acervo
-         * tem quase três mil. Sem paginar, a contagem sai calada e errada: o
-         * MPB aparecia com 99 faixas quando tem 116, e o Rap/Hip Hop com 78
-         * quando tem 109. Número errado numa página pública é a mesma doença
-         * dos "Nº 042" que saíram da /track.
+         * A contagem é um count exato por gênero (HEAD, só o número volta).
+         *
+         * Já foi uma varredura da coluna `genre` inteira, paginada de mil em
+         * mil, quando o acervo tinha três mil faixas. Com a medição do catálogo
+         * todo ele passou de 290 mil, e a varredura virou 290 requisições em
+         * fila: dois a três minutos para montar a home do zero. O nginx desiste
+         * em 60 s, e o login — que chama revalidatePath('/') e por isso remonta
+         * a home na resposta — morria em 504 junto com ela (20/10).
+         *
+         * Só os gêneros da casa aparecem, então só eles precisam de número.
          */
-        const PAGINA = 1000
-        const generosBrutos: string[] = []
-        for (let de = 0; ; de += PAGINA) {
-            const { data, error } = await supabasePublic
-                .from('observed_tracks')
-                .select('genre')
-                .eq('active', true)
-                .not('genre', 'is', null)
-                // Ordem explícita, pela PK. Paginar sem order by devolve o que o
-                // Postgres achar mais barato, e ele não promete a mesma ordem
-                // entre duas execuções — o Observatório reescreve last_checked_at
-                // desta tabela inteira toda madrugada, que é exatamente quando
-                // uma página pode repetir linha e outra pular. Aí a contagem
-                // volta a mentir, do mesmo jeito que mentia truncada.
-                .order('deezer_track_id', { ascending: true })
-                .range(de, de + PAGINA - 1)
-
-            if (error) {
-                console.error('[home] falha na contagem de gêneros:', error.message)
-                return []
-            }
-            const pagina = (data ?? []) as { genre: string }[]
-            generosBrutos.push(...pagina.map((l) => l.genre))
-            if (pagina.length < PAGINA) break
-        }
-
-        const totais = new Map<string, number>()
-        for (const g of generosBrutos) {
-            totais.set(g, (totais.get(g) ?? 0) + 1)
-        }
-
         // Uma consulta por gênero da casa. Uma amostra única de mil linhas não
         // garantia capas para todos eles — dependia de quais linhas o Postgres
         // devolvesse primeiro, e alguns gêneros sumiam da home sem motivo.
         const escolhidos = GENEROS_DA_CASA.slice(0, quantosGeneros)
         const fileiras = await Promise.all(
             escolhidos.map(async (nome) => {
-                const { data, error } = await supabasePublic
-                    .from('observed_tracks')
-                    .select(
-                        'deezer_track_id,title,artist_name,genre,cover_md5,last_rank,isrc'
-                    )
-                    .eq('active', true)
-                    .eq('genre', nome)
-                    .not('cover_md5', 'is', null)
-                    .limit(capasPorGenero * 4)
+                const [amostra, contagem] = await Promise.all([
+                    supabasePublic
+                        .from('observed_tracks')
+                        .select(
+                            'deezer_track_id,title,artist_name,genre,cover_md5,last_rank,isrc'
+                        )
+                        .eq('active', true)
+                        .eq('genre', nome)
+                        .not('cover_md5', 'is', null)
+                        .limit(capasPorGenero * 4),
+                    supabasePublic
+                        .from('observed_tracks')
+                        .select('deezer_track_id', { count: 'exact', head: true })
+                        .eq('active', true)
+                        .eq('genre', nome),
+                ])
 
-                if (error) {
-                    console.error(`[home] falha nas capas de ${nome}:`, error.message)
+                if (amostra.error) {
+                    console.error(`[home] falha nas capas de ${nome}:`, amostra.error.message)
                     return null
                 }
-                const faixas = embaralharEstavel((data ?? []) as LinhaBruta[], 981)
+                if (contagem.error) {
+                    console.error(`[home] falha na contagem de ${nome}:`, contagem.error.message)
+                }
+                const faixas = embaralharEstavel((amostra.data ?? []) as LinhaBruta[], 981)
                     .slice(0, capasPorGenero)
                     .map(paraFaixa)
 
                 if (faixas.length < capasPorGenero) return null
-                return { nome, total: totais.get(nome) ?? faixas.length, faixas }
+                return { nome, total: contagem.count ?? faixas.length, faixas }
             })
         )
 

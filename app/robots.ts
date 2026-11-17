@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { siteUrl } from '@/lib/site'
 
 /**
  * O robots.txt.
@@ -121,5 +122,8 @@ export default function robots(): MetadataRoute.Robots {
                 disallow: '/',
             },
         ],
+        // Só vale para quem pode entrar: robô bloqueado acima não tem por que
+        // ler a lista. A régua do que está nela mora em utils/sitemapService.ts.
+        sitemap: `${siteUrl}/sitemap.xml`,
     }
 }

@@ -22,6 +22,8 @@ export default function ClubLayoutShell({
         pathname === '/feed/' ||
         pathname === '/pilha' ||
         pathname === '/pilha/' ||
+        pathname === '/stakes' ||
+        pathname === '/stakes/' ||
         pathname.startsWith('/track/') ||
         pathname.startsWith('/artist/')
             ? 'mostarda'

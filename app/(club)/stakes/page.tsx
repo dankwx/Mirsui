@@ -1,5 +1,4 @@
 import StakesContent, { type Stake } from '@/components/StakesContent/StakesContent'
-import LandingFooter from '@/components/Footer/LandingFooter'
 import { getStakesData } from './get-stakes'
 import type { Metadata } from 'next'
 
@@ -15,14 +14,12 @@ export const dynamic = 'force-dynamic'
 export default async function StakesPage() {
     const { stakes, points, failed } = await getStakesData()
 
+    // O shell, o cabeçalho e o rodapé vêm do layout do grupo (club).
     return (
-        <>
-            <StakesContent
-                initialStakes={stakes as Stake[]}
-                initialPoints={points}
-                initialLoadFailed={failed}
-            />
-            <LandingFooter />
-        </>
+        <StakesContent
+            initialStakes={stakes as Stake[]}
+            initialPoints={points}
+            initialLoadFailed={failed}
+        />
     )
 }

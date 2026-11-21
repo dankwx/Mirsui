@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { X } from 'lucide-react'
 import { formatMultiplier } from '@/utils/stakeMultiplier'
+import styles from './Stakes.module.css'
 
 // Gráfico de evolução da popularidade de um stake (série diária do Deezer).
 // Abre em modal por cima da página de Stakes. A série vem de
@@ -29,9 +31,6 @@ type Props = {
     initialSnapshots?: Snapshot[]
     onClose: () => void
 }
-
-const ACC = '#cdef36'
-const MUTED = 'rgba(236,227,210,.22)'
 
 const fmtInt = (n: number) => Math.round(n).toLocaleString('pt-BR')
 
@@ -124,63 +123,64 @@ export default function StakeChartModal({
     const focus = focusIdx != null && snaps ? snaps[focusIdx] : null
 
     const delta = Math.round(current) - Math.round(baseline)
-    const deltaColor =
-        delta > 0 ? ACC : delta < 0 ? '#d98359' : 'rgba(236,227,210,.6)'
 
     return (
         <div
             onClick={onClose}
-            className="anim-fade fixed inset-0 z-[90] flex items-center justify-center overflow-y-auto bg-[rgba(8,6,3,0.72)] px-5 py-12 backdrop-blur-md"
+            className={`anim-fade ${styles.backdrop} ${styles.backdropTop}`}
         >
             <div
                 onClick={(e) => e.stopPropagation()}
-                className="anim-pop w-full max-w-[620px] overflow-hidden rounded-[18px] border border-mir-line2/80 bg-[#1c160e] shadow-[0_40px_80px_-30px_rgba(0,0,0,.7)]"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="ficha-grafico-title"
+                className={`anim-pop ${styles.dialog} ${styles.dialogWide}`}
             >
-                {/* header */}
-                <div className="flex items-start justify-between gap-4 border-b border-mir-line px-6 py-[22px]">
-                    <div className="min-w-0">
-                        <div className="mb-[7px] font-mono text-[10px] tracking-[0.18em] text-mir-acc">
-                            EVOLUÇÃO DA POPULARIDADE
-                        </div>
-                        <h3 className="m-0 overflow-hidden text-ellipsis whitespace-nowrap text-[23px] font-black tracking-[-0.035em]">
+                <div className={styles.dialogHead}>
+                    <div>
+                        <p className={styles.dialogKicker}>
+                            Evolução da popularidade
+                        </p>
+                        <h3
+                            id="ficha-grafico-title"
+                            className={styles.dialogTitle}
+                        >
                             {title}
                         </h3>
-                        <div className="mt-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12px] text-mir-text2/[0.8]">
-                            {artist}
-                        </div>
+                        <p className={styles.dialogSub}>{artist}</p>
                     </div>
                     <button
+                        type="button"
                         onClick={onClose}
-                        className="flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border border-mir-line2 bg-transparent text-base leading-[0] text-mir-text/70"
+                        aria-label="Fechar"
+                        className={styles.close}
                     >
-                        ✕
+                        <X size={17} aria-hidden="true" />
                     </button>
                 </div>
 
-                <div className="px-6 pb-6 pt-5">
+                <div className={styles.chartBody}>
                     {/* readout do dia em foco */}
-                    <div className="mb-5 flex items-end justify-between gap-4">
+                    <div className={styles.readout}>
                         <div>
-                            <div className="font-mono text-[10px] tracking-[0.12em] text-mir-text2/[0.6]">
-                                {focus ? fmtDate(focus.date) : 'POPULARIDADE'}
+                            <div className={styles.readoutDate}>
+                                {focus ? fmtDate(focus.date) : 'Popularidade'}
                             </div>
-                            <div className="mt-1 flex items-baseline gap-2">
-                                <span className="text-[40px] font-black leading-[0.85] tracking-[-0.04em] text-mir-text">
+                            <div className={styles.readoutValue}>
+                                <strong>
                                     {focus
                                         ? Math.round(focus.popularity)
                                         : Math.round(current)}
-                                </span>
-                                <span className="font-mono text-[12px] text-mir-text2/60">
-                                    / 100
-                                </span>
+                                </strong>
+                                <span>/ 100</span>
                             </div>
                         </div>
                         {focus && focus.pointsGain > 0 ? (
-                            <span className="flex-none rounded-full bg-mir-acc/20 px-3 py-1.5 font-mono text-[12px] font-bold text-mir-acc">
+                            <span className={styles.readoutGain}>
                                 +{fmtInt(focus.pointsGain)} pts nesse dia
                             </span>
                         ) : (
-                            <span className="flex-none font-mono text-[11px] text-mir-text2/55">
+                            <span className={styles.readoutNote}>
                                 {focus && focusIdx === 0
                                     ? 'dia da ficha'
                                     : 'sem ganho nesse dia'}
@@ -188,17 +188,16 @@ export default function StakeChartModal({
                         )}
                     </div>
 
-                    {/* chart */}
                     {error ? (
-                        <div className="flex h-[200px] items-center justify-center text-center font-mono text-[12px] text-mir-text2/60">
+                        <div className={styles.chartEmpty}>
                             Não foi possível carregar o histórico.
                         </div>
                     ) : snaps == null ? (
-                        <div className="flex h-[200px] items-end gap-[6px] px-1">
+                        <div className={styles.chartSkeleton} aria-hidden="true">
                             {Array.from({ length: 9 }).map((_, i) => (
                                 <div
                                     key={i}
-                                    className="anim-pulse flex-1 rounded-t-[3px] bg-mir-text2/10"
+                                    className="anim-pulse"
                                     style={{
                                         height: `${28 + ((i * 37) % 60)}%`,
                                     }}
@@ -206,7 +205,7 @@ export default function StakeChartModal({
                             ))}
                         </div>
                     ) : snaps.length === 0 ? (
-                        <div className="flex h-[200px] items-center justify-center text-center font-mono text-[12px] text-mir-text2/60">
+                        <div className={styles.chartEmpty}>
                             Sem medições ainda.
                         </div>
                     ) : (
@@ -222,47 +221,44 @@ export default function StakeChartModal({
                         />
                     )}
 
-                    {/* legenda / rodapé */}
-                    <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-mir-line pt-4 font-mono text-[10.5px] text-mir-text2/70">
-                        <span className="flex items-center gap-1.5">
+                    {/* legenda */}
+                    <div className={styles.legend}>
+                        <span>
                             <span
-                                className="inline-block h-2.5 w-2.5 rounded-[2px]"
-                                style={{ background: ACC }}
+                                className={`${styles.swatch} ${styles.swatchEarned}`}
                             />
                             rendeu pontos
                         </span>
-                        <span className="flex items-center gap-1.5">
-                            <span
-                                className="inline-block h-2.5 w-2.5 rounded-[2px]"
-                                style={{ background: MUTED }}
-                            />
+                        <span>
+                            <span className={styles.swatch} />
                             sem ganho
                         </span>
-                        <span className="flex items-center gap-1.5">
-                            <span className="inline-block h-0 w-3.5 border-t border-dashed border-mir-text/50" />
-                            seu stake ({Math.round(baseline)})
+                        <span>
+                            <span className={styles.swatchBase} />
+                            sua ficha ({Math.round(baseline)})
                         </span>
                         {recorde > Math.round(baseline) && (
-                            <span className="flex items-center gap-1.5">
-                                <span
-                                    className="inline-block h-0 w-3.5 border-t"
-                                    style={{ borderColor: ACC }}
-                                />
+                            <span>
+                                <span className={styles.swatchRecord} />
                                 recorde ({recorde})
                             </span>
                         )}
                     </div>
 
-                    <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[11px] text-mir-text2/[0.8]">
-                        <span style={{ color: deltaColor }}>
+                    <div className={styles.summary}>
+                        <span
+                            className={
+                                delta > 0 ? styles.summaryUp : styles.summaryFlat
+                            }
+                        >
                             {delta > 0 ? '↑' : delta < 0 ? '↓' : '→'}{' '}
                             {Math.round(baseline)} → {Math.round(current)}
                         </span>
-                        <span className="opacity-40">·</span>
+                        <span aria-hidden="true">·</span>
                         <span>
                             multiplicador {formatMultiplier(Number(multiplier))}
                         </span>
-                        <span className="opacity-40">·</span>
+                        <span aria-hidden="true">·</span>
                         <span>{fmtInt(accumulatedPoints)} pts acumulados</span>
                     </div>
 
@@ -270,17 +266,17 @@ export default function StakeChartModal({
                         terreno já andado não paga de novo (migration 028). Sem
                         esta linha o gráfico mostra a subida e o card mostra "+0",
                         e os dois parecem estar brigando. */}
-                    <div className="mt-2 font-mono text-[10.5px] leading-[1.5] text-mir-text2/55">
+                    <p className={styles.chartNote}>
                         {recorde > Math.round(current)
                             ? `Falta ${recorde - Math.round(current)} pra bater o recorde de ${recorde} e voltar a render. O que já rendeu está guardado.`
                             : 'Ela está no próprio recorde — daqui pra cima toda subida vira ponto.'}
-                    </div>
+                    </p>
 
                     {snaps && snaps.length === 1 && (
-                        <div className="mt-3 font-mono text-[10.5px] leading-[1.5] text-mir-text2/55">
+                        <p className={styles.chartNote}>
                             Medimos 1× por dia — volte amanhã pra ver a faixa
                             começar a desenhar a curva.
-                        </div>
+                        </p>
                     )}
                 </div>
             </div>
@@ -310,36 +306,34 @@ function Chart({
     const baseY = yPct(baseline)
     const peakY = yPct(recorde)
     return (
-        <div className="flex gap-3">
+        <div className={styles.chart}>
             {/* eixo Y */}
-            <div className="flex h-[200px] w-7 flex-none flex-col justify-between py-[2px] text-right font-mono text-[9px] text-mir-text2/45">
+            <div className={styles.yAxis} aria-hidden="true">
                 <span>{yMax}</span>
                 <span>{Math.round((yMax + yMin) / 2)}</span>
                 <span>{yMin}</span>
             </div>
 
-            {/* plot */}
-            <div className="min-w-0 flex-1">
+            <div className={styles.plotWrap}>
                 <div
-                    className="relative h-[200px]"
+                    className={styles.plot}
                     onMouseLeave={() => setHover(null)}
                 >
-                    {/* linha de baseline (onde você botou a ficha) */}
+                    {/* onde você botou a ficha */}
                     <div
-                        className="pointer-events-none absolute inset-x-0 border-t border-dashed border-mir-text/40"
+                        className={styles.lineBase}
                         style={{ bottom: `${baseY}%` }}
                     />
 
-                    {/* linha do recorde — a régua que precisa ser batida */}
+                    {/* o recorde — a régua que precisa ser batida */}
                     {recorde > Math.round(baseline) && (
                         <div
-                            className="pointer-events-none absolute inset-x-0 border-t"
-                            style={{ bottom: `${peakY}%`, borderColor: ACC }}
+                            className={styles.lineRecord}
+                            style={{ bottom: `${peakY}%` }}
                         />
                     )}
 
-                    {/* barras */}
-                    <div className="absolute inset-0 flex items-end gap-[5px]">
+                    <div className={styles.bars}>
                         {snaps.map((s, i) => {
                             const h = Math.max(2, yPct(s.popularity))
                             const earned = s.pointsGain > 0
@@ -347,16 +341,16 @@ function Chart({
                             return (
                                 <button
                                     key={i}
+                                    type="button"
                                     onMouseEnter={() => setHover(i)}
                                     onFocus={() => setHover(i)}
-                                    className="group relative flex h-full flex-1 cursor-default items-end border-none bg-transparent p-0"
+                                    className={styles.barSlot}
                                     aria-label={`${fmtDate(s.date)}: popularidade ${Math.round(s.popularity)}`}
                                 >
                                     <div
-                                        className="w-full rounded-t-[3px] transition-[opacity,transform] duration-150"
+                                        className={`${styles.barFill} ${earned ? styles.barFillEarned : ''}`}
                                         style={{
                                             height: `${h}%`,
-                                            background: earned ? ACC : MUTED,
                                             opacity:
                                                 hover == null || active
                                                     ? 1
@@ -370,7 +364,7 @@ function Chart({
                 </div>
 
                 {/* eixo X: primeira e última data */}
-                <div className="mt-2 flex justify-between font-mono text-[9px] text-mir-text2/45">
+                <div className={styles.xAxis} aria-hidden="true">
                     <span>{fmtDate(snaps[0].date)}</span>
                     {snaps.length > 1 && (
                         <span>{fmtDate(snaps[snaps.length - 1].date)}</span>

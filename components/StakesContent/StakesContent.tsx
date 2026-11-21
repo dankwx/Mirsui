@@ -10,7 +10,19 @@ import {
 import { useToast } from '@/components/ui/use-toast'
 import { formatMultiplier } from '@/utils/stakeMultiplier'
 import { capture } from '@/lib/posthog'
+import {
+    ArrowLeft,
+    ArrowRight,
+    BarChart3,
+    ChevronDown,
+    Plus,
+    Search,
+    X,
+} from 'lucide-react'
+import shellStyles from '@/components/Club/ClubShell.module.css'
+import recipes from '@/components/Club/club-recipes.module.css'
 import StakeChartModal from './StakeChartModal'
+import styles from './Stakes.module.css'
 
 // Regras da feature (ver Stake.md): 3 fichas; a ficha rende quando a faixa bate
 // o próprio recorde de popularidade (marca d'água, migration 028) e o acumulado
@@ -69,7 +81,7 @@ type SearchTrack = {
 
 // ---- covers ----
 const PALETTES: Palette[] = [
-    { bg: '#cdef36', fg: '#16120c', mut: 'rgba(22,18,12,.6)' },
+    { bg: '#f9d454', fg: '#2d230f', mut: 'rgba(45,35,15,.6)' },
     { bg: '#16120c', fg: '#ece3d2', mut: 'rgba(236,227,210,.5)' },
     { bg: '#c14a26', fg: '#f7ead7', mut: 'rgba(247,234,215,.62)' },
     { bg: '#e3d8c1', fg: '#16120c', mut: 'rgba(22,18,12,.5)' },
@@ -160,64 +172,40 @@ function tier(pop: number): 'BAIXA' | 'MÉDIA' | 'ALTA' {
     return pop < 34 ? 'BAIXA' : pop < 67 ? 'MÉDIA' : 'ALTA'
 }
 
+// Cores da identidade club (tokens do shell), não hex: a paleta e o tema
+// escuro chegam aqui sozinhos.
 type Badge = {
     tier: string
     text: string
     hint: string
-    style: CSSProperties
+    className: string
     multColor: string
 }
 
 function badge(pop: number): Badge {
     const t = tier(pop)
-    const base: CSSProperties = {
-        fontFamily:
-            "var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif",
-        fontSize: '9.5px',
-        fontWeight: 700,
-        letterSpacing: '.1em',
-        padding: '4px 9px',
-        borderRadius: '4px',
-        flex: 'none',
-        whiteSpace: 'nowrap',
-    }
     if (t === 'BAIXA')
         return {
             tier: t,
             text: 'ACHADO RARO',
             hint: 'mult. alto',
-            style: {
-                ...base,
-                background: 'rgba(205,239,54,.16)',
-                color: '#cdef36',
-                border: '1px solid rgba(205,239,54,.4)',
-            },
-            multColor: '#cdef36',
+            className: styles.badgeRaro,
+            multColor: 'var(--club-accent-text)',
         }
     if (t === 'MÉDIA')
         return {
             tier: t,
             text: 'SUBINDO',
             hint: 'mult. médio',
-            style: {
-                ...base,
-                background: 'rgba(236,227,210,.1)',
-                color: 'rgba(236,227,210,.82)',
-                border: '1px solid rgba(236,227,210,.22)',
-            },
-            multColor: '#cdef36',
+            className: styles.badgeSubindo,
+            multColor: 'var(--club-accent-text)',
         }
     return {
         tier: t,
         text: 'NA BOCA DO POVO',
         hint: 'mult. baixo',
-        style: {
-            ...base,
-            background: 'transparent',
-            color: 'rgba(236,227,210,.5)',
-            border: '1px solid rgba(236,227,210,.18)',
-        },
-        multColor: 'rgba(236,227,210,.62)',
+        className: '',
+        multColor: 'var(--club-muted)',
     }
 }
 
@@ -248,8 +236,8 @@ type Movement = {
     tag: string | null
 }
 
-const ACC = '#cdef36'
-const MUTED = 'rgba(236,227,210,.62)'
+const ACC = 'var(--club-accent-text)'
+const MUTED = 'var(--club-muted)'
 
 /**
  * Recorde da ficha. Fichas gravadas antes da migration 028 podem vir sem o
@@ -329,8 +317,6 @@ function movement(s: Stake, paused = false): Movement {
         tag: now < base ? `${base - now} pra marca` : null,
     }
 }
-
-const monoFont = 'font-mono'
 
 function mapSearchTrack(t: {
     id: string
@@ -657,686 +643,600 @@ export default function StakesContent({
     // "0 DE 3 NA MESA" e três vagas livres aqui seria afirmar algo falso.
     const stateUnknown = loadFailed && stakes.length === 0
 
+    // Esc fecha a busca, como já fecha o gráfico.
+    useEffect(() => {
+        if (modalSlot == null) return
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') closeModal()
+        }
+        window.addEventListener('keydown', onKey)
+        return () => window.removeEventListener('keydown', onKey)
+        // closeModal só zera estado; recriar o listener a cada render não muda nada
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [modalSlot])
+
     return (
-        <>
-            {/* HERO */}
-            <section>
-                <div className="mx-auto max-w-[1200px] px-5 pb-6 pt-14 sm:px-8">
-                    <div className="mb-4 font-mono text-[11px] tracking-[0.2em] text-mir-text3">
-                        BOTE SUAS FICHAS ANTES DELA BOMBAR
-                    </div>
-                    <div className="flex flex-wrap items-end gap-6">
-                        <h1 className="m-0 text-[clamp(64px,9vw,116px)] font-black leading-[0.82] tracking-[-0.055em]">
-                            Fichas
-                        </h1>
-                        <p className="m-0 mb-3 max-w-[440px] text-[18px] leading-[1.45] text-mir-text2">
-                            {stateUnknown ? (
+        <div className={`${shellStyles.container} ${styles.page}`}>
+            <header className={styles.heading}>
+                <p className={styles.kicker}>Bote suas fichas antes dela bombar</p>
+                <h1>Fichas</h1>
+                <p className={styles.lead}>
+                    {stateUnknown ? (
+                        <>
+                            Suas fichas não carregaram agora. Nada foi perdido:
+                            o que estava na mesa continua lá.
+                        </>
+                    ) : (
+                        <>
+                            Você tem{' '}
+                            <b>
+                                {MAX_SLOTS - used}{' '}
+                                {MAX_SLOTS - used === 1 ? 'ficha' : 'fichas'}
+                            </b>{' '}
+                            pra botar nas faixas que você acha que vão subir.
+                            Quanto mais escondida a faixa, maior o
+                            multiplicador. Seu faro, em jogo.
+                        </>
+                    )}
+                </p>
+
+                <p className={styles.meta}>
+                    {stateUnknown ? (
+                        <span>Não foi possível ler suas fichas</span>
+                    ) : (
+                        <>
+                            <span className={styles.metaLive}>
+                                <span
+                                    className={styles.liveDot}
+                                    aria-hidden="true"
+                                />
+                                <span>
+                                    <b className={styles.num}>{used}</b> de{' '}
+                                    <b className={styles.num}>{MAX_SLOTS}</b>{' '}
+                                    fichas na mesa
+                                </span>
+                            </span>
+                            <span className={styles.sep} aria-hidden="true">
+                                ·
+                            </span>
+                            <span>Coleta libera em {MIN_DAYS} dias</span>
+                            {points != null && (
                                 <>
-                                    Suas fichas não carregaram agora. Nada foi
-                                    perdido: o que estava na mesa continua lá.
-                                </>
-                            ) : (
-                                <>
-                                    Você tem{' '}
-                                    <b className="font-bold text-mir-text">
-                                        {MAX_SLOTS - used}{' '}
-                                        {MAX_SLOTS - used === 1
-                                            ? 'ficha'
-                                            : 'fichas'}
-                                    </b>{' '}
-                                    pra botar nas faixas que você acha que vão
-                                    subir. Quanto mais escondida a faixa, maior
-                                    o multiplicador. Seu faro, em jogo.
+                                    <span
+                                        className={styles.sep}
+                                        aria-hidden="true"
+                                    >
+                                        ·
+                                    </span>
+                                    <span>
+                                        <b className={styles.num}>
+                                            {fmt(points)}
+                                        </b>{' '}
+                                        pontos recolhidos
+                                    </span>
                                 </>
                             )}
-                        </p>
-                    </div>
-
-                    <div className="mt-7 flex flex-wrap items-center gap-[18px] font-mono text-[11px] tracking-[0.12em] text-mir-text2/80">
-                        {stateUnknown ? (
-                            <span className="text-mir-text3">
-                                NÃO FOI POSSÍVEL LER SUAS FICHAS
-                            </span>
-                        ) : (
-                            <>
-                                <span className="flex items-center gap-2">
-                                    <span className="anim-blink h-2 w-2 rounded-full bg-mir-acc" />
-                                    {used} DE {MAX_SLOTS} FICHAS NA MESA
-                                </span>
-                                <span className="opacity-40">·</span>
-                                <span>COLETA LIBERA EM {MIN_DAYS} DIAS</span>
-                                {points != null && (
-                                    <>
-                                        <span className="opacity-40">·</span>
-                                        <span>
-                                            {fmt(points)} PONTOS RECOLHIDOS
-                                        </span>
-                                    </>
-                                )}
-                            </>
-                        )}
-                    </div>
-                </div>
-            </section>
-
-            {/* 3 SLOTS */}
-            <section>
-                <div className="mx-auto max-w-[1200px] px-5 pb-20 pt-6 sm:px-8">
-                    {stateUnknown && (
-                        <div className="rounded-2xl border-[1.5px] border-dashed border-mir-line2 px-8 py-16 text-center">
-                            <p className="text-[19px] font-extrabold tracking-[-0.02em] text-mir-text">
-                                Não conseguimos carregar suas fichas
-                            </p>
-                            <p className="mx-auto mt-2 max-w-[46ch] text-[14px] leading-[1.55] text-mir-text2">
-                                O problema é do nosso lado. As fichas que você
-                                já botou seguem na mesa e os pontos continuam
-                                acumulando.
-                            </p>
-                            <button
-                                onClick={retryLoad}
-                                disabled={retrying}
-                                className="mt-6 inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border-none bg-mir-text px-7 text-sm font-bold text-mir-bg disabled:opacity-60"
-                            >
-                                {retrying ? 'Tentando…' : 'Tentar de novo'}
-                            </button>
-                        </div>
+                        </>
                     )}
-                    <div
-                        className={`grid grid-cols-1 items-start gap-[18px] md:grid-cols-3 ${stateUnknown ? 'hidden' : ''}`}
+                </p>
+            </header>
+
+            {stateUnknown && (
+                <div className={styles.failedBox}>
+                    <h2>Não conseguimos carregar suas fichas</h2>
+                    <p>
+                        O problema é do nosso lado. As fichas que você já botou
+                        seguem na mesa e os pontos continuam acumulando.
+                    </p>
+                    <button
+                        type="button"
+                        onClick={retryLoad}
+                        disabled={retrying}
+                        className={recipes.button}
                     >
-                        {slots.map((s, i) => {
-                            const vaga = '0' + (i + 1)
+                        {retrying ? 'Tentando…' : 'Tentar de novo'}
+                    </button>
+                </div>
+            )}
 
-                            if (!s) {
-                                return (
-                                    <div
-                                        key={i}
-                                        className="flex min-w-0 rounded-2xl border-[1.5px] border-dashed border-mir-line2 bg-mir-fill1"
-                                    >
-                                        <button
-                                            onClick={() => openModal(i)}
-                                            disabled={loading}
-                                            className="flex min-h-[300px] w-full cursor-pointer flex-col items-center justify-center gap-1.5 border-none bg-transparent p-[26px] text-center text-inherit disabled:opacity-50"
-                                        >
-                                            <div className="mb-3 flex h-[60px] w-[60px] items-center justify-center rounded-full border-[1.5px] border-mir-line2 text-[34px] font-light leading-[0] text-mir-text3">
-                                                +
-                                            </div>
-                                            <div className="font-mono text-[11px] tracking-[0.16em] text-mir-text2/70">
-                                                FICHA {vaga} · NA MÃO
-                                            </div>
-                                            <div className="mt-0.5 max-w-[200px] text-[21px] font-extrabold leading-[1.1] tracking-[-0.03em]">
-                                                Bote essa ficha numa faixa antes
-                                                dela bombar
-                                            </div>
-                                            <span className="mt-4 inline-flex items-center gap-[7px] rounded-full bg-mir-text px-[22px] py-[11px] text-sm font-bold text-mir-bg">
-                                                {loading
-                                                    ? 'Carregando…'
-                                                    : 'Escolher faixa →'}
-                                            </span>
-                                        </button>
-                                    </div>
-                                )
-                            }
+            {!stateUnknown && (
+                <div className={styles.slots}>
+                    {slots.map((s, i) => {
+                        const vaga = '0' + (i + 1)
 
-                            const removida = s.status === 'removida'
-                            const podeColetar = s.can_collect
-                            // 7 dias cumpridos mas sem saldo: não é "livre pra
-                            // recolher", é vaga presa. O SQL apaga a linha nesse
-                            // caso, então o card não pode oferecer coleta.
-                            const semSaldo =
-                                !podeColetar && s.days_to_collect === 0
-                            const b = badge(s.baseline_popularity)
-                            const opened = isOpen(s.id)
-                            const mult = Number(s.multiplier)
-                            const busy = busyId === s.id
-                            const mv = movement(s, removida)
-
-                            // Uma ficha `removida` COM saldo coletável não é um
-                            // card morto: tem dinheiro em cima dele. Só apaga o
-                            // que parou de medir e não tem o que recolher —
-                            // senão o card cinza escondia o botão que paga.
-                            const apagado = removida && !podeColetar
-
-                            // estilo da borda: apagado = sumido, livre = destaque, segurando = neutro
-                            const border = apagado
-                                ? '1px solid rgba(236,227,210,.08)'
-                                : podeColetar
-                                  ? '1.5px solid rgba(205,239,54,.4)'
-                                  : '1px solid rgba(236,227,210,.12)'
-                            const shadow = podeColetar
-                                ? '0 20px 44px -24px rgba(205,239,54,.32)'
-                                : 'none'
-
-                            // status sobre a capa: ponto + texto limpo (sem pill)
-                            const statusDot = apagado
-                                ? '#8a8175'
-                                : podeColetar
-                                  ? '#cdef36'
-                                  : '#e0a84a'
-                            // "Removida do Spotify" era falso: a métrica é do
-                            // Deezer, e o que sumiu foi o id de lá (re-upload,
-                            // troca de distribuidora, licença por região). A
-                            // faixa segue tocando no Spotify — dizer o contrário
-                            // é a mentira mais fácil do mundo de o usuário
-                            // desmentir, e chegava junto com a perda de pontos.
-                            const statusLabel = podeColetar
-                                ? removida
-                                    ? 'Parou de medir · dá pra recolher'
-                                    : 'Livre pra recolher'
-                                : removida
-                                  ? 'Não dá mais pra medir'
-                                  : `Segurando há ${s.days_held}d`
-
+                        if (!s) {
                             return (
-                                <div
-                                    key={s.id}
-                                    className="flex min-w-0 flex-col overflow-hidden rounded-2xl bg-mir-surface"
-                                    style={{
-                                        border,
-                                        boxShadow: shadow,
-                                        opacity: apagado ? 0.55 : 1,
-                                    }}
+                                <button
+                                    key={i}
+                                    type="button"
+                                    onClick={() => openModal(i)}
+                                    disabled={loading}
+                                    className={styles.empty}
                                 >
-                                    {/* CAPA EM DESTAQUE */}
-                                    <div
-                                        className="relative aspect-square w-full flex-none overflow-hidden"
-                                        style={{
-                                            filter: apagado
-                                                ? 'grayscale(1)'
-                                                : 'none',
-                                        }}
+                                    <span
+                                        className={styles.plus}
+                                        aria-hidden="true"
                                     >
-                                        <CoverImage
-                                            src={s.track_thumbnail}
-                                            track={{
-                                                title: s.track_title,
-                                                artist: s.artist_name,
-                                            }}
-                                            size="big"
-                                        />
-                                        {/* gradiente pra leitura do título e blend com o card */}
-                                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-mir-surface via-mir-surface/60 to-transparent" />
-
-                                        {/* gradiente do topo pra leitura do status */}
-                                        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/55 to-transparent" />
-
-                                        {/* topo: status + ficha (texto limpo, sem pill) */}
-                                        <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-2 px-5 pt-[18px]">
-                                            <span
-                                                className="inline-flex items-center gap-[9px] text-[14px] font-bold leading-none tracking-[-0.01em] [text-shadow:0_1px_4px_rgba(0,0,0,.55)]"
-                                                style={{
-                                                    color: apagado
-                                                        ? 'rgba(236,227,210,.6)'
-                                                        : '#f3ead6',
-                                                }}
-                                            >
-                                                <span
-                                                    className="h-[8px] w-[8px] flex-none rounded-full"
-                                                    style={{
-                                                        background: statusDot,
-                                                        boxShadow: apagado
-                                                            ? 'none'
-                                                            : `0 0 8px ${statusDot}`,
-                                                    }}
-                                                />
-                                                {statusLabel}
-                                            </span>
-                                            <span className="flex-none font-mono text-[10px] tracking-[0.18em] text-white/55 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">
-                                                FICHA {vaga}
-                                            </span>
-                                        </div>
-
-                                        {/* base: título + artista sobre a capa */}
-                                        <div className="absolute inset-x-0 bottom-0 p-5 pt-12">
-                                            <div className="flex items-center gap-2">
-                                                <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[25px] font-extrabold leading-[1.05] tracking-[-0.03em] text-mir-text">
-                                                    {s.track_title}
-                                                </div>
-                                                {!removida &&
-                                                    s.last_day_gain > 0 && (
-                                                        <span className="flex-none rounded-full bg-mir-acc/20 px-2 py-[3px] font-mono text-[10px] font-bold text-mir-acc">
-                                                            +
-                                                            {fmt(
-                                                                s.last_day_gain
-                                                            )}
-                                                        </span>
-                                                    )}
-                                            </div>
-                                            <div className="mt-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[11.5px] text-mir-text2/85">
-                                                {s.artist_name}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* CONTEÚDO */}
-                                    <div className="flex flex-col p-5 pt-[18px]">
-                                        {/* o recorde e a distância até ele — é o que
-                                            decide se rende ponto. Clicável → abre o
-                                            gráfico de evolução. */}
-                                        <button
-                                            onClick={() => {
-                                                setChartStake(s)
-                                                capture('stake_chart_opened', {
-                                                    stake_id: s.id,
-                                                    track_title: s.track_title,
-                                                })
-                                            }}
-                                            className="group mb-4 flex w-full cursor-pointer items-center gap-3 rounded-xl border border-mir-line bg-mir-fill1/40 px-3.5 py-3 text-left transition-colors hover:border-mir-line2 hover:bg-mir-fill1"
-                                        >
-                                            <div
-                                                className="flex h-9 w-9 flex-none items-center justify-center rounded-lg text-[16px] font-bold leading-none"
-                                                style={{
-                                                    color: mv.color,
-                                                    background: `${mv.color}1f`,
-                                                }}
-                                            >
-                                                {mv.arrow}
-                                            </div>
-                                            <div className="min-w-0 flex-1">
-                                                <div
-                                                    className="text-[13.5px] font-bold tracking-[-0.01em]"
-                                                    style={{
-                                                        color:
-                                                            mv.tone === 'record'
-                                                                ? mv.color
-                                                                : '#ece3d2',
-                                                    }}
-                                                >
-                                                    {mv.headline}
-                                                </div>
-                                                <div className="mt-0.5 font-mono text-[10.5px] leading-tight text-mir-text2/70">
-                                                    {mv.sub}
-                                                </div>
-                                            </div>
-                                            {mv.tag && (
-                                                <span
-                                                    className="flex-none font-mono text-[11px] font-bold"
-                                                    style={{ color: mv.color }}
-                                                >
-                                                    {mv.tag}
-                                                </span>
-                                            )}
-                                            {/* ícone de gráfico: sinaliza que dá pra abrir */}
-                                            <svg
-                                                width="15"
-                                                height="15"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="2.2"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                className="flex-none text-mir-text2/40 transition-colors group-hover:text-mir-text2/75"
-                                            >
-                                                <path d="M3 3v18h18" />
-                                                <rect
-                                                    x="7"
-                                                    y="12"
-                                                    width="3"
-                                                    height="5"
-                                                />
-                                                <rect
-                                                    x="12"
-                                                    y="8"
-                                                    width="3"
-                                                    height="9"
-                                                />
-                                                <rect
-                                                    x="17"
-                                                    y="5"
-                                                    width="3"
-                                                    height="12"
-                                                />
-                                            </svg>
-                                        </button>
-
-                                        {/* action
-                                            A ordem importa: coletável vem antes
-                                            de `removida`, porque parar de medir
-                                            não anula saldo já ganho (028). */}
-                                        {podeColetar ? (
-                                            <>
-                                                <div className="flex gap-[9px]">
-                                                    <button
-                                                        onClick={() =>
-                                                            recolher(s)
-                                                        }
-                                                        disabled={busy}
-                                                        className="h-11 flex-1 cursor-pointer rounded-full border-none bg-mir-text text-sm font-bold text-mir-bg disabled:opacity-60"
-                                                    >
-                                                        {busy
-                                                            ? 'Recolhendo…'
-                                                            : 'Recolher · ' +
-                                                              fmt(
-                                                                  s.accumulated_points
-                                                              ) +
-                                                              ' pts'}
-                                                    </button>
-                                                </div>
-                                                <div className="mt-[9px] text-center font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55]">
-                                                    {removida
-                                                        ? 'Parou de render · o que juntou é seu'
-                                                        : 'Trava cumprida · recolha quando quiser'}
-                                                </div>
-                                            </>
-                                        ) : removida ? (
-                                            <>
-                                                <button
-                                                    onClick={() => recolher(s)}
-                                                    disabled={busy}
-                                                    className="h-11 w-full cursor-pointer rounded-full border border-mir-line2 bg-transparent text-sm font-bold text-mir-text/75 disabled:opacity-50"
-                                                >
-                                                    {busy
-                                                        ? 'Liberando…'
-                                                        : 'Liberar a vaga'}
-                                                </button>
-                                                <div className="mt-[9px] text-center font-mono text-[10px] leading-[1.5] tracking-[0.04em] text-mir-text2/[0.55]">
-                                                    {s.accumulated_points > 0
-                                                        ? `Perdemos a medição dessa faixa · recolha os ${fmt(s.accumulated_points)} pts em ${s.days_to_collect} ${s.days_to_collect === 1 ? 'dia' : 'dias'}`
-                                                        : 'Perdemos a medição dessa faixa · não chegou a render'}
-                                                </div>
-                                            </>
-                                        ) : semSaldo ? (
-                                            <>
-                                                <button
-                                                    disabled
-                                                    className="h-11 w-full cursor-not-allowed rounded-full border border-mir-line2/80 bg-mir-fill1 text-sm font-bold text-mir-text2"
-                                                >
-                                                    Sem nada pra recolher
-                                                </button>
-                                                <div className="mt-[9px] flex items-center justify-center gap-2 text-center font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55]">
-                                                    <span>
-                                                        Ela ainda pode subir —
-                                                        ou você troca de faixa
-                                                    </span>
-                                                    <span className="opacity-40">
-                                                        ·
-                                                    </span>
-                                                    <button
-                                                        onClick={() =>
-                                                            recolher(s)
-                                                        }
-                                                        disabled={busy}
-                                                        className="cursor-pointer border-none bg-transparent p-0 font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55] underline disabled:opacity-50"
-                                                    >
-                                                        {busy
-                                                            ? 'liberando…'
-                                                            : 'liberar a vaga'}
-                                                    </button>
-                                                </div>
-                                            </>
+                                        <Plus size={26} strokeWidth={1.5} />
+                                    </span>
+                                    <span className={styles.slotLabel}>
+                                        Ficha {vaga} · na mão
+                                    </span>
+                                    <span className={styles.emptyTitle}>
+                                        Bote essa ficha numa faixa antes dela
+                                        bombar
+                                    </span>
+                                    <span
+                                        className={`${recipes.button} ${styles.emptyCta}`}
+                                    >
+                                        {loading ? (
+                                            'Carregando…'
                                         ) : (
                                             <>
-                                                <button
-                                                    disabled
-                                                    className="h-11 w-full cursor-not-allowed rounded-full border border-mir-line2/80 bg-mir-fill1 text-sm font-bold text-mir-text2"
-                                                >
-                                                    {s.accumulated_points > 0
-                                                        ? fmt(
-                                                              s.accumulated_points
-                                                          ) + ' pts acumulados'
-                                                        : 'Acumulando pontos…'}
-                                                </button>
-                                                <div className="mt-[9px] flex items-center justify-center gap-2 text-center font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55]">
-                                                    <span>
-                                                        Recolher libera em{' '}
-                                                        {s.days_to_collect}{' '}
-                                                        {s.days_to_collect === 1
-                                                            ? 'dia'
-                                                            : 'dias'}
-                                                    </span>
-                                                    <span className="opacity-40">
-                                                        ·
-                                                    </span>
-                                                    <button
-                                                        onClick={() =>
-                                                            recolher(s)
-                                                        }
-                                                        disabled={busy}
-                                                        className="cursor-pointer border-none bg-transparent p-0 font-mono text-[10px] tracking-[0.04em] text-mir-text2/[0.55] underline disabled:opacity-50"
-                                                    >
-                                                        {busy
-                                                            ? 'removendo…'
-                                                            : 'remover assim mesmo'}
-                                                    </button>
-                                                </div>
+                                                Escolher faixa{' '}
+                                                <ArrowRight
+                                                    size={15}
+                                                    aria-hidden="true"
+                                                />
                                             </>
                                         )}
+                                    </span>
+                                </button>
+                            )
+                        }
 
-                                        {/* ver infos toggle */}
-                                        <button
-                                            onClick={() => toggleInfo(s.id)}
-                                            className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 border-t border-t-mir-line bg-transparent pt-3.5 font-mono text-[11px] tracking-[0.04em] text-mir-text2/70 transition-colors hover:text-mir-text2"
+                        const removida = s.status === 'removida'
+                        const podeColetar = s.can_collect
+                        // 7 dias cumpridos mas sem saldo: não é "livre pra
+                        // recolher", é vaga presa. O SQL apaga a linha nesse
+                        // caso, então o card não pode oferecer coleta.
+                        const semSaldo = !podeColetar && s.days_to_collect === 0
+                        const b = badge(s.baseline_popularity)
+                        const opened = isOpen(s.id)
+                        const mult = Number(s.multiplier)
+                        const busy = busyId === s.id
+                        const mv = movement(s, removida)
+
+                        // Uma ficha `removida` COM saldo coletável não é um
+                        // card morto: tem dinheiro em cima dele. Só apaga o
+                        // que parou de medir e não tem o que recolher —
+                        // senão o card cinza escondia o botão que paga.
+                        const apagado = removida && !podeColetar
+
+                        // apagado = sumido, livre = destaque, segurando = neutro
+                        const cardClass = [
+                            styles.card,
+                            podeColetar ? styles.cardReady : '',
+                            apagado ? styles.cardFaded : '',
+                        ]
+                            .filter(Boolean)
+                            .join(' ')
+                        const dotClass = apagado
+                            ? styles.statusDotFaded
+                            : podeColetar
+                              ? styles.statusDotReady
+                              : ''
+
+                        // "Removida do Spotify" era falso: a métrica é do
+                        // Deezer, e o que sumiu foi o id de lá (re-upload,
+                        // troca de distribuidora, licença por região). A
+                        // faixa segue tocando no Spotify — dizer o contrário
+                        // é a mentira mais fácil do mundo de o usuário
+                        // desmentir, e chegava junto com a perda de pontos.
+                        const statusLabel = podeColetar
+                            ? removida
+                                ? 'Parou de medir · dá pra recolher'
+                                : 'Livre pra recolher'
+                            : removida
+                              ? 'Não dá mais pra medir'
+                              : `Segurando há ${s.days_held}d`
+
+                        return (
+                            <article key={s.id} className={cardClass}>
+                                <div
+                                    className={`${styles.cover} ${apagado ? styles.coverFaded : ''}`}
+                                >
+                                    <CoverImage
+                                        src={s.track_thumbnail}
+                                        track={{
+                                            title: s.track_title,
+                                            artist: s.artist_name,
+                                        }}
+                                        size="big"
+                                    />
+                                </div>
+
+                                <div className={styles.statusRow}>
+                                    <span className={styles.status}>
+                                        <span
+                                            className={`${styles.statusDot} ${dotClass}`}
+                                            aria-hidden="true"
+                                        />
+                                        {statusLabel}
+                                    </span>
+                                    <span className={styles.slotLabel}>
+                                        Ficha {vaga}
+                                    </span>
+                                </div>
+
+                                <div className={styles.trackTitleRow}>
+                                    <h2 className={styles.trackTitle}>
+                                        {s.track_title}
+                                    </h2>
+                                    {!removida && s.last_day_gain > 0 && (
+                                        <span className={styles.gain}>
+                                            +{fmt(s.last_day_gain)}
+                                        </span>
+                                    )}
+                                </div>
+                                <p className={styles.trackArtist}>
+                                    {s.artist_name}
+                                </p>
+
+                                {/* o recorde e a distância até ele — é o que
+                                    decide se rende ponto. Clicável → abre o
+                                    gráfico de evolução. */}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setChartStake(s)
+                                        capture('stake_chart_opened', {
+                                            stake_id: s.id,
+                                            track_title: s.track_title,
+                                        })
+                                    }}
+                                    className={styles.movement}
+                                >
+                                    <span
+                                        className={styles.movementIcon}
+                                        style={{
+                                            color: mv.color,
+                                            background: `color-mix(in srgb, ${mv.color} 14%, transparent)`,
+                                        }}
+                                        aria-hidden="true"
+                                    >
+                                        {mv.arrow}
+                                    </span>
+                                    <span className={styles.movementText}>
+                                        <span
+                                            className={styles.movementHeadline}
+                                            style={{
+                                                display: 'block',
+                                                color:
+                                                    mv.tone === 'record'
+                                                        ? mv.color
+                                                        : 'var(--club-text)',
+                                            }}
                                         >
-                                            {opened
-                                                ? 'esconder infos'
-                                                : 'ver infos da ficha'}
-                                            <svg
-                                                width="11"
-                                                height="11"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="2.5"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                className={`transition-transform duration-200 ${opened ? 'rotate-180' : ''}`}
-                                            >
-                                                <path d="M6 9l6 6 6-6" />
-                                            </svg>
-                                        </button>
+                                            {mv.headline}
+                                        </span>
+                                        <span
+                                            className={styles.movementSub}
+                                            style={{ display: 'block' }}
+                                        >
+                                            {mv.sub}
+                                        </span>
+                                    </span>
+                                    {mv.tag && (
+                                        <span
+                                            className={styles.movementTag}
+                                            style={{ color: mv.color }}
+                                        >
+                                            {mv.tag}
+                                        </span>
+                                    )}
+                                    <BarChart3
+                                        size={16}
+                                        className={styles.chartIcon}
+                                        aria-hidden="true"
+                                    />
+                                    <span className="sr-only">
+                                        Abrir o gráfico da popularidade
+                                    </span>
+                                </button>
 
-                                        {opened && (
-                                            <div className="anim-slide mt-3.5 flex flex-col gap-3.5">
-                                                <div className="flex items-start justify-between gap-3">
-                                                    <div>
-                                                        <div className="mb-[5px] font-mono text-[9.5px] tracking-[0.14em] text-mir-text2/[0.66]">
-                                                            MULTIPLICADOR DA
-                                                            FICHA
-                                                        </div>
-                                                        <div className="text-[34px] font-black leading-[0.85] tracking-[-0.04em] text-mir-acc">
-                                                            {formatMultiplier(
-                                                                mult
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    <span style={b.style}>
-                                                        {b.text}
-                                                    </span>
+                                {/* A ordem importa: coletável vem antes de
+                                    `removida`, porque parar de medir não
+                                    anula saldo já ganho (028). */}
+                                <div className={styles.actions}>
+                                    {podeColetar ? (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => recolher(s)}
+                                                disabled={busy}
+                                                className={`${recipes.button} ${styles.fullButton}`}
+                                            >
+                                                {busy
+                                                    ? 'Recolhendo…'
+                                                    : 'Recolher · ' +
+                                                      fmt(s.accumulated_points) +
+                                                      ' pts'}
+                                            </button>
+                                            <p className={styles.actionNote}>
+                                                {removida
+                                                    ? 'Parou de render · o que juntou é seu'
+                                                    : 'Trava cumprida · recolha quando quiser'}
+                                            </p>
+                                        </>
+                                    ) : removida ? (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => recolher(s)}
+                                                disabled={busy}
+                                                className={`${recipes.outlineButton} ${styles.fullButton}`}
+                                            >
+                                                {busy
+                                                    ? 'Liberando…'
+                                                    : 'Liberar a vaga'}
+                                            </button>
+                                            <p className={styles.actionNote}>
+                                                {s.accumulated_points > 0
+                                                    ? `Perdemos a medição dessa faixa · recolha os ${fmt(s.accumulated_points)} pts em ${s.days_to_collect} ${s.days_to_collect === 1 ? 'dia' : 'dias'}`
+                                                    : 'Perdemos a medição dessa faixa · não chegou a render'}
+                                            </p>
+                                        </>
+                                    ) : semSaldo ? (
+                                        <>
+                                            <button
+                                                type="button"
+                                                disabled
+                                                className={styles.waitButton}
+                                            >
+                                                Sem nada pra recolher
+                                            </button>
+                                            <p className={styles.actionNote}>
+                                                <span>
+                                                    Ela ainda pode subir — ou
+                                                    você troca de faixa
+                                                </span>
+                                                <span aria-hidden="true">·</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => recolher(s)}
+                                                    disabled={busy}
+                                                    className={styles.inlineAction}
+                                                >
+                                                    {busy
+                                                        ? 'liberando…'
+                                                        : 'liberar a vaga'}
+                                                </button>
+                                            </p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button
+                                                type="button"
+                                                disabled
+                                                className={styles.waitButton}
+                                            >
+                                                {s.accumulated_points > 0
+                                                    ? fmt(s.accumulated_points) +
+                                                      ' pts acumulados'
+                                                    : 'Acumulando pontos…'}
+                                            </button>
+                                            <p className={styles.actionNote}>
+                                                <span>
+                                                    Recolher libera em{' '}
+                                                    {s.days_to_collect}{' '}
+                                                    {s.days_to_collect === 1
+                                                        ? 'dia'
+                                                        : 'dias'}
+                                                </span>
+                                                <span aria-hidden="true">·</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => recolher(s)}
+                                                    disabled={busy}
+                                                    className={styles.inlineAction}
+                                                >
+                                                    {busy
+                                                        ? 'removendo…'
+                                                        : 'remover assim mesmo'}
+                                                </button>
+                                            </p>
+                                        </>
+                                    )}
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={() => toggleInfo(s.id)}
+                                    aria-expanded={opened}
+                                    className={`${styles.infoToggle} ${opened ? styles.infoToggleOpen : ''}`}
+                                >
+                                    {opened
+                                        ? 'Esconder infos'
+                                        : 'Ver infos da ficha'}
+                                    <ChevronDown size={14} aria-hidden="true" />
+                                </button>
+
+                                {opened && (
+                                    <div className={`anim-slide ${styles.info}`}>
+                                        <div className={styles.infoTop}>
+                                            <div>
+                                                <div className={styles.infoLabel}>
+                                                    Multiplicador da ficha
                                                 </div>
-                                                <div>
-                                                    <div className="mb-1.5 flex justify-between font-mono text-[9.5px] tracking-[0.1em] text-mir-text2/[0.7]">
-                                                        <span>
-                                                            POPULARIDADE
-                                                        </span>
-                                                        <span>
-                                                            {Math.round(
-                                                                s.baseline_popularity
-                                                            )}{' '}
-                                                            na ficha · recorde{' '}
-                                                            {picoDe(s)} · agora{' '}
-                                                            {Math.round(
-                                                                s.last_popularity
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                    <div className="relative h-1.5 rounded-sm bg-mir-text2/15">
-                                                        {/* trilha até o recorde: o
-                                                            território já conquistado,
-                                                            que é o que virou ponto */}
-                                                        <div
-                                                            className="absolute inset-y-0 left-0 rounded-sm bg-mir-acc/25"
-                                                            style={{
-                                                                width:
-                                                                    picoDe(s) +
-                                                                    '%',
-                                                            }}
-                                                        />
-                                                        <div
-                                                            className="absolute inset-y-0 left-0 rounded-sm"
-                                                            style={{
-                                                                width:
-                                                                    Math.round(
-                                                                        s.last_popularity
-                                                                    ) + '%',
-                                                                background:
-                                                                    mv.color,
-                                                            }}
-                                                        />
-                                                        {/* onde a ficha foi botada */}
-                                                        <div
-                                                            className="absolute inset-y-[-2.5px] w-px bg-mir-text/60"
-                                                            style={{
-                                                                left: `calc(${Math.round(
-                                                                    s.baseline_popularity
-                                                                )}% - 0.5px)`,
-                                                            }}
-                                                        />
-                                                        {/* o recorde: a marca que
-                                                            precisa ser batida pra
-                                                            render de novo */}
-                                                        {picoDe(s) >
-                                                            Math.round(
-                                                                s.baseline_popularity
-                                                            ) && (
-                                                            <div
-                                                                className="absolute inset-y-[-3.5px] w-[1.5px] bg-mir-acc"
-                                                                style={{
-                                                                    left: `calc(${picoDe(s)}% - 0.75px)`,
-                                                                }}
-                                                            />
-                                                        )}
-                                                    </div>
-                                                    <div className="mt-1.5 font-mono text-[9px] leading-[1.5] tracking-[0.04em] text-mir-text2/55">
-                                                        a marca clara é onde
-                                                        você botou a ficha; a
-                                                        verde é o recorde — só
-                                                        passar dele rende ponto
-                                                    </div>
-                                                </div>
-                                                <div className="font-mono text-[11px] leading-[1.45] text-mir-text2/[0.9]">
-                                                    {fmt(s.pessoas_deram_stake)}{' '}
-                                                    {s.pessoas_deram_stake === 1
-                                                        ? 'pessoa botou ficha'
-                                                        : 'pessoas botaram ficha'}{' '}
-                                                    ·{' '}
-                                                    {fmt(s.accumulated_points)}{' '}
-                                                    pontos acumulados
-                                                    {!removida &&
-                                                    s.last_day_gain > 0
-                                                        ? ` · +${fmt(s.last_day_gain)} na última medição`
-                                                        : ''}
+                                                <div className={styles.multBig}>
+                                                    {formatMultiplier(mult)}
                                                 </div>
                                             </div>
-                                        )}
+                                            <span
+                                                className={`${styles.badge} ${b.className}`}
+                                            >
+                                                {b.text}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <div className={styles.popHead}>
+                                                <span>Popularidade</span>
+                                                <span>
+                                                    {Math.round(
+                                                        s.baseline_popularity
+                                                    )}{' '}
+                                                    na ficha · recorde{' '}
+                                                    {picoDe(s)} · agora{' '}
+                                                    {Math.round(s.last_popularity)}
+                                                </span>
+                                            </div>
+                                            <div className={styles.bar}>
+                                                {/* trilha até o recorde: o
+                                                    território já conquistado,
+                                                    que é o que virou ponto */}
+                                                <div
+                                                    className={styles.barPeak}
+                                                    style={{
+                                                        width: picoDe(s) + '%',
+                                                    }}
+                                                />
+                                                <div
+                                                    className={styles.barNow}
+                                                    style={{
+                                                        width:
+                                                            Math.round(
+                                                                s.last_popularity
+                                                            ) + '%',
+                                                        background: mv.color,
+                                                    }}
+                                                />
+                                                {/* onde a ficha foi botada */}
+                                                <div
+                                                    className={styles.barBase}
+                                                    style={{
+                                                        left: `calc(${Math.round(
+                                                            s.baseline_popularity
+                                                        )}% - 0.5px)`,
+                                                    }}
+                                                />
+                                                {/* o recorde: a marca que
+                                                    precisa ser batida pra
+                                                    render de novo */}
+                                                {picoDe(s) >
+                                                    Math.round(
+                                                        s.baseline_popularity
+                                                    ) && (
+                                                    <div
+                                                        className={styles.barRecord}
+                                                        style={{
+                                                            left: `calc(${picoDe(s)}% - 1px)`,
+                                                        }}
+                                                    />
+                                                )}
+                                            </div>
+                                            <p className={styles.barNote}>
+                                                O traço fino é onde você botou
+                                                a ficha; o destacado é o
+                                                recorde — só passar dele rende
+                                                ponto.
+                                            </p>
+                                        </div>
+                                        <p className={styles.infoFoot}>
+                                            {fmt(s.pessoas_deram_stake)}{' '}
+                                            {s.pessoas_deram_stake === 1
+                                                ? 'pessoa botou ficha'
+                                                : 'pessoas botaram ficha'}{' '}
+                                            · {fmt(s.accumulated_points)} pontos
+                                            acumulados
+                                            {!removida && s.last_day_gain > 0
+                                                ? ` · +${fmt(s.last_day_gain)} na última medição`
+                                                : ''}
+                                        </p>
                                     </div>
-                                </div>
-                            )
-                        })}
-                    </div>
+                                )}
+                            </article>
+                        )
+                    })}
                 </div>
-            </section>
+            )}
 
-            {/* MODAL */}
+            {/* BUSCA E CONFIRMAÇÃO */}
             {modalOpen && (
                 <div
                     onClick={closeModal}
-                    className="anim-fade fixed inset-0 z-[80] flex items-center justify-center overflow-y-auto bg-[rgba(8,6,3,0.72)] px-5 py-12 backdrop-blur-md"
+                    className={`anim-fade ${styles.backdrop}`}
                 >
                     <div
                         onClick={(e) => e.stopPropagation()}
-                        className="anim-pop w-full max-w-[560px] overflow-hidden rounded-[18px] border border-mir-line2/80 bg-[#1c160e] shadow-[0_40px_80px_-30px_rgba(0,0,0,.7)]"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="ficha-dialog-title"
+                        className={`anim-pop ${styles.dialog}`}
                     >
-                        <div className="flex items-start justify-between gap-4 border-b border-mir-line px-6 py-[22px]">
+                        <div className={styles.dialogHead}>
                             <div>
-                                <div className="mb-[7px] font-mono text-[10px] tracking-[0.18em] text-mir-text3">
-                                    BOTAR A FICHA{' '}
+                                <p className={styles.dialogKicker}>
+                                    Botar a ficha{' '}
                                     {modalSlot != null
                                         ? '0' + (modalSlot + 1)
                                         : ''}
-                                </div>
-                                <h3 className="m-0 text-[25px] font-black tracking-[-0.035em]">
+                                </p>
+                                <h3
+                                    id="ficha-dialog-title"
+                                    className={styles.dialogTitle}
+                                >
                                     {selected
                                         ? 'Confira e bote a ficha'
                                         : 'Buscar faixa'}
                                 </h3>
                             </div>
                             <button
+                                type="button"
                                 onClick={closeModal}
-                                className="flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border border-mir-line2 bg-transparent text-base leading-[0] text-mir-text/70"
+                                aria-label="Fechar"
+                                className={styles.close}
                             >
-                                ✕
+                                <X size={17} aria-hidden="true" />
                             </button>
                         </div>
 
-                        {/* SEARCH VIEW */}
                         {searchView && (
                             <>
-                                <div className="px-6 pb-3 pt-5">
-                                    <div className="group flex items-center gap-3 rounded-2xl border border-mir-line2/70 bg-[#241c12] px-[18px] py-[15px] transition-colors duration-150 focus-within:border-mir-acc/60 focus-within:bg-[#2a2114] focus-within:shadow-[0_0_0_3px_rgba(205,239,54,.1)]">
-                                        <svg
-                                            width="20"
-                                            height="20"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            className="flex-none text-mir-text2/50 transition-colors duration-150 group-focus-within:text-mir-acc"
-                                        >
-                                            <circle cx="11" cy="11" r="7" />
-                                            <path d="M21 21l-3.5-3.5" />
-                                        </svg>
+                                <div className={styles.searchWrap}>
+                                    <div className={styles.searchField}>
+                                        <Search size={19} aria-hidden="true" />
                                         <input
                                             value={query}
                                             onChange={(e) =>
                                                 setQuery(e.target.value)
                                             }
                                             autoFocus
+                                            aria-label="Buscar faixa"
                                             placeholder="Nome da faixa ou artista…"
-                                            className="w-full border-none bg-transparent text-[16px] font-medium tracking-[-0.01em] text-mir-text outline-none placeholder:font-normal placeholder:text-mir-text3"
                                         />
                                         {query && (
                                             <button
+                                                type="button"
                                                 onClick={() => setQuery('')}
                                                 aria-label="Limpar busca"
-                                                className="bg-mir-text2/12 flex h-[22px] w-[22px] flex-none cursor-pointer items-center justify-center rounded-full border-none text-[11px] leading-[0] text-mir-text2/70 transition-colors hover:bg-mir-text2/20 hover:text-mir-text"
+                                                className={styles.clear}
                                             >
-                                                ✕
+                                                <X size={13} aria-hidden="true" />
                                             </button>
                                         )}
                                     </div>
                                 </div>
-                                <div className="max-h-[48vh] overflow-y-auto px-3 pb-3.5 pt-1.5">
+                                <div className={styles.results}>
                                     {query.trim().length < 2 && (
-                                        <div className="flex flex-col items-center px-6 py-12 text-center">
-                                            <div className="mb-4 flex h-[58px] w-[58px] items-center justify-center rounded-full border border-mir-line2 bg-mir-fill2 text-mir-text3">
-                                                <svg
-                                                    width="26"
-                                                    height="26"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="1.8"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                >
-                                                    <circle
-                                                        cx="11"
-                                                        cy="11"
-                                                        r="7"
-                                                    />
-                                                    <path d="M21 21l-3.5-3.5" />
-                                                </svg>
+                                        <div className={styles.searchHint}>
+                                            <div
+                                                className={styles.searchHintIcon}
+                                                aria-hidden="true"
+                                            >
+                                                <Search
+                                                    size={24}
+                                                    strokeWidth={1.8}
+                                                />
                                             </div>
-                                            <div className="text-[16px] font-extrabold tracking-[-0.02em] text-mir-text">
+                                            <strong>
                                                 Busque a faixa que vai bombar
-                                            </div>
-                                            <div className="mt-1.5 max-w-[280px] font-mono text-[12px] leading-[1.6] text-mir-text2/[0.66]">
+                                            </strong>
+                                            <p>
                                                 Comece a digitar o nome. Você
                                                 confere as infos dela antes de
                                                 botar a ficha.
-                                            </div>
+                                            </p>
                                         </div>
                                     )}
                                     {searching &&
@@ -1344,23 +1244,39 @@ export default function StakesContent({
                                             (_, i) => (
                                                 <div
                                                     key={i}
-                                                    className="flex w-full items-center gap-4 px-3.5 py-[14px]"
+                                                    className={styles.skeleton}
                                                     style={{
                                                         opacity: 1 - i * 0.16,
-                                                        animationDelay: `${i * 90}ms`,
                                                     }}
+                                                    aria-hidden="true"
                                                 >
-                                                    <div className="anim-pulse h-[58px] w-[58px] flex-none rounded-md bg-mir-text2/10" />
-                                                    <div className="min-w-0 flex-1">
+                                                    <div
+                                                        className={`anim-pulse ${styles.skeletonBlock}`}
+                                                        style={{
+                                                            width: 56,
+                                                            height: 56,
+                                                            flex: 'none',
+                                                            animationDelay: `${i * 90}ms`,
+                                                        }}
+                                                    />
+                                                    <div
+                                                        style={{
+                                                            flex: 1,
+                                                            minWidth: 0,
+                                                        }}
+                                                    >
                                                         <div
-                                                            className="anim-pulse h-[15px] rounded bg-mir-text2/10"
+                                                            className={`anim-pulse ${styles.skeletonBlock}`}
                                                             style={{
+                                                                height: 15,
                                                                 width: `${72 - i * 9}%`,
                                                             }}
                                                         />
                                                         <div
-                                                            className="anim-pulse mt-2.5 h-[11px] rounded bg-mir-text2/10"
+                                                            className={`anim-pulse ${styles.skeletonBlock}`}
                                                             style={{
+                                                                height: 11,
+                                                                marginTop: 10,
                                                                 width: `${44 - i * 5}%`,
                                                             }}
                                                         />
@@ -1372,43 +1288,62 @@ export default function StakesContent({
                                         results.map((r) => (
                                             <button
                                                 key={r.id}
+                                                type="button"
                                                 onClick={() => selectTrack(r)}
-                                                className="flex w-full cursor-pointer items-center gap-4 rounded-[10px] border-b border-none border-b-mir-line bg-transparent px-3.5 py-[14px] text-left text-inherit"
+                                                className={styles.result}
                                             >
-                                                <div className="relative h-[58px] w-[58px] flex-none overflow-hidden rounded-md">
+                                                <span
+                                                    className={styles.resultCover}
+                                                >
                                                     <CoverImage
                                                         src={r.thumbnail}
                                                         track={r}
                                                         size="slot"
                                                     />
-                                                </div>
-                                                <div className="min-w-0 flex-1">
-                                                    <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[18px] font-bold tracking-[-0.02em]">
-                                                        {r.title}
-                                                    </div>
-                                                    <div className="mt-[4px] overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12px] text-mir-text2/[0.8]">
-                                                        {r.artist}
-                                                    </div>
-                                                </div>
-                                                <span className="flex-none text-lg text-mir-text2/[0.66]">
-                                                    →
                                                 </span>
+                                                <span
+                                                    className={styles.resultText}
+                                                >
+                                                    <span
+                                                        className={
+                                                            styles.resultTitle
+                                                        }
+                                                        style={{
+                                                            display: 'block',
+                                                        }}
+                                                    >
+                                                        {r.title}
+                                                    </span>
+                                                    <span
+                                                        className={
+                                                            styles.resultArtist
+                                                        }
+                                                        style={{
+                                                            display: 'block',
+                                                        }}
+                                                    >
+                                                        {r.artist}
+                                                    </span>
+                                                </span>
+                                                <ArrowRight
+                                                    size={18}
+                                                    className={styles.resultArrow}
+                                                    aria-hidden="true"
+                                                />
                                             </button>
                                         ))}
                                     {!searching &&
                                         query.trim().length >= 2 &&
                                         results.length === 0 && (
-                                            <div className="px-5 py-10 text-center font-mono text-[12px] text-mir-text2/[0.66]">
+                                            <p className={styles.noResults}>
                                                 Nenhuma faixa encontrada pra
-                                                &quot;
-                                                {query}&quot;.
-                                            </div>
+                                                &quot;{query}&quot;.
+                                            </p>
                                         )}
                                 </div>
                             </>
                         )}
 
-                        {/* DETAIL VIEW */}
                         {detailView && selected && (
                             <DetailView
                                 track={selected}
@@ -1439,7 +1374,7 @@ export default function StakesContent({
                     onClose={() => setChartStake(null)}
                 />
             )}
-        </>
+        </div>
     )
 }
 
@@ -1468,79 +1403,61 @@ function DetailView({
           ? formatMultiplier(previewMult)
           : '—'
     return (
-        <div className="anim-slide px-6 pb-6 pt-5">
-            <button
-                onClick={onBack}
-                className={`mb-5 cursor-pointer border-none bg-transparent p-0 ${monoFont} text-[12px] tracking-[0.1em] text-mir-text2/[0.7]`}
-            >
-                ← buscar outra
+        <div className={`anim-slide ${styles.detail}`}>
+            <button type="button" onClick={onBack} className={styles.back}>
+                <ArrowLeft size={15} aria-hidden="true" />
+                Buscar outra
             </button>
 
-            {/* HERO — capa em destaque (estilo Shazam) */}
-            <div className="flex flex-col items-center text-center">
-                <div className="relative aspect-square w-[240px] max-w-full flex-none overflow-hidden rounded-2xl shadow-[0_28px_56px_-20px_rgba(0,0,0,.8)]">
+            <div className={styles.detailHero}>
+                <div className={`${recipes.sleeve} ${styles.detailCover}`}>
                     <CoverImage
                         src={track.cover ?? track.thumbnail}
                         track={track}
                         size="big"
                     />
                 </div>
-                <div className="mt-5 max-w-full px-1">
-                    <div className="text-[30px] font-black leading-[1.04] tracking-[-0.03em]">
-                        {track.title}
-                    </div>
-                    <div className="mt-2 font-mono text-[14px] text-mir-text2/[0.8]">
-                        {track.artist}
-                    </div>
-                </div>
+                <div className={styles.detailTitle}>{track.title}</div>
+                <div className={styles.detailArtist}>{track.artist}</div>
             </div>
 
-            {/* stats discretos — multiplicador + popularidade */}
-            <div className="mt-7 flex items-stretch gap-2.5">
-                <div className="flex-1 rounded-xl border border-mir-line bg-mir-fill1/40 px-4 py-3.5">
-                    <div className="font-mono text-[10px] tracking-[0.12em] text-mir-text2/[0.6]">
-                        MULTIPLICADOR
-                    </div>
+            {/* multiplicador + popularidade */}
+            <div className={styles.stats}>
+                <div className={styles.stat}>
+                    <div className={styles.statLabel}>Multiplicador</div>
                     <div
-                        className="mt-1 text-[22px] font-black leading-none tracking-[-0.03em]"
+                        className={styles.statValue}
                         style={{ color: b.multColor }}
                     >
                         {multLabel}
                     </div>
                 </div>
-                <div className="flex-1 rounded-xl border border-mir-line bg-mir-fill1/40 px-4 py-3.5">
-                    <div className="flex items-center justify-between">
-                        <span className="font-mono text-[10px] tracking-[0.12em] text-mir-text2/[0.6]">
-                            POPULARIDADE
-                        </span>
-                        <span className="font-mono text-[13px] font-bold text-mir-text">
+                <div className={styles.stat}>
+                    <div className={styles.statTop}>
+                        <span className={styles.statLabel}>Popularidade</span>
+                        <span className={styles.statSmall}>
                             {previewing ? '…' : pop}
                         </span>
                     </div>
-                    <div className="mt-2.5 h-1 overflow-hidden rounded-sm bg-mir-text2/20">
-                        <div
-                            className="h-full rounded-sm bg-mir-text2/[0.8]"
-                            style={{ width: pop + '%' }}
-                        />
+                    <div className={styles.popMini}>
+                        <div style={{ width: pop + '%' }} />
                     </div>
                 </div>
             </div>
 
-            <div className="mx-0.5 mb-5 mt-4 font-mono text-[12px] leading-[1.6] text-mir-text2/[0.7]">
+            <p className={styles.rules}>
                 O multiplicador trava em {multLabel} e não muda mais. A ficha
                 rende toda vez que a faixa bate o próprio recorde de
-                popularidade —{' '}
-                <b className="font-bold text-mir-text2">
-                    cair nunca tira ponto
-                </b>
-                , só adia o próximo. A partir de {MIN_DAYS} dias você recolhe;
-                antes disso dá pra desistir, mas aí zera.
-            </div>
+                popularidade — <b>cair nunca tira ponto</b>, só adia o próximo.
+                A partir de {MIN_DAYS} dias você recolhe; antes disso dá pra
+                desistir, mas aí zera.
+            </p>
 
             <button
+                type="button"
                 onClick={onConfirm}
                 disabled={staking || previewing}
-                className="h-[52px] w-full cursor-pointer rounded-full border-none bg-mir-text text-base font-extrabold tracking-[-0.01em] text-mir-bg disabled:opacity-60"
+                className={`${recipes.button} ${styles.confirm}`}
             >
                 {staking ? 'Botando…' : `Botar ficha · ${multLabel}`}
             </button>

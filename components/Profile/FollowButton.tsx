@@ -14,6 +14,10 @@ interface FollowButtonProps {
     initialIsFollowing: boolean
     type?: ButtonType
     compact?: boolean
+    /** classe extra, para quando o botão mora sobre outra superfície */
+    className?: string
+    /** classe extra só no estado "seguindo" */
+    followingClassName?: string
 }
 
 export default function FollowButton({
@@ -21,6 +25,8 @@ export default function FollowButton({
     initialIsFollowing,
     type = 'icon',
     compact = false,
+    className = '',
+    followingClassName = '',
 }: FollowButtonProps) {
     const [isFollowing, setIsFollowing] = useState(initialIsFollowing)
     const [isLoading, setIsLoading] = useState(false)
@@ -73,7 +79,7 @@ export default function FollowButton({
             onClick={handleToggleFollow}
             disabled={isLoading}
             title={label}
-            className={`${recipes.button} ${compact ? recipes.buttonSmall : ''} ${styles.textButton} ${isFollowing ? styles.following : styles.primary}`}
+            className={`${recipes.button} ${compact ? recipes.buttonSmall : ''} ${styles.textButton} ${isFollowing ? `${styles.following} ${followingClassName}` : styles.primary} ${className}`}
         >
             {icon}
             {isLoading ? 'Carregando...' : label}

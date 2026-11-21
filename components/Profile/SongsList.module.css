@@ -1,9 +1,6 @@
 .section {
-    border-top: 1px solid var(--club-line);
-}
-
-.container {
-    padding-block: 56px;
+    min-width: 0;
+    scroll-margin-top: 92px;
 }
 
 .headingRow {
@@ -40,7 +37,7 @@
     appearance: none;
     padding: 9px 32px 9px 12px;
     border: 1px solid var(--club-line);
-    border-radius: 7px;
+    border-radius: var(--club-button-radius, 7px);
     color: var(--club-text);
     background: transparent;
     font: inherit;
@@ -261,11 +258,15 @@
 .empty,
 .emptyFilter {
     padding: 48px 24px;
-    border-radius: 7px;
+    border-radius: 3px;
     color: var(--club-text);
     background: var(--club-surface);
     text-align: center;
     font-size: 15px;
+}
+
+.empty {
+    margin-top: 20px;
 }
 
 .empty a {
@@ -291,10 +292,6 @@
 }
 
 @media (max-width: 767px) {
-    .container {
-        padding-block: 40px;
-    }
-
     .headingRow {
         align-items: flex-start;
         flex-direction: column;

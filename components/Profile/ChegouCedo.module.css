@@ -1,9 +1,9 @@
 .section {
-    border-top: 1px solid var(--club-line);
+    min-width: 0;
 }
 
 .container {
-    padding-block: 56px;
+    padding-block: 48px 8px;
 }
 
 .heading h2 {
@@ -24,39 +24,89 @@
 
 .content {
     display: grid;
-    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
-    align-items: end;
-    gap: 48px;
+    grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+    align-items: start;
+    gap: clamp(32px, 4.5vw, 64px);
     margin-top: 24px;
 }
 
-.featuredLink,
-.secondaryLink {
+.single {
+    grid-template-columns: minmax(0, 340px);
+}
+
+/* O registro: papel, cabeçalho, capa, resultado sob a linha pontilhada. */
+
+.receipt {
     display: block;
-    min-width: 0;
+    padding: 22px 24px 6px;
+    border: 1px solid var(--club-line);
+    border-radius: 3px;
     color: var(--club-text);
+    background: var(--club-paper);
+    box-shadow: 0 15px 35px -20px #15191045;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.featuredCover {
-    box-shadow: 0 18px 28px -16px #20201e70;
+.receipt:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 40px -22px #15191060;
 }
 
-.featuredLink h3 {
-    display: -webkit-box;
-    margin-top: 16px;
-    overflow: hidden;
-    color: var(--club-text);
-    font-family: var(--font-archivo), sans-serif;
-    font-size: 24px;
+.receiptHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--club-line);
+}
+
+.receiptHeader > span:first-of-type {
+    font-size: 9px;
     font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: -0.03em;
+    letter-spacing: 0.11em;
+}
+
+.receiptHeader > span:last-of-type {
+    margin-left: auto;
+    color: var(--club-accent);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+}
+
+.receiptCover {
+    display: block;
+    margin-top: 18px;
+}
+
+.receiptTrack {
+    display: block;
+    padding-block: 14px 16px;
+}
+
+.receiptTitle {
+    display: -webkit-box;
+    overflow: hidden;
+    font-family: var(--font-archivo), sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.035em;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
 }
 
-.artist {
-    margin-top: 2px;
+.receipt:hover .receiptTitle {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+}
+
+.receiptArtist {
+    display: block;
+    margin-top: 4px;
     overflow: hidden;
     color: var(--club-muted);
     font-size: 14px;
@@ -67,119 +117,191 @@
 .receiptResult {
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin-top: 14px;
-    padding-top: 14px;
+    gap: 15px;
+    padding-block: 16px 18px;
     border-top: 1px dashed var(--club-line);
 }
 
-.featuredOrdinal {
+.receiptPosition {
+    min-width: 52px;
     color: var(--club-accent-text);
     font-family: var(--font-archivo), sans-serif;
-    font-size: 40px;
+    font-size: 42px;
     font-weight: 700;
     line-height: 1;
-    letter-spacing: -0.05em;
+    letter-spacing: -0.06em;
 }
 
 .receiptResult strong {
     display: block;
-    color: var(--club-text);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
+    line-height: 1.3;
 }
 
-.receiptResult p {
+.receiptResult small {
+    display: block;
     margin-top: 4px;
     color: var(--club-muted);
     font-size: 12px;
 }
 
-.secondaryGrid {
+/* As outras: lista curta, posição na frente. */
+
+.list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.list > li + li .row {
+    border-top: 1px solid var(--club-line);
+}
+
+.row {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    align-self: end;
-    gap: 22px;
-}
-
-.secondaryLink h3 {
-    margin-top: 12px;
-    overflow: hidden;
+    grid-template-columns: 44px 72px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 18px;
+    padding-block: 18px;
     color: var(--club-text);
-    font-size: 14px;
+}
+
+.list > li:first-child .row {
+    padding-top: 0;
+}
+
+.position {
+    color: var(--club-muted);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: 26px;
     font-weight: 700;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-variant-numeric: tabular-nums;
 }
 
-.secondaryLink .artist {
-    font-size: 13px;
-}
-
-.callout,
-.calloutLarge {
-    margin-top: 6px;
-    overflow: hidden;
-    color: var(--club-muted);
-    font-size: 12px;
-    line-height: 1.4;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.calloutLarge {
-    font-size: 13px;
-}
-
-.ordinal {
-    margin-right: 3px;
-    color: var(--club-muted);
-    font-weight: 500;
-}
-
-.ordinalAccent {
+.positionAccent {
     color: var(--club-accent-text);
-    font-weight: 600;
 }
 
-.featuredLink:hover h3,
-.secondaryLink:hover h3 {
+.rowCover {
+    display: block;
+    width: 72px;
+}
+
+.rowCover img {
+    transition: transform 0.35s;
+}
+
+.row:hover .rowCover img {
+    transform: scale(1.04);
+}
+
+.rowCopy {
+    min-width: 0;
+}
+
+.rowTitle {
+    display: block;
+    overflow: hidden;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.row:hover .rowTitle {
     text-decoration: underline;
     text-underline-offset: 3px;
 }
 
-.secondaryLink:hover [data-record-cover] img {
-    transform: scale(1.035);
+.rowArtist {
+    display: block;
+    margin-top: 3px;
+    overflow: hidden;
+    color: var(--club-muted);
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
+.rowMeta {
+    color: var(--club-muted);
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .receipt,
+    .rowCover img {
+        transition: none;
+    }
+
+    .receipt:hover {
+        transform: none;
+    }
+}
+
+/* Com a coluna mais estreita, a data desce para debaixo do artista. */
 @media (max-width: 1100px) {
     .content {
-        grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+        grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
         gap: 32px;
     }
 
-    .secondaryGrid {
-        gap: 16px;
+    .single {
+        grid-template-columns: minmax(0, 300px);
+    }
+
+    .row {
+        grid-template-columns: 34px 56px minmax(0, 1fr);
+        gap: 4px 14px;
+        padding-block: 14px;
+    }
+
+    .rowCover {
+        width: 56px;
+        grid-row: span 2;
+    }
+
+    .position {
+        grid-row: span 2;
+        font-size: 22px;
+    }
+
+    .rowCopy {
+        align-self: end;
+    }
+
+    .rowMeta {
+        grid-column: 3;
+        align-self: start;
+    }
+
+    .rowTitle {
+        font-size: 15px;
+    }
+
+    .rowArtist {
+        font-size: 13px;
     }
 }
 
 @media (max-width: 767px) {
     .container {
-        padding-block: 40px;
+        padding-top: 36px;
     }
 
     .content {
-        grid-template-columns: 1fr;
-        gap: 32px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 28px;
         margin-top: 18px;
     }
 
-    .featuredLink {
-        max-width: 320px;
-    }
-
-    .secondaryGrid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 24px 20px;
+    .receipt {
+        max-width: 360px;
     }
 }

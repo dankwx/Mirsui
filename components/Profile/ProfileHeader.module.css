@@ -1,52 +1,42 @@
-.section {
-    border-bottom: 1px solid var(--club-line);
+/* Abertura do perfil: a faixa de cabeçalho da paleta (a mesma da faixa e do
+   artista) e, abaixo dela, a faixa clara com os números. */
+
+.hero {
+    padding-block: clamp(28px, 4vw, 56px);
+    color: var(--home-masthead-ink);
+    background: var(--home-masthead);
+}
+
+.hero :is(a, button):focus-visible {
+    outline: 2px solid var(--home-masthead-ink);
+    outline-offset: 3px;
 }
 
 .layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 296px;
-    align-items: start;
-    gap: 64px;
-    padding-block: 40px;
+    grid-template-columns: clamp(128px, 14vw, 188px) minmax(0, 1fr);
+    align-items: center;
+    gap: 24px clamp(24px, 4vw, 56px);
 }
 
-.noFavorites {
-    grid-template-columns: minmax(0, 1fr);
+.withFavorites {
+    grid-template-columns: clamp(128px, 14vw, 188px) minmax(0, 1fr) auto;
 }
 
-.identityColumn {
-    min-width: 0;
-}
+/* Foto: redonda, porque é gente. */
 
-.identity {
-    display: flex;
-    align-items: flex-start;
-    gap: 24px;
-}
-
-.avatar,
-.avatarButton {
+.avatar {
+    position: relative;
     display: grid;
-    width: 96px;
-    height: 96px;
-    flex: none;
-    place-items: center;
+    width: 100%;
+    aspect-ratio: 1;
     overflow: hidden;
+    padding: 0;
     border: 0;
     border-radius: 50%;
-    background: var(--club-accent-soft);
-    box-shadow: 0 0 0 1px var(--club-line);
-    color: var(--club-accent-text);
-}
-
-.avatarButton {
-    cursor: pointer;
-    transition: box-shadow 0.2s;
-}
-
-.avatarButton:hover,
-.avatarButton:focus-visible {
-    box-shadow: 0 0 0 2px var(--club-accent);
+    color: var(--home-masthead-ink);
+    background: color-mix(in srgb, currentColor 12%, transparent);
+    box-shadow: 0 18px 32px -16px rgb(0 0 0 / 55%);
 }
 
 .avatarImage,
@@ -60,92 +50,213 @@
 
 .avatarFallback {
     font-family: var(--font-archivo), sans-serif;
-    font-size: 32px;
-    font-weight: 800;
+    font-size: clamp(40px, 5vw, 72px);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
 }
 
-.identityCopy {
+.avatarButton {
+    cursor: pointer;
+}
+
+.avatarHint {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: rgb(0 0 0 / 38%);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.avatarButton:hover .avatarHint,
+.avatarButton:focus-visible .avatarHint {
+    opacity: 1;
+}
+
+/* Nome, @ e bio. */
+
+.copy {
     min-width: 0;
-    padding-top: 1px;
 }
 
-.identityCopy h1 {
-    color: var(--club-text);
-    font-family: var(--font-archivo), sans-serif;
-    font-size: clamp(34px, 4.4vw, 56px);
-    font-weight: 700;
-    line-height: 1.05;
-    letter-spacing: -0.05em;
-    overflow-wrap: anywhere;
-}
-
-.username {
-    margin-top: 6px;
-    color: var(--club-muted);
-    font-family: var(--font-space-grotesk), sans-serif;
+.eyebrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 0;
+    color: var(--home-masthead-muted);
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 700;
+}
+
+.eyebrow > span:first-child {
+    font-family: var(--font-space-grotesk), sans-serif;
+}
+
+.eyebrow > span + span::before {
+    content: '·';
+    padding-inline: 9px;
+}
+
+.name {
+    max-width: 18ch;
+    margin-top: 9px;
+    font-family: var(--font-archivo), sans-serif;
+    font-size: clamp(40px, 5.4vw, 80px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.065em;
+    overflow-wrap: anywhere;
 }
 
 .bio {
-    max-width: 56ch;
-    margin-top: 12px;
-    color: var(--club-muted);
+    max-width: 52ch;
+    margin-top: 14px;
+    color: var(--home-masthead-ink);
     font-size: 16px;
-    line-height: 1.55;
+    line-height: 1.5;
     overflow-wrap: anywhere;
-}
-
-.stats {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 20px 40px;
-    margin-top: 28px;
-    padding-top: 22px;
-    border-top: 1px solid var(--club-line);
+    white-space: pre-line;
 }
 
 .actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 16px;
-    margin-top: 24px;
+    gap: 8px 20px;
+    margin-top: clamp(16px, 2.2vw, 26px);
+    padding-top: 14px;
+    border-top: 1px solid var(--home-masthead-rule);
 }
 
-.since {
-    margin-left: auto;
-    color: var(--club-muted);
-    font-size: 12px;
+/* O botão principal troca de cor sobre a faixa: a tinta vira fundo e a
+   cor da faixa vira texto, como no fechamento da home. */
+.hero .heroButton {
+    border-color: var(--home-masthead-ink);
+    color: var(--home-masthead);
+    background: var(--home-masthead-ink);
 }
+
+.hero .heroButton:hover {
+    color: var(--home-masthead);
+    background: var(--home-masthead-ink);
+    box-shadow: 0 5px 0 color-mix(in srgb, var(--home-masthead-ink) 30%, transparent);
+}
+
+.hero .heroButton.heroButtonQuiet,
+.hero .heroButton.heroButtonQuiet:hover {
+    border-color: var(--home-masthead-rule);
+    color: var(--home-masthead-ink);
+    background: transparent;
+}
+
+.hero .heroButton.heroButtonQuiet:hover {
+    border-color: var(--home-masthead-ink);
+    box-shadow: none;
+    transform: none;
+}
+
+.hero .heroLink {
+    color: inherit;
+}
+
+/* Favoritas: as capas que a pessoa escolheu, levemente fora do lugar, como
+   discos apoiados na estante. Endireitam no hover e no foco. */
 
 .favorites {
     min-width: 0;
 }
 
 .favoritesLabel {
-    margin-bottom: 12px;
-    color: var(--club-muted);
-    font-size: 12px;
-    font-weight: 600;
+    margin-bottom: 14px;
+    color: var(--home-masthead-muted);
+    font-size: 13px;
+    font-weight: 700;
 }
 
-.favoritesGrid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+.favoritesRow {
+    display: flex;
+    margin: 0;
+    padding: 0 0 6px;
+    list-style: none;
+}
+
+.favoritesRow > li + li {
+    margin-left: -14px;
 }
 
 .favoriteLink {
+    position: relative;
     display: block;
-    min-width: 0;
+    transition: transform 0.25s;
 }
 
-.favoriteLink:hover [data-record-cover] img,
-.favoriteLink:focus-visible [data-record-cover] img {
-    transform: scale(1.035);
+.favoritesRow > li:nth-child(1) .favoriteLink {
+    transform: rotate(-4deg);
 }
+
+.favoritesRow > li:nth-child(2) .favoriteLink {
+    transform: rotate(2.5deg) translateY(4px);
+}
+
+.favoritesRow > li:nth-child(3) .favoriteLink {
+    transform: rotate(-1.5deg);
+}
+
+.favoritesRow > li:nth-child(4) .favoriteLink {
+    transform: rotate(3.5deg) translateY(-2px);
+}
+
+.favoritesRow > li .favoriteLink:hover,
+.favoritesRow > li .favoriteLink:focus-visible {
+    z-index: 2;
+    transform: rotate(0deg) translateY(-6px);
+}
+
+.favoriteCover {
+    width: clamp(84px, 8vw, 116px);
+    box-shadow:
+        0 14px 22px -14px rgb(0 0 0 / 60%),
+        1px 1px 2px rgb(0 0 0 / 22%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .favoriteLink,
+    .avatarHint {
+        transition: none;
+    }
+}
+
+/* Números com função: o que está no acervo, onde chegou antes, quem segue. */
+
+.statsBand {
+    border-bottom: 1px solid var(--club-line);
+    background: var(--club-surface);
+}
+
+.stats {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    padding-block: 16px;
+}
+
+.stats > * {
+    padding-inline: 24px;
+}
+
+.stats > :first-child {
+    padding-left: 0;
+}
+
+.stats > * + * {
+    border-left: 1px solid var(--club-line);
+}
+
+/* Edição do perfil. */
 
 .dialogOverlay {
     background: rgba(30, 32, 29, 0.55);
@@ -222,7 +333,7 @@
     width: 100%;
     padding: 11px 12px;
     border: 1px solid var(--club-line);
-    border-radius: 6px;
+    border-radius: var(--club-button-radius, 6px);
     outline: none;
     color: var(--club-text);
     background: var(--club-bg);
@@ -245,6 +356,11 @@
     border-color: var(--club-muted);
 }
 
+.field input:focus-visible,
+.field textarea:focus-visible {
+    border-color: var(--club-text);
+}
+
 .editActions {
     display: flex;
     align-items: stretch;
@@ -256,45 +372,55 @@
     flex: 1;
 }
 
-@media (max-width: 767px) {
-    .layout {
-        display: block;
-        padding-block: 28px;
-    }
-
-    .identity {
-        gap: 18px;
-    }
-
-    .avatar,
-    .avatarButton {
-        width: 72px;
-        height: 72px;
-    }
-
-    .avatarFallback {
-        font-size: 24px;
-    }
-
-    .stats {
-        gap: 18px 28px;
-    }
-
-    .actions {
-        gap: 12px;
-    }
-
-    .since {
-        width: 100%;
-        margin-left: 0;
+/* Abaixo de 1024 px as favoritas descem para debaixo do nome. */
+@media (max-width: 1023px) {
+    .withFavorites {
+        grid-template-columns: clamp(120px, 17vw, 168px) minmax(0, 1fr);
     }
 
     .favorites {
-        margin-top: 28px;
+        grid-column: 2;
+    }
+}
+
+@media (max-width: 767px) {
+    .stats {
+        grid-auto-flow: row;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        row-gap: 16px;
     }
 
-    .favoritesGrid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 10px;
+    .stats > * {
+        padding-inline: 12px;
+    }
+
+    .stats > :nth-child(3n + 1) {
+        padding-left: 0;
+        border-left: 0;
+    }
+}
+
+/* No celular a foto fica sobre o nome e as favoritas ocupam a largura. */
+@media (max-width: 600px) {
+    .layout,
+    .withFavorites {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 20px;
+    }
+
+    .avatar {
+        width: clamp(88px, 26vw, 120px);
+    }
+
+    .name {
+        font-size: clamp(36px, 10vw, 52px);
+    }
+
+    .favorites {
+        grid-column: auto;
+    }
+
+    .favoriteCover {
+        width: clamp(72px, 22vw, 96px);
     }
 }

@@ -18,7 +18,6 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import RecordCover from '@/components/Club/RecordCover'
-import shellStyles from '@/components/Club/ClubShell.module.css'
 import recipes from '@/components/Club/club-recipes.module.css'
 import { useCertificateGeneratorSimple } from '@/hooks/use-certificate-generator-simple'
 import { removeTrack, toggleFavorite } from './actions'
@@ -266,76 +265,76 @@ const SongsList: React.FC<SongsListProps> = ({ songs, canRemove = false, userDat
 
     if (!songs.length) {
         return (
-            <section className={styles.section}>
-                <div className={`${shellStyles.container} ${styles.container}`}>
-                    <div className={styles.heading}>
-                        <h2>Acervo</h2>
-                        <p>0 faixas</p>
-                    </div>
-                    <div className={styles.empty}>
-                        <p>Nenhuma faixa salva ainda.</p>
-                        <Link href="/pilha" className={recipes.button}>
-                            Revirar a pilha ↗
-                        </Link>
-                    </div>
+            <section className={styles.section} id="acervo" aria-labelledby="acervo-titulo">
+                <div className={styles.heading}>
+                    <h2 id="acervo-titulo">Acervo</h2>
+                    <p>0 faixas</p>
+                </div>
+                <div className={styles.empty}>
+                    <p>
+                        {canRemove
+                            ? 'Nenhuma faixa salva ainda. O que você salvar aparece aqui, com a posição em que chegou.'
+                            : 'Nenhuma faixa salva ainda.'}
+                    </p>
+                    <Link href="/pilha" className={recipes.button}>
+                        Revirar a pilha ↗
+                    </Link>
                 </div>
             </section>
         )
     }
 
     return (
-        <section className={styles.section}>
-            <div className={`${shellStyles.container} ${styles.container}`}>
-                <div className={styles.headingRow}>
-                    <div className={styles.heading}>
-                        <h2>Acervo</h2>
-                        <p>
-                            {list.length} {list.length === 1 ? 'faixa' : 'faixas'}
-                        </p>
-                    </div>
-                    <div className={styles.sortControl}>
-                        <select
-                            value={sort}
-                            onChange={(event) => setSort(event.target.value as Sort)}
-                            aria-label="Ordenar acervo"
-                        >
-                            {SORTS.map((item) => (
-                                <option key={item.id} value={item.id}>
-                                    {item.label}
-                                </option>
-                            ))}
-                        </select>
-                        <ChevronDown size={14} aria-hidden="true" />
-                    </div>
+        <section className={styles.section} id="acervo" aria-labelledby="acervo-titulo">
+            <div className={styles.headingRow}>
+                <div className={styles.heading}>
+                    <h2 id="acervo-titulo">Acervo</h2>
+                    <p>
+                        {list.length} {list.length === 1 ? 'faixa' : 'faixas'}
+                    </p>
                 </div>
-
-                {filters.length > 1 && (
-                    <div className={`${recipes.filters} ${styles.filters}`} role="group" aria-label="Filtrar acervo">
-                        {filters.map((item) => (
-                            <button
-                                type="button"
-                                key={item.id}
-                                onClick={() => setFilter(item.id)}
-                                aria-pressed={filter === item.id}
-                                className={filter === item.id ? recipes.filterActive : recipes.filter}
-                            >
-                                {item.label}{' '}
-                                <span className={styles.filterCount}>{item.count}</span>
-                            </button>
+                <div className={styles.sortControl}>
+                    <select
+                        value={sort}
+                        onChange={(event) => setSort(event.target.value as Sort)}
+                        aria-label="Ordenar acervo"
+                    >
+                        {SORTS.map((item) => (
+                            <option key={item.id} value={item.id}>
+                                {item.label}
+                            </option>
                         ))}
-                    </div>
-                )}
-
-                {list.length === 0 ? (
-                    <div className={styles.emptyFilter}>Nenhuma faixa neste filtro.</div>
-                ) : (
-                    <div className={styles.grid}>
-                        {items.map(({ song, month }) => (
-                            <Tile key={song.id} song={song} month={month} />
-                        ))}
-                    </div>
-                )}
+                    </select>
+                    <ChevronDown size={14} aria-hidden="true" />
+                </div>
             </div>
+
+            {filters.length > 1 && (
+                <div className={`${recipes.filters} ${styles.filters}`} role="group" aria-label="Filtrar acervo">
+                    {filters.map((item) => (
+                        <button
+                            type="button"
+                            key={item.id}
+                            onClick={() => setFilter(item.id)}
+                            aria-pressed={filter === item.id}
+                            className={filter === item.id ? recipes.filterActive : recipes.filter}
+                        >
+                            {item.label}{' '}
+                            <span className={styles.filterCount}>{item.count}</span>
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {list.length === 0 ? (
+                <div className={styles.emptyFilter}>Nenhuma faixa neste filtro.</div>
+            ) : (
+                <div className={styles.grid}>
+                    {items.map(({ song, month }) => (
+                        <Tile key={song.id} song={song} month={month} />
+                    ))}
+                </div>
+            )}
         </section>
     )
 }

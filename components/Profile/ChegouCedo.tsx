@@ -1,4 +1,11 @@
+// "Chegou cedo": as faixas em que a pessoa chegou antes de quase todo mundo.
+//
+// A primeira vira um registro (papel, divisão pontilhada, posição grande), o
+// mesmo objeto da página de faixa e da home. As outras entram numa lista
+// curta com a posição na frente, porque é a posição que esta seção prova.
+
 import Link from 'next/link'
+import { Disc3 } from 'lucide-react'
 import RecordCover from '@/components/Club/RecordCover'
 import shellStyles from '@/components/Club/ClubShell.module.css'
 import recipes from '@/components/Club/club-recipes.module.css'
@@ -28,37 +35,12 @@ const mesAno = (iso: string | null) => {
     return `${MESES[d.getMonth()]} ${d.getFullYear()}`
 }
 
-function Chamada({
-    song,
-    savers,
-    big = false,
-}: {
-    song: Song
-    savers?: number
-    big?: boolean
-}) {
-    // O próprio dono é o primeiro salvador. Quando ninguém veio depois, a
-    // data ainda informa desde quando aquele registro existe.
-    const depois = savers && savers > 1 ? `${savers} já salvaram` : mesAno(song.claimedat)
-    const n = song.position
+// O próprio dono é o primeiro salvador. Quando ninguém veio depois, a data
+// ainda informa desde quando aquele registro existe.
+const depoisDe = (song: Song, savers?: number) =>
+    savers && savers > 1 ? `${savers} já salvaram` : mesAno(song.claimedat)
 
-    return (
-        <div className={big ? styles.calloutLarge : styles.callout}>
-            {n !== null && (
-                <>
-                    <span
-                        className={`${recipes.smallNumber} ${styles.ordinal} ${n === 1 ? styles.ordinalAccent : ''}`}
-                    >
-                        {n}ª
-                    </span>
-                    <span>a salvar</span>
-                </>
-            )}
-            {n !== null && depois && <span> · </span>}
-            {depois && <span>{depois}</span>}
-        </div>
-    )
-}
+const ordinal = (position: number | null) => (position !== null ? `${position}ª` : '·')
 
 export default function ChegouCedo({
     songs,
@@ -71,60 +53,82 @@ export default function ChegouCedo({
 
     const [destaque, ...resto] = songs
     const saversDe = (song: Song) => (song.track_uri ? savers[song.track_uri] : undefined)
+    const depoisDoDestaque = depoisDe(destaque, saversDe(destaque))
 
     return (
-        <section className={styles.section}>
+        <section className={styles.section} aria-labelledby="chegou-cedo">
             <div className={`${shellStyles.container} ${styles.container}`}>
                 <div className={styles.heading}>
-                    <h2>Chegou cedo</h2>
+                    <h2 id="chegou-cedo">Chegou cedo</h2>
                     <p>As faixas em que chegou mais cedo.</p>
                 </div>
 
-                <div className={styles.content}>
-                    <Link href={trackHref(destaque)} className={styles.featuredLink}>
+                <div className={`${styles.content} ${resto.length === 0 ? styles.single : ''}`}>
+                    <Link href={trackHref(destaque)} className={styles.receipt}>
+                        <span className={styles.receiptHeader}>
+                            <Disc3 size={19} aria-hidden="true" />
+                            <span>REGISTRO DE DESCOBERTA</span>
+                            <span aria-hidden="true">m.</span>
+                        </span>
+
                         <RecordCover
                             src={destaque.track_thumbnail}
-                            alt={`Capa de ${destaque.track_title}`}
-                            className={`${recipes.sleeve} ${styles.featuredCover}`}
+                            alt=""
+                            className={`${recipes.sleeve} ${styles.receiptCover}`}
                         />
-                        <h3>{destaque.track_title}</h3>
-                        <p className={styles.artist}>{destaque.artist_name}</p>
-                        <div className={styles.receiptResult}>
-                            <span className={styles.featuredOrdinal}>
-                                {destaque.position}ª
+
+                        <span className={styles.receiptTrack}>
+                            <span className={styles.receiptTitle}>{destaque.track_title}</span>
+                            <span className={styles.receiptArtist}>{destaque.artist_name}</span>
+                        </span>
+
+                        <span className={styles.receiptResult}>
+                            <span className={styles.receiptPosition}>
+                                {ordinal(destaque.position)}
                             </span>
-                            <div>
+                            <span>
                                 <strong>a salvar</strong>
-                                <p>
-                                    {saversDe(destaque) && saversDe(destaque)! > 1
-                                        ? `${saversDe(destaque)} já salvaram`
-                                        : mesAno(destaque.claimedat)}
-                                </p>
-                            </div>
-                        </div>
+                                {depoisDoDestaque && <small>{depoisDoDestaque}</small>}
+                            </span>
+                        </span>
                     </Link>
 
                     {resto.length > 0 && (
-                        <div className={styles.secondaryGrid}>
-                            {resto.map((song) => (
-                                <Link
-                                    key={song.id}
-                                    href={trackHref(song)}
-                                    className={styles.secondaryLink}
-                                >
-                                    <RecordCover
-                                        src={song.track_thumbnail}
-                                        alt={`Capa de ${song.track_title}`}
-                                    />
-                                    <h3>{song.track_title}</h3>
-                                    <p className={styles.artist}>{song.artist_name}</p>
-                                    <Chamada
-                                        song={song}
-                                        savers={saversDe(song)}
-                                    />
-                                </Link>
-                            ))}
-                        </div>
+                        <ol className={styles.list}>
+                            {resto.map((song) => {
+                                const depois = depoisDe(song, saversDe(song))
+                                return (
+                                    <li key={song.id}>
+                                        <Link href={trackHref(song)} className={styles.row}>
+                                            <span
+                                                className={`${styles.position} ${song.position === 1 ? styles.positionAccent : ''}`}
+                                            >
+                                                {ordinal(song.position)}
+                                                {song.position !== null && (
+                                                    <span className="sr-only"> a salvar, </span>
+                                                )}
+                                            </span>
+                                            <RecordCover
+                                                src={song.track_thumbnail}
+                                                alt=""
+                                                className={`${recipes.sleeve} ${styles.rowCover}`}
+                                            />
+                                            <span className={styles.rowCopy}>
+                                                <span className={styles.rowTitle}>
+                                                    {song.track_title}
+                                                </span>
+                                                <span className={styles.rowArtist}>
+                                                    {song.artist_name}
+                                                </span>
+                                            </span>
+                                            {depois && (
+                                                <span className={styles.rowMeta}>{depois}</span>
+                                            )}
+                                        </Link>
+                                    </li>
+                                )
+                            })}
+                        </ol>
                     )}
                 </div>
             </div>

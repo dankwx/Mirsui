@@ -1,5 +1,10 @@
 'use client'
 
+// A abertura do perfil: a mesma faixa de cabeçalho da faixa e do artista, na
+// cor da paleta, com a pessoa (foto redonda, nome, @ e bio), a ação dela
+// (seguir ou editar) e as favoritas como capas. Os números ficam na faixa
+// clara logo abaixo, como os do artista.
+
 import { useState } from 'react'
 import Link from 'next/link'
 import { Check, ImageIcon, Link2, Pencil } from 'lucide-react'
@@ -120,139 +125,140 @@ export default function ProfileHeader({
         }
     }
 
+    const avatar = (
+        <FotoDePerfil
+            src={userData.avatar_url}
+            loading="eager"
+            className={styles.avatarImage}
+        >
+            <span className={styles.avatarFallback}>{fallbackInitials}</span>
+        </FotoDePerfil>
+    )
+
     return (
-        <section className={styles.section}>
-            <div
-                className={`${shellStyles.container} ${styles.layout} ${favorites.length === 0 ? styles.noFavorites : ''}`}
-            >
-                <div className={styles.identityColumn}>
-                    <div className={styles.identity}>
-                        {canEdit ? (
-                            <button
-                                type="button"
-                                onClick={() => setShowAvatarModal(true)}
-                                aria-label="Trocar foto"
-                                className={styles.avatarButton}
-                            >
-                                <FotoDePerfil
-                                    src={userData.avatar_url}
-                                    className={styles.avatarImage}
-                                >
-                                    <span className={styles.avatarFallback}>
-                                        {fallbackInitials}
-                                    </span>
-                                </FotoDePerfil>
-                            </button>
-                        ) : (
-                            <div className={styles.avatar}>
-                                <FotoDePerfil
-                                    src={userData.avatar_url}
-                                    className={styles.avatarImage}
-                                >
-                                    <span className={styles.avatarFallback}>
-                                        {fallbackInitials}
-                                    </span>
-                                </FotoDePerfil>
-                            </div>
-                        )}
-
-                        <div className={styles.identityCopy}>
-                            <h1>{currentDisplayName}</h1>
-                            <div className={styles.username}>
-                                @{userData.username}
-                            </div>
-                            {currentDescription && (
-                                <p className={styles.bio}>{currentDescription}</p>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className={styles.stats}>
-                        <Numero value={stats.total} label="no acervo" />
-                        {badge && (
-                            <Numero
-                                value={badge.value}
-                                label={badge.label}
-                                accent
-                            />
-                        )}
-                        <Numero value={stats.artists} label="artistas" />
-                        <FollowersFollowingSection
-                            followers={userData.totalFollowers}
-                            following={userData.totalFollowing}
-                            rating={userData.rating}
-                            isOwnProfile={isOwnProfile}
-                            isLoggedIn={isLoggedIn}
-                            currentUserId={userData.id}
-                        />
-                    </div>
-
-                    <div className={styles.actions}>
-                        {canEdit ? (
-                            <button
-                                type="button"
-                                onClick={() => setOpenEdit(true)}
-                                className={recipes.button}
-                            >
-                                <Pencil size={15} aria-hidden="true" />
-                                Editar perfil
-                            </button>
-                        ) : (
-                            isLoggedIn && (
-                                <FollowButton
-                                    followingId={userData.id}
-                                    initialIsFollowing={userData.isFollowing || false}
-                                    type="text"
-                                />
-                            )
-                        )}
+        <>
+            <header className={styles.hero}>
+                <div
+                    className={`${shellStyles.container} ${styles.layout} ${favorites.length > 0 ? styles.withFavorites : ''}`}
+                >
+                    {canEdit ? (
                         <button
                             type="button"
-                            onClick={handleShare}
-                            className={recipes.textLink}
-                            aria-live="polite"
+                            onClick={() => setShowAvatarModal(true)}
+                            aria-label="Trocar foto"
+                            title="Trocar foto"
+                            className={`${styles.avatar} ${styles.avatarButton}`}
                         >
-                            {copied ? (
-                                <>
-                                    <Check size={15} aria-hidden="true" />
-                                    Link copiado
-                                </>
-                            ) : (
-                                <>
-                                    <Link2 size={15} aria-hidden="true" />
-                                    Copiar link
-                                </>
-                            )}
-                        </button>
-                        {stats.since && (
-                            <span className={styles.since}>
-                                salvando desde {stats.since}
+                            {avatar}
+                            <span className={styles.avatarHint} aria-hidden="true">
+                                <ImageIcon size={16} />
                             </span>
-                        )}
-                    </div>
-                </div>
+                        </button>
+                    ) : (
+                        <div className={styles.avatar}>{avatar}</div>
+                    )}
 
-                {favorites.length > 0 && (
-                    <div className={styles.favorites}>
-                        <p className={styles.favoritesLabel}>Favoritas do perfil</p>
-                        <div className={styles.favoritesGrid}>
-                            {favorites.map((song) => (
-                                <Link
-                                    key={song.id}
-                                    href={trackHref(song)}
-                                    aria-label={`${song.track_title}, ${song.artist_name}`}
-                                    className={styles.favoriteLink}
+                    <div className={styles.copy}>
+                        <p className={styles.eyebrow}>
+                            <span>@{userData.username}</span>
+                            {stats.since && <span>salvando desde {stats.since}</span>}
+                        </p>
+
+                        <h1 className={styles.name}>{currentDisplayName}</h1>
+
+                        {currentDescription && (
+                            <p className={styles.bio}>{currentDescription}</p>
+                        )}
+
+                        <div className={styles.actions}>
+                            {canEdit ? (
+                                <button
+                                    type="button"
+                                    onClick={() => setOpenEdit(true)}
+                                    className={`${recipes.button} ${recipes.buttonSmall} ${styles.heroButton}`}
                                 >
-                                    <RecordCover
-                                        src={song.track_thumbnail}
-                                        alt={`Capa de ${song.track_title}`}
-                                        className={recipes.sleeve}
+                                    <Pencil size={15} aria-hidden="true" />
+                                    Editar perfil
+                                </button>
+                            ) : (
+                                isLoggedIn && (
+                                    <FollowButton
+                                        followingId={userData.id}
+                                        initialIsFollowing={userData.isFollowing || false}
+                                        type="text"
+                                        compact
+                                        className={styles.heroButton}
+                                        followingClassName={styles.heroButtonQuiet}
                                     />
-                                </Link>
-                            ))}
+                                )
+                            )}
+                            <button
+                                type="button"
+                                onClick={handleShare}
+                                className={`${recipes.textLink} ${styles.heroLink}`}
+                                aria-live="polite"
+                            >
+                                {copied ? (
+                                    <>
+                                        <Check size={15} aria-hidden="true" />
+                                        Link copiado
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link2 size={15} aria-hidden="true" />
+                                        Copiar link
+                                    </>
+                                )}
+                            </button>
                         </div>
                     </div>
-                )}
+
+                    {favorites.length > 0 && (
+                        <div className={styles.favorites}>
+                            <p className={styles.favoritesLabel}>Favoritas</p>
+                            <ul className={styles.favoritesRow}>
+                                {favorites.map((song) => (
+                                    <li key={song.id}>
+                                        <Link
+                                            href={trackHref(song)}
+                                            aria-label={`${song.track_title}, ${song.artist_name}`}
+                                            title={`${song.track_title} · ${song.artist_name}`}
+                                            className={styles.favoriteLink}
+                                        >
+                                            <RecordCover
+                                                src={song.track_thumbnail}
+                                                alt=""
+                                                className={`${recipes.sleeve} ${styles.favoriteCover}`}
+                                            />
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            </header>
+
+            <div className={styles.statsBand}>
+                <div className={`${shellStyles.container} ${styles.stats}`}>
+                    <Numero
+                        value={stats.total}
+                        label={stats.total === 1 ? 'faixa no acervo' : 'faixas no acervo'}
+                    />
+                    {badge && <Numero value={badge.value} label={badge.label} accent />}
+                    <Numero
+                        value={stats.artists}
+                        label={stats.artists === 1 ? 'artista' : 'artistas'}
+                    />
+                    <FollowersFollowingSection
+                        followers={userData.totalFollowers}
+                        following={userData.totalFollowing}
+                        rating={userData.rating}
+                        isOwnProfile={isOwnProfile}
+                        isLoggedIn={isLoggedIn}
+                        currentUserId={userData.id}
+                    />
+                </div>
             </div>
 
             {canEdit && (
@@ -321,6 +327,6 @@ export default function ProfileHeader({
                     onAvatarClick={setShowAvatarModal}
                 />
             )}
-        </section>
+        </>
     )
 }

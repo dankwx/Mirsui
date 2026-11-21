@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { ArrowDown, Pin, PinOff, Trash2 } from 'lucide-react'
 import AuthModalTrigger from '@/components/AuthModalTrigger/AuthModalTrigger'
 import FotoDePerfil from '@/components/FotoDePerfil'
-import shellStyles from '@/components/Club/ClubShell.module.css'
 import recipes from '@/components/Club/club-recipes.module.css'
 import { createClient } from '@/utils/supabase/client'
 import { RECADO_SELECT, RECADOS_PAGE_SIZE, type Recado } from '@/utils/profileComments'
@@ -157,139 +157,150 @@ const Recados: React.FC<RecadosProps> = ({
     }
 
     return (
-        <section className={styles.section}>
-            <div className={`${shellStyles.container} ${styles.container}`}>
-                <div className={styles.heading}>
-                    <h2>Recados</h2>
-                    <p>
-                        {total} {total === 1 ? 'recado' : 'recados'}
-                    </p>
-                </div>
-
-                {isLoggedIn ? (
-                    <form onSubmit={handleSubmit} className={styles.form}>
-                        <div className={styles.composerAvatar}>vc</div>
-                        <input
-                            type="text"
-                            value={content}
-                            maxLength={500}
-                            onChange={(event) => setContent(event.target.value)}
-                            placeholder="Deixe um recado…"
-                        />
-                        <button
-                            type="submit"
-                            disabled={!content.trim() || isPosting}
-                            className={`${recipes.button} ${recipes.buttonSmall}`}
-                        >
-                            {isPosting ? 'Enviando...' : 'Enviar'}
-                        </button>
-                    </form>
-                ) : (
-                    <div className={styles.loginNotice}>
-                        Entre para deixar um recado.{' '}
-                        <AuthModalTrigger mode="login" className={recipes.textLink}>
-                            Entrar ↗
-                        </AuthModalTrigger>
-                    </div>
-                )}
-
-                {error && (
-                    <p className={styles.error} role="alert">
-                        {error}
-                    </p>
-                )}
-
-                {recados.length === 0 ? (
-                    <p className={styles.empty}>Nenhum recado por aqui ainda.</p>
-                ) : (
-                    <ul className={styles.list}>
-                        {recados.map((recado) => {
-                            const canDelete =
-                                currentUserId === recado.author?.id || isOwner
-                            const name = displayNameOf(recado.author)
-                            return (
-                                <li
-                                    key={recado.id}
-                                    className={`${styles.item} ${recado.is_pinned ? styles.pinned : ''}`}
-                                >
-                                    <div className={styles.messageAvatar}>
-                                        <FotoDePerfil
-                                            src={recado.author?.avatar_url}
-                                            className={styles.avatarImage}
-                                        >
-                                            <span>{initialsOf(recado.author)}</span>
-                                        </FotoDePerfil>
-                                    </div>
-                                    <div className={styles.messageBody}>
-                                        <div className={styles.meta}>
-                                            <span className={styles.name}>{name}</span>
-                                            {recado.author?.username && (
-                                                <span className={styles.handle}>
-                                                    @{recado.author.username}
-                                                </span>
-                                            )}
-                                            {recado.is_pinned && (
-                                                <span className={styles.pinLabel}>
-                                                    <Pin size={11} aria-hidden="true" />
-                                                    Fixado
-                                                </span>
-                                            )}
-                                            <span className={styles.date}>
-                                                {formatDate(recado.created_at)}
-                                            </span>
-                                        </div>
-                                        <p className={styles.content}>{recado.content}</p>
-                                    </div>
-
-                                    {(isOwner || canDelete) && (
-                                        <div className={styles.itemActions}>
-                                            {isOwner && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleTogglePin(recado)}
-                                                    title={recado.is_pinned ? 'Desafixar' : 'Fixar'}
-                                                    aria-label={recado.is_pinned ? 'Desafixar' : 'Fixar'}
-                                                >
-                                                    {recado.is_pinned ? (
-                                                        <PinOff size={13} aria-hidden="true" />
-                                                    ) : (
-                                                        <Pin size={13} aria-hidden="true" />
-                                                    )}
-                                                </button>
-                                            )}
-                                            {canDelete && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleDelete(recado)}
-                                                    title="Remover recado"
-                                                    aria-label="Remover recado"
-                                                >
-                                                    <Trash2 size={13} aria-hidden="true" />
-                                                </button>
-                                            )}
-                                        </div>
-                                    )}
-                                </li>
-                            )
-                        })}
-                    </ul>
-                )}
-
-                {hasMore && (
-                    <div className={styles.more}>
-                        <button
-                            type="button"
-                            onClick={loadMore}
-                            disabled={loadingMore}
-                            className={recipes.textLink}
-                            aria-busy={loadingMore}
-                        >
-                            {loadingMore ? 'Carregando…' : 'Ver mais recados'}
-                            {!loadingMore && <ArrowDown size={15} aria-hidden="true" />}
-                        </button>
-                    </div>
-                )}
+        <section className={styles.section} aria-labelledby="recados-titulo">
+            <div className={styles.heading}>
+                <h2 id="recados-titulo">Recados</h2>
+                <p>
+                    {total} {total === 1 ? 'recado' : 'recados'}
+                </p>
             </div>
+
+            {isLoggedIn ? (
+                <form onSubmit={handleSubmit} className={styles.form}>
+                    <label htmlFor="recado-novo" className="sr-only">
+                        {isOwner ? 'Escrever no seu mural' : 'Deixar um recado'}
+                    </label>
+                    <input
+                        id="recado-novo"
+                        type="text"
+                        value={content}
+                        maxLength={500}
+                        onChange={(event) => setContent(event.target.value)}
+                        placeholder={isOwner ? 'Escreva no seu mural…' : 'Deixe um recado…'}
+                    />
+                    <button
+                        type="submit"
+                        disabled={!content.trim() || isPosting}
+                        className={`${recipes.button} ${recipes.buttonSmall}`}
+                    >
+                        {isPosting ? 'Enviando…' : 'Enviar'}
+                    </button>
+                </form>
+            ) : (
+                <div className={styles.loginNotice}>
+                    Entre para deixar um recado.{' '}
+                    <AuthModalTrigger mode="login" className={recipes.textLink}>
+                        Entrar ↗
+                    </AuthModalTrigger>
+                </div>
+            )}
+
+            {error && (
+                <p className={styles.error} role="alert">
+                    {error}
+                </p>
+            )}
+
+            {recados.length === 0 ? (
+                <p className={styles.empty}>Nenhum recado por aqui ainda.</p>
+            ) : (
+                <ul className={styles.list}>
+                    {recados.map((recado) => {
+                        const canDelete = currentUserId === recado.author?.id || isOwner
+                        const name = displayNameOf(recado.author)
+                        const username = recado.author?.username
+                        return (
+                            <li
+                                key={recado.id}
+                                className={`${styles.item} ${recado.is_pinned ? styles.pinned : ''}`}
+                            >
+                                <div className={styles.messageAvatar}>
+                                    <FotoDePerfil
+                                        src={recado.author?.avatar_url}
+                                        className={styles.avatarImage}
+                                    >
+                                        <span>{initialsOf(recado.author)}</span>
+                                    </FotoDePerfil>
+                                </div>
+                                <div className={styles.messageBody}>
+                                    {recado.is_pinned && (
+                                        <span className={styles.pinLabel}>
+                                            <Pin size={11} aria-hidden="true" />
+                                            Fixado
+                                        </span>
+                                    )}
+                                    <div className={styles.meta}>
+                                        {username ? (
+                                            <Link
+                                                href={`/user/${username}`}
+                                                className={styles.name}
+                                                title={`@${username}`}
+                                            >
+                                                {name}
+                                            </Link>
+                                        ) : (
+                                            <span className={styles.name}>{name}</span>
+                                        )}
+                                        <span className={styles.date}>
+                                            {formatDate(recado.created_at)}
+                                        </span>
+
+                                        {(isOwner || canDelete) && (
+                                            <span className={styles.itemActions}>
+                                                {isOwner && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleTogglePin(recado)}
+                                                        title={recado.is_pinned ? 'Desafixar' : 'Fixar'}
+                                                        aria-label={
+                                                            recado.is_pinned
+                                                                ? `Desafixar recado de ${name}`
+                                                                : `Fixar recado de ${name}`
+                                                        }
+                                                    >
+                                                        {recado.is_pinned ? (
+                                                            <PinOff size={13} aria-hidden="true" />
+                                                        ) : (
+                                                            <Pin size={13} aria-hidden="true" />
+                                                        )}
+                                                    </button>
+                                                )}
+                                                {canDelete && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDelete(recado)}
+                                                        title="Remover recado"
+                                                        aria-label={`Remover recado de ${name}`}
+                                                        className={styles.deleteButton}
+                                                    >
+                                                        <Trash2 size={13} aria-hidden="true" />
+                                                    </button>
+                                                )}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className={styles.content}>{recado.content}</p>
+                                </div>
+                            </li>
+                        )
+                    })}
+                </ul>
+            )}
+
+            {hasMore && (
+                <div className={styles.more}>
+                    <button
+                        type="button"
+                        onClick={loadMore}
+                        disabled={loadingMore}
+                        className={recipes.textLink}
+                        aria-busy={loadingMore}
+                    >
+                        {loadingMore ? 'Carregando…' : 'Ver mais recados'}
+                        {!loadingMore && <ArrowDown size={15} aria-hidden="true" />}
+                    </button>
+                </div>
+            )}
         </section>
     )
 }

@@ -1,19 +1,13 @@
+/* Recados: o mural do perfil, na lateral ao lado do acervo. */
+
 .section {
-    border-top: 1px solid var(--club-line);
-}
-
-.container {
-    padding-block: 56px 72px;
-}
-
-.heading {
-    margin-bottom: 20px;
+    min-width: 0;
 }
 
 .heading h2 {
     color: var(--club-text);
     font-family: var(--font-archivo), sans-serif;
-    font-size: clamp(26px, 2.8vw, 36px);
+    font-size: clamp(22px, 2.2vw, 28px);
     font-weight: 700;
     line-height: 1.1;
     letter-spacing: -0.045em;
@@ -29,37 +23,22 @@
 
 .form {
     display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.composerAvatar,
-.messageAvatar {
-    display: grid;
-    width: 36px;
-    height: 36px;
-    flex: none;
-    place-items: center;
-    overflow: hidden;
-    border-radius: 50%;
-    background: var(--club-accent-soft);
-    color: var(--club-accent-text);
-    font-family: var(--font-archivo), sans-serif;
-    font-size: 12px;
-    font-weight: 800;
+    align-items: stretch;
+    gap: 8px;
+    margin-top: 16px;
 }
 
 .form input {
     min-width: 0;
     flex: 1;
-    padding: 11px 14px;
+    padding: 10px 12px;
     border: 1px solid var(--club-line);
-    border-radius: 7px;
+    border-radius: var(--club-button-radius, 7px);
     outline: none;
     color: var(--club-text);
     background: var(--club-paper);
     font: inherit;
-    font-size: 15px;
+    font-size: 14px;
 }
 
 .form input:hover {
@@ -71,15 +50,17 @@
 }
 
 .form input:focus-visible {
-    border-color: var(--club-accent);
+    border-color: var(--club-text);
 }
 
 .loginNotice {
-    padding: 14px 16px;
-    border-radius: 7px;
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 3px;
     color: var(--club-muted);
     background: var(--club-surface);
     font-size: 14px;
+    line-height: 1.5;
 }
 
 .loginNotice button {
@@ -96,30 +77,55 @@
 }
 
 .empty {
-    padding-block: 32px;
+    margin-top: 14px;
+    padding-block: 14px;
+    border-top: 1px solid var(--club-line);
     color: var(--club-muted);
     font-size: 14px;
 }
 
 .list {
-    margin: 8px 0 0;
+    margin: 16px 0 0;
     padding: 0;
     list-style: none;
 }
 
 .item {
-    position: relative;
-    display: flex;
-    gap: 14px;
-    padding: 18px 0;
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 12px;
+    padding-block: 14px;
+    border-top: 1px solid var(--club-line);
+}
+
+.item:last-child {
     border-bottom: 1px solid var(--club-line);
 }
 
 .pinned {
-    padding-inline: 14px;
-    border-bottom: 0;
-    border-radius: 7px;
-    background: var(--club-surface);
+    margin-bottom: 6px;
+    padding: 14px;
+    border: 1px solid var(--club-line);
+    border-radius: 3px;
+    background: var(--club-paper);
+}
+
+.pinned + .item {
+    border-top: 0;
+}
+
+.messageAvatar {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 50%;
+    color: var(--club-accent-text);
+    background: var(--club-accent-soft);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: 11px;
+    font-weight: 800;
 }
 
 .avatarImage,
@@ -133,17 +139,30 @@
 
 .messageBody {
     min-width: 0;
-    flex: 1;
+}
+
+.pinLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+    color: var(--club-accent-text);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
 }
 
 .meta {
     display: flex;
+    min-height: 24px;
     align-items: center;
     gap: 8px;
     min-width: 0;
 }
 
 .name {
+    min-width: 0;
     overflow: hidden;
     color: var(--club-text);
     font-size: 14px;
@@ -152,50 +171,34 @@
     white-space: nowrap;
 }
 
-.handle,
+a.name:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
 .date {
+    flex: none;
     color: var(--club-muted);
     font-family: var(--font-space-grotesk), sans-serif;
     font-size: 12px;
     white-space: nowrap;
 }
 
-.date {
-    margin-left: auto;
-    padding-left: 12px;
-}
-
-.pinLabel {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    color: var(--club-accent-text);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-}
-
 .content {
-    margin-top: 6px;
+    margin-top: 4px;
     color: var(--club-text);
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.55;
     overflow-wrap: anywhere;
 }
 
 .itemActions {
-    position: absolute;
-    top: 14px;
-    right: 0;
     display: flex;
+    flex: none;
     gap: 4px;
+    margin-left: auto;
     opacity: 0;
     transition: opacity 0.2s;
-}
-
-.pinned .itemActions {
-    right: 14px;
 }
 
 .item:hover .itemActions,
@@ -205,8 +208,8 @@
 
 .itemActions button {
     display: grid;
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     place-items: center;
     border: 1px solid var(--club-line);
     border-radius: 50%;
@@ -220,15 +223,13 @@
     color: var(--club-text);
 }
 
-.itemActions button:last-child:hover {
+.itemActions .deleteButton:hover {
     border-color: var(--club-danger);
     color: var(--club-danger);
 }
 
 .more {
-    display: flex;
-    justify-content: center;
-    margin-top: 24px;
+    margin-top: 12px;
 }
 
 @media (hover: none) {
@@ -237,40 +238,8 @@
     }
 }
 
-@media (max-width: 767px) {
-    .container {
-        padding-block: 40px 48px;
-    }
-
-    .form {
-        flex-wrap: wrap;
-    }
-
-    .form input {
-        flex-basis: calc(100% - 48px);
-    }
-
-    .form button {
-        margin-left: 48px;
-    }
-
-    .meta {
-        flex-wrap: wrap;
-        row-gap: 3px;
-    }
-
-    .date {
-        margin-left: 0;
-        padding-left: 0;
-    }
-
-    .itemActions,
-    .pinned .itemActions {
-        top: 12px;
-        right: 0;
-    }
-
-    .pinned .itemActions {
-        right: 10px;
+@media (prefers-reduced-motion: reduce) {
+    .itemActions {
+        transition: none;
     }
 }

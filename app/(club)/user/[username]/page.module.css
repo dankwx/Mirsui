@@ -1,0 +1,78 @@
+/* Corpo do perfil: o acervo na coluna larga; artistas e recados na lateral,
+   como a precedência na página de artista. */
+
+.page {
+    padding-bottom: 64px;
+}
+
+.body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
+    align-items: start;
+    gap: clamp(32px, 4.5vw, 64px);
+    padding-top: 48px;
+}
+
+/* Depois de "Chegou cedo", uma linha separa a vitrine do acervo. Sem a
+   vitrine, a faixa dos números já faz essa divisão. */
+.page > section + .body {
+    margin-top: 48px;
+    padding-top: 40px;
+    border-top: 1px solid var(--club-line);
+}
+
+.main {
+    min-width: 0;
+}
+
+.rail {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 48px;
+}
+
+/* Abaixo de 900 px a lateral se desfaz: artistas sobem para antes do
+   acervo (são poucos e dão o retrato da pessoa); recados vão para o fim. */
+@media (max-width: 900px) {
+    .body {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 44px;
+    }
+
+    .rail {
+        display: contents;
+    }
+
+    .artists {
+        order: -1;
+    }
+
+    .main {
+        order: 0;
+    }
+
+    .recados {
+        order: 1;
+        padding-top: 36px;
+        border-top: 1px solid var(--club-line);
+    }
+}
+
+@media (max-width: 767px) {
+    .page {
+        padding-bottom: 48px;
+    }
+
+    .body {
+        gap: 40px;
+        padding-top: 36px;
+    }
+
+    .page > section + .body {
+        margin-top: 36px;
+        padding-top: 32px;
+    }
+}

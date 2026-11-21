@@ -25,7 +25,8 @@ export default function ClubLayoutShell({
         pathname === '/stakes' ||
         pathname === '/stakes/' ||
         pathname.startsWith('/track/') ||
-        pathname.startsWith('/artist/')
+        pathname.startsWith('/artist/') ||
+        pathname.startsWith('/user/')
             ? 'mostarda'
             : undefined
 

@@ -20,6 +20,8 @@ export default function ClubLayoutShell({
     const palette =
         pathname === '/feed' ||
         pathname === '/feed/' ||
+        pathname === '/pilha' ||
+        pathname === '/pilha/' ||
         pathname.startsWith('/track/') ||
         pathname.startsWith('/artist/')
             ? 'mostarda'

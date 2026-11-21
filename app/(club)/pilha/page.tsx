@@ -4,9 +4,9 @@
 //
 // Vive no grupo `(club)`, com o shell, o header e o rodapé compactos de
 // DESIGN.md, na linha "Busca / pilha" do guia: as capas dominam, os filtros
-// são acessíveis e os estados vazios dizem o que aconteceu. O cabeçalho é
-// uma faixa fina de propósito — a pilha é o assunto da página, então o título
-// não disputa tamanho com ela. Dados, cache e metadata não mudaram.
+// são acessíveis e os estados vazios dizem o que aconteceu. Usa a paleta
+// mostarda, e o título segue o tamanho de "Achados" no feed, para as duas
+// abas do cabeçalho combinarem. Dados, cache e metadata não mudaram.
 
 import type { Metadata } from 'next'
 import Pile from '@/components/Pile/Pile'

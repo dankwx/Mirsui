@@ -24,7 +24,11 @@ export default function PublicShell({
         )
     }
     return (
-        <ClubShell className={palettes.palette} defaultTheme="light">
+        <ClubShell
+            className={palettes.palette}
+            defaultTheme="light"
+            palette="mostarda"
+        >
             <main>{children}</main>
             <ClubFooter />
         </ClubShell>

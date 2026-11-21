@@ -55,23 +55,6 @@
     font-weight: 600;
     padding: 12px 0;
 }
-.paletteSwitch {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    width: 108px;
-    min-height: 36px;
-    padding-inline: 8px;
-    border: 1px solid var(--club-line);
-    border-radius: 2px;
-    color: var(--club-accent-text);
-    font-size: 13px;
-    font-weight: 700;
-}
-.paletteSwitch:hover {
-    background: var(--club-surface);
-}
 .themeToggle {
     display: grid;
     place-items: center;
@@ -717,12 +700,6 @@
     .navLinks {
         gap: 20px;
         margin-left: 0;
-    }
-    .paletteSwitch {
-        width: 40px;
-    }
-    .paletteSwitch span {
-        display: none;
     }
     .navActions {
         gap: 17px;

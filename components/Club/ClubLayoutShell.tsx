@@ -17,12 +17,13 @@ export default function ClubLayoutShell({
     isDono: boolean
 }) {
     const pathname = usePathname()
-    let palette: 'grafite' | 'mostarda' | undefined
-    if (pathname === '/feed' || pathname === '/feed/') {
-        palette = 'grafite'
-    } else if (pathname.startsWith('/track/') || pathname.startsWith('/artist/')) {
-        palette = 'mostarda'
-    }
+    const palette =
+        pathname === '/feed' ||
+        pathname === '/feed/' ||
+        pathname.startsWith('/track/') ||
+        pathname.startsWith('/artist/')
+            ? 'mostarda'
+            : undefined
 
     return (
         <ClubShell

@@ -1,7 +1,5 @@
 import { AuthProvider } from '@/components/AuthProvider/AuthProvider'
-import ClubHeader from '@/components/Club/ClubHeader'
-import ClubShell from '@/components/Club/ClubShell'
-import ClubFooter from '@/components/Landing/ClubFooter'
+import ClubLayoutShell from '@/components/Club/ClubLayoutShell'
 import { getSessionProfile } from '@/lib/sessionProfile'
 
 export default async function ClubLayout({
@@ -13,11 +11,9 @@ export default async function ClubLayout({
 
     return (
         <AuthProvider>
-            <ClubShell>
-                <ClubHeader userProfile={userProfile} isDono={dono} />
-                <main style={{ flex: 1 }}>{children}</main>
-                <ClubFooter compact />
-            </ClubShell>
+            <ClubLayoutShell userProfile={userProfile} isDono={dono}>
+                {children}
+            </ClubLayoutShell>
         </AuthProvider>
     )
 }

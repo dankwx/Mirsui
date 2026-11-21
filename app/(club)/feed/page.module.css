@@ -1,29 +1,32 @@
 .page {
-    padding-block: 32px 64px;
+    padding-bottom: 64px;
+}
+
+.heading {
+    padding-top: clamp(28px, 4vw, 56px);
 }
 
 .heading h1 {
-    color: var(--club-text);
     font-family: var(--font-archivo), sans-serif;
-    font-size: clamp(26px, 2.6vw, 32px);
-    font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: -0.045em;
+    font-size: clamp(38px, 4.4vw, 62px);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.06em;
 }
 
 .heading p {
-    margin-top: 6px;
+    margin-top: 10px;
     color: var(--club-muted);
-    font-size: 15px;
-    line-height: 1.55;
+    font-size: 16px;
+    line-height: 1.4;
 }
 
 .body {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-columns: minmax(0, 1fr) clamp(264px, 26%, 324px);
     align-items: start;
-    gap: 64px;
-    margin-top: 24px;
+    gap: clamp(32px, 4.5vw, 64px);
+    margin-top: 30px;
 }
 
 .rail {
@@ -32,31 +35,21 @@
     min-width: 0;
 }
 
-@media (max-width: 1100px) {
-    .body {
-        grid-template-columns: minmax(0, 1fr) 280px;
-        gap: 40px;
-    }
-}
-
 /* Abaixo de 1024 px as duas colunas ficam estreitas demais para o destaque;
    a pilha desce para depois do feed. */
 @media (max-width: 1023px) {
     .body {
-        display: flex;
-        flex-direction: column;
-        gap: 40px;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .rail {
         position: static;
-        width: 100%;
     }
 }
 
 @media (max-width: 767px) {
     .page {
-        padding-block: 24px 48px;
+        padding-bottom: 48px;
     }
 
     .heading p {
@@ -65,6 +58,6 @@
 
     .body {
         gap: 36px;
-        margin-top: 18px;
+        margin-top: 20px;
     }
 }

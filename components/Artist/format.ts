@@ -28,13 +28,8 @@ export function ano(date?: string | null): string | null {
     return /^\d{4}$/.test(y) ? y : null
 }
 
-/** "1 lançamento" · "36 lançamentos" */
-export function plural(n: number, um: string, varios: string): string {
-    return `${n.toLocaleString('pt-BR')} ${n === 1 ? um : varios}`
-}
-
 /**
- * A foto grande do Deezer vem em 1000×1000; para um círculo de 168 px o
+ * A foto grande do Deezer vem em 1000×1000; para o retrato na página o
  * variante de 500 basta e carrega bem antes. Só troca quando reconhece o
  * padrão; qualquer outra URL passa intacta.
  */

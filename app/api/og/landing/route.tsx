@@ -14,10 +14,10 @@ import {
 
 export const runtime = 'edge'
 
-const BG = '#f7f7f2'
-const ACC = '#db4b27'
-const TEXT = '#242522'
-const MUTED = '#64665e'
+const BG = '#f9d454'
+const ACC = '#775500'
+const TEXT = '#2d230f'
+const MUTED = '#473710'
 
 export async function GET() {
     return new ImageResponse(
@@ -67,7 +67,7 @@ export async function GET() {
                     <div
                         style={{
                             display: 'flex',
-                            fontSize: '78px',
+                            fontSize: '66px',
                             fontWeight: 800,
                             letterSpacing: '-3.6px',
                             lineHeight: 1.04,
@@ -75,7 +75,7 @@ export async function GET() {
                             maxWidth: '900px',
                         }}
                     >
-                        Você ouviu primeiro. O mundo vem depois.
+                        Sensação de ter descoberto algo antes de virar assunto.
                     </div>
                     <div
                         style={{
@@ -86,7 +86,7 @@ export async function GET() {
                             color: MUTED,
                         }}
                     >
-                        Descubra música. Registre seus achados.
+                        Um clube de descobertas musicais.
                     </div>
                 </div>
 
@@ -115,7 +115,7 @@ export async function GET() {
                             color: TEXT,
                         }}
                     >
-                        SEU OUVIDO CHEGA ANTES.
+                        SUBSTANTIVO INVENTADO
                     </div>
                 </div>
             </div>

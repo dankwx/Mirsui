@@ -12,38 +12,32 @@ export default function ComoFunciona() {
         <section id="como" className={styles.how} aria-labelledby="how-title">
             <div className={`${styles.container} ${styles.howGrid}`}>
                 <div className={styles.howCopy}>
-                    <p className={styles.eyebrow}>Bom gosto deixa rastro.</p>
-                    <h2 id="how-title">
-                        O famoso
-                        <br />
-                        “eu já ouvia”.
-                        <br />
-                        <span>Agora, com prova.</span>
-                    </h2>
-                    <p>
-                        Tem uma música que ninguém conhece ainda?
-                        <br />
-                        Dê a ela um lugar no seu acervo.
-                    </p>
+                    <h2 id="how-title">Como guardar um achado</h2>
                     <ol className={styles.steps}>
                         <li>
                             <span>01</span>
                             <div>
-                                <h3>Achou um som? Salva.</h3>
-                                <p>Busque uma faixa e registre a descoberta.</p>
+                                <h3>Busque a faixa</h3>
+                                <p>
+                                    Pode ser uma faixa que você acabou de
+                                    descobrir ou uma que já vive no repeat.
+                                </p>
                             </div>
                         </li>
                         <li>
                             <span>02</span>
                             <div>
-                                <h3>O momento fica.</h3>
-                                <p>Sua posição e a data ficam no registro.</p>
+                                <h3>Registre a descoberta</h3>
+                                <p>
+                                    O Mirsui guarda a data e sua posição entre
+                                    quem registrou a faixa.
+                                </p>
                             </div>
                         </li>
                         <li>
                             <span>03</span>
                             <div>
-                                <h3>O acervo é a sua cara.</h3>
+                                <h3>Mostre seu acervo</h3>
                                 <p>
                                     Compartilhe seus achados e acompanhe os de
                                     outras pessoas.
@@ -85,7 +79,7 @@ export default function ComoFunciona() {
                                 <strong>
                                     {saved
                                         ? 'Você chegou primeiro.'
-                                        : 'Todo achado começa aqui.'}
+                                        : 'Sua vez de testar'}
                                 </strong>
                                 <p>
                                     {saved

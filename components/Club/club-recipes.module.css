@@ -5,7 +5,7 @@
     gap: 8px;
     padding: 12px 18px;
     border: 1px solid var(--club-text);
-    border-radius: 7px;
+    border-radius: var(--club-button-radius, 7px);
     color: var(--club-on-button);
     background: var(--club-text);
     font: inherit;
@@ -42,7 +42,7 @@
     gap: 8px;
     padding: 11px 16px;
     border: 1px solid var(--club-line);
-    border-radius: 7px;
+    border-radius: var(--club-button-radius, 7px);
     color: var(--club-text);
     background: transparent;
     font: inherit;

@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import LandingFooter from '@/components/Footer/LandingFooter'
 import ClubFooter from './ClubFooter'
 import ClubShell from '@/components/Club/ClubShell'
-import styles from './Club.module.css'
+import palettes from '@/components/Club/ClubPalettes.module.css'
 
 /** Keep the redesign on the home; legal pages retain their existing chrome. */
 export default function PublicShell({
@@ -24,7 +24,7 @@ export default function PublicShell({
         )
     }
     return (
-        <ClubShell>
+        <ClubShell className={palettes.palette} defaultTheme="light">
             <main>{children}</main>
             <ClubFooter />
         </ClubShell>

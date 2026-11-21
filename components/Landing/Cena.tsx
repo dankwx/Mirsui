@@ -21,8 +21,8 @@ export default function Cena({
             aria-labelledby="scene-title"
         >
             <div className={styles.sectionHeading}>
-                <h2 id="scene-title">Música boa circula.</h2>
-                <p>Por trás de cada achado, alguém que deu o play antes.</p>
+                <h2 id="scene-title">O que a galera achou</h2>
+                <p>Faixas que a comunidade salvou recentemente.</p>
             </div>
             {achados.length > 0 ? (
                 <div className={styles.activityGrid}>
@@ -116,7 +116,7 @@ export default function Cena({
                             ))}
                         </div>
                     )}
-                    <p>A cena é pequena. O repertório, não.</p>
+                    {pessoas.length > 0 && <p>Quem anda garimpando</p>}
                 </div>
                 <Link href="/feed" className={styles.textLink}>
                     Ver todos os achados <ArrowUpRight size={17} />

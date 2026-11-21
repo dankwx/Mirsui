@@ -1,113 +1,97 @@
-/* ------------------------------------------------------------ abertura */
-
 .hero {
-    padding-block: 44px 40px;
+    padding-block: clamp(28px, 4vw, 56px);
+    color: var(--home-masthead-ink);
+    background: var(--home-masthead);
 }
 
 .heroGrid {
     display: grid;
-    grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
-    align-items: start;
-    gap: 56px;
+    grid-template-columns: clamp(168px, 19vw, 252px) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(28px, 4vw, 64px);
 }
 
-.coverColumn {
-    min-width: 0;
-}
-
-.cover {
-    box-shadow:
-        0 24px 40px -22px #20201e80,
-        1px 1px 2px #20201e25;
+.heroGrid > .cover {
+    box-shadow: 0 18px 32px -16px rgb(0 0 0 / 65%);
 }
 
 .info {
     min-width: 0;
-    padding-top: 4px;
 }
 
 .eyebrow {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 0;
-    color: var(--club-muted);
-    font-size: 12px;
-    font-weight: 600;
+    align-items: baseline;
+    gap: 4px 0;
+    color: var(--home-masthead-muted);
+    font-size: 13px;
+    font-weight: 700;
 }
 
 .eyebrow > span + span::before {
     content: '·';
-    padding-inline: 8px;
-}
-
-.eyebrow > span:first-child {
-    color: var(--club-accent-text);
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    font-size: 11px;
+    padding-inline: 9px;
 }
 
 .title {
-    margin-top: 12px;
-    color: var(--club-text);
+    max-width: 20ch;
+    margin-top: 9px;
     font-family: var(--font-archivo), sans-serif;
-    font-size: clamp(34px, 4.6vw, 60px);
-    font-weight: 700;
-    line-height: 1.02;
-    letter-spacing: -0.05em;
+    font-size: clamp(42px, 6vw, 86px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.065em;
     overflow-wrap: anywhere;
 }
 
 .artists {
-    margin-top: 12px;
-    color: var(--club-text);
-    font-size: 18px;
+    margin-top: clamp(16px, 2.2vw, 28px);
+    padding-top: 13px;
+    border-top: 1px solid var(--home-masthead-rule);
+    color: var(--home-masthead-muted);
+    font-size: clamp(16px, 1.7vw, 22px);
     font-weight: 600;
     line-height: 1.4;
+    overflow-wrap: anywhere;
 }
 
 .artists a {
-    color: inherit;
+    color: var(--home-masthead-ink);
     text-underline-offset: 4px;
 }
 
-.artists a:hover {
+.artists a:hover,
+.artists a:focus-visible {
     text-decoration: underline;
 }
 
-.album {
-    color: var(--club-muted);
-    font-weight: 400;
+.hero .artists a:focus-visible {
+    outline-color: var(--home-masthead-ink);
 }
-
-.player {
-    max-width: 640px;
-    margin-top: 30px;
-}
-
-/* --------------------------------------------------------------- ficha */
 
 .specs {
-    border-top: 1px solid var(--club-line);
     border-bottom: 1px solid var(--club-line);
+    background: var(--club-surface);
 }
 
 .specsList {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(136px, 1fr));
     margin-block: 0;
+    padding-block: 15px;
 }
 
 .specsList > div {
     min-width: 0;
-    flex: 1 1 140px;
-    padding: 18px 28px 18px 0;
+    padding-inline: 20px;
+}
+
+.specsList > div:first-child {
+    padding-left: 0;
 }
 
 .specsList > div + div {
-    padding-left: 28px;
     border-left: 1px solid var(--club-line);
 }
 
@@ -118,109 +102,102 @@
 }
 
 .specsList dd {
-    margin: 6px 0 0;
-    overflow: hidden;
-    color: var(--club-text);
+    margin: 3px 0 0;
     font-size: 15px;
-    font-weight: 600;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
 }
-
-/* --------------------------------------------------------------- corpo */
 
 .body {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-columns: minmax(0, 1fr) clamp(278px, 28%, 348px);
+    grid-template-areas:
+        'listening receipt'
+        'discovery receipt';
+    grid-template-rows: min-content 1fr;
     align-items: start;
-    gap: 64px;
-    padding-block: 52px 60px;
+    gap: 32px clamp(32px, 4.5vw, 64px);
+    padding-block: 34px 60px;
+}
+
+.listening {
+    grid-area: listening;
+    min-width: 0;
 }
 
 .rail {
     position: sticky;
     top: 92px;
+    grid-area: receipt;
     min-width: 0;
 }
 
-@media (max-width: 1100px) {
-    .heroGrid {
-        grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
-        gap: 40px;
-    }
-
-    .body {
-        grid-template-columns: minmax(0, 1fr) 300px;
-        gap: 40px;
-    }
-
-    /* Abaixo de 1100 px a ficha não cabe numa linha: vira faixa rolável em vez
-       de quebrar e deixar um item órfão com divisor pela metade. */
-    .specsList {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        scrollbar-width: thin;
-    }
-
-    .specsList > div {
-        flex: 0 0 auto;
-        min-width: 120px;
-        max-width: 240px;
-    }
+.discovery {
+    grid-area: discovery;
+    min-width: 0;
+    padding-top: 26px;
+    border-top: 1px solid var(--club-line);
 }
 
 @media (max-width: 767px) {
-    .hero {
-        padding-block: 28px 32px;
-    }
-
     .heroGrid {
-        display: block;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 20px;
     }
 
-    .coverColumn {
-        width: min(100%, 260px);
-    }
-
-    .info {
-        margin-top: 22px;
-        padding-top: 0;
+    .heroGrid > .cover {
+        width: clamp(130px, 37vw, 192px);
     }
 
     .title {
-        margin-top: 10px;
+        font-size: clamp(36px, 9.5vw, 56px);
     }
 
-    .artists {
-        font-size: 16px;
-    }
-
-    .player {
-        margin-top: 24px;
+    .specsList {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        row-gap: 14px;
     }
 
     .specsList > div {
-        padding: 14px 20px 14px 0;
+        padding-inline: 14px;
     }
 
-    .specsList > div + div {
-        padding-left: 20px;
-    }
-
-    .specsList dd {
-        font-size: 14px;
+    .specsList > div:nth-child(odd) {
+        padding-left: 0;
+        border-left: 0;
     }
 
     .body {
-        display: flex;
-        flex-direction: column;
-        gap: 36px;
-        padding-block: 36px 44px;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            'listening'
+            'receipt'
+            'discovery';
+        grid-template-rows: none;
+        padding-block: 24px 44px;
     }
 
     .rail {
         position: static;
-        order: -1;
+    }
+
+    .discovery {
+        padding-top: 22px;
+    }
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+    .heroGrid {
+        grid-template-columns: clamp(136px, 26vw, 180px) minmax(0, 1fr);
+        gap: 24px;
+    }
+
+    .heroGrid > .cover {
         width: 100%;
+    }
+
+    .title {
+        font-size: clamp(36px, 7vw, 52px);
     }
 }

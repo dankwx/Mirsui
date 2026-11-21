@@ -3,7 +3,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { Moon, Sun } from 'lucide-react'
 
-export default function ThemeToggle({ className }: { className?: string }) {
+export default function ThemeToggle({
+    className,
+    defaultTheme = 'auto',
+}: {
+    className?: string
+    defaultTheme?: 'auto' | 'light'
+}) {
     const [dark, setDark] = useState(false)
     const preference = useRef<string | null>(null)
 
@@ -20,7 +26,9 @@ export default function ThemeToggle({ className }: { className?: string }) {
         const update = () => {
             const next =
                 preference.current === 'dark' ||
-                (preference.current !== 'light' && media.matches)
+                (preference.current !== 'light' &&
+                    defaultTheme === 'auto' &&
+                    media.matches)
             setDark(next)
             if (shell) shell.dataset.clubTheme = next ? 'dark' : 'light'
         }
@@ -28,7 +36,7 @@ export default function ThemeToggle({ className }: { className?: string }) {
         update()
         media.addEventListener('change', update)
         return () => media.removeEventListener('change', update)
-    }, [])
+    }, [defaultTheme])
 
     const toggle = () => {
         const next = !dark

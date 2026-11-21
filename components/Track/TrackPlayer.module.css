@@ -105,7 +105,7 @@
 .unavailable {
     margin-top: 0;
     padding: 14px 16px;
-    border-radius: 7px;
+    border-radius: var(--club-button-radius, 7px);
     background: var(--club-surface);
     font-size: 14px;
 }

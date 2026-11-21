@@ -42,13 +42,15 @@ export default async function FeedPage() {
     // usando o token que authHeaders() manda. Não há segunda ida ao banco.
 
     return (
-        <div className={`${shellStyles.container} ${styles.page}`}>
+        <div className={styles.page}>
             <header className={styles.heading}>
-                <h1>Achados</h1>
-                <p>Quem ouviu primeiro o quê, na ordem em que aconteceu.</p>
+                <div className={shellStyles.container}>
+                    <h1>Achados</h1>
+                    <p>Quem ouviu primeiro o quê, na ordem em que aconteceu.</p>
+                </div>
             </header>
 
-            <div className={styles.body}>
+            <div className={`${shellStyles.container} ${styles.body}`}>
                 <Feed
                     initialPosts={feed.posts}
                     currentUserId={currentUserId}

@@ -9,7 +9,7 @@ import type { Metadata } from 'next'
 
 const TITLE = 'mirsui'
 const DESCRIPTION =
-    'Salve a música antes dela estourar. Fica registrado que a descoberta foi sua.'
+    'Um clube pra descobrir música e registrar quando você ouviu. Sabe aquela sensação de ter chegado antes? Mirsui.'
 
 export const metadata: Metadata = {
     title: TITLE,

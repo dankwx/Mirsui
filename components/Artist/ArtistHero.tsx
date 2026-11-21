@@ -13,7 +13,7 @@ import FotoDePerfil from '@/components/FotoDePerfil'
 import shellStyles from '@/components/Club/ClubShell.module.css'
 import recipes from '@/components/Club/club-recipes.module.css'
 import type { ArtistaDaVitrine, Cobertura } from '@/utils/artistPageService'
-import { fotoMenor, pessoas, plural } from './format'
+import { fotoMenor, pessoas } from './format'
 import styles from './ArtistHero.module.css'
 
 interface ArtistHeroProps {
@@ -36,60 +36,46 @@ export default function ArtistHero({
     const inicial = artista.name.trim().slice(0, 1).toUpperCase() || '·'
 
     return (
-        <header className={styles.hero}>
-            <div className={`${shellStyles.container} ${styles.layout}`}>
-                <div className={styles.photo}>
-                    <FotoDePerfil
-                        src={foto}
-                        loading="eager"
-                        className={styles.photoImage}
-                    >
-                        <span
-                            className={styles.photoFallback}
-                            role="img"
-                            aria-label={`Sem foto de ${artista.name}`}
+        <>
+            <header className={styles.hero}>
+                <div className={`${shellStyles.container} ${styles.layout}`}>
+                    <div className={styles.photo}>
+                        <FotoDePerfil
+                            src={foto}
+                            loading="eager"
+                            className={styles.photoImage}
                         >
-                            {inicial}
-                        </span>
-                    </FotoDePerfil>
-                </div>
-
-                <div className={styles.copy}>
-                    <p className={styles.eyebrow}>
-                        <span>Artista</span>
-                        {fas && (
-                            <span>
-                                {fas} {fa} no Deezer
+                            <span
+                                className={styles.photoFallback}
+                                role="img"
+                                aria-label={`Sem foto de ${artista.name}`}
+                            >
+                                {inicial}
                             </span>
-                        )}
-                        {lancamentos > 0 && (
-                            <span>
-                                {plural(
-                                    lancamentos,
-                                    'lançamento',
-                                    'lançamentos'
-                                )}
-                                {cobertura === 'acervo' ? ' no acervo' : ''}
-                            </span>
-                        )}
-                    </p>
+                        </FotoDePerfil>
+                    </div>
 
-                    <h1 className={styles.name}>{artista.name}</h1>
+                    <div className={styles.copy}>
+                        <p className={styles.eyebrow}>Artista</p>
 
-                    <div className={styles.actions}>
-                        <a
-                            href={artista.external_urls.spotify}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={recipes.textLink}
-                        >
-                            Ouvir no Deezer
-                            <ArrowUpRight size={17} aria-hidden="true" />
-                        </a>
+                        <h1 className={styles.name}>{artista.name}</h1>
+
+                        <div className={styles.actions}>
+                            <a
+                                href={artista.external_urls.spotify}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`${recipes.textLink} ${styles.listenLink}`}
+                            >
+                                Ouvir no Deezer
+                                <ArrowUpRight size={17} aria-hidden="true" />
+                            </a>
+                        </div>
                     </div>
                 </div>
-
-                <dl className={styles.stats}>
+            </header>
+            <div className={styles.statsBand}>
+                <dl className={`${shellStyles.container} ${styles.stats}`}>
                     {fas && (
                         <div className={recipes.stat}>
                             <dt className={recipes.statLabel}>
@@ -103,9 +89,7 @@ export default function ArtistHero({
                             className={`${recipes.stat} ${recipes.statAccent}`}
                         >
                             <dt className={recipes.statLabel}>
-                                audiência média das mais ouvidas,
-                                <br />
-                                de 0 a 100
+                                audiência média das mais ouvidas, de 0 a 100
                             </dt>
                             <dd className={recipes.statValue}>
                                 {artista.popularity}
@@ -126,6 +110,6 @@ export default function ArtistHero({
                     </div>
                 </dl>
             </div>
-        </header>
+        </>
     )
 }

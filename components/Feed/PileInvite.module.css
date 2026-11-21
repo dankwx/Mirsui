@@ -1,8 +1,7 @@
 .section {
     min-width: 0;
-    padding: 22px 22px 24px;
-    border-radius: 7px;
-    background: var(--club-surface);
+    padding-top: 20px;
+    border-top: 1px solid var(--club-line);
 }
 
 .title {
@@ -65,20 +64,11 @@
 }
 
 .cta {
-    width: 100%;
     margin-top: 22px;
 }
 
 @media (max-width: 767px) {
-    .section {
-        padding: 20px 18px 22px;
-    }
-
     .strip {
         max-width: 320px;
-    }
-
-    .cta {
-        width: auto;
     }
 }

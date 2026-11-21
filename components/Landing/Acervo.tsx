@@ -36,11 +36,7 @@ export default function Acervo({ generos }: { generos: GeneroDoAcervo[] }) {
             aria-labelledby="discovery-title"
         >
             <div className={styles.sectionHeading}>
-                <h2 id="discovery-title">Saia do repeat.</h2>
-                <p>
-                    Seu próximo favorito pode estar onde você ainda não
-                    procurou.
-                </p>
+                <h2 id="discovery-title">O que tem na pilha</h2>
             </div>
             <div
                 className={styles.filters}
@@ -101,7 +97,7 @@ export default function Acervo({ generos }: { generos: GeneroDoAcervo[] }) {
                 <p>
                     {selected
                         ? `${selected.total.toLocaleString('pt-BR')} faixas de ${selected.nome} no acervo.`
-                        : 'Sons brasileiros, ouvidos bem abertos.'}
+                        : 'Uma seleção de sons brasileiros.'}
                 </p>
                 <Link className={styles.textLink} href="/pilha">
                     Revirar a pilha <ArrowUpRight size={17} />

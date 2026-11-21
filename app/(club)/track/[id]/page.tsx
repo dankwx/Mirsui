@@ -343,19 +343,16 @@ export default async function TrackDetailsPage({
             {/* ============ ABERTURA ============ */}
             <header className={styles.hero}>
                 <div className={`${shellStyles.container} ${styles.heroGrid}`}>
-                    <div className={styles.coverColumn}>
-                        <RecordCover
-                            src={faixa.coverUrl}
-                            alt={`Capa de ${faixa.albumName || faixa.title}`}
-                            className={`${recipes.sleeve} ${styles.cover}`}
-                            priority
-                        />
-                    </div>
+                    <RecordCover
+                        src={faixa.coverUrl}
+                        alt={`Capa de ${faixa.albumName || faixa.title}`}
+                        className={`${recipes.sleeve} ${styles.cover}`}
+                        priority
+                    />
 
                     <div className={styles.info}>
                         <p className={styles.eyebrow}>
                             <span>Faixa</span>
-                            {genre && <span>{genre}</span>}
                             {releaseYear && (
                                 <span className={recipes.smallNumber}>
                                     {releaseYear}
@@ -386,41 +383,7 @@ export default async function TrackDetailsPage({
                                     {index < faixa.artists.length - 1 && ', '}
                                 </span>
                             ))}
-                            {faixa.albumName && (
-                                <span className={styles.album}>
-                                    {' '}
-                                    · {faixa.albumName}
-                                </span>
-                            )}
                         </p>
-
-                        <div className={styles.player}>
-                            <TrackPlayer
-                                previewUrl={previaDoDeezer}
-                                videoId={youtubeVideoId}
-                                trackTitle={faixa.title}
-                                artistName={faixa.artistNames}
-                            />
-                        </div>
-
-                        {trackUri && (
-                            <TrackActions
-                                trackUri={trackUri}
-                                isrc={isrc}
-                                spotifyTrackId={faixa.spotifyTrackId}
-                                trackUrl={linkExterno}
-                                shareUrl={shareUrl}
-                                trackTitle={faixa.title}
-                                artistName={faixa.artistNames}
-                                albumName={faixa.albumName || ''}
-                                popularity={faixa.popularity ?? 0}
-                                trackThumbnail={faixa.coverUrl || ''}
-                                totalClaims={totalClaims}
-                                isLoggedIn={isLoggedIn}
-                                initialClaimed={hasUserClaimed}
-                                userPosition={userClaimPosition}
-                            />
-                        )}
                     </div>
                 </div>
             </header>
@@ -441,13 +404,34 @@ export default async function TrackDetailsPage({
                 </section>
             )}
 
-            {/* ============ REGISTRO E QUEM CHEGOU ANTES ============ */}
             <div className={`${shellStyles.container} ${styles.body}`}>
-                <QuemSalvou
-                    salvamentos={topClaimers}
-                    total={totalClaims}
-                    viewerId={viewerId}
-                />
+                <div className={styles.listening}>
+                    <TrackPlayer
+                        previewUrl={previaDoDeezer}
+                        videoId={youtubeVideoId}
+                        trackTitle={faixa.title}
+                        artistName={faixa.artistNames}
+                    />
+
+                    {trackUri && (
+                        <TrackActions
+                            trackUri={trackUri}
+                            isrc={isrc}
+                            spotifyTrackId={faixa.spotifyTrackId}
+                            trackUrl={linkExterno}
+                            shareUrl={shareUrl}
+                            trackTitle={faixa.title}
+                            artistName={faixa.artistNames}
+                            albumName={faixa.albumName || ''}
+                            popularity={faixa.popularity ?? 0}
+                            trackThumbnail={faixa.coverUrl || ''}
+                            totalClaims={totalClaims}
+                            isLoggedIn={isLoggedIn}
+                            initialClaimed={hasUserClaimed}
+                            userPosition={userClaimPosition}
+                        />
+                    )}
+                </div>
 
                 <div className={styles.rail}>
                     <TrackReceipt
@@ -460,6 +444,14 @@ export default async function TrackDetailsPage({
                         totalClaims={totalClaims}
                         popularity={faixa.popularity}
                         medindoDesde={curva?.observedSince ?? null}
+                    />
+                </div>
+
+                <div className={styles.discovery}>
+                    <QuemSalvou
+                        salvamentos={topClaimers}
+                        total={totalClaims}
+                        viewerId={viewerId}
                     />
                 </div>
             </div>

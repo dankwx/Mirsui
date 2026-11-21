@@ -1,31 +1,25 @@
 .hero {
-    border-bottom: 1px solid var(--club-line);
+    padding-block: clamp(28px, 4vw, 56px);
+    color: var(--home-masthead-ink);
+    background: var(--home-masthead);
 }
 
 .layout {
     display: grid;
-    grid-template-columns: 168px minmax(0, 1fr);
-    grid-template-areas:
-        'photo copy'
-        'stats stats';
+    grid-template-columns: clamp(144px, 17vw, 220px) minmax(0, 1fr);
     align-items: center;
-    column-gap: 36px;
-    padding-block: 44px 0;
+    gap: clamp(24px, 4vw, 56px);
 }
 
 .photo {
-    grid-area: photo;
     display: grid;
-    width: 168px;
-    height: 168px;
-    place-items: center;
+    width: 100%;
+    aspect-ratio: 1;
     overflow: hidden;
     border-radius: 50%;
-    color: var(--club-accent-text);
-    background: var(--club-accent-soft);
-    box-shadow:
-        0 0 0 1px var(--club-line),
-        0 18px 30px -22px #20201e80;
+    color: var(--home-masthead-ink);
+    background: color-mix(in srgb, currentColor 12%, transparent);
+    box-shadow: 0 18px 32px -16px rgb(0 0 0 / 55%);
 }
 
 .photoImage,
@@ -39,72 +33,70 @@
 
 .photoFallback {
     font-family: var(--font-archivo), sans-serif;
-    font-size: 64px;
-    font-weight: 800;
+    font-size: clamp(44px, 6vw, 88px);
+    font-weight: 900;
     line-height: 1;
 }
 
 .copy {
-    grid-area: copy;
     min-width: 0;
 }
 
 .eyebrow {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 0;
-    color: var(--club-muted);
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.eyebrow > span + span::before {
-    content: '·';
-    padding-inline: 8px;
-}
-
-.eyebrow > span:first-child {
-    color: var(--club-accent-text);
-    font-size: 11px;
+    color: var(--home-masthead-muted);
+    font-size: 13px;
     font-weight: 700;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
 }
 
 .name {
-    margin-top: 10px;
-    color: var(--club-text);
+    max-width: 20ch;
+    margin-top: 9px;
     font-family: var(--font-archivo), sans-serif;
-    font-size: clamp(34px, 4.6vw, 60px);
-    font-weight: 700;
-    line-height: 1.02;
-    letter-spacing: -0.05em;
+    font-size: clamp(42px, 6vw, 86px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.065em;
     overflow-wrap: anywhere;
 }
 
 .actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 16px;
-    margin-top: 14px;
+    margin-top: clamp(16px, 2.2vw, 28px);
+    padding-top: 5px;
+    border-top: 1px solid var(--home-masthead-rule);
+}
+
+.hero .listenLink {
+    color: inherit;
+}
+
+.hero .listenLink:focus-visible {
+    outline-color: var(--home-masthead-ink);
+    text-decoration: underline;
+}
+
+.statsBand {
+    border-bottom: 1px solid var(--club-line);
+    background: var(--club-surface);
 }
 
 .stats {
-    grid-area: stats;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px 48px;
-    margin: 32px 0 0;
-    padding-block: 22px 28px;
-    border-top: 1px solid var(--club-line);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    padding-block: 16px;
 }
 
-/* `dl` por semântica: no DOM o rótulo (dt) vem antes do valor (dd), como o
-   HTML pede. A receita `.stat` quer o valor em cima, então a coluna inverte. */
 .stats > div {
     flex-direction: column-reverse;
+    justify-content: flex-end;
+    padding-inline: 24px;
+}
+
+.stats > div:first-child {
+    padding-left: 0;
+}
+
+.stats > div + div {
+    border-left: 1px solid var(--club-line);
 }
 
 .stats dd {
@@ -113,46 +105,37 @@
 
 @media (max-width: 767px) {
     .layout {
-        grid-template-columns: 104px minmax(0, 1fr);
-        column-gap: 20px;
-        padding-top: 28px;
-    }
-
-    .photo {
-        width: 104px;
-        height: 104px;
-        align-self: start;
-    }
-
-    .photoFallback {
-        font-size: 40px;
+        grid-template-columns: clamp(112px, 24vw, 160px) minmax(0, 1fr);
+        gap: 20px;
     }
 
     .name {
-        margin-top: 8px;
+        font-size: clamp(36px, 7vw, 56px);
     }
 
-    .actions {
-        margin-top: 10px;
+    .stats > div {
+        padding-inline: 12px;
     }
 
-    .stats {
-        gap: 18px 32px;
-        margin-top: 24px;
-        padding-block: 20px 24px;
+    .stats > div:last-child {
+        padding-right: 0;
+    }
+
+    .stats dd {
+        font-size: 24px;
     }
 }
 
-@media (max-width: 389px) {
+@media (max-width: 479px) {
     .layout {
         grid-template-columns: minmax(0, 1fr);
-        grid-template-areas:
-            'photo'
-            'copy'
-            'stats';
     }
 
-    .copy {
-        margin-top: 18px;
+    .photo {
+        width: clamp(112px, 34vw, 144px);
+    }
+
+    .name {
+        font-size: clamp(36px, 9.5vw, 48px);
     }
 }

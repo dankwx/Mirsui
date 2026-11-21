@@ -34,12 +34,8 @@ export default function FeedHighlight({
                 />
             </Link>
 
-            <div className={styles.head}>
-                <p className={styles.eyebrow}>Último achado</p>
-                <Byline post={post} isOwn={isOwn} size="large" />
-            </div>
-
             <div className={styles.body}>
+                <p className={styles.eyebrow}>Último achado</p>
                 <h2 className={styles.title}>
                     <Link href={href}>{post.track_title}</Link>
                 </h2>
@@ -50,6 +46,9 @@ export default function FeedHighlight({
                     )}
                 </p>
 
+                <div className={styles.byline}>
+                    <Byline post={post} isOwn={isOwn} size="large" />
+                </div>
                 {nota && <ClaimNote text={nota} />}
 
                 <div className={styles.footer}>

@@ -116,7 +116,7 @@
 
 .empty {
     padding: 18px 20px;
-    border-radius: 7px;
+    border-radius: var(--club-button-radius, 7px);
     background: var(--club-surface);
 }
 

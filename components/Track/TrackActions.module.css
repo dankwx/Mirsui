@@ -16,7 +16,7 @@
     gap: 8px;
     padding: 11px 16px;
     border: 1px solid var(--club-line);
-    border-radius: 7px;
+    border-radius: var(--club-button-radius, 7px);
     color: var(--club-text);
     background: var(--club-surface);
     font-size: 14px;
@@ -55,7 +55,7 @@
     margin-top: 16px;
     padding: 16px;
     border: 1px solid var(--club-line);
-    border-radius: 7px;
+    border-radius: var(--club-button-radius, 7px);
     background: var(--club-paper);
 }
 
@@ -69,7 +69,7 @@
     width: 100%;
     padding: 11px 12px;
     border: 1px solid var(--club-line);
-    border-radius: 6px;
+    border-radius: var(--club-button-radius, 7px);
     outline: none;
     color: var(--club-text);
     background: var(--club-bg);

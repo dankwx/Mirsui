@@ -50,7 +50,7 @@
     height: 40px;
     padding: 0 12px;
     border: 1px solid var(--club-line);
-    border-radius: 6px;
+    border-radius: var(--club-button-radius, 6px);
     color: var(--club-text);
     background: var(--club-bg);
     font: inherit;

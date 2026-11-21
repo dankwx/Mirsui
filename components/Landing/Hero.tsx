@@ -1,17 +1,15 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowDown, ArrowUpRight } from 'lucide-react'
 import AuthModalTrigger from '@/components/AuthModalTrigger/AuthModalTrigger'
 import MirsuiLogo from '@/components/MirsuiLogo/MirsuiLogo'
-import { enderecoDaFaixa } from '@/utils/trackHref'
-import { editorialRecords } from './editorialRecords'
 import ThemeToggle from '@/components/Club/ThemeToggle'
+import PaletteSwitch from '@/components/Club/PaletteSwitch'
 import styles from './Club.module.css'
 
 export default function Hero() {
     return (
-        <header className={styles.hero}>
-            <a className={styles.skipLink} href="#acervo">
+        <header>
+            <a className={styles.skipLink} href="#verbete">
                 Pular para o conteúdo
             </a>
             <nav
@@ -36,7 +34,8 @@ export default function Hero() {
                     <a href="#cena">A cena</a>
                 </div>
                 <div className={styles.navActions}>
-                    <ThemeToggle className={styles.themeToggle} />
+                    <PaletteSwitch className={styles.paletteSwitch} />
+                    <ThemeToggle className={styles.themeToggle} defaultTheme="light" />
                     <AuthModalTrigger mode="login" className={styles.login}>
                         Entrar
                     </AuthModalTrigger>
@@ -48,66 +47,48 @@ export default function Hero() {
                     </AuthModalTrigger>
                 </div>
             </nav>
-            <div className={`${styles.container} ${styles.heroCopy}`}>
-                <p className={styles.eyebrow}>Seu ouvido chega antes.</p>
-                <h1>
-                    Você ouviu primeiro.
-                    <br />
-                    <span>O mundo vem depois.</span>
-                </h1>
-                <p className={styles.heroDescription}>
-                    Descubra música, registre seus achados e encontre gente
-                    <br className={styles.desktopBreak} /> que também escuta
-                    fora do óbvio.
-                </p>
-                <div className={styles.heroActions}>
-                    <AuthModalTrigger mode="signup" className={styles.button}>
-                        Criar meu acervo grátis <ArrowUpRight size={18} />
-                    </AuthModalTrigger>
-                    <a href="#acervo" className={styles.textLink}>
-                        Explorar os sons <ArrowDown size={16} />
-                    </a>
+            <div className={styles.masthead}>
+                <div className={styles.container}>
+                    <h1 id="verbete" tabIndex={-1}>
+                        mirsui
+                    </h1>
+                    <div className={styles.entry}>
+                        <div>
+                            <p className={styles.entryGrammar}>
+                                <span>mir·su·i</span> <i>substantivo inventado</i>
+                            </p>
+                            <p className={styles.definition}>
+                                Sensação de ter descoberto algo antes de virar
+                                assunto.
+                            </p>
+                        </div>
+                        <p className={styles.usage}>
+                            <q>
+                                Tocou na festa e todo mundo cantou. Me deu
+                                um mirsui danado.
+                            </q>
+                        </p>
+                    </div>
                 </div>
             </div>
-            <div
-                className={styles.recordShelf}
-                aria-label="Uma seleção para começar a descobrir"
-            >
-                {editorialRecords.map((record, index) => (
-                    <Link
-                        key={record.isrc}
-                        href={enderecoDaFaixa(
-                            record.isrc,
-                            record.artist,
-                            record.title
-                        )}
-                        className={styles.heroRecord}
-                        style={
-                            {
-                                '--record-angle': `${[-12, 7, -6, 9, -8, 11][index]}deg`,
-                                '--record-offset': `${[35, 0, 20, 0, 12, 38][index]}px`,
-                                '--record-index': index,
-                            } as React.CSSProperties
-                        }
-                        aria-label={`${record.title}, de ${record.artist}. Ver faixa`}
-                    >
-                        <div className={styles.sleeve}>
-                            <Image
-                                src={record.cover}
-                                alt={`Capa de ${record.title}, de ${record.artist}`}
-                                width={500}
-                                height={500}
-                                priority={index < 2}
-                                unoptimized
-                                sizes="(max-width: 640px) 155px, (max-width: 1024px) 190px, 250px"
-                            />
-                        </div>
-                        <span className={styles.recordCaption}>
-                            {record.artist}
-                            <ArrowUpRight size={13} />
-                        </span>
-                    </Link>
-                ))}
+            <div className={styles.introBand}>
+                <div className={`${styles.container} ${styles.heroIntro}`}>
+                    <p>
+                        O Mirsui é um clube de descobertas musicais. Por aqui,
+                        dá pra achar som novo e registrar quando você ouviu.
+                    </p>
+                    <div className={styles.heroActions}>
+                        <AuthModalTrigger
+                            mode="signup"
+                            className={styles.button}
+                        >
+                            Criar meu acervo <ArrowUpRight size={17} />
+                        </AuthModalTrigger>
+                        <a href="#acervo" className={styles.textLink}>
+                            Explorar o acervo <ArrowDown size={15} />
+                        </a>
+                    </div>
+                </div>
             </div>
         </header>
     )

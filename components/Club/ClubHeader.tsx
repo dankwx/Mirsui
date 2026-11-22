@@ -68,7 +68,7 @@ export default function ClubHeader({
                     className={styles.wordmark}
                     aria-label="Mirsui, início"
                 >
-                    <MirsuiLogo size={24} />
+                    <MirsuiLogo size={30} />
                     mirsui
                 </Link>
 

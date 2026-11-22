@@ -81,7 +81,7 @@ Em telas funcionais, reduza títulos e espaço entre seções conforme a tarefa.
 - **Avatares:** círculos; fallback de iniciais quando a foto falhar. Nome e contexto ao lado.
 - **Registro:** superfície de papel, divisão pontilhada, posição em destaque. A pequena rotação pertence à demonstração editorial; documentos e formulários de uso contínuo podem ficar retos.
 - **Ícones:** `lucide-react`, já instalado. Reuse uma família, geralmente 16–21 px. A seta diagonal indica acesso/continuidade; não a coloque em toda linha por decoração.
-- **Marca:** reuse [MirsuiLogo](components/MirsuiLogo/MirsuiLogo.tsx): o símbolo do furo, numa cor só, que segue a cor do texto (`currentColor`). O nome “mirsui” fica ao lado como texto em Archivo 800, não como imagem. O furo é vazado e mostra o fundo.
+- **Marca:** reuse [MirsuiLogo](components/MirsuiLogo/MirsuiLogo.tsx): a toupeira saindo do buraco, numa cor só, que segue a cor do texto (`currentColor`). O nome “mirsui” fica ao lado como texto em Archivo 800, não como imagem. Olhos, focinho, boca e patas são vazados e mostram o fundo; onde o fundo é fixo, pinte `MARCA_SILHUETA` de creme por baixo.
 
 O rodapé com “mirsui” enorme é uma assinatura da landing. Em telas de uso frequente, prefira uma presença compacta da marca.
 

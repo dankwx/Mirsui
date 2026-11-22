@@ -734,7 +734,8 @@
         gap: 6px;
     }
     .wordmark svg {
-        width: 30px;
+        width: 38px;
+        height: auto;
     }
     .navLinks {
         display: none;

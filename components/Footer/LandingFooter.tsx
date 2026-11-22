@@ -26,7 +26,7 @@ export default function LandingFooter({ compact = false }: { compact?: boolean }
                     href="/"
                     className="flex items-center gap-2.5 text-[20px] font-extrabold tracking-[-0.04em] text-[#ece3d2]"
                 >
-                    <MirsuiLogo size={26} />
+                    <MirsuiLogo size={30} />
                     mirsui
                 </Link>
 

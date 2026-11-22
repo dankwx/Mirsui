@@ -84,7 +84,7 @@ export default function Header({ userProfile, isDono = false }: HeaderProps) {
                     href={homeUrl}
                     className="flex items-center gap-2.5 text-2xl font-black tracking-[-0.04em] text-mir-text"
                 >
-                    <MirsuiLogo size={30} />
+                    <MirsuiLogo size={34} />
                     mirsui
                 </Link>
 

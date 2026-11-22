@@ -7,8 +7,10 @@
 import { ImageResponse } from 'next/og'
 
 import {
-    MARCA_FURO,
     MARCA_RAZAO,
+    MARCA_RISCOS,
+    MARCA_SILHUETA,
+    MARCA_TOUPEIRA,
     MARCA_VIEWBOX,
 } from '@/components/MirsuiLogo/marca'
 
@@ -18,6 +20,7 @@ const BG = '#f9d454'
 const ACC = '#775500'
 const TEXT = '#2d230f'
 const MUTED = '#473710'
+const CREAM = '#fffdf1'
 
 export async function GET() {
     return new ImageResponse(
@@ -42,12 +45,14 @@ export async function GET() {
                     }}
                 >
                     <svg
-                        width={Math.round(44 * MARCA_RAZAO)}
-                        height="44"
+                        width={Math.round(56 * MARCA_RAZAO)}
+                        height="56"
                         viewBox={MARCA_VIEWBOX}
                         xmlns="http://www.w3.org/2000/svg"
                     >
-                        <path fillRule="evenodd" d={MARCA_FURO} fill={TEXT} />
+                        <path d={MARCA_SILHUETA} fill={CREAM} />
+                        <path fillRule="evenodd" d={MARCA_TOUPEIRA} fill={TEXT} />
+                        <path d={MARCA_RISCOS} fill={TEXT} />
                     </svg>
                     <div
                         style={{

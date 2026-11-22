@@ -20,7 +20,7 @@ export default function Hero() {
                     className={styles.wordmark}
                     aria-label="Mirsui, início"
                 >
-                    <MirsuiLogo size={27} />
+                    <MirsuiLogo size={34} />
                     mirsui
                 </Link>
                 <div className={styles.navLinks}>

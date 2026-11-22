@@ -132,7 +132,7 @@ export default function LegalDoc({
                             color: 'inherit',
                         }}
                     >
-                        <MirsuiLogo size={30} />
+                        <MirsuiLogo size={34} />
                         <span
                             style={{
                                 fontWeight: 900,

@@ -1,4 +1,9 @@
-import { MARCA_FURO, MARCA_RAZAO, MARCA_VIEWBOX } from './marca'
+import {
+    MARCA_RAZAO,
+    MARCA_RISCOS,
+    MARCA_TOUPEIRA,
+    MARCA_VIEWBOX,
+} from './marca'
 
 interface MirsuiLogoProps {
     /** altura do símbolo em px; a largura sai da razão da marca */
@@ -22,7 +27,8 @@ export default function MirsuiLogo({
             viewBox={MARCA_VIEWBOX}
             aria-hidden="true"
         >
-            <path fillRule="evenodd" d={MARCA_FURO} fill={ink} />
+            <path fillRule="evenodd" d={MARCA_TOUPEIRA} fill={ink} />
+            <path d={MARCA_RISCOS} fill={ink} />
         </svg>
     )
 }

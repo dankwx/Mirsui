@@ -15,11 +15,7 @@ export default function ClubFooter({ compact = false }: { compact?: boolean }) {
                             aria-label="Mirsui, voltar ao início"
                         >
                             mirsui
-                            <MirsuiLogo
-                                size={16}
-                                ink="currentColor"
-                                acc="var(--club-accent)"
-                            />
+                            <MirsuiLogo size={16} />
                         </Link>
                         <nav aria-label="Links do rodapé">
                             <Link href="/#cena">

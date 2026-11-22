@@ -1,24 +1,16 @@
-import {
-    MARCA_DISCOS,
-    MARCA_MIOLO,
-    MARCA_RAZAO,
-    MARCA_VIEWBOX,
-} from './marca'
+import { MARCA_FURO, MARCA_RAZAO, MARCA_VIEWBOX } from './marca'
 
 interface MirsuiLogoProps {
     /** altura do símbolo em px; a largura sai da razão da marca */
     size?: number
-    /** cor dos discos — o padrão é a tinta do produto */
+    /** cor do símbolo — o padrão é a cor do texto ao redor */
     ink?: string
-    /** cor do miolo */
-    acc?: string
     className?: string
 }
 
 export default function MirsuiLogo({
     size = 30,
-    ink = '#ece3d2',
-    acc = '#cdef36',
+    ink = 'currentColor',
     className,
 }: MirsuiLogoProps) {
     return (
@@ -30,8 +22,7 @@ export default function MirsuiLogo({
             viewBox={MARCA_VIEWBOX}
             aria-hidden="true"
         >
-            <path fillRule="evenodd" d={MARCA_DISCOS} fill={ink} />
-            <path d={MARCA_MIOLO} fill={acc} />
+            <path fillRule="evenodd" d={MARCA_FURO} fill={ink} />
         </svg>
     )
 }

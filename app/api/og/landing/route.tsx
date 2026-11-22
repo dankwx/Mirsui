@@ -7,8 +7,8 @@
 import { ImageResponse } from 'next/og'
 
 import {
-    MARCA_DISCOS,
-    MARCA_MIOLO,
+    MARCA_FURO,
+    MARCA_RAZAO,
     MARCA_VIEWBOX,
 } from '@/components/MirsuiLogo/marca'
 
@@ -42,13 +42,12 @@ export async function GET() {
                     }}
                 >
                     <svg
-                        width="61"
+                        width={Math.round(44 * MARCA_RAZAO)}
                         height="44"
                         viewBox={MARCA_VIEWBOX}
                         xmlns="http://www.w3.org/2000/svg"
                     >
-                        <path fillRule="evenodd" d={MARCA_DISCOS} fill={TEXT} />
-                        <path d={MARCA_MIOLO} fill={ACC} />
+                        <path fillRule="evenodd" d={MARCA_FURO} fill={TEXT} />
                     </svg>
                     <div
                         style={{

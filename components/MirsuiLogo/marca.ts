@@ -1,28 +1,24 @@
 /**
- * Geometria da marca do Mirsui.
+ * Geometria da marca do Mirsui: o "furo".
  *
- * Os contornos foram traçados da arte de origem (referencia/marca/
- * mirsui-icon-master.png) por seguimento de borda, e não redesenhados à mão:
- * uma tentativa de reconstruir a pilha como três elipses iguais deslocadas
- * empastelou, porque as crescentes têm arco próprio e ponta afilada.
+ * O contorno foi traçado da arte de origem (referencia/marca/
+ * mirsui-furo-master.png) com potrace, depois de desfocar a borda para tirar
+ * o serrilhado da imagem, e não redesenhado à mão. Da arte só sai o símbolo;
+ * o nome continua como texto, em Archivo, ao lado dele.
  *
- * Os vãos entre os discos são vazados, não pintados com a cor do fundo. O
- * símbolo aparece sobre o header translúcido e sobre os gradientes do Hero,
- * onde um vão sólido apareceria como remendo.
+ * O furo é vazado, não pintado com a cor do fundo: o símbolo aparece sobre o
+ * header mostarda, sobre o papel claro e sobre o tema escuro, e o furo tem de
+ * mostrar o que estiver atrás.
  *
- * A caixa é 100x72 porque a marca é 1,39:1. Assim `size` continua valendo
- * como altura, igual ao símbolo circular que veio antes.
+ * A caixa é 137x100 porque a marca é 1,37:1. Assim `size` continua valendo
+ * como altura.
  */
 
-export const MARCA_VIEWBOX = '0 0 100 72'
+export const MARCA_VIEWBOX = '0 0 137 100'
 
 /** largura / altura — para dimensionar a partir da altura desejada */
-export const MARCA_RAZAO = 100 / 72
+export const MARCA_RAZAO = 137 / 100
 
-/** os três discos, com o furo do anel; precisa de fill-rule evenodd */
-export const MARCA_DISCOS =
-    'M54.71 1.57L64.43 1.71L73.86 3.14L83 6L87.43 8.14L90.57 10.14L93.29 12.43L95.29 14.71L97 17.71L97.57 19.43L97.86 23.14L97.29 25.86L96.29 28.14L94.71 30.43L92 33.14L88.57 35.57L81.14 39.14L73.14 41.43L63.57 42.71L52.57 42.57L44.29 41.29L40 40.14L34.57 38.14L27.57 34.29L22.43 29.71L20.29 26.57L19.29 24.14L18.86 21.29L19.14 18.86L19.57 17.43L21.29 14.43L23.29 12.29L26.57 9.71L29.43 8L34.43 5.71L40.14 3.86L45.14 2.71L51 1.86L54.57 1.71ZM14.86 21.14L14.86 24.14L15.43 27.14L16.57 30L19 33.57L21.86 36.43L25.43 39.14L32.57 43L38.43 45.14L42.86 46.29L49.86 47.43L55.86 47.86L68.43 47.29L75.29 46.14L81.43 44.57L82.29 44.86L83 45.86L83.14 47L82.57 48.43L79.29 51.14L73.71 53.71L67.71 55.29L61 56.14L50.71 56.29L43.14 55.57L35 53.86L29.43 52L23.57 49.29L17.86 45.57L13.43 41.43L10.43 37L9 32.29L9.43 28L11.29 24.43L14.71 21.29ZM5.57 35.14L6.14 35.43L6.57 38L8.14 41.86L11.14 46.14L14 49L17.43 51.71L21.57 54.29L26 56.43L35.57 59.57L40.71 60.57L47.29 61.29L55.29 61.43L60.29 61.14L71.86 59.29L73.14 59.86L73.71 60.71L73.71 62.14L73 63.29L70.57 65.14L64.57 67.71L56.57 69.57L49 70.29L40.86 70.14L34.29 69.29L27.71 67.71L22.57 65.86L17.14 63.14L11.71 59.43L7.43 55.29L4.14 50.57L2.29 45.57L2 41.57L3.29 37.71L5.43 35.29ZM56.43 12L61.14 12L65.14 12.57L69.29 13.86L73.14 16L75.14 18L76.29 20.43L76.14 23.43L74.57 26L71.71 28.29L68.43 29.86L64.43 31L58.86 31.57L54.29 31.29L51.29 30.71L47.57 29.43L44.14 27.43L42.14 25.43L41 23L41 20.57L42.14 18.14L44.71 15.71L48.29 13.86L52.57 12.57L56.29 12.14Z'
-
-/** o ponto central, na cor de acento */
-export const MARCA_MIOLO =
-    'M56.57 17L60.71 17L64.86 18.29L66.57 19.57L67.43 21L67.43 22.57L67 23.43L64.43 25.43L60.14 26.57L55.86 26.43L51.86 25L49.86 22.86L49.71 21L50.14 20.14L51 19.14L52.86 18L56.43 17.14Z'
+/** o corpo com o furo; precisa de fill-rule evenodd */
+export const MARCA_FURO =
+    'M40.2 99.9C35.7 99.7 31 97.5 25.8 93.2C25.3 92.7 24.3 91.9 23.6 91.3C22.8 90.7 21.6 89.6 20.8 88.8C20.1 88.1 18.8 86.9 18 86.1C17.2 85.4 16 84.1 15.2 83.3C14.5 82.5 13.4 81.3 12.7 80.6C10.7 78.4 7.3 74.5 5.3 71.9C1.4 66.9 -0.2 62.3 0.2 57C0.4 53.8 0.7 51.9 2.3 46.2C3.1 43.3 5.2 37.2 6.3 34.6C6.6 33.9 7.1 32.8 7.4 32.1C8.4 29.7 10.6 25.1 11.8 23.2C12 22.8 12.6 21.8 13.1 21C14.3 19 15.7 17 16.2 16.7C16.5 16.5 16.9 16.6 18.2 17C22.5 18.4 27.3 18.8 31 18C38.8 16.4 44.8 12.2 50 4.8C51.4 2.8 53.2 1.7 56 0.9C62.3 -1 66.6 0.3 80.7 7.8C81.3 8.2 82.4 8.7 83 9C83.7 9.4 84.7 9.9 85.2 10.2C85.8 10.5 86.8 11.1 87.6 11.4C88.3 11.8 89.6 12.5 90.3 12.9C91 13.3 92.3 14 93 14.4C93.8 14.8 95.1 15.5 96 16C99.8 18.1 103.2 19.8 108.8 22.7C110 23.2 111.6 24.1 112.6 24.6C113.5 25.1 115.7 26.2 117.5 27.1C130.7 33.8 133.4 35.4 135 37.9C138.1 42.5 137.1 47.2 132.3 51.1C130 52.9 128.8 53.6 124.8 55.8C124.1 56.1 123.1 56.7 122.6 57C122 57.3 121.1 57.8 120.5 58.1C119.9 58.4 118.7 59.1 117.9 59.5C117 60 115.4 60.9 114.3 61.4C109.7 63.8 100.2 69 97.4 70.6C96.7 71.1 95.6 71.7 95.1 72C94.5 72.3 92.7 73.3 91 74.4C89.3 75.4 87.4 76.5 86.9 76.8C86.3 77.1 85.1 77.9 84.1 78.4C82.4 79.6 80 81.1 78.8 81.8C78.4 82 76.9 83 75.4 84C74 84.9 72.2 86.1 71.6 86.4C71 86.8 69.6 87.7 68.6 88.3C67.6 89 66.4 89.8 65.9 90.1C65.3 90.3 64.3 91 63.5 91.5C61.9 92.5 61.2 92.8 57.9 94.6C53.7 96.8 52.3 97.4 49.4 98.5C45.5 99.8 43.7 100.1 40.2 99.9ZM45.9 84.5C68.8 82.7 84.4 56.6 73.8 37.7C70 30.8 64 26.3 56.7 24.6C46.6 22.4 36.1 25.3 28 32.5C14.1 44.8 12.3 65 24 76.9C25.5 78.3 28.7 80.7 30.5 81.6C35.1 83.8 40.6 84.9 45.9 84.5Z'

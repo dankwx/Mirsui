@@ -9,8 +9,8 @@ import { ImageResponse } from 'next/og'
 import { NextRequest } from 'next/server'
 
 import {
-    MARCA_DISCOS,
-    MARCA_MIOLO,
+    MARCA_FURO,
+    MARCA_RAZAO,
     MARCA_VIEWBOX,
 } from '@/components/MirsuiLogo/marca'
 
@@ -72,17 +72,12 @@ export async function GET(req: NextRequest) {
                     }}
                 >
                     <svg
-                        width="64"
+                        width={Math.round(46 * MARCA_RAZAO)}
                         height="46"
                         viewBox={MARCA_VIEWBOX}
                         xmlns="http://www.w3.org/2000/svg"
                     >
-                        <path
-                            fillRule="evenodd"
-                            d={MARCA_DISCOS}
-                            fill={TEXT}
-                        />
-                        <path d={MARCA_MIOLO} fill={ACC} />
+                        <path fillRule="evenodd" d={MARCA_FURO} fill={TEXT} />
                     </svg>
                     <div
                         style={{

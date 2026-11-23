@@ -111,6 +111,45 @@ export function buildBadge(
 }
 
 /**
+ * O Faro: quantos achados subiram depois que a pessoa salvou.
+ *
+ * Os números vêm do Observatório, pela RPC `get_user_faro` (migration 051 do
+ * backend): `medidos` são os achados que ele mede, `acertos` os que subiram
+ * pelo menos 5 pontos e 20% desde o save, a mesma régua do aviso de salto.
+ *
+ * Os níveis são de faro, do nariz da toupeira: farejando (ainda nenhum subiu),
+ * pegou o cheiro (1 ou 2), faro bom (3 a 9) e faro fino (10 ou mais). Em
+ * 23/11/2026 o maior Faro do site tinha 6 acertos. Sem achado medido não tem
+ * Faro, e o item some: nada de "0" na cara de quem acabou de chegar.
+ */
+export interface Faro {
+    nivel: string
+    detalhe: string
+}
+
+export function buildFaro(
+    row: { medidos: number; acertos: number } | null | undefined
+): Faro | null {
+    if (!row || !row.medidos) return null
+    const { medidos, acertos } = row
+
+    if (!acertos) {
+        return {
+            nivel: 'Farejando',
+            detalhe: `${medidos} ${medidos === 1 ? 'achado' : 'achados'} no Observatório`,
+        }
+    }
+
+    return {
+        nivel: acertos >= 10 ? 'Faro fino' : acertos >= 3 ? 'Faro bom' : 'Pegou o cheiro',
+        detalhe:
+            acertos === 1
+                ? '1 achado subiu depois de salvo'
+                : `${acertos} achados subiram depois de salvos`,
+    }
+}
+
+/**
  * Artistas mais salvos, com a capa de uma faixa dele para servir de retrato.
  *
  * `minCount` existe porque artista de uma faixa só não é artista favorito de

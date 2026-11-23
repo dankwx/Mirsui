@@ -64,6 +64,7 @@
 }
 
 .result {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 15px;
@@ -79,6 +80,19 @@
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.06em;
+}
+
+/* O selo batido no canto do registro, por cima da linha pontilhada. */
+.selo {
+    position: absolute;
+    top: 50%;
+    right: -16px;
+    margin-top: -60px;
+}
+
+/* O texto quebra antes de chegar no selo. */
+.result:has(.selo) > div {
+    padding-right: 84px;
 }
 
 .result strong {

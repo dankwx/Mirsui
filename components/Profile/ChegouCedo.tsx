@@ -7,8 +7,10 @@
 import Link from 'next/link'
 import { Disc3 } from 'lucide-react'
 import RecordCover from '@/components/Club/RecordCover'
+import SeloDeChegada from '@/components/MirsuiLogo/SeloDeChegada'
 import shellStyles from '@/components/Club/ClubShell.module.css'
 import recipes from '@/components/Club/club-recipes.module.css'
+import { dataCompleta } from '@/components/Track/format'
 import { trackHref } from './trackHref'
 import type { Song } from '@/types/profile'
 import styles from './ChegouCedo.module.css'
@@ -90,6 +92,13 @@ export default function ChegouCedo({
                                 <strong>a salvar</strong>
                                 {depoisDoDestaque && <small>{depoisDoDestaque}</small>}
                             </span>
+                            <SeloDeChegada
+                                posicao={destaque.position}
+                                data={destaque.claimedat}
+                                size={104}
+                                rotulo={`Salva em ${dataCompleta(destaque.claimedat)}`}
+                                className={styles.selo}
+                            />
                         </span>
                     </Link>
 

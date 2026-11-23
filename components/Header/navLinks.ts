@@ -16,8 +16,10 @@ export type NavLink = {
  *                       Vem de "botar as fichas em", que em português falado já
  *                       significa apoiar com convicção. Rota segue /stakes; só
  *                       o rótulo é português.
- *   Faro                a pontuação. Ainda sem página própria, então fora
- *                       da nav por enquanto.
+ *   Faro                a pontuação: quantos achados subiram depois de
+ *                       salvos, em níveis de faro (farejando, pegou o
+ *                       cheiro, faro bom, faro fino). Aparece no perfil;
+ *                       ainda sem página própria, então fora da nav.
  *
  * Aposentados: carimbar/carimbo, claim/Claim, reivindicar, despacho, cravar/
  * cravada, stake como verbo ("dê stake"). Identificadores, rotas e campos de

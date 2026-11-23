@@ -1,9 +1,20 @@
 // app/api/og/selo/route.tsx
 //
-// Gera a imagem de compartilhamento (formato story 1080x1920) via next/og,
-// estilo Letterboxd: capa do álbum em destaque sobre fundo escuro, faixa e
-// artista, com marca discreta. O servidor busca a capa do Spotify, então não
-// há problema de CORS no client — o componente só baixa/compartilha o PNG.
+// A imagem do story (1080x1920), via next/og: capa grande, faixa, artista e a
+// marca, na paleta mostarda do site. O servidor busca a capa, então não há
+// problema de CORS no client: o componente só baixa ou compartilha o PNG.
+//
+// Quando quem compartilha salvou a faixa, o botão manda `pos` e `em`, e o
+// story leva o selo de chegada batido no canto da capa: a toupeira com
+// "CHEGOU EM 1º" e a data. É a prova do "eu já ouvia" que vai para o
+// Instagram, e leva a toupeira junto. Sem eles (quem compartilha não salvou),
+// não tem selo: a posição de outra pessoa no story de alguém seria mentira.
+//
+// O selo é o mesmo SVG do site (SeloDesenho), com as letras já em contorno:
+// o next/og não desenha texto em curva.
+//
+// As fontes são as do site, em TTF em app/api/og/fontes (o next/og não lê woff2).
+// Sem elas a imagem saía na fonte padrão, fina, e o selo perdia a força.
 
 import { ImageResponse } from 'next/og'
 import { NextRequest } from 'next/server'
@@ -11,16 +22,55 @@ import { NextRequest } from 'next/server'
 import {
     MARCA_RAZAO,
     MARCA_RISCOS,
+    MARCA_SILHUETA,
     MARCA_TOUPEIRA,
     MARCA_VIEWBOX,
 } from '@/components/MirsuiLogo/marca'
+import SeloDesenho from '@/components/MirsuiLogo/SeloDesenho'
+import { textosDoSelo } from '@/components/MirsuiLogo/selo'
 
 export const runtime = 'edge'
 
-const BG = '#14110b'
-const ACC = '#cdef36'
-const TEXT = '#f3ecdb'
-const MUTED = '#9a9180'
+const BG = '#f9d454'
+const ACC = '#775500'
+const TEXT = '#2d230f'
+const MUTED = '#5a4714'
+const CREAM = '#fffdf1'
+
+/** lado do selo no story, em px */
+const SELO_PX = 330
+
+// Lidas uma vez por processo, não a cada story.
+const fontes = Promise.all([
+    fetch(new URL('../fontes/Archivo_800ExtraBold.ttf', import.meta.url)).then((r) =>
+        r.arrayBuffer()
+    ),
+    fetch(new URL('../fontes/HankenGrotesk_600SemiBold.ttf', import.meta.url)).then((r) =>
+        r.arrayBuffer()
+    ),
+    fetch(new URL('../fontes/SpaceGrotesk_700Bold.ttf', import.meta.url)).then((r) =>
+        r.arrayBuffer()
+    ),
+])
+
+function Selo({ cima, baixo }: { cima: string; baixo: string }) {
+    // O selo sai da capa pelo canto de baixo, à direita, e o título desce
+    // para não ficar embaixo dele.
+    return (
+        <div
+            style={{
+                position: 'absolute',
+                right: '-118px',
+                bottom: '-132px',
+                width: `${SELO_PX}px`,
+                height: `${SELO_PX}px`,
+                display: 'flex',
+            }}
+        >
+            <SeloDesenho cima={cima} baixo={baixo} cor={TEXT} size={SELO_PX} />
+        </div>
+    )
+}
 
 export async function GET(req: NextRequest) {
     const { searchParams } = req.nextUrl
@@ -29,6 +79,12 @@ export async function GET(req: NextRequest) {
     const cover = searchParams.get('cover') || ''
     const total = parseInt(searchParams.get('total') || '0', 10)
     const year = searchParams.get('year') || ''
+    const selo = textosDoSelo(
+        parseInt(searchParams.get('pos') || '', 10) || null,
+        searchParams.get('em')
+    )
+
+    const [archivo, hanken, spaceGrotesk] = await fontes
 
     const footer =
         total > 0
@@ -47,24 +103,10 @@ export async function GET(req: NextRequest) {
                     justifyContent: 'space-between',
                     backgroundColor: BG,
                     padding: '120px 90px',
-                    position: 'relative',
+                    fontFamily: 'Hanken Grotesk',
                 }}
             >
-                {/* glow sutil */}
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: '120px',
-                        left: '50%',
-                        marginLeft: '-450px',
-                        width: '900px',
-                        height: '900px',
-                        background: `radial-gradient(closest-side, ${ACC}22, transparent 70%)`,
-                        display: 'flex',
-                    }}
-                />
-
-                {/* topo — marca */}
+                {/* topo: a marca. Com selo, a toupeira já está nele. */}
                 <div
                     style={{
                         display: 'flex',
@@ -72,19 +114,23 @@ export async function GET(req: NextRequest) {
                         gap: '16px',
                     }}
                 >
-                    <svg
-                        width={Math.round(58 * MARCA_RAZAO)}
-                        height="58"
-                        viewBox={MARCA_VIEWBOX}
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <path fillRule="evenodd" d={MARCA_TOUPEIRA} fill={TEXT} />
-                        <path d={MARCA_RISCOS} fill={TEXT} />
-                    </svg>
+                    {!selo && (
+                        <svg
+                            width={Math.round(58 * MARCA_RAZAO)}
+                            height="58"
+                            viewBox={MARCA_VIEWBOX}
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path d={MARCA_SILHUETA} fill={CREAM} />
+                            <path fillRule="evenodd" d={MARCA_TOUPEIRA} fill={TEXT} />
+                            <path d={MARCA_RISCOS} fill={TEXT} />
+                        </svg>
+                    )}
                     <div
                         style={{
                             display: 'flex',
-                            fontSize: '34px',
+                            fontFamily: 'Archivo',
+                            fontSize: '42px',
                             fontWeight: 800,
                             letterSpacing: '-1.5px',
                             color: TEXT,
@@ -94,7 +140,7 @@ export async function GET(req: NextRequest) {
                     </div>
                 </div>
 
-                {/* miolo — capa + faixa (texto alinhado à esquerda da capa) */}
+                {/* miolo: capa (com o selo no canto) e a faixa */}
                 <div
                     style={{
                         display: 'flex',
@@ -102,39 +148,49 @@ export async function GET(req: NextRequest) {
                         width: '700px',
                     }}
                 >
-                    {cover ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                            src={cover}
-                            width={700}
-                            height={700}
-                            alt=""
-                            style={{
-                                borderRadius: '28px',
-                                border: '1px solid rgba(243,236,219,0.12)',
-                                objectFit: 'cover',
-                                boxShadow: '0 60px 120px -40px rgba(0,0,0,0.8)',
-                            }}
-                        />
-                    ) : (
-                        <div
-                            style={{
-                                width: '700px',
-                                height: '700px',
-                                borderRadius: '28px',
-                                backgroundColor: '#221d15',
-                                display: 'flex',
-                            }}
-                        />
-                    )}
+                    <div
+                        style={{
+                            display: 'flex',
+                            position: 'relative',
+                            width: '700px',
+                            height: '700px',
+                        }}
+                    >
+                        {cover ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                                src={cover}
+                                width={700}
+                                height={700}
+                                alt=""
+                                style={{
+                                    borderRadius: '10px',
+                                    objectFit: 'cover',
+                                    boxShadow: '0 50px 90px -40px rgba(45,35,15,0.65)',
+                                }}
+                            />
+                        ) : (
+                            <div
+                                style={{
+                                    width: '700px',
+                                    height: '700px',
+                                    borderRadius: '10px',
+                                    backgroundColor: '#eabc43',
+                                    display: 'flex',
+                                }}
+                            />
+                        )}
+                        {selo && <Selo cima={selo.cima} baixo={selo.baixo} />}
+                    </div>
 
                     <div
                         style={{
                             display: 'flex',
-                            marginTop: '56px',
+                            marginTop: selo ? '150px' : '64px',
+                            fontFamily: 'Archivo',
                             fontSize: '74px',
                             fontWeight: 800,
-                            letterSpacing: '-3px',
+                            letterSpacing: '-3.5px',
                             color: TEXT,
                             lineHeight: 1.04,
                         }}
@@ -169,7 +225,7 @@ export async function GET(req: NextRequest) {
                             display: 'flex',
                             width: '80px',
                             height: '2px',
-                            backgroundColor: 'rgba(243,236,219,0.18)',
+                            backgroundColor: 'rgba(45,35,15,0.28)',
                             marginBottom: '26px',
                         }}
                     />
@@ -188,7 +244,9 @@ export async function GET(req: NextRequest) {
                         style={{
                             display: 'flex',
                             marginTop: '16px',
+                            fontFamily: 'Space Grotesk',
                             fontSize: '24px',
+                            fontWeight: 700,
                             color: MUTED,
                         }}
                     >
@@ -197,6 +255,14 @@ export async function GET(req: NextRequest) {
                 </div>
             </div>
         ),
-        { width: 1080, height: 1920 }
+        {
+            width: 1080,
+            height: 1920,
+            fonts: [
+                { name: 'Archivo', data: archivo, weight: 800, style: 'normal' },
+                { name: 'Hanken Grotesk', data: hanken, weight: 600, style: 'normal' },
+                { name: 'Space Grotesk', data: spaceGrotesk, weight: 700, style: 'normal' },
+            ],
+        }
     )
 }

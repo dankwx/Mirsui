@@ -24,7 +24,8 @@ import FollowButton from './FollowButton'
 import { updateDescription, updateDisplayName } from './actions'
 import { trackHref } from './trackHref'
 import type { Achievement, Rating, Song, User } from '@/types/profile'
-import type { ProfileStats } from '@/utils/profileStats'
+import type { Faro, ProfileStats } from '@/utils/profileStats'
+import ToupeiraFarejando from '@/components/MirsuiLogo/ToupeiraFarejando'
 import styles from './ProfileHeader.module.css'
 
 interface ProfileHeaderProps {
@@ -36,6 +37,7 @@ interface ProfileHeaderProps {
     }
     stats: ProfileStats
     badge: { value: string; label: string } | null
+    faro: Faro | null
     favorites: Song[]
     isLoggedIn: boolean
     isOwnProfile: boolean
@@ -72,6 +74,7 @@ export default function ProfileHeader({
     userData,
     stats,
     badge,
+    faro,
     favorites,
     isLoggedIn,
     isOwnProfile,
@@ -240,7 +243,20 @@ export default function ProfileHeader({
             </header>
 
             <div className={styles.statsBand}>
-                <div className={`${shellStyles.container} ${styles.stats}`}>
+                <div
+                    className={`${shellStyles.container} ${styles.stats} ${faro ? styles.comFaro : ''}`}
+                >
+                    {faro && (
+                        <div className={styles.faro}>
+                            <ToupeiraFarejando size={40} className={styles.faroToupeira} />
+                            <div className={recipes.stat}>
+                                <div className={`${recipes.statValue} ${styles.faroNivel}`}>
+                                    {faro.nivel}
+                                </div>
+                                <div className={recipes.statLabel}>{faro.detalhe}</div>
+                            </div>
+                        </div>
+                    )}
                     <Numero
                         value={stats.total}
                         label={stats.total === 1 ? 'faixa no acervo' : 'faixas no acervo'}

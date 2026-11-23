@@ -58,3 +58,17 @@ export const MARCA_RISCOS =
 
 /** o contorno externo da toupeira com o buraco, para pintar as partes claras */
 export const MARCA_SILHUETA = MARCA_CONTORNO
+
+/**
+ * As duas ondas de cheiro na frente do nariz: a toupeira farejando, que é a
+ * cara do Faro. São traço, não preenchimento (`MARCA_CHEIRO_TRACO` de largura,
+ * ponta redonda), e cada onda é um subcaminho para poder animar em separado.
+ */
+export const MARCA_CHEIRO = ['M124 30q3.5 -4.4 7 -0.8t7 -0.8', 'M125 41q3.5 -4 7 0t7 0'] as const
+
+export const MARCA_CHEIRO_TRACO = 3.6
+
+/** a toupeira sem os riscos, com folga à direita para o cheiro */
+export const MARCA_VIEWBOX_FARO = '-1 22.6 143 78.4'
+
+export const MARCA_RAZAO_FARO = 143 / 78.4

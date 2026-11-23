@@ -1,0 +1,34 @@
+.toupeira {
+    display: block;
+    flex: none;
+    overflow: visible;
+}
+
+/* A onda vem de longe, chega no nariz e some; na última volta fica. */
+.onda {
+    animation: fareja 820ms ease-out 3 both;
+}
+
+.onda + .onda {
+    animation-delay: 160ms;
+}
+
+@keyframes fareja {
+    0% {
+        opacity: 0;
+        transform: translateX(6px);
+    }
+    45% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .onda {
+        animation: none;
+    }
+}

@@ -12,6 +12,7 @@ import {
     buildTopArtists,
     buildEarliest,
     buildBadge,
+    buildFaro,
     rankVitrine,
     countSaversByUri,
 } from '@/utils/profileStats'
@@ -73,6 +74,7 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
         followersResult,
         followingResult,
         recados,
+        faroResult,
     ] = await Promise.all([
         fetchSongs(userData.id, currentUserId),
         supabase.rpc('get_user_achievements', { user_uuid: userData.id }),
@@ -80,7 +82,11 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
         supabase.rpc('get_user_followers', { user_uuid: userData.id }),
         supabase.rpc('get_user_following', { user_uuid: userData.id }),
         fetchProfileComments(userData.id),
+        supabase.rpc('get_user_faro', { user_uuid: userData.id }),
     ])
+
+    if (faroResult.error) console.error('Erro ao ler o Faro:', faroResult.error)
+    const faro = buildFaro(Array.isArray(faroResult.data) ? faroResult.data[0] : null)
 
     const songs = Array.isArray(rawSongs) ? rawSongs : []
 
@@ -110,6 +116,7 @@ export default async function ProfilePage({ params }: ProfilePageParams) {
                 userData={profileData}
                 stats={stats}
                 badge={badge}
+                faro={faro}
                 favorites={favorites}
                 isLoggedIn={isLoggedIn}
                 isOwnProfile={isOwnProfile}

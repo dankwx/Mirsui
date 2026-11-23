@@ -256,6 +256,32 @@
     border-left: 1px solid var(--club-line);
 }
 
+/* O Faro abre a faixa: a toupeira farejando e o nível. A coluna dele tem a
+   largura do nome do nível; os números dividem o resto. */
+.comFaro {
+    grid-template-columns: max-content;
+}
+
+.faro {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.faroToupeira {
+    color: var(--club-text);
+}
+
+.faroNivel {
+    white-space: nowrap;
+}
+
+@media (max-width: 380px) {
+    .faroNivel {
+        font-size: 26px;
+    }
+}
+
 /* Edição do perfil. */
 
 .dialogOverlay {
@@ -395,6 +421,26 @@
     }
 
     .stats > :nth-child(3n + 1) {
+        padding-left: 0;
+        border-left: 0;
+    }
+
+    /* No celular o Faro ocupa a primeira linha inteira, e as linhas de três
+       começam um item depois. */
+    .comFaro {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .comFaro > .faro {
+        grid-column: 1 / -1;
+    }
+
+    .comFaro > :nth-child(3n + 1):not(.faro) {
+        padding-left: 12px;
+        border-left: 1px solid var(--club-line);
+    }
+
+    .comFaro > :nth-child(3n + 2) {
         padding-left: 0;
         border-left: 0;
     }

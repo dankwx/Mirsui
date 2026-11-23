@@ -1,0 +1,6 @@
+.selo {
+    display: block;
+    flex: none;
+    color: var(--club-accent);
+    pointer-events: none;
+}

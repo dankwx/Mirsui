@@ -16,8 +16,6 @@ interface StoryShareButtonProps {
     albumImageUrl: string
     year: number | null
     totalClaims: number
-    /** posição e data de quem compartilha; com elas o story leva o selo */
-    selo?: { posicao: number | null; data: string | null } | null
 }
 
 type Estado = 'parado' | 'gerando' | 'baixado' | 'erro'
@@ -29,7 +27,6 @@ export default function StoryShareButton({
     albumImageUrl,
     year,
     totalClaims,
-    selo,
 }: StoryShareButtonProps) {
     const [estado, setEstado] = useState<Estado>('parado')
 
@@ -44,10 +41,6 @@ export default function StoryShareButton({
                 total: String(totalClaims),
                 year: String(year ?? ''),
             })
-            if (selo?.posicao && selo.data) {
-                params.set('pos', String(selo.posicao))
-                params.set('em', selo.data)
-            }
             const res = await fetch(`/api/og/selo?${params.toString()}`)
             if (!res.ok) throw new Error('falha ao gerar')
 

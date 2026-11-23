@@ -4,17 +4,8 @@
 // marca, na paleta mostarda do site. O servidor busca a capa, então não há
 // problema de CORS no client: o componente só baixa ou compartilha o PNG.
 //
-// Quando quem compartilha salvou a faixa, o botão manda `pos` e `em`, e o
-// story leva o selo de chegada batido no canto da capa: a toupeira com
-// "CHEGOU EM 1º" e a data. É a prova do "eu já ouvia" que vai para o
-// Instagram, e leva a toupeira junto. Sem eles (quem compartilha não salvou),
-// não tem selo: a posição de outra pessoa no story de alguém seria mentira.
-//
-// O selo é o mesmo SVG do site (SeloDesenho), com as letras já em contorno:
-// o next/og não desenha texto em curva.
-//
 // As fontes são as do site, em TTF em app/api/og/fontes (o next/og não lê woff2).
-// Sem elas a imagem saía na fonte padrão, fina, e o selo perdia a força.
+// Sem elas a imagem saía na fonte padrão, fina.
 
 import { ImageResponse } from 'next/og'
 import { NextRequest } from 'next/server'
@@ -26,8 +17,6 @@ import {
     MARCA_TOUPEIRA,
     MARCA_VIEWBOX,
 } from '@/components/MirsuiLogo/marca'
-import SeloDesenho from '@/components/MirsuiLogo/SeloDesenho'
-import { textosDoSelo } from '@/components/MirsuiLogo/selo'
 
 export const runtime = 'edge'
 
@@ -36,9 +25,6 @@ const ACC = '#775500'
 const TEXT = '#2d230f'
 const MUTED = '#5a4714'
 const CREAM = '#fffdf1'
-
-/** lado do selo no story, em px */
-const SELO_PX = 330
 
 // Lidas uma vez por processo, não a cada story.
 const fontes = Promise.all([
@@ -53,25 +39,6 @@ const fontes = Promise.all([
     ),
 ])
 
-function Selo({ cima, baixo }: { cima: string; baixo: string }) {
-    // O selo sai da capa pelo canto de baixo, à direita, e o título desce
-    // para não ficar embaixo dele.
-    return (
-        <div
-            style={{
-                position: 'absolute',
-                right: '-118px',
-                bottom: '-132px',
-                width: `${SELO_PX}px`,
-                height: `${SELO_PX}px`,
-                display: 'flex',
-            }}
-        >
-            <SeloDesenho cima={cima} baixo={baixo} cor={TEXT} size={SELO_PX} />
-        </div>
-    )
-}
-
 export async function GET(req: NextRequest) {
     const { searchParams } = req.nextUrl
     const title = (searchParams.get('title') || 'Faixa').slice(0, 80)
@@ -79,10 +46,6 @@ export async function GET(req: NextRequest) {
     const cover = searchParams.get('cover') || ''
     const total = parseInt(searchParams.get('total') || '0', 10)
     const year = searchParams.get('year') || ''
-    const selo = textosDoSelo(
-        parseInt(searchParams.get('pos') || '', 10) || null,
-        searchParams.get('em')
-    )
 
     const [archivo, hanken, spaceGrotesk] = await fontes
 
@@ -106,7 +69,7 @@ export async function GET(req: NextRequest) {
                     fontFamily: 'Hanken Grotesk',
                 }}
             >
-                {/* topo: a marca. Com selo, a toupeira já está nele. */}
+                {/* topo: a marca */}
                 <div
                     style={{
                         display: 'flex',
@@ -114,18 +77,16 @@ export async function GET(req: NextRequest) {
                         gap: '16px',
                     }}
                 >
-                    {!selo && (
-                        <svg
-                            width={Math.round(58 * MARCA_RAZAO)}
-                            height="58"
-                            viewBox={MARCA_VIEWBOX}
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path d={MARCA_SILHUETA} fill={CREAM} />
-                            <path fillRule="evenodd" d={MARCA_TOUPEIRA} fill={TEXT} />
-                            <path d={MARCA_RISCOS} fill={TEXT} />
-                        </svg>
-                    )}
+                    <svg
+                        width={Math.round(58 * MARCA_RAZAO)}
+                        height="58"
+                        viewBox={MARCA_VIEWBOX}
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path d={MARCA_SILHUETA} fill={CREAM} />
+                        <path fillRule="evenodd" d={MARCA_TOUPEIRA} fill={TEXT} />
+                        <path d={MARCA_RISCOS} fill={TEXT} />
+                    </svg>
                     <div
                         style={{
                             display: 'flex',
@@ -140,7 +101,7 @@ export async function GET(req: NextRequest) {
                     </div>
                 </div>
 
-                {/* miolo: capa (com o selo no canto) e a faixa */}
+                {/* miolo: capa e faixa */}
                 <div
                     style={{
                         display: 'flex',
@@ -180,13 +141,12 @@ export async function GET(req: NextRequest) {
                                 }}
                             />
                         )}
-                        {selo && <Selo cima={selo.cima} baixo={selo.baixo} />}
                     </div>
 
                     <div
                         style={{
                             display: 'flex',
-                            marginTop: selo ? '150px' : '64px',
+                            marginTop: '64px',
                             fontFamily: 'Archivo',
                             fontSize: '74px',
                             fontWeight: 800,

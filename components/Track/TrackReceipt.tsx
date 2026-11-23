@@ -7,7 +7,6 @@
 
 import { Disc3 } from 'lucide-react'
 import RecordCover from '@/components/Club/RecordCover'
-import SeloDeChegada from '@/components/MirsuiLogo/SeloDeChegada'
 import recipes from '@/components/Club/club-recipes.module.css'
 import StoryShareButton from './StoryShareButton'
 import { dataCompleta, dataCurta } from './format'
@@ -88,12 +87,6 @@ export default function TrackReceipt({
                                 {dataCompleta(registro.data)}
                             </p>
                         </div>
-                        <SeloDeChegada
-                            posicao={registro.posicao}
-                            data={registro.data}
-                            size={104}
-                            className={styles.selo}
-                        />
                     </>
                 ) : (
                     <>
@@ -139,11 +132,6 @@ export default function TrackReceipt({
                 albumImageUrl={coverUrl || ''}
                 year={year}
                 totalClaims={totalClaims}
-                selo={
-                    registro?.seu
-                        ? { posicao: registro.posicao, data: registro.data }
-                        : null
-                }
             />
         </aside>
     )

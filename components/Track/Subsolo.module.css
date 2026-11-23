@@ -1,0 +1,40 @@
+.subsolo {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    margin-top: 28px;
+}
+
+.toupeira {
+    flex: none;
+    color: var(--club-text);
+}
+
+.subsolo figcaption {
+    display: grid;
+    gap: 2px;
+    padding-bottom: 1px;
+}
+
+.subsolo strong {
+    color: var(--club-text);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+}
+
+.subsolo figcaption > span {
+    max-width: 34ch;
+    color: var(--club-muted);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.numero {
+    color: var(--club-text);
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}

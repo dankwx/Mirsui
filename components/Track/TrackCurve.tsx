@@ -22,6 +22,7 @@ import shellStyles from '@/components/Club/ClubShell.module.css'
 import recipes from '@/components/Club/club-recipes.module.css'
 import { popScore } from '@/utils/popScore'
 import LinhaDaCurva from './LinhaDaCurva'
+import Subsolo from './Subsolo'
 import { dataCurta, diasEntre, percentual } from './format'
 import styles from './TrackCurve.module.css'
 
@@ -33,6 +34,8 @@ export default function TrackCurve({ curva }: { curva: CurvaDaFaixa }) {
     const desde = dataCurta(series[0].d)
     const ate = dataCurta(series[series.length - 1].d)
     const variacao = variacaoDaCurva(series)
+    // A audiência de hoje: o último ponto, na escala 0-100 do recibo.
+    const hoje = popScore(series[series.length - 1].r)
 
     // --- Estado inicial: mede há pouco, ainda não há o que desenhar ---
     if (variacao === null) {
@@ -49,6 +52,7 @@ export default function TrackCurve({ curva }: { curva: CurvaDaFaixa }) {
                             0&nbsp;a&nbsp;100, medida pelo Mirsui uma vez por
                             dia. Nenhuma plataforma publica esse histórico.
                         </p>
+                        <Subsolo audiencia={hoje} />
                     </div>
                     <div className={styles.reading}>
                         <p className={styles.headline}>
@@ -76,7 +80,6 @@ export default function TrackCurve({ curva }: { curva: CurvaDaFaixa }) {
     // não tem. O percentual continua vindo do rank bruto, mais fino que o
     // número arredondado: 83 e 83 podem ser um +0,9% de verdade.
     const inicio = popScore(series[0].r)
-    const hoje = popScore(series[series.length - 1].r)
     const leitura = estavel
         ? `sem movimento desde ${desde} · audiência ${hoje}/100`
         : inicio === hoje
@@ -96,6 +99,7 @@ export default function TrackCurve({ curva }: { curva: CurvaDaFaixa }) {
                         0&nbsp;a&nbsp;100, medida pelo Mirsui uma vez por dia.
                         Nenhuma plataforma publica esse histórico.
                     </p>
+                    <Subsolo audiencia={hoje} />
                 </div>
 
                 <div className={styles.reading}>

@@ -10,6 +10,8 @@
 import { getFeedPostsWithInteractions, getRecentClaims } from '@/utils/feedService.backend'
 import Feed from '@/components/Feed/Feed'
 import PileInvite from '@/components/Feed/PileInvite'
+import SaltoDaSemana from '@/components/Feed/SaltoDaSemana'
+import { getSaltoDaSemana } from '@/utils/saltoService'
 import shellStyles from '@/components/Club/ClubShell.module.css'
 import { createClient } from '@/utils/supabase/server'
 import type { Metadata } from 'next'
@@ -38,6 +40,10 @@ export default async function FeedPage() {
 
     const currentUserId = user?.id ?? null
 
+    // Depois do getUser de propósito: a função é só de quem tem sessão, e
+    // visitante no feed não tem acervo para ter salto.
+    const salto = user ? await getSaltoDaSemana(supabase) : null
+
     // `saved_by_me` já vem de /feed: o backend resolve na mesma requisição,
     // usando o token que authHeaders() manda. Não há segunda ida ao banco.
 
@@ -49,6 +55,12 @@ export default async function FeedPage() {
                     <p>Quem ouviu primeiro o quê, na ordem em que aconteceu.</p>
                 </div>
             </header>
+
+            {salto && (
+                <div className={shellStyles.container}>
+                    <SaltoDaSemana salto={salto} />
+                </div>
+            )}
 
             <div className={`${shellStyles.container} ${styles.body}`}>
                 <Feed

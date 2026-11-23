@@ -81,7 +81,7 @@ Em telas funcionais, reduza títulos e espaço entre seções conforme a tarefa.
 - **Avatares:** círculos; fallback de iniciais quando a foto falhar. Nome e contexto ao lado.
 - **Registro:** superfície de papel, divisão pontilhada, posição em destaque. A pequena rotação pertence à demonstração editorial; documentos e formulários de uso contínuo podem ficar retos.
 - **Ícones:** `lucide-react`, já instalado. Reuse uma família, geralmente 16–21 px. A seta diagonal indica acesso/continuidade; não a coloque em toda linha por decoração.
-- **Marca:** reuse [MirsuiLogo](components/MirsuiLogo/MirsuiLogo.tsx): a toupeira saindo do buraco, numa cor só, que segue a cor do texto (`currentColor`). O nome “mirsui” fica ao lado como texto em Archivo 800, não como imagem. Olhos, focinho, boca e patas são vazados e mostram o fundo; onde o fundo é fixo, pinte `MARCA_SILHUETA` de creme por baixo.
+- **Marca:** reuse [MirsuiLogo](components/MirsuiLogo/MirsuiLogo.tsx): a toupeira saindo do buraco, numa cor só, que segue a cor do texto (`currentColor`). O nome “mirsui” fica ao lado como texto em Archivo 800, não como imagem. Olhos, focinho, boca e patas são vazados e mostram o fundo; onde o fundo é fixo, pinte `MARCA_SILHUETA` de creme por baixo. A toupeira também é mascote, sempre com a mesma geometria: [ToupeiraNoBuraco](components/MirsuiLogo/ToupeiraNoBuraco.tsx) a afunda no buraco em quatro níveis (medidor de subsolo da faixa, 404) e a versão com os riscos de susto marca salto (o aviso no feed). Ela aparece em momentos com função, não como enfeite.
 
 O rodapé com “mirsui” enorme é uma assinatura da landing. Em telas de uso frequente, prefira uma presença compacta da marca.
 
@@ -94,6 +94,8 @@ A ilustração [digging-records.webp](public/assets/landing/digging-records.webp
 As imagens da landing estão no repositório, em WebP, com miniaturas de 250 px para o grid. `unoptimized` nos `Image` desses assets é deliberado: já foram preparados, e o standalone atual não tem `sharp`. Não generalize isso para imagens enormes novas. Reserve dimensões e trate erro de carregamento.
 
 O movimento confirma ações e dá materialidade às capas: entrada curta dos discos, capa que se endireita no hover/foco, imagem do grid que aumenta levemente, botão que reage. A manchete aparece imediatamente. Sua animação foi removida após piorar o LCP; não reintroduza um fade que esconda o conteúdo principal.
+
+Enquanto a próxima página carrega, a toupeira dá pulinhos no meio da tela ([Cavando](components/Club/Cavando.tsx)), só depois de 250 ms. **Não use `loading.tsx`** nos grupos `(club)` e `(public)`: ele faz o servidor mandar o HTML antes do fim, e o 308 da faixa e o 404 passam a chegar como 200.
 
 Respeite `prefers-reduced-motion`. Não acrescente rolagem forçada, paralaxe, cursores customizados ou animações permanentes para “melhorar” uma interface que já tem personalidade.
 

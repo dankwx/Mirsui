@@ -1,0 +1,56 @@
+.page {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-block: clamp(48px, 9vw, 112px);
+}
+
+.toupeira {
+    color: var(--club-text);
+}
+
+.codigo {
+    margin-top: 28px;
+    color: var(--club-muted);
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+.titulo {
+    margin-top: 8px;
+    color: var(--club-text);
+    font-family: var(--font-archivo), sans-serif;
+    font-size: clamp(38px, 4.4vw, 62px);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.06em;
+}
+
+.texto {
+    max-width: 44ch;
+    margin-top: 14px;
+    color: var(--club-muted);
+    font-size: 16px;
+    line-height: 1.55;
+}
+
+.acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 26px;
+    margin-top: 30px;
+}
+
+@media (max-width: 767px) {
+    .toupeira {
+        width: 96px;
+        height: auto;
+    }
+
+    .texto {
+        font-size: 15px;
+    }
+}

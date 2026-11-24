@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { login, signup } from '../../app/auth/actions'
 import { createClient } from '@/utils/supabase/client'
 import { capture } from '@/lib/posthog'
+import MirsuiLogo from '@/components/MirsuiLogo/MirsuiLogo'
 
 type AuthMode = 'login' | 'signup'
 
@@ -174,16 +175,6 @@ function injectAuthCSS() {
     document.head.appendChild(el)
 }
 
-/* ---------- Magatama "joia" ---------- */
-const MG_PATH = 'M50 10 A40 40 0 0 1 50 90 A20 20 0 0 0 50 50 A20 20 0 0 1 50 10 Z'
-function Magatama({ size = 30 }: { size?: number }) {
-    return (
-        <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden="true">
-            <path d={MG_PATH} fill="var(--text)" />
-            <circle cx="50" cy="30" r="7" fill="var(--acc)" />
-        </svg>
-    )
-}
 function ArrowIco({ size = 16 }: { size?: number }) {
     return (
         <svg
@@ -452,7 +443,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
                           <div className="au-inner">
                               <div className="au-mark">
-                                  <Magatama size={30} />
+                                  <MirsuiLogo size={28} ink="var(--text)" />
                               </div>
 
                               <div className="au-head au-swap" key={mode}>

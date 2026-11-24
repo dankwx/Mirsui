@@ -8,6 +8,7 @@
 import { Disc3 } from 'lucide-react'
 import RecordCover from '@/components/Club/RecordCover'
 import recipes from '@/components/Club/club-recipes.module.css'
+import type { DadosDoStory } from '@/utils/story'
 import StoryShareButton from './StoryShareButton'
 import { dataCompleta, dataCurta } from './format'
 import styles from './TrackReceipt.module.css'
@@ -26,7 +27,10 @@ interface TrackReceiptProps {
     trackTitle: string
     artistName: string
     coverUrl: string | null
-    year: number | null
+    /** a imagem do story, já com a linha de quem olha quando ela salvou */
+    story: DadosDoStory
+    /** a página da faixa, para ir junto da imagem onde o app aceita texto */
+    shareUrl: string
     registro: RegistroDoRecibo | null
     totalClaims: number
     /** 0-100 na escala do Observatório; null quando não há medição */
@@ -40,7 +44,8 @@ export default function TrackReceipt({
     trackTitle,
     artistName,
     coverUrl,
-    year,
+    story,
+    shareUrl,
     registro,
     totalClaims,
     popularity,
@@ -126,12 +131,10 @@ export default function TrackReceipt({
             </dl>
 
             <StoryShareButton
+                story={story}
                 trackUri={trackUri}
-                trackTitle={trackTitle}
-                artistName={artistName}
-                albumImageUrl={coverUrl || ''}
-                year={year}
-                totalClaims={totalClaims}
+                link={shareUrl}
+                origem="faixa"
             />
         </aside>
     )

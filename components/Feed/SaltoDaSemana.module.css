@@ -43,6 +43,14 @@
     line-height: 1.45;
 }
 
+.acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px 18px;
+}
+
 
 @media (max-width: 767px) {
     .salto {
@@ -62,8 +70,8 @@
         font-size: 17px;
     }
 
-    .curva {
+    .acoes {
         grid-column: 2;
-        justify-self: start;
+        justify-content: flex-start;
     }
 }

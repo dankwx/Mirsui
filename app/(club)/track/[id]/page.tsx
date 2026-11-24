@@ -54,6 +54,7 @@ import {
     quemSalvou,
     salvamentoDoUsuario,
 } from '@/utils/trackClaims'
+import { storyDaFaixa } from '@/utils/storyService'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import RecordCover from '@/components/Club/RecordCover'
@@ -242,6 +243,16 @@ export default async function TrackDetailsPage({
 
     const hasUserClaimed = !!meuSalvamento
     const userClaimPosition = meuSalvamento?.position ?? null
+
+    // O story leva a linha de quem olha (nome, data do save, nota e a subida
+    // desde então) só quando ela salvou; senão é só a faixa. O perfil só é
+    // lido nesse caso.
+    const story = await storyDaFaixa({
+        faixa,
+        curva,
+        userId: viewerId,
+        salvamento: meuSalvamento,
+    })
 
     const genre = generos(faixa.genres)
     const releaseYear = faixa.releaseDate
@@ -439,7 +450,8 @@ export default async function TrackDetailsPage({
                         trackTitle={faixa.title}
                         artistName={faixa.artistNames}
                         coverUrl={faixa.coverUrl}
-                        year={releaseYear}
+                        story={story}
+                        shareUrl={shareUrl}
                         registro={registro}
                         totalClaims={totalClaims}
                         popularity={faixa.popularity}

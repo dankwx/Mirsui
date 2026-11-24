@@ -99,20 +99,34 @@ export async function salvamentoDoUsuario(
     userId: string,
     trackUri: string | null,
     isrc: string | null
-): Promise<{ position: number | null; claimedat: string | null } | null> {
+): Promise<{
+    position: number | null
+    claimedat: string | null
+    /** a nota escrita ao salvar, se houver (a mesma régua do feed: 5+ letras) */
+    nota: string | null
+} | null> {
     const filtro = filtroDaGravacao(trackUri, isrc)
     if (!filtro) return null
 
     const supabase = await createClient()
     const { data, error } = await supabase
         .from('tracks')
-        .select('position, claimedat')
+        .select('position, claimedat, claim_message')
         .eq('user_id', userId)
         .or(filtro)
         .limit(1)
         .maybeSingle()
 
     if (error || !data) return null
-    const linha = data as { position: number | null; claimedat: string | null }
-    return { position: linha.position, claimedat: linha.claimedat ?? null }
+    const linha = data as {
+        position: number | null
+        claimedat: string | null
+        claim_message: string | null
+    }
+    const nota = linha.claim_message?.trim() ?? ''
+    return {
+        position: linha.position,
+        claimedat: linha.claimedat ?? null,
+        nota: nota.length >= 5 ? nota : null,
+    }
 }

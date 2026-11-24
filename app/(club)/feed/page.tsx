@@ -12,6 +12,7 @@ import Feed from '@/components/Feed/Feed'
 import PileInvite from '@/components/Feed/PileInvite'
 import SaltoDaSemana from '@/components/Feed/SaltoDaSemana'
 import { getSaltoDaSemana } from '@/utils/saltoService'
+import { storyPorIsrc } from '@/utils/storyService'
 import shellStyles from '@/components/Club/ClubShell.module.css'
 import { createClient } from '@/utils/supabase/server'
 import type { Metadata } from 'next'
@@ -44,6 +45,16 @@ export default async function FeedPage() {
     // visitante no feed não tem acervo para ter salto.
     const salto = user ? await getSaltoDaSemana(supabase) : null
 
+    // O story da faixa do salto, para o botão do aviso. Só quando há salto,
+    // o que é raro; falha vira aviso sem botão, nunca página quebrada.
+    const storyDoSalto =
+        salto && user
+            ? await storyPorIsrc(salto.isrc, user.id).catch((e) => {
+                  console.error('[feed] falha ao montar o story do salto:', e)
+                  return null
+              })
+            : null
+
     // `saved_by_me` já vem de /feed: o backend resolve na mesma requisição,
     // usando o token que authHeaders() manda. Não há segunda ida ao banco.
 
@@ -58,7 +69,7 @@ export default async function FeedPage() {
 
             {salto && (
                 <div className={shellStyles.container}>
-                    <SaltoDaSemana salto={salto} />
+                    <SaltoDaSemana salto={salto} story={storyDoSalto} />
                 </div>
             )}
 

@@ -52,6 +52,14 @@ function diasEntre(a: string, b: string): number {
     )
 }
 
+/** Sem acento e em minúscula: "flavio" acha "Flávio". */
+function normalizar(texto: string): string {
+    return texto
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+}
+
 function capa(md5: string | null): string | null {
     return md5
         ? `https://cdn-images.dzcdn.net/images/cover/${md5}/250x250-000000-80-0-0.jpg`
@@ -590,6 +598,23 @@ export default function FilaDeSaltos({ fila }: { fila: Fila }) {
     const [aviso, setAviso] = useState<string | null>(null)
     const textoRef = useRef<HTMLTextAreaElement>(null)
     const [focar, setFocar] = useState(false)
+    const [busca, setBusca] = useState('')
+
+    // A busca filtra o que já veio do backend (a fila inteira cabe numa
+    // página: pendente expira em 30 dias). Todas as palavras precisam
+    // aparecer em algum lugar: título, artista, álbum ou gênero.
+    const visiveis = useMemo(() => {
+        const termos = normalizar(busca).split(/\s+/).filter(Boolean)
+        if (termos.length === 0) return saltos
+        return saltos.filter((s) => {
+            const alvo = normalizar(
+                [s.faixa.title, s.faixa.artist_name, s.faixa.album_name, s.faixa.genre]
+                    .filter(Boolean)
+                    .join(' ')
+            )
+            return termos.every((t) => alvo.includes(t))
+        })
+    }, [saltos, busca])
 
     // A lista muda depois de cada ação (router.refresh). Seleção de um salto
     // que saiu da fila não pode continuar valendo.
@@ -610,13 +635,13 @@ export default function FilaDeSaltos({ fila }: { fila: Fila }) {
 
     const porDia = useMemo(() => {
         const grupos = new Map<string, SaltoDoPainel[]>()
-        for (const s of saltos) {
+        for (const s of visiveis) {
             const lista = grupos.get(s.dia) ?? []
             lista.push(s)
             grupos.set(s.dia, lista)
         }
         return Array.from(grupos.entries())
-    }, [saltos])
+    }, [visiveis])
 
     // Outras faixas do mesmo artista no mesmo dia: quase sempre a mesma causa.
     const irmaosDe = useMemo(() => {
@@ -634,12 +659,12 @@ export default function FilaDeSaltos({ fila }: { fila: Fila }) {
 
     const porNota = useMemo(() => {
         const grupos = new Map<number, SaltoDoPainel[]>()
-        for (const s of saltos) {
+        for (const s of visiveis) {
             if (!s.nota) continue
             grupos.set(s.nota.id, [...(grupos.get(s.nota.id) ?? []), s])
         }
         return Array.from(grupos.values())
-    }, [saltos])
+    }, [visiveis])
 
     const alternar = (id: number) =>
         setSelecionados((atual) => {
@@ -759,6 +784,52 @@ export default function FilaDeSaltos({ fila }: { fila: Fila }) {
                 </nav>
             </header>
 
+            {saltos.length > 0 && (
+                <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <label htmlFor="busca-saltos" className="sr-only">
+                        Buscar na lista
+                    </label>
+                    <input
+                        id="busca-saltos"
+                        type="search"
+                        value={busca}
+                        onChange={(e) => setBusca(e.target.value)}
+                        placeholder="Buscar música, artista ou álbum"
+                        autoComplete="off"
+                        className={`${CAMPO} max-w-[420px]`}
+                    />
+                    {busca.trim() && (
+                        <>
+                            <span className="font-mono text-[12px] tabular-nums text-mir-text3">
+                                {visiveis.length} de {saltos.length}
+                            </span>
+                            {status === 'pendente' && visiveis.length > 1 && (
+                                <button
+                                    type="button"
+                                    className={BOTAO}
+                                    onClick={() => juntar(visiveis.map((s) => s.id))}
+                                >
+                                    Selecionar os {visiveis.length}
+                                </button>
+                            )}
+                            <button
+                                type="button"
+                                onClick={() => setBusca('')}
+                                className="font-mono text-[11px] uppercase tracking-[0.1em] text-mir-text3 hover:text-mir-text"
+                            >
+                                Limpar busca
+                            </button>
+                        </>
+                    )}
+                </div>
+            )}
+
+            {saltos.length > 0 && busca.trim() && visiveis.length === 0 && (
+                <p className="py-10 text-[15px] text-mir-text3">
+                    Nada na lista com “{busca.trim()}”.
+                </p>
+            )}
+
             {aviso && (
                 <p className="mt-4 text-[14px] text-mir-text" role="status">
                     {aviso}
@@ -836,9 +907,9 @@ export default function FilaDeSaltos({ fila }: { fila: Fila }) {
             )}
 
             {/* ---- ignoradas e expiradas: dá para devolver à fila ---- */}
-            {(status === 'ignorado' || status === 'expirado') && saltos.length > 0 && (
+            {(status === 'ignorado' || status === 'expirado') && visiveis.length > 0 && (
                 <ul className="mt-4">
-                    {saltos.map((s) => (
+                    {visiveis.map((s) => (
                         <Salto
                             key={s.id}
                             salto={s}

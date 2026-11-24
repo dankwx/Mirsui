@@ -457,7 +457,9 @@ export default async function TrackDetailsPage({
             </div>
 
             {/* ============ OBSERVATÓRIO ============ */}
-            {curva && <TrackCurve curva={curva} />}
+            {curva && (
+                <TrackCurve curva={curva} notas={dados?.notas ?? []} />
+            )}
 
             {/* ============ PARECIDAS ============ */}
             <Parecidas

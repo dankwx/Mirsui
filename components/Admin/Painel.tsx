@@ -886,6 +886,12 @@ export default function PainelDoDono({ dados }: { dados: DadosDoPainel }) {
                             {/* Discreto de propósito: é ferramenta de bastidor,
                                 não um número do painel. */}
                             <Link
+                                href="/admin/saltos"
+                                className="transition-colors hover:text-mir-text"
+                            >
+                                saltos →
+                            </Link>
+                            <Link
                                 href="/admin/perfis"
                                 className="transition-colors hover:text-mir-text"
                             >

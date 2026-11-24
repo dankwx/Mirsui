@@ -88,12 +88,22 @@ function leituraDoDia(serie: PontoDaCurva[], i: number) {
     return { data: dataCurta(ponto.d), audiencia, mudanca, subiu }
 }
 
+/** Um salto com nota: o número aparece no ponto `indice` da série. */
+export interface MarcaDaCurva {
+    indice: number
+    numero: number
+}
+
+const SEM_MARCAS: MarcaDaCurva[] = []
+
 export default function LinhaDaCurva({
     serie,
     gradId,
+    marcas = SEM_MARCAS,
 }: {
     serie: PontoDaCurva[]
     gradId: string
+    marcas?: MarcaDaCurva[]
 }) {
     const [ativo, setAtivo] = useState<number | null>(null)
     const caixa = useRef<HTMLDivElement>(null)
@@ -146,7 +156,10 @@ export default function LinhaDaCurva({
 
     // Quem usa leitor de tela ouve o mesmo que o tooltip mostra.
     const lido = leituraDoDia(serie, ativo ?? ultimo)
-    const textoLido = `${lido.data}: audiência ${lido.audiencia} de 100, ${lido.mudanca}`
+    const marcaLida = marcas.find((m) => m.indice === (ativo ?? ultimo))
+    const textoLido = `${lido.data}: audiência ${lido.audiencia} de 100, ${lido.mudanca}${
+        marcaLida ? `, nota ${marcaLida.numero} abaixo` : ''
+    }`
 
     const foco = ativo === null ? null : pontos[ativo]
     const focoX = foco?.[0] ?? 0
@@ -209,6 +222,26 @@ export default function LinhaDaCurva({
                 style={{ left: `${fimX}%`, top: `${(fimY / A) * 100}%` }}
             />
 
+            {/* HTML por cima, pelo mesmo motivo do ponto final: no SVG
+                esticado o círculo viraria elipse. */}
+            {marcas.map((m) => {
+                const ponto = pontos[m.indice]
+                if (!ponto) return null
+                return (
+                    <span
+                        key={m.numero}
+                        className={styles.marca}
+                        style={{
+                            left: `${ponto[0]}%`,
+                            top: `${(ponto[1] / A) * 100}%`,
+                        }}
+                        aria-hidden="true"
+                    >
+                        {m.numero}
+                    </span>
+                )
+            })}
+
             {foco && (
                 <>
                     <span
@@ -246,6 +279,11 @@ export default function LinhaDaCurva({
                         >
                             {lido.mudanca}
                         </span>
+                        {marcaLida && (
+                            <span className={styles.tipNota}>
+                                nota {marcaLida.numero} abaixo
+                            </span>
+                        )}
                     </div>
                 </>
             )}

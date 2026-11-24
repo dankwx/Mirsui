@@ -47,6 +47,51 @@ interface CurvaBruta {
 }
 
 /**
+ * O porquê de um salto da curva, escrito pelo dono no painel (/admin/saltos)
+ * e publicado com a fonte. Vem dentro de `get_track_page` desde a migration
+ * 052. Salto sem nota não vem: a página só muda depois que alguém escreve.
+ */
+export interface NotaDoSalto {
+    /** dia do pico do salto, YYYY-MM-DD, no mesmo calendário da curva */
+    dia: string
+    /** quanto subiu na escala 0-100, em até 10 dias */
+    pontos: number
+    texto: string
+    fonteUrl: string | null
+    fonteNome: string | null
+}
+
+/** Do jsonb da RPC para a lista, na ordem dos dias. Linha torta fica de fora. */
+export function montarNotas(bruto: unknown): NotaDoSalto[] {
+    if (!Array.isArray(bruto)) return []
+    return bruto
+        .flatMap((linha) => {
+            const n = linha as {
+                dia?: string
+                pontos?: number | string
+                texto?: string
+                fonte_url?: string | null
+                fonte_nome?: string | null
+            }
+            if (!n?.dia || !n.texto) return []
+            const url =
+                n.fonte_url && /^https?:\/\//i.test(n.fonte_url)
+                    ? n.fonte_url
+                    : null
+            return [
+                {
+                    dia: n.dia,
+                    pontos: Number(n.pontos) || 0,
+                    texto: n.texto,
+                    fonteUrl: url,
+                    fonteNome: n.fonte_nome || null,
+                },
+            ]
+        })
+        .sort((a, b) => (a.dia < b.dia ? -1 : a.dia > b.dia ? 1 : 0))
+}
+
+/**
  * Da resposta da RPC para o objeto da curva.
  *
  * Só a montagem mora aqui — a chamada não. A curva deixou de ter requisição

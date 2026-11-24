@@ -181,6 +181,109 @@
     font-size: 12px;
 }
 
+/* ---- Os saltos com nota (migration 052) ----
+   O mesmo número no ponto da curva e na lista logo abaixo: é o que liga a
+   frase ao dia. Só existe quando o dono escreveu a nota. */
+
+.marca,
+.notaNumero {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    color: var(--club-bg);
+    background: var(--club-accent);
+    font-family: var(--font-space-grotesk), sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.marca {
+    position: absolute;
+    z-index: 1;
+    border: 2px solid var(--club-bg);
+    box-shadow: 0 0 0 1px var(--club-accent);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.tipNota {
+    color: var(--club-accent-text);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.notas {
+    display: grid;
+    margin: 20px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.nota {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    column-gap: 12px;
+    align-items: start;
+    padding-block: 14px;
+    border-top: 1px solid var(--club-line);
+}
+
+.nota:last-child {
+    padding-bottom: 0;
+}
+
+.nota > :not(.notaNumero) {
+    grid-column: 2;
+}
+
+.notaNumero {
+    grid-row: span 3;
+}
+
+.notaQuando {
+    color: var(--club-muted);
+    font-size: 13px;
+    line-height: 22px;
+}
+
+.notaQuando strong {
+    color: var(--club-accent-text);
+    font-weight: 700;
+}
+
+.notaTexto {
+    max-width: 62ch;
+    margin-top: 2px;
+    color: var(--club-text);
+    font-size: 15px;
+    line-height: 1.55;
+}
+
+.notaFonte {
+    justify-self: start;
+    margin-top: 6px;
+    color: var(--club-muted);
+    font-size: 13px;
+    text-decoration: underline;
+    text-decoration-color: var(--club-line);
+    text-underline-offset: 3px;
+}
+
+.notaFonte:hover {
+    color: var(--club-text);
+    text-decoration-color: currentColor;
+}
+
+.notaFonte:focus-visible {
+    border-radius: 2px;
+    outline: 2px solid var(--club-accent);
+    outline-offset: 3px;
+}
+
 @media (max-width: 1100px) {
     .grid {
         grid-template-columns: minmax(0, 300px) minmax(0, 1fr);

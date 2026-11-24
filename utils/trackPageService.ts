@@ -45,7 +45,12 @@ import {
     montarFaixaObservada,
     type FaixaObservada,
 } from '@/utils/trackIdentity'
-import { montarCurva, type CurvaDaFaixa } from '@/utils/observatoryService'
+import {
+    montarCurva,
+    montarNotas,
+    type CurvaDaFaixa,
+    type NotaDoSalto,
+} from '@/utils/observatoryService'
 import type { QuemSalvou } from '@/utils/trackClaims'
 import { enderecoDaFaixa } from '@/utils/trackHref'
 import { popScore } from '@/utils/popScore'
@@ -132,6 +137,8 @@ export interface DadosDaPagina {
     quemSalvou: QuemSalvou[]
     /** até seis, uma por artista vizinho; vazio antes da 041 ou sem vizinhos */
     relacionadas: FaixaRelacionada[]
+    /** o porquê dos saltos da curva, escrito pelo dono (052); quase sempre vazio */
+    notas: NotaDoSalto[]
 }
 
 const NADA: DadosDaPagina = {
@@ -140,6 +147,7 @@ const NADA: DadosDaPagina = {
     salvamentos: 0,
     quemSalvou: [],
     relacionadas: [],
+    notas: [],
 }
 
 /**
@@ -216,6 +224,7 @@ export const carregarDadosDaFaixa = cache(async function carregarDadosDaFaixa(
         salvamentos?: number | string
         quem_salvou?: unknown
         relacionadas?: unknown
+        notas?: unknown
     }
 
     return {
@@ -228,6 +237,7 @@ export const carregarDadosDaFaixa = cache(async function carregarDadosDaFaixa(
             ? (b.quem_salvou as QuemSalvou[])
             : [],
         relacionadas: montarRelacionadas(b.relacionadas),
+        notas: montarNotas(b.notas),
     }
 })
 

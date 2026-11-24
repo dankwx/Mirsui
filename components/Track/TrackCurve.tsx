@@ -16,7 +16,7 @@
 //    quando está medindo e que a curva se forma na próxima. É honesto e ainda
 //    dá um motivo para a pessoa voltar.
 
-import type { CurvaDaFaixa } from '@/utils/observatoryService'
+import type { CurvaDaFaixa, NotaDoSalto } from '@/utils/observatoryService'
 import { variacaoDaCurva } from '@/utils/observatoryService'
 import shellStyles from '@/components/Club/ClubShell.module.css'
 import recipes from '@/components/Club/club-recipes.module.css'
@@ -26,7 +26,33 @@ import Subsolo from './Subsolo'
 import { dataCurta, diasEntre, percentual } from './format'
 import styles from './TrackCurve.module.css'
 
-export default function TrackCurve({ curva }: { curva: CurvaDaFaixa }) {
+/**
+ * Em que ponto da série cai o dia da nota: o último dia medido até ele. Nota
+ * de antes da primeira medição desta edição fica sem número na curva (mas
+ * continua na lista).
+ */
+function indiceDoDia(serie: CurvaDaFaixa['series'], dia: string): number {
+    let indice = -1
+    for (let i = 0; i < serie.length && serie[i].d <= dia; i++) indice = i
+    return indice
+}
+
+function nomeDaFonte(nota: NotaDoSalto): string {
+    if (nota.fonteNome) return nota.fonteNome
+    try {
+        return new URL(nota.fonteUrl ?? '').hostname.replace(/^www\./, '')
+    } catch {
+        return 'link'
+    }
+}
+
+export default function TrackCurve({
+    curva,
+    notas = [],
+}: {
+    curva: CurvaDaFaixa
+    notas?: NotaDoSalto[]
+}) {
     const { series } = curva
     if (series.length === 0) return null
 
@@ -86,6 +112,17 @@ export default function TrackCurve({ curva }: { curva: CurvaDaFaixa }) {
           ? `audiência ${subiu ? 'subiu' : 'caiu'} desde ${desde} · ${hoje}/100`
           : `audiência ${subiu ? 'subiu' : 'caiu'} de ${inicio} para ${hoje}/100 desde ${desde}`
 
+    // O número da nota é a ordem dos dias: a 1 é o salto mais antigo. O mesmo
+    // número aparece no ponto da curva e na lista logo abaixo dela.
+    const notasNumeradas = notas.map((nota, i) => ({
+        ...nota,
+        numero: i + 1,
+        indice: indiceDoDia(series, nota.dia),
+    }))
+    const marcas = notasNumeradas
+        .filter((n) => n.indice >= 0)
+        .map((n) => ({ indice: n.indice, numero: n.numero }))
+
     return (
         <section
             className={styles.section}
@@ -121,6 +158,7 @@ export default function TrackCurve({ curva }: { curva: CurvaDaFaixa }) {
                     <LinhaDaCurva
                         serie={series}
                         gradId={`curva-${curva.deezerTrackId}`}
+                        marcas={marcas}
                     />
 
                     <div className={`${recipes.smallNumber} ${styles.axis}`}>
@@ -130,6 +168,46 @@ export default function TrackCurve({ curva }: { curva: CurvaDaFaixa }) {
                         </span>
                         <span>{ate}</span>
                     </div>
+
+                    {/* O porquê dos saltos. Só existe quando o dono escreveu:
+                        salto sem nota não ganha número nem texto. */}
+                    {notasNumeradas.length > 0 && (
+                        <ol className={styles.notas} aria-label="Por que subiu">
+                            {notasNumeradas.map((nota) => (
+                                <li key={nota.numero} className={styles.nota}>
+                                    <span
+                                        className={styles.notaNumero}
+                                        aria-hidden="true"
+                                    >
+                                        {nota.numero}
+                                    </span>
+                                    <p className={styles.notaQuando}>
+                                        {dataCurta(nota.dia)}
+                                        {nota.pontos > 0 && (
+                                            <>
+                                                {' · '}
+                                                <strong>+{nota.pontos}</strong>
+                                            </>
+                                        )}
+                                    </p>
+                                    <p className={styles.notaTexto}>
+                                        {nota.texto}
+                                    </p>
+                                    {nota.fonteUrl && (
+                                        <a
+                                            className={styles.notaFonte}
+                                            href={nota.fonteUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer nofollow"
+                                        >
+                                            Fonte: {nomeDaFonte(nota)}{' '}
+                                            <span aria-hidden="true">↗</span>
+                                        </a>
+                                    )}
+                                </li>
+                            ))}
+                        </ol>
+                    )}
                 </div>
             </div>
         </section>

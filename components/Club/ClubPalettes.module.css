@@ -23,49 +23,12 @@
     color: var(--club-on-button);
 }
 
-:global([data-club-theme='dark']).palette,
-:global(body):has(:global([data-club-theme='dark']).palette) {
-    --club-bg: var(--palette-dark-bg, #111326);
-    --club-surface: var(--palette-dark-surface, #1a1e39);
-    --club-paper: var(--palette-dark-paper, #242847);
-    --club-text: var(--palette-dark-ink, #f2f3ff);
-    --club-muted: var(--palette-dark-muted, #c1c5de);
-    --club-line: var(--palette-dark-line, #44496c);
-    --club-accent: var(--palette-dark-accent, #abb8ff);
-    --club-accent-text: var(--palette-dark-accent, #b7c2ff);
-    --club-accent-soft: var(--palette-dark-soft, #2b345e);
-    --club-on-button: var(--palette-dark-bg, #171d43);
-    --home-masthead: var(--palette-dark-masthead, #2337cd);
-}
-
-@media (prefers-color-scheme: dark) {
-    :global([data-club-theme='auto']).palette,
-    :global(body):has(:global([data-club-theme='auto']).palette) {
-        --club-bg: var(--palette-dark-bg, #111326);
-        --club-surface: var(--palette-dark-surface, #1a1e39);
-        --club-paper: var(--palette-dark-paper, #242847);
-        --club-text: var(--palette-dark-ink, #f2f3ff);
-        --club-muted: var(--palette-dark-muted, #c1c5de);
-        --club-line: var(--palette-dark-line, #44496c);
-        --club-accent: var(--palette-dark-accent, #abb8ff);
-        --club-accent-text: var(--palette-dark-accent, #b7c2ff);
-        --club-accent-soft: var(--palette-dark-soft, #2b345e);
-        --club-on-button: var(--palette-dark-bg, #171d43);
-        --home-masthead: var(--palette-dark-masthead, #2337cd);
-    }
-}
-
 .palette:global(:not([data-home-palette='cobalto'])),
 :global(body):has(.palette:global(:not([data-home-palette='cobalto']))) {
     --palette-light-surface: color-mix(in srgb, var(--palette-light-bg) 91%, var(--palette-light-accent));
     --palette-light-muted: color-mix(in srgb, var(--palette-light-ink) 74%, var(--palette-light-bg));
     --palette-light-line: color-mix(in srgb, var(--palette-light-bg) 77%, var(--palette-light-ink));
     --palette-light-soft: color-mix(in srgb, var(--palette-light-bg) 85%, var(--palette-light-accent));
-    --palette-dark-surface: color-mix(in srgb, var(--palette-dark-bg) 91%, var(--palette-dark-accent));
-    --palette-dark-paper: color-mix(in srgb, var(--palette-dark-bg) 85%, var(--palette-dark-accent));
-    --palette-dark-muted: color-mix(in srgb, var(--palette-dark-ink) 77%, var(--palette-dark-bg));
-    --palette-dark-line: color-mix(in srgb, var(--palette-dark-bg) 72%, var(--palette-dark-ink));
-    --palette-dark-soft: color-mix(in srgb, var(--palette-dark-bg) 82%, var(--palette-dark-accent));
     --palette-masthead-muted: color-mix(in srgb, var(--home-masthead-ink) 88%, var(--home-masthead));
     --palette-masthead-rule: color-mix(in srgb, var(--home-masthead-ink) 55%, var(--home-masthead));
 }
@@ -76,10 +39,6 @@
     --palette-light-ink: #26132d;
     --palette-light-accent: #6c2e81;
     --palette-light-masthead: #60217e;
-    --palette-dark-bg: #1e1225;
-    --palette-dark-ink: #fff3ff;
-    --palette-dark-accent: #e5a8f6;
-    --palette-dark-masthead: #542371;
 }
 
 .palette:global([data-home-palette='tomate']),
@@ -88,10 +47,6 @@
     --palette-light-ink: #331613;
     --palette-light-accent: #aa2c23;
     --palette-light-masthead: #b32d24;
-    --palette-dark-bg: #231615;
-    --palette-dark-ink: #fff1e9;
-    --palette-dark-accent: #ffa695;
-    --palette-dark-masthead: #962c2a;
 }
 
 .palette:global([data-home-palette='petroleo']),
@@ -100,10 +55,6 @@
     --palette-light-ink: #102a2b;
     --palette-light-accent: #08706f;
     --palette-light-masthead: #00595e;
-    --palette-dark-bg: #102225;
-    --palette-dark-ink: #e8faf5;
-    --palette-dark-accent: #7ee3d5;
-    --palette-dark-masthead: #065055;
 }
 
 .palette:global(:is(:not([data-home-palette]), [data-home-palette='mostarda'])),
@@ -112,10 +63,6 @@
     --palette-light-ink: #2d230f;
     --palette-light-accent: #775500;
     --palette-light-masthead: #f9d454;
-    --palette-dark-bg: #211c11;
-    --palette-dark-ink: #fff7de;
-    --palette-dark-accent: #f2cf68;
-    --palette-dark-masthead: #eabc43;
     --palette-masthead-ink: #2d230f;
 }
 
@@ -125,8 +72,4 @@
     --palette-light-ink: #191a1d;
     --palette-light-accent: #484b54;
     --palette-light-masthead: #25262b;
-    --palette-dark-bg: #111217;
-    --palette-dark-ink: #f6f6f8;
-    --palette-dark-accent: #c6c9d1;
-    --palette-dark-masthead: #353740;
 }

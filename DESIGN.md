@@ -2,13 +2,13 @@
 
 Esta é a identidade aprovada pelo dono do produto e publicada na home em setembro de 2026. Use-a como referência ao levar o design para outras áreas. Não é um convite para reinterpretar a marca a cada tarefa.
 
-**Referência preservada:** tag Git `design-club-v1`, commit `f4b122b`. Veja as capturas [desktop](docs/redesign/desktop.webp), [mobile](docs/redesign/mobile.webp) e [tema escuro](docs/redesign/dark.webp). Elas registram a composição; o código desse commit registra o comportamento.
+**Referência preservada:** tag Git `design-club-v1`, commit `f4b122b`. Veja as capturas [desktop](docs/redesign/desktop.webp), [mobile](docs/redesign/mobile.webp) e [tema escuro](docs/redesign/dark.webp) (histórico: o tema escuro saiu em 24/11/2026). Elas registram a composição; o código desse commit registra o comportamento.
 
 ## Leitura rápida para agentes
 
 1. O Mirsui é um **clube de descobertas musicais**: pessoal, curioso, com gosto por garimpar e registrar quem chegou primeiro.
 2. A personalidade vem de tipografia forte, espaço, capas reais e detalhes de loja de discos. Evite transformar tudo em cartões ou adicionar decoração para preencher vazios.
-3. Base clara levemente esverdeada, tinta escura e um acento laranja. Há tema escuro equivalente. Use os tokens abaixo.
+3. Base clara levemente esverdeada, tinta escura e um acento laranja. O site tem só o tema claro, para todo mundo. Use os tokens abaixo.
 4. **Archivo** nos títulos; **Hanken Grotesk** no texto; **Space Grotesk** em pequenos números. Todas já estão carregadas.
 5. O laranja marca descoberta, precedência e ênfase. O botão principal é neutro de alto contraste; ele não precisa ser laranja.
 6. Capas quase quadradas nas quinas; botões com raio pequeno; círculos para avatares. A inclinação é um gesto para objetos musicais, não para todo componente.
@@ -33,20 +33,20 @@ A referência inicial foi o Record Club: respiro, tipografia e personalidade. O 
 
 ## Cores: use papéis, não hex espalhado
 
-Fonte executável: [Club.module.css](components/Landing/Club.module.css), blocos `.shell` e temas.
+Fonte executável: [Club.module.css](components/Landing/Club.module.css), blocos `.shell`; tokens em [app/club.css](app/club.css).
 
-| Token | Claro | Escuro | Uso |
-|---|---|---|---|
-| `--club-bg` | `#f7f7f2` | `#1e201d` | Fundo principal |
-| `--club-surface` | `#eeeee7` | `#282b26` | Agrupamentos, campos, seção de explicação |
-| `--club-paper` | `#fdfdf9` | `#30332e` | Registro, modal, superfície elevada |
-| `--club-text` | `#242522` | `#f0f0e7` | Texto principal e fundo do CTA |
-| `--club-muted` | `#64665e` | `#b2b7aa` | Texto secundário |
-| `--club-line` | `#d9dbd2` | `#42473d` | Divisores discretos |
-| `--club-accent` | `#db4b27` | `#f57a53` | Marca, ênfase grande, detalhe de interação |
-| `--club-accent-text` | `#b63a1b` | `#f9906f` | Texto pequeno que precisa de acento |
-| `--club-accent-soft` | `#f5e1d7` | `#47332b` | Fundo discreto associado ao acento |
-| `--club-on-button` | `#f7f7f2` | `#20221d` | Texto sobre CTA principal |
+| Token | Valor | Uso |
+|---|---|---|
+| `--club-bg` | `#f7f7f2` | Fundo principal |
+| `--club-surface` | `#eeeee7` | Agrupamentos, campos, seção de explicação |
+| `--club-paper` | `#fdfdf9` | Registro, modal, superfície elevada |
+| `--club-text` | `#242522` | Texto principal e fundo do CTA |
+| `--club-muted` | `#64665e` | Texto secundário |
+| `--club-line` | `#d9dbd2` | Divisores discretos |
+| `--club-accent` | `#db4b27` | Marca, ênfase grande, detalhe de interação |
+| `--club-accent-text` | `#b63a1b` | Texto pequeno que precisa de acento |
+| `--club-accent-soft` | `#f5e1d7` | Fundo discreto associado ao acento |
+| `--club-on-button` | `#f7f7f2` | Texto sobre CTA principal |
 
 `accent` e `accent-text` são diferentes de propósito: o laranja da manchete não deve ser aplicado automaticamente a legendas pequenas. Não derive texto secundário só reduzindo opacidade; preserve o contraste com cada superfície.
 
@@ -108,9 +108,9 @@ Respeite `prefers-reduced-motion`. Não acrescente rolagem forçada, paralaxe, c
 3. Para migrar várias telas, extraia os tokens, estilos básicos e controle de tema para uma camada compartilhada. Faça essa extração preservando o resultado visual da home; evite copiar dez hexadecimais para cada módulo.
 4. Planeje o shell da nova área. Use `ClubShell` e os tokens de `app/club.css`; importar `Club.module.css` sozinho não define as variáveis. Copiar `PublicShell` também não resolve, pois ele é o shell da home.
 5. Reuse a hierarquia de botões, capas, textos e estados. Crie layouts adequados à tarefa, em vez de repetir as seções da landing.
-6. Compare a home antes/depois da extração e teste a nova tela nos dois temas.
+6. Compare a home antes/depois da extração e teste a nova tela no tema claro, com os modais.
 
-**Tema e portais:** [ThemeToggle](components/Club/ThemeToggle.tsx) usa `data-club-theme="auto|light|dark"`, preferência do sistema e a chave `mirsui-landing-theme` no `localStorage`. Hoje encontra um único shell via `querySelector`. Se houver mais shells ou um tema para todo o app, centralize esse controle e preserve a preferência anterior na migração.
+**Tema e portais:** o site tem um tema só, o claro. [ClubShell](components/Club/ClubShell.tsx) sempre marca `data-club-theme="light"`; não há botão de tema nem leitura de `prefers-color-scheme`. A chave antiga `mirsui-landing-theme` pode continuar no `localStorage` de quem usou o botão, mas nada mais a lê. Não reintroduza tema escuro sem pedido.
 
 O modal de autenticação é montado em um portal no `body`. Por isso há seletores `body:has([data-club-theme])` que disponibilizam os tokens e adaptam as classes `.au-*`. Um novo diálogo portado para fora do shell precisa receber o tema também. Não resolva isso com um override global que recolore telas ainda não migradas.
 
@@ -146,7 +146,7 @@ Esse tamanho é uma sugestão para páginas internas, não um valor extraído da
 
 | Arquivo | Responsabilidade |
 |---|---|
-| [app/club.css](app/club.css) | Tokens, base compartilhada, temas, acessibilidade e adaptação do modal em portal |
+| [app/club.css](app/club.css) | Tokens, base compartilhada, acessibilidade e adaptação do modal em portal |
 | [Club.module.css](components/Landing/Club.module.css) | Layouts e componentes visuais específicos da home |
 | [Hero.tsx](components/Landing/Hero.tsx) | Navegação, promessa principal, CTA e capas inclinadas |
 | [Acervo.tsx](components/Landing/Acervo.tsx) | Seleção editorial e filtros de gêneros reais |
@@ -167,7 +167,7 @@ Esse tamanho é uma sugestão para páginas internas, não um valor extraído da
 
 - [ ] A tela tem uma hierarquia clara e parece parte da mesma marca?
 - [ ] Foram usados tokens `club`, fontes existentes e o mesmo vocabulário de formas?
-- [ ] Claro, escuro e modais mantêm contraste e consistência?
+- [ ] Tema claro e modais mantêm contraste e consistência, mesmo com o sistema em modo escuro?
 - [ ] Funciona a 320, 390, 768, 1024 e 1440 px, sem overflow da página?
 - [ ] Rolagens locais têm propósito; interações não dependem só de hover?
 - [ ] Teclado, foco visível, rótulos, estado selecionado e movimento reduzido funcionam?
@@ -193,4 +193,4 @@ Use a referência para comparar e recuperar arquivos de forma seletiva. Não use
 
 Pedido reutilizável para uma próxima sessão:
 
-> Aplique a identidade descrita em DESIGN.md à tela [rota]. Use a home e as capturas como referência visual, adapte a densidade à tarefa e preserve funcionalidades. Mantenha a home aprovada. Valide mobile, temas claro/escuro e interações.
+> Aplique a identidade descrita em DESIGN.md à tela [rota]. Use a home e as capturas como referência visual, adapte a densidade à tarefa e preserve funcionalidades. Mantenha a home aprovada. Valide mobile, tema claro (único) e interações.

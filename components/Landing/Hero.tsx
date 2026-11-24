@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { ArrowDown, ArrowUpRight } from 'lucide-react'
 import AuthModalTrigger from '@/components/AuthModalTrigger/AuthModalTrigger'
 import MirsuiLogo from '@/components/MirsuiLogo/MirsuiLogo'
-import ThemeToggle from '@/components/Club/ThemeToggle'
 import styles from './Club.module.css'
 
 export default function Hero() {
@@ -29,7 +28,6 @@ export default function Hero() {
                     <a href="#cena">A cena</a>
                 </div>
                 <div className={styles.navActions}>
-                    <ThemeToggle className={styles.themeToggle} defaultTheme="light" />
                     <AuthModalTrigger mode="login" className={styles.login}>
                         Entrar
                     </AuthModalTrigger>

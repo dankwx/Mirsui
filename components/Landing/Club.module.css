@@ -55,16 +55,6 @@
     font-weight: 600;
     padding: 12px 0;
 }
-.themeToggle {
-    display: grid;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-}
-.themeToggle:hover {
-    background: var(--club-surface);
-}
 .button {
     display: inline-flex;
     align-items: center;
@@ -747,10 +737,6 @@
         padding: 10px 12px;
         font-size: 12px;
         gap: 8px;
-    }
-    .themeToggle {
-        width: 30px;
-        height: 36px;
     }
     .masthead h1 {
         font-size: clamp(83px, 24vw, 150px);

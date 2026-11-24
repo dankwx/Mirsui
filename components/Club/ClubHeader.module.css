@@ -82,23 +82,6 @@
     --search-accent: var(--club-accent-text) !important;
 }
 
-.themeToggle {
-    display: grid;
-    flex: none;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    border: 0;
-    border-radius: 50%;
-    color: var(--club-text);
-    background: transparent;
-    transition: background 0.2s;
-}
-
-.themeToggle:hover {
-    background: var(--club-surface);
-}
-
 .login {
     padding-block: 10px;
     color: var(--club-muted);

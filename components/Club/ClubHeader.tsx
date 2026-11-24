@@ -11,7 +11,6 @@ import MirsuiLogo from '@/components/MirsuiLogo/MirsuiLogo'
 import { signOut } from '@/app/auth/actions'
 import { navLinks, navLinksVisitante } from '@/components/Header/navLinks'
 import type { SessionUserProfile } from '@/lib/sessionProfile'
-import ThemeToggle from './ThemeToggle'
 import styles from './ClubHeader.module.css'
 
 export default function ClubHeader({
@@ -92,7 +91,6 @@ export default function ClubHeader({
                     <div className={styles.search}>
                         <SearchWithResults className="club-search" />
                     </div>
-                    <ThemeToggle className={styles.themeToggle} />
 
                     {userProfile ? (
                         <div className={styles.profile} ref={profileRef}>

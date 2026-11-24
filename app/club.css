@@ -20,42 +20,6 @@ body:has([data-club-theme]) {
     -webkit-font-smoothing: antialiased;
 }
 
-[data-club-theme='dark'],
-body:has([data-club-theme='dark']) {
-    --club-bg: #1e201d;
-    --club-surface: #282b26;
-    --club-paper: #30332e;
-    --club-text: #f0f0e7;
-    --club-muted: #b2b7aa;
-    --club-line: #42473d;
-    --club-accent: #f57a53;
-    --club-accent-text: #f9906f;
-    --club-accent-soft: #47332b;
-    --club-on-button: #20221d;
-    --club-danger: #f28b82;
-    --club-danger-soft: #4a2b28;
-    color-scheme: dark;
-}
-
-@media (prefers-color-scheme: dark) {
-    [data-club-theme='auto'],
-    body:has([data-club-theme='auto']) {
-        --club-bg: #1e201d;
-        --club-surface: #282b26;
-        --club-paper: #30332e;
-        --club-text: #f0f0e7;
-        --club-muted: #b2b7aa;
-        --club-line: #42473d;
-        --club-accent: #f57a53;
-        --club-accent-text: #f9906f;
-        --club-accent-soft: #47332b;
-        --club-on-button: #20221d;
-        --club-danger: #f28b82;
-        --club-danger-soft: #4a2b28;
-        color-scheme: dark;
-    }
-}
-
 [data-club-theme] *,
 [data-club-theme] *::before,
 [data-club-theme] *::after {

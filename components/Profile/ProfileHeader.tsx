@@ -7,7 +7,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Check, ImageIcon, Link2, Pencil } from 'lucide-react'
+import { ArrowUpRight, Check, ImageIcon, Link2, Pencil } from 'lucide-react'
 import {
     Dialog,
     DialogContent,
@@ -330,6 +330,9 @@ export default function ProfileHeader({
                                     Alterar foto
                                 </button>
                             </div>
+                            <Link href="/emails" className={`${recipes.textLink} ${styles.emailsLink}`}>
+                                Avisos por e-mail <ArrowUpRight size={15} aria-hidden="true" />
+                            </Link>
                         </form>
                     </DialogContent>
                 </Dialog>

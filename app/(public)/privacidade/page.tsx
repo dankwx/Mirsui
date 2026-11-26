@@ -53,6 +53,7 @@ const SECTIONS: LegalSection[] = [
             'Calcular o Faro, montar rankings e mostrar a cena ao vivo.',
             'Personalizar recomendações e o acervo de acordo com sua escuta.',
             'Detectar fraude, manipulação de Faro e abusos.',
+            'Mandar avisos por e-mail sobre a sua conta (novo seguidor, faixas do seu acervo que subiram), que você desliga quando quiser.',
         ],
     },
     {

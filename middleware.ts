@@ -26,6 +26,7 @@ const PUBLIC_EXACT = [
   '/privacidade',
   '/auth/check-email',
   '/reset-password',
+  '/emails', // preferências de aviso, aberta pelo link do e-mail (sem login)
 ]
 
 /** Prefixos públicos: a própria rota e tudo abaixo dela. */
@@ -52,6 +53,9 @@ const PUBLIC_API_ROUTES = [
   // A prévia de 30 s da página de faixa, pedida no play. A página é pública,
   // então o play também tem que ser.
   '/api/previa/',
+  // O descadastro de um clique dos avisos por e-mail: quem chama é o Gmail,
+  // sem sessão. A autorização é o token na URL.
+  '/api/emails/',
 ]
 
 function isPublicPath(pathname: string): boolean {

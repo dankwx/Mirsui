@@ -398,6 +398,11 @@
     flex: 1;
 }
 
+.emailsLink {
+    align-self: flex-start;
+    font-size: 14px;
+}
+
 /* Abaixo de 1024 px as favoritas descem para debaixo do nome. */
 @media (max-width: 1023px) {
     .withFavorites {

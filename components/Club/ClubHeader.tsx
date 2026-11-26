@@ -8,6 +8,7 @@ import SearchWithResults from '@/components/SearchWithResults/SearchWithResults'
 import AuthModalTrigger from '@/components/AuthModalTrigger/AuthModalTrigger'
 import FotoDePerfil from '@/components/FotoDePerfil'
 import MirsuiLogo from '@/components/MirsuiLogo/MirsuiLogo'
+import Sininho from './Sininho'
 import { signOut } from '@/app/auth/actions'
 import { navLinks, navLinksVisitante } from '@/components/Header/navLinks'
 import type { SessionUserProfile } from '@/lib/sessionProfile'
@@ -91,6 +92,8 @@ export default function ClubHeader({
                     <div className={styles.search}>
                         <SearchWithResults className="club-search" />
                     </div>
+
+                    {userProfile && <Sininho />}
 
                     {userProfile ? (
                         <div className={styles.profile} ref={profileRef}>
